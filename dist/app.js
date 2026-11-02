@@ -220,16 +220,16 @@ class BomaSphereApp {
       this.state.recentPayments = statsData.recentPayments || [];
       this.state.recentTickets = statsData.recentTickets || [];
       this.state.monthlyGraph = statsData.monthlyGraph;
-      this.state.properties = properties;
-      this.state.units = units;
-      this.state.tenants = tenants;
-      this.state.invoices = invoices;
-      this.state.payments = payments;
-      this.state.waterReadings = waterReadings;
-      this.state.maintenance = maintenance;
-      this.state.communications = comms;
-      this.state.expenses = expenses;
-      this.state.users = users;
+      this.state.properties = Array.isArray(properties) ? properties : [];
+      this.state.units = Array.isArray(units) ? units : [];
+      this.state.tenants = Array.isArray(tenants) ? tenants : [];
+      this.state.invoices = Array.isArray(invoices) ? invoices : [];
+      this.state.payments = Array.isArray(payments) ? payments : [];
+      this.state.waterReadings = Array.isArray(waterReadings) ? waterReadings : [];
+      this.state.maintenance = Array.isArray(maintenance) ? maintenance : [];
+      this.state.communications = Array.isArray(comms) ? comms : [];
+      this.state.expenses = Array.isArray(expenses) ? expenses : [];
+      this.state.users = Array.isArray(users) ? users : [];
 
       this.updateSidebarSummary();
       this.renderCurrentView();
@@ -246,11 +246,12 @@ class BomaSphereApp {
 
     const unitsCountEl = document.getElementById('sidebar-units-count');
     const occBadgeEl = document.getElementById('sidebar-occupancy-badge');
-    if (unitsCountEl) unitsCountEl.textContent = `${s.total_units} Units Total`;
-    if (occBadgeEl) occBadgeEl.textContent = `${s.occupancy_rate}% Occupied`;
+    if (unitsCountEl) unitsCountEl.textContent = `${s.total_units || 0} Units Total`;
+    if (occBadgeEl) occBadgeEl.textContent = `${s.occupancy_rate || 0}% Occupied`;
 
-    // Overdue count badge
-    const overdueCount = this.state.invoices.filter(i => i.status === 'overdue').length;
+    // Overdue count badge (defensive Array check)
+    const invList = Array.isArray(this.state.invoices) ? this.state.invoices : [];
+    const overdueCount = invList.filter(i => i.status === 'overdue').length;
     const navOverdue = document.getElementById('nav-overdue-count');
     if (navOverdue) {
       navOverdue.textContent = overdueCount;
@@ -259,7 +260,7 @@ class BomaSphereApp {
 
     // Active tickets badge
     const navTickets = document.getElementById('nav-tickets-badge');
-    if (navTickets) navTickets.textContent = s.active_tickets;
+    if (navTickets) navTickets.textContent = s.active_tickets || 0;
   }
 
   // ==========================================
@@ -344,7 +345,8 @@ class BomaSphereApp {
     document.getElementById('dash-collection-rate').textContent = `${s.collection_rate}%`;
 
     this.animateCounter('dash-total-arrears', s.total_arrears, 'KES ');
-    const overdueCount = this.state.invoices.filter(i => i.status === 'overdue').length;
+    const invList = Array.isArray(this.state.invoices) ? this.state.invoices : [];
+    const overdueCount = invList.filter(i => i.status === 'overdue').length;
     document.getElementById('dash-overdue-units-count').textContent = overdueCount;
 
     this.animateCounter('dash-active-tickets', s.active_tickets);
