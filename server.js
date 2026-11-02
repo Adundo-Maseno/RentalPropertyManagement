@@ -476,20 +476,78 @@ async function handleRequest(req, res) {
         return sendJSON(res, 403, { error: '403 Forbidden: Authorizing lease agreements requires Property Manager or Admin privileges.' });
       }
       const b = await parseBody(req);
+      const unitId = Number(b.unit_id);
+      const tenantId = Number(b.tenant_id);
+      const monthlyRent = Number(b.monthly_rent || 0);
+
+      if (!unitId || !tenantId || !monthlyRent) {
+        return sendJSON(res, 400, { error: 'Unit ID, Tenant ID, and Monthly Rent are required.' });
+      }
+
+      // Check if unit exists
+      const unit = db.prepare('SELECT u.*, p.name as property_name FROM units u JOIN properties p ON u.property_id = p.id WHERE u.id = ?').get(unitId);
+      if (!unit) {
+        return sendJSON(res, 404, { error: 'Unit not found.' });
+      }
+
+      // Enforce: Occupied units CANNOT be assigned to another tenant
+      const activeLease = db.prepare("SELECT l.*, t.name as tenant_name FROM leases l JOIN tenants t ON l.tenant_id = t.id WHERE l.unit_id = ? AND l.status = 'active'").get(unitId);
+      if (activeLease || unit.status === 'occupied') {
+        const currentTenant = activeLease ? activeLease.tenant_name : 'an existing resident';
+        return sendJSON(res, 400, {
+          error: `Unit ${unit.unit_number} (${unit.property_name}) is already occupied by ${currentTenant}. An occupied unit cannot be leased again. Please terminate or expire the existing lease before assigning a new tenant.`
+        });
+      }
+
       const insertLease = db.prepare(`
         INSERT INTO leases (unit_id, tenant_id, start_date, end_date, monthly_rent, deposit_paid, water_deposit, status, terms)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       const info = insertLease.run(
-        b.unit_id, b.tenant_id, b.start_date, b.end_date,
-        b.monthly_rent, b.deposit_paid || b.monthly_rent, b.water_deposit || 5000,
-        'active', b.terms || 'Standard residential lease agreement'
+        unitId, tenantId,
+        b.start_date || new Date().toISOString().slice(0, 10),
+        b.end_date || new Date(Date.now() + 365*86400000).toISOString().slice(0, 10),
+        monthlyRent,
+        Number(b.deposit_paid || monthlyRent),
+        Number(b.water_deposit || 5000),
+        'active',
+        b.terms || 'Standard residential lease agreement'
       );
 
-      // Mark unit as occupied
-      db.prepare("UPDATE units SET status = 'occupied' WHERE id = ?").run(b.unit_id);
+      const leaseId = info.lastInsertRowid;
 
-      return sendJSON(res, 201, { success: true, id: info.lastInsertRowid });
+      // Mark unit as occupied
+      db.prepare("UPDATE units SET status = 'occupied' WHERE id = ?").run(unitId);
+
+      // Automatically populate Digital Leases & E-sign (lease_agreements)
+      const agreementCode = `BS-LEASE-2026-${unit.unit_number.replace(/\s+/g, '')}`;
+      const contractHash = 'SHA256-' + crypto.randomBytes(12).toString('hex').toUpperCase();
+
+      db.prepare(`
+        INSERT INTO lease_agreements (
+          lease_id, unit_id, tenant_id, agreement_code, rent_amount, deposit_amount,
+          start_date, end_date, terms_clauses, status, contract_hash
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_tenant', ?)
+      `).run(
+        leaseId,
+        unitId,
+        tenantId,
+        agreementCode,
+        monthlyRent,
+        Number(b.deposit_paid || monthlyRent * 2),
+        b.start_date || new Date().toISOString().slice(0, 10),
+        b.end_date || new Date(Date.now() + 365*86400000).toISOString().slice(0, 10),
+        b.terms || 'Residential Tenancy Agreement governed by the Laws of Kenya (Landlord and Tenant Act). Rent due on or before 5th. No unauthorized subletting.',
+        contractHash
+      );
+
+      return sendJSON(res, 201, {
+        success: true,
+        id: leaseId,
+        agreement_code: agreementCode,
+        contract_hash: contractHash,
+        message: 'Lease activated and automatically added to Digital Leases & E-sign.'
+      });
     }
 
     if (pathname.endsWith('/terminate') && pathname.startsWith('/api/leases/') && method === 'PUT') {
@@ -1200,7 +1258,7 @@ async function handleRequest(req, res) {
     // PUBLIC VACANCIES & VIEWING BOOKING API
     // ==========================================
     if (pathname === '/api/public/vacancies' && method === 'GET') {
-      const vacancies = db.prepare(`
+      let vacancies = db.prepare(`
         SELECT 
           u.id, u.unit_number, u.floor, u.unit_type, u.base_rent, u.service_charge, u.garbage_fee,
           u.status, u.notes,
@@ -1210,6 +1268,19 @@ async function handleRequest(req, res) {
         WHERE u.status = 'vacant'
         ORDER BY u.base_rent ASC
       `).all();
+
+      // Graceful fallback if portfolio is 100% occupied
+      if (vacancies.length === 0) {
+        vacancies = db.prepare(`
+          SELECT 
+            u.id, u.unit_number, u.floor, u.unit_type, u.base_rent, u.service_charge, u.garbage_fee,
+            u.status, u.notes,
+            p.id as property_id, p.name as property_name, p.property_type, p.address, p.city
+          FROM units u
+          JOIN properties p ON u.property_id = p.id
+          ORDER BY u.id DESC LIMIT 2
+        `).all();
+      }
 
       const enriched = vacancies.map(v => {
         let bedrooms = 2;
@@ -1288,23 +1359,74 @@ async function handleRequest(req, res) {
         return sendJSON(res, 400, { error: 'Unit ID, prospect name, phone, and preferred date are required.' });
       }
 
+      const unit = db.prepare(`
+        SELECT u.*, p.name as property_name 
+        FROM units u 
+        JOIN properties p ON u.property_id = p.id 
+        WHERE u.id = ?
+      `).get(unit_id);
+
       const ref = 'VIEW-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-      db.prepare(`
+      const insertLead = db.prepare(`
         INSERT INTO viewing_leads (unit_id, prospect_name, phone, email, preferred_date, time_slot, status, notes)
         VALUES (?, ?, ?, ?, ?, ?, 'confirmed', ?)
       `).run(unit_id, prospect_name, phone, email || null, preferred_date, time_slot || '10:00 AM', notes || null);
 
+      // 1. Prospect confirmation SMS
       db.prepare(`
         INSERT INTO communications (type, recipient_name, recipient_phone, message, status, purpose)
         VALUES ('sms', ?, ?, ?, 'delivered', 'viewing_confirmation')
-      `).run(prospect_name, phone, `Hello ${prospect_name}, your viewing reference is ${ref} for ${preferred_date} at ${time_slot || '10:00 AM'}. Our property caretaker will welcome you. - BomaSphere Management`);
+      `).run(
+        prospect_name,
+        phone,
+        `Hello ${prospect_name}, your viewing reference is ${ref} for Unit ${unit?.unit_number || ''} at ${unit?.property_name || 'BomaSphere'} on ${preferred_date} at ${time_slot || '10:00 AM'}. Our property caretaker will welcome you. - BomaSphere Management`
+      );
+
+      // 2. Caretaker / Manager Alert SMS
+      const caretaker = db.prepare("SELECT * FROM users WHERE role = 'caretaker' LIMIT 1").get();
+      if (caretaker) {
+        db.prepare(`
+          INSERT INTO communications (type, recipient_name, recipient_phone, message, status, purpose)
+          VALUES ('sms', ?, ?, ?, 'delivered', 'viewing_caretaker_alert')
+        `).run(
+          caretaker.name,
+          caretaker.phone || '+254711223344',
+          `Viewing Alert: ${prospect_name} (${phone}) scheduled to view Unit ${unit?.unit_number || ''} (${unit?.property_name || ''}) on ${preferred_date} at ${time_slot || '10:00 AM'}. Reference: ${ref}.`
+        );
+      }
 
       return sendJSON(res, 201, {
         success: true,
         reference: ref,
         booking_reference: ref,
+        lead_id: insertLead.lastInsertRowid,
         message: 'Viewing successfully booked. Confirmation SMS dispatched.'
       });
+    }
+
+    if (pathname === '/api/viewing-leads' && method === 'GET') {
+      const leads = db.prepare(`
+        SELECT v.*, u.unit_number, u.unit_type, u.base_rent, p.name as property_name
+        FROM viewing_leads v
+        JOIN units u ON v.unit_id = u.id
+        JOIN properties p ON u.property_id = p.id
+        ORDER BY v.preferred_date DESC, v.id DESC
+      `).all();
+      return sendJSON(res, 200, { success: true, count: leads.length, leads });
+    }
+
+    if (pathname.startsWith('/api/viewing-leads/') && method === 'PUT') {
+      const id = pathname.split('/')[3];
+      const b = await parseBody(req);
+      db.prepare(`
+        UPDATE viewing_leads SET
+          status = COALESCE(?, status),
+          notes = COALESCE(?, notes),
+          preferred_date = COALESCE(?, preferred_date),
+          time_slot = COALESCE(?, time_slot)
+        WHERE id = ?
+      `).run(b.status || null, b.notes || null, b.preferred_date || null, b.time_slot || null, id);
+      return sendJSON(res, 200, { success: true, message: 'Viewing lead updated successfully.' });
     }
 
     // ==========================================

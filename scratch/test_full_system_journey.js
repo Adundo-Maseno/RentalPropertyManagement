@@ -78,7 +78,10 @@ async function runAudit() {
       time_slot: '10:00 AM',
       notes: 'Interested in executive 2BR unit'
     });
-    test('Stage 1: Prospect Viewing Appointment Booking', r2.ok && r2.json?.booking_reference, `Ref: ${r2.json?.booking_reference}`);
+    test('Stage 1: Prospect Viewing Appointment Booking', r2.ok && (r2.json?.booking_reference || r2.json?.reference), `Ref: ${r2.json?.booking_reference || r2.json?.reference}`);
+
+    const rLeads = await invoke('/api/viewing-leads');
+    test('Stage 1: Inbound Viewing Leads Dashboard Feed', rLeads.ok && rLeads.json?.leads?.length > 0, `Total Leads: ${rLeads.json?.leads?.length}`);
   } catch (e) {
     test('Stage 1: Public Vacancies & Viewing', false, e.message);
   }
@@ -115,21 +118,52 @@ async function runAudit() {
     test('Stage 3: Tenant Onboarding', false, e.message);
   }
 
-  // Stage 4: Digital Tenancy Lease Execution
+  // Stage 4: Digital Tenancy Lease Execution & Occupied Collision Prevention
   let newLeaseId = null;
   try {
-    const r5 = await invoke('/api/leases', 'POST', {
-      unit_id: 7, // Suite 102
+    // 1. Fetch available units
+    const unitsRes = await invoke('/api/units');
+    let vacantUnit = unitsRes.json?.find(u => u.status === 'vacant');
+    if (!vacantUnit) {
+      // Free up unit 7 for deterministic repeat testing
+      const leases = (await invoke('/api/leases')).json || [];
+      for (const l of leases) {
+        if (l.unit_id === 7 && l.status === 'active') {
+          await invoke(`/api/leases/${l.id}/terminate`, 'PUT');
+        }
+      }
+      vacantUnit = { id: 7, base_rent: 75000 };
+    }
+
+    // 2. Test occupied assignment rejection!
+    const occupiedUnit = unitsRes.json?.find(u => u.status === 'occupied') || { id: 1 };
+    const rOccupied = await invoke('/api/leases', 'POST', {
+      unit_id: occupiedUnit.id,
       tenant_id: newTenantId || 1,
       start_date: '2026-11-01',
       end_date: '2027-10-31',
-      monthly_rent: 75000,
-      deposit_paid: 150000,
+      monthly_rent: 65000
+    });
+    test('Stage 4: Collision Prevention: Occupied Unit Re-assignment Blocked (400)', rOccupied.statusCode === 400, `Status: ${rOccupied.statusCode}`);
+
+    // 3. Create lease on vacant unit
+    const r5 = await invoke('/api/leases', 'POST', {
+      unit_id: vacantUnit.id,
+      tenant_id: newTenantId || 1,
+      start_date: '2026-11-01',
+      end_date: '2027-10-31',
+      monthly_rent: vacantUnit.base_rent || 75000,
+      deposit_paid: (vacantUnit.base_rent || 75000) * 2,
       water_deposit: 5000,
       terms: 'Standard commercial tenancy agreement'
     });
     newLeaseId = r5.json?.id;
     test('Stage 4: Create Tenancy Lease Agreement', r5.ok && newLeaseId, `Lease ID: ${newLeaseId}`);
+
+    // 4. Verify lease agreement automatically appeared in Digital Leases & E-sign!
+    const rAgreements = await invoke('/api/leases/agreements');
+    const autoAgreement = rAgreements.json?.agreements?.find(a => a.lease_id === newLeaseId || a.unit_id === vacantUnit.id);
+    test('Stage 4: Auto-sync to Digital Leases & E-sign', !!autoAgreement && autoAgreement.status === 'pending_tenant', `Code: ${autoAgreement?.agreement_code}, Hash: ${autoAgreement?.contract_hash}`);
   } catch (e) {
     test('Stage 4: Create Tenancy Lease', false, e.message);
   }

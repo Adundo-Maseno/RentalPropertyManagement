@@ -355,19 +355,47 @@ export async function onRequest(context) {
     }
     let b = {};
     try { b = await request.json(); } catch(e) {}
+    const unitId = Number(b.unit_id || 1);
+    const tenantId = Number(b.tenant_id || 1);
+    const unit = DB.units.find(u => u.id === unitId);
+
+    // Enforce: Occupied units CANNOT be leased again
+    const activeLease = DB.leaseAgreements.find(l => l.unit_id === unitId && (l.status === 'active' || l.status === 'executed' || l.status === 'pending_tenant'));
+    if (activeLease || (unit && unit.status === 'occupied')) {
+      const tenant = DB.tenants.find(t => t.id === (activeLease ? activeLease.tenant_id : unit.tenant_id));
+      const tenantName = tenant ? tenant.name : 'an existing resident';
+      return json({
+        error: `Unit ${unit ? unit.unit_number : unitId} is already occupied by ${tenantName}. An occupied unit cannot be leased again. Please terminate or expire the existing lease before assigning a new tenant.`
+      }, 400);
+    }
+
+    if (unit) unit.status = 'occupied';
+
+    const code = `BS-LEASE-2026-${unit ? unit.unit_number.replace(/\s+/g, '') : Math.floor(1000 + Math.random() * 9000)}`;
+    const hash = 'SHA256-' + Math.random().toString(36).substring(2, 14).toUpperCase();
     const newLease = {
       id: DB.leaseAgreements.length + 1,
-      unit_id: Number(b.unit_id || 1),
-      tenant_id: Number(b.tenant_id || 1),
+      lease_id: DB.leaseAgreements.length + 1,
+      unit_id: unitId,
+      tenant_id: tenantId,
       start_date: b.start_date || new Date().toISOString().slice(0, 10),
       end_date: b.end_date || '2027-12-31',
       monthly_rent: Number(b.monthly_rent || 65000),
-      deposit_amount: Number(b.deposit_amount || 130000),
-      status: 'active',
-      agreement_code: `BS-LEASE-${Math.floor(1000 + Math.random() * 9000)}`
+      rent_amount: Number(b.monthly_rent || 65000),
+      deposit_amount: Number(b.deposit_paid || b.deposit_amount || 130000),
+      status: 'pending_tenant',
+      agreement_code: code,
+      contract_hash: hash,
+      terms_clauses: b.terms || 'Residential Tenancy Agreement governed by the Laws of Kenya (Landlord and Tenant Act). Rent due on or before 5th. No unauthorized subletting.'
     };
     DB.leaseAgreements.unshift(newLease);
-    return json({ success: true, id: newLease.id, lease: newLease }, 201);
+    return json({
+      success: true,
+      id: newLease.id,
+      agreement_code: code,
+      contract_hash: hash,
+      message: 'Lease activated and automatically added to Digital Leases & E-sign.'
+    }, 201);
   }
 
   if (pathname.startsWith('/api/leases/') && method === 'PUT') {
@@ -848,12 +876,55 @@ export async function onRequest(context) {
     let b = {};
     try { b = await request.json(); } catch(e) {}
     const ref = 'VIEW-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    const newLead = {
+      id: DB.viewingLeads.length + 1,
+      unit_id: Number(b.unit_id || 4),
+      prospect_name: b.prospect_name || 'Prospect',
+      phone: b.phone || '+254700000000',
+      email: b.email || null,
+      preferred_date: b.preferred_date || new Date().toISOString().slice(0, 10),
+      time_slot: b.time_slot || '10:00 AM',
+      status: 'confirmed',
+      notes: b.notes || null,
+      created_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
+    };
+    DB.viewingLeads.unshift(newLead);
+
     return json({
       success: true,
       reference: ref,
       booking_reference: ref,
+      lead_id: newLead.id,
       message: 'Viewing booked successfully. SMS dispatched.'
     }, 201);
+  }
+
+  if (pathname === '/api/viewing-leads' && method === 'GET') {
+    const enriched = DB.viewingLeads.map(v => {
+      const u = DB.units.find(unit => unit.id === v.unit_id) || {};
+      const p = DB.properties.find(prop => prop.id === u.property_id) || {};
+      return {
+        ...v,
+        unit_number: u.unit_number || 'N/A',
+        unit_type: u.unit_type || 'N/A',
+        base_rent: u.base_rent || 0,
+        property_name: p.name || 'BomaSphere'
+      };
+    });
+    return json({ success: true, count: enriched.length, leads: enriched });
+  }
+
+  if (pathname.startsWith('/api/viewing-leads/') && method === 'PUT') {
+    const id = Number(pathname.split('/')[3]);
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const lead = DB.viewingLeads.find(v => v.id === id);
+    if (!lead) return json({ error: 'Viewing lead not found' }, 404);
+    if (b.status) lead.status = b.status;
+    if (b.notes) lead.notes = b.notes;
+    if (b.preferred_date) lead.preferred_date = b.preferred_date;
+    if (b.time_slot) lead.time_slot = b.time_slot;
+    return json({ success: true, message: 'Viewing lead updated successfully.' });
   }
 
   // 14. WhatsApp Business Bot

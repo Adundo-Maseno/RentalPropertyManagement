@@ -669,7 +669,40 @@
               </table>
             </div>
           </div>
-        </section>
+        
+          <!-- Inbound Viewing Leads & Prospect Appointments -->
+          <div class="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/90 dark:border-zinc-800 shadow-xs overflow-hidden mt-6">
+            <div class="p-4 border-b border-slate-100 dark:border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50 dark:bg-zinc-800/40">
+              <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                  <i data-lucide="calendar-check" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-800 dark:text-white text-sm">Prospect House Viewing Appointments &amp; Leads</h3>
+                  <p class="text-xs text-slate-500 dark:text-zinc-400">Inbound house tours booked from public vacancy showcase awaiting caretaker walkthrough &amp; leasing</p>
+                </div>
+              </div>
+              <span class="text-xs font-semibold px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 rounded-full border border-indigo-200 dark:border-indigo-800" id="viewing-leads-count-badge">0 Scheduled Tours</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 dark:bg-zinc-800/50 text-slate-500 dark:text-zinc-400 font-semibold border-b border-slate-200 dark:border-zinc-800 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th class="py-3 px-4">Prospect Details</th>
+                    <th class="py-3 px-4">Target Unit &amp; Property</th>
+                    <th class="py-3 px-4">Preferred Date &amp; Slot</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4">Prospect Notes</th>
+                    <th class="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-zinc-800" id="viewing-leads-table-body">
+                  <!-- Dynamic viewing leads -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+</section>
 
         <!-- ==================================================== -->
         <!-- VIEW 4: INVOICING & RENT LEDGER -->
