@@ -1205,16 +1205,29 @@ async function handleRequest(req, res) {
 
     fs.readFile(filePath, (err, content) => {
       if (err) {
+        const notFoundPage = path.join(PUBLIC_DIR, '404.html');
+        if (fs.existsSync(notFoundPage) && req.headers?.accept?.includes('text/html')) {
+          res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', ...SECURITY_HEADERS });
+          return res.end(fs.readFileSync(notFoundPage));
+        }
         res.writeHead(404, { 'Content-Type': 'text/plain', ...SECURITY_HEADERS });
         res.end('404 Not Found');
       } else {
-        res.writeHead(200, { 'Content-Type': contentType, ...SECURITY_HEADERS, ...extraHeaders });
+        const statusCode = path.basename(filePath) === '404.html' ? 404 : (path.basename(filePath) === '500.html' ? 500 : 200);
+        res.writeHead(statusCode, { 'Content-Type': contentType, ...SECURITY_HEADERS, ...extraHeaders });
         res.end(content);
       }
     });
 
   } catch (err) {
     console.error('API Error:', err);
+    if (req.headers?.accept?.includes('text/html')) {
+      const errPage = path.join(PUBLIC_DIR, '500.html');
+      if (fs.existsSync(errPage)) {
+        res.writeHead(500, { 'Content-Type': 'text/html; charset=utf-8', ...SECURITY_HEADERS });
+        return res.end(fs.readFileSync(errPage));
+      }
+    }
     sendJSON(res, 500, { success: false, error: err.message });
   }
 }

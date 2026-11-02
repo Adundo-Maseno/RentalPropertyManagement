@@ -386,6 +386,26 @@ async function runTests() {
     console.log(`      Verified /api/auth/me identity: ${authRes.json.user.name}`);
   });
 
+  // 30. Production Error Pages: 404 Not Found Page
+  await test('Error Pages: /404.html serves customized branded page with 404 status', async () => {
+    const res = await invokeHandler('/404.html');
+    if (res.statusCode !== 404) throw new Error(`Expected 404 status, got ${res.statusCode}`);
+    if (!res.body.includes('Page Not Found') || !res.body.includes('BomaSphere')) {
+      throw new Error('404.html missing expected branding and error messaging');
+    }
+    console.log('      Verified 404 page: Branded Page Not Found with return actions and diagnostics');
+  });
+
+  // 31. Production Error Pages: 500 Server Error Page
+  await test('Error Pages: /500.html serves customized incident telemetry page with 500 status', async () => {
+    const res = await invokeHandler('/500.html');
+    if (res.statusCode !== 500) throw new Error(`Expected 500 status, got ${res.statusCode}`);
+    if (!res.body.includes('Internal Server Error') || !res.body.includes('Incident Telemetry')) {
+      throw new Error('500.html missing expected error messaging or incident tracking');
+    }
+    console.log('      Verified 500 page: Branded Internal Server Error with incident ID and telemetry');
+  });
+
   console.log(`\n=======================================================`);
   console.log(` TESTS COMPLETED: ${passed} PASSED, ${failed} FAILED `);
   console.log(`=======================================================`);

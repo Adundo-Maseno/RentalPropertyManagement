@@ -4,7 +4,7 @@
  * Cache Version: bomasphere-v2.0.0
  */
 
-const CACHE_NAME = 'bomasphere-cache-v2';
+const CACHE_NAME = 'bomasphere-cache-v2.1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -13,6 +13,8 @@ const STATIC_ASSETS = [
   '/manifest.json',
   '/favicon.ico',
   '/favicon.svg',
+  '/404.html',
+  '/500.html',
   '/icons/icon.svg',
   '/icons/icon-192.png',
   '/icons/icon-512.png',

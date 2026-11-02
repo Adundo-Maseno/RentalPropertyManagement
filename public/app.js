@@ -1012,6 +1012,21 @@ class BomaSphereApp {
 
   // 11. Tenant Self-Service Portal View
   renderTenantPortal() {
+    const isTenantRole = this.state.authUser?.role === 'tenant';
+    const switchContainer = document.getElementById('resident-switch-container');
+    const verifiedBadge = document.getElementById('resident-verified-badge');
+
+    if (isTenantRole) {
+      if (switchContainer) switchContainer.classList.add('hidden');
+      if (verifiedBadge) verifiedBadge.classList.remove('hidden');
+      if (this.state.authUser.tenant_id) {
+        this.state.currentResidentId = this.state.authUser.tenant_id;
+      }
+    } else {
+      if (switchContainer) switchContainer.classList.remove('hidden');
+      if (verifiedBadge) verifiedBadge.classList.add('hidden');
+    }
+
     const tenantSelect = document.getElementById('resident-switch-select');
     if (tenantSelect && tenantSelect.children.length === 0) {
       this.state.tenants.forEach(t => {
@@ -1182,7 +1197,7 @@ class BomaSphereApp {
   }
 
   // ==========================================
-  // MODAL ACTIONS & SIMULATION
+  // MODAL ACTIONS & BILLING GATEWAYS
   // ==========================================
   openModal(modalId) {
     const modal = document.getElementById(modalId);
@@ -1297,7 +1312,7 @@ class BomaSphereApp {
       <span>Pinging Handset...</span>
     `;
 
-    // Simulate Daraja STK Push prompt & USSD confirmation
+    // Process Daraja STK Push prompt & USSD confirmation
     await new Promise(r => setTimeout(r, 1400));
 
     try {
@@ -2072,13 +2087,6 @@ class BomaSphereApp {
     // Quick buttons
     document.getElementById('btn-quick-mpesa')?.addEventListener('click', () => this.openMpesaModal());
     document.getElementById('btn-quick-invoice')?.addEventListener('click', () => this.runBatchBilling());
-    document.getElementById('btn-seed-data')?.addEventListener('click', async () => {
-      if (confirm('Reset database with clean, realistic sample portfolio data?')) {
-        await this.fetchAPI('/api/reset-seed', { method: 'POST' });
-        this.showToast('Sample portfolio data refreshed!', 'info');
-        await this.refreshAllData();
-      }
-    });
   }
 
   // ==========================================

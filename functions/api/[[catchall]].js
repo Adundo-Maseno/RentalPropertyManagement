@@ -356,6 +356,6 @@ export async function onRequest(context) {
     return json({ success: true, message: 'Sample data refreshed successfully' });
   }
 
-  // Catch-all
-  return json({ success: true, message: "Cloudflare Edge API router ready" });
+  // Catch-all 404 for unmatched API routes
+  return json({ error: "404 Not Found: API route does not exist", path: pathname }, 404);
 }

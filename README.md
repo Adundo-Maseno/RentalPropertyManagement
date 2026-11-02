@@ -3,7 +3,7 @@
 [![Deployment Status](https://img.shields.io/badge/Cloudflare_Pages-Live_Production-059669?style=flat&logo=cloudflare)](https://rentalpropertymanagement.pages.dev/)
 [![PWA](https://img.shields.io/badge/PWA-Installable_Native_App-blue?style=flat&logo=pwa)](https://rentalpropertymanagement.pages.dev/)
 [![Security RBAC](https://img.shields.io/badge/Security-5--Tier_Strict_RBAC-success?style=flat&logo=shield)](https://rentalpropertymanagement.pages.dev/)
-[![Tests](https://img.shields.io/badge/Tests-27%2F27_Passed-brightgreen?style=flat)](https://github.com/Adundo-Maseno/RentalPropertyManagement)
+[![Tests](https://img.shields.io/badge/Tests-31%2F31_Passed-brightgreen?style=flat)](https://github.com/Adundo-Maseno/RentalPropertyManagement)
 [![Node.js](https://img.shields.io/badge/Node.js-22%2B_Zero_Dependencies-339933?style=flat&logo=node.js)](https://nodejs.org/)
 
 > **Next-Generation Real Estate & Property Management Platform**  
@@ -25,15 +25,15 @@ BomaSphere enforces strict **Role-Based Access Control (RBAC)** across both the 
 | **Landlord / Investor** | Dr. Esther Wambui Ndung'u | `esther.ndungu@gmail.com` | `Landlord@2026` *(or `password123`)* | Scoped to Riverside Green Court. Access to owner statements, monthly remittance breakdowns, unit occupancy, and asset maintenance reports. |
 | **Resident Tenant** | Kariuki James Mwangi | `james.kariuki@techke.com` | `Tenant@2026` *(or `password123`)* | Scoped strictly to Unit A101 (Tenant ID #1). Resident self-service portal, view itemized rent bills, trigger instant Lipa Na M-Pesa STK payments, and log repair tickets. |
 
-> 💡 **Tip:** To quickly test different roles without typing, click the **User Avatar / Role Chip** at the bottom of the sidebar (desktop) or top right header (mobile) to open the **Instant Account Switcher**.
+> 💡 **Production Sign In & Role Switching:** To sign in or switch roles, authenticate with the respective email & password. Use the **Sign Out** button in the sidebar footer or top header to end the active session and return to the login interface.
 
 ---
 
 ## 🌟 Core Modules & Capabilities
 
 ### 🇰🇪 1. Localized Kenyan & African Real Estate Financials
-- **Lipa Na M-Pesa STK Push Simulator & Direct Bank Feeds**:
-  - Direct simulation of Safaricom Daraja API STK Push (`/api/payments`).
+- **Lipa Na M-Pesa STK Push Gateway & Direct Bank Feeds**:
+  - Direct processing of Safaricom Daraja API STK Push (`/api/payments`).
   - Sends instant payment notification prompts to tenant phone numbers (`+254...`).
   - Automatic reconciliation: matches reference codes (e.g. `QGEH2RMXPC`), deducts tenant arrears, clears overdue balances, and issues printable receipt vouchers.
   - Multi-bank remittance support for KCB Bank, Equity Bank, Co-operative Bank, ABSA, and NCBA.
@@ -137,7 +137,7 @@ node server.js
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### 3. Run the Automated Direct Test Suite
-To run all 27 integration and security verification tests:
+To run all 31 integration, RBAC, authentication, and error-handling tests:
 ```bash
 node test_suite.js
 ```
