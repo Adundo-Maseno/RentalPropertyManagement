@@ -1,0 +1,88 @@
+{
+  "id": "/bomasphere-pms",
+  "name": "BomaSphere Property Management System",
+  "short_name": "BomaSphere",
+  "description": "Next-Gen Enterprise & African Real Estate Management Platform with automated M-Pesa billing, sub-metering, and landlord remittances.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#090a0f",
+  "theme_color": "#059669",
+  "orientation": "any",
+  "dir": "ltr",
+  "lang": "en-KE",
+  "categories": [
+    "business",
+    "finance",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Lipa na M-Pesa",
+      "short_name": "M-Pesa Pay",
+      "description": "Trigger instant automated STK Push payment",
+      "url": "/#view=payments&action=mpesa",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Rent Invoices",
+      "short_name": "Invoices",
+      "description": "Review automated monthly rent invoices",
+      "url": "/#view=invoices",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Water Sub-metering",
+      "short_name": "Water Meter",
+      "description": "Log meter readings and compute tariffs",
+      "url": "/#view=water",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Work Orders",
+      "short_name": "Maintenance",
+      "description": "Manage maintenance tickets and contractors",
+      "url": "/#view=maintenance",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": []
+}

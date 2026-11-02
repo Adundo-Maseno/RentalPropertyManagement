@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="favBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0f1d"/>
+      <stop offset="100%" stop-color="#040711"/>
+    </linearGradient>
+    <linearGradient id="favEm" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#favBg)"/>
+  <rect width="62" height="62" x="1" y="1" rx="13" fill="none" stroke="#10b981" stroke-width="1.5" stroke-opacity="0.5"/>
+  <!-- Central Architectural Silhouette -->
+  <path d="M14 52 L14 28 L23 23 L23 52 Z" fill="#059669" opacity="0.9"/>
+  <path d="M26 52 L26 16 L32 11 L38 16 L38 52 Z" fill="url(#favEm)"/>
+  <path d="M41 52 L41 26 L50 31 L50 52 Z" fill="#047857" opacity="0.9"/>
+  <path d="M29 52 L29 42 L35 42 L35 52 Z" fill="#ffffff" opacity="0.95"/>
+</svg>
