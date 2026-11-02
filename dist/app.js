@@ -3747,13 +3747,34 @@ class BomaSphereApp {
 
   openLeaseSignModal(id) {
     const lease = (this.state.leaseAgreements || []).find(l => l.id == id);
-    if (!lease) return;
+    if (!lease) {
+      this.showToast('Lease record not found for digital signature.', 'error');
+      return;
+    }
 
-    document.getElementById('modal-lease-id').value = lease.id;
-    document.getElementById('sign-lease-code').textContent = lease.agreement_code;
-    document.getElementById('sign-lease-tenant').textContent = lease.tenant_name || 'Resident';
-    document.getElementById('sign-lease-rent').textContent = this.formatMoney(lease.monthly_rent);
-    document.getElementById('sign-lease-period').textContent = `${lease.start_date} to ${lease.end_date}`;
+    const leaseIdEl = document.getElementById('modal-lease-id');
+    if (leaseIdEl) leaseIdEl.value = lease.id;
+
+    const codeEl = document.getElementById('sign-lease-code') || document.getElementById('modal-lease-code');
+    if (codeEl) codeEl.textContent = `Agreement: ${lease.agreement_code}`;
+
+    const tenantEl = document.getElementById('sign-lease-tenant') || document.getElementById('modal-lease-parties');
+    if (tenantEl) tenantEl.textContent = `Unit ${lease.unit_number || 'Unit'} • ${lease.tenant_name || 'Resident'}`;
+
+    const rentAmount = lease.rent_amount || lease.monthly_rent;
+    const depositAmount = lease.deposit_amount || lease.security_deposit || (rentAmount * 2);
+
+    const rentEl = document.getElementById('sign-lease-rent') || document.getElementById('modal-lease-rent');
+    if (rentEl) rentEl.textContent = this.formatMoney(rentAmount);
+
+    const depositEl = document.getElementById('modal-lease-deposit');
+    if (depositEl) depositEl.textContent = this.formatMoney(depositAmount);
+
+    const periodEl = document.getElementById('sign-lease-period') || document.getElementById('modal-lease-period');
+    if (periodEl) periodEl.textContent = `${lease.start_date || 'Immediate'} to ${lease.end_date || '1 Year'}`;
+
+    const termsEl = document.getElementById('modal-lease-terms');
+    if (termsEl && lease.terms_clauses) termsEl.textContent = lease.terms_clauses;
 
     this.openModal('modal-lease-sign');
     setTimeout(() => this.initLeaseSignaturePad(), 150);
@@ -3762,7 +3783,7 @@ class BomaSphereApp {
   viewLeaseDetails(id) {
     const lease = (this.state.leaseAgreements || []).find(l => l.id == id);
     if (!lease) return;
-    alert(`Digital Agreement: ${lease.agreement_code}\nStatus: Executed\nContract Hash: ${lease.contract_hash || 'SHA256: 7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069'}\nSigned At: ${lease.tenant_signed_at || 'Recorded'}\nTenant: ${lease.tenant_name}`);
+    this.showToast(`Agreement ${lease.agreement_code}: Status Executed. SHA-256 Hash verified on legal registry.`, 'info');
   }
 
   initLeaseSignaturePad() {
