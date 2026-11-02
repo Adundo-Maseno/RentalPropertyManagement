@@ -726,16 +726,11 @@ export async function onRequest(context) {
   }
 
   if (pathname === '/api/auth/me' && method === 'GET') {
-    const authHeader = request.headers.get('Authorization') || request.headers.get('X-Auth-Token') || '';
-    const token = authHeader.replace('Bearer ', '').trim();
-    if (token) {
-      const role = token.replace('token_', '');
-      const user = DB.users.find(u => u.role === role);
-      if (user) {
-        return json({ success: true, user });
-      }
+    const user = resolveRequestUser(request);
+    if (!user) {
+      return json({ error: 'Authentication required. Please sign in.' }, 401);
     }
-    return json({ error: 'Authentication required. Please sign in.' }, 401);
+    return json({ success: true, user });
   }
 
   if (pathname === '/api/auth/login' && method === 'POST') {
