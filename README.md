@@ -65,8 +65,14 @@ BomaSphere enforces strict **Role-Based Access Control (RBAC)** across both the 
 - **Resident Self-Service Portal**:
   - Dedicated tenant view allowing residents to track current balances, trigger M-Pesa payments, and file maintenance requests.
 
-### 📱 3. Mobile-First Progressive Web App (PWA)
+### 📱 3. Mobile-First Progressive Web App (PWA) & Public Showcase
 - **Installable Native App**: Standalone display mode with Web App Manifest (`manifest.json`), service worker (`sw.js`), and high-resolution vector and maskable PNG icons (192px, 512px, Apple Touch icon).
+- **Public Vacancy Showcase with Higgsfield AI Cinematic Camera Engine** (`/rentals.html`):
+  - **Higgsfield Physics-Aware Motion**: Smooth composite-accelerated camera trajectories on vacancy cards (`Dolly-In Glide`, `Cinema Drone 3D Arc Pullback`, `Pedestal Horizontal Pan`, and `180° Facade Orbit`).
+  - **Volumetric Golden-Hour Light Sweep**: Simulated natural sunlight glint across glass windows and Italian porcelain floorings.
+  - **Interactive 3D Gyro/Mouse Tilt Parallax**: Dynamic perspective shifts (`perspective(1000px) rotateX(...) rotateY(...)`) simulating physical spatial presence.
+  - **Higgsfield Virtual Walkthrough Studio Modal**: 16:9 widescreen cinema viewport with live camera rig switcher (Dolly, Drone Arc, 3D Orbit, Golden Twilight), 24fps timecode counter, speed controls (0.5x, 1.0x, 1.5x), prompt grammar generation, and instant viewing booking.
+  - **Global Motion Controls**: Switchable between `Cinematic (24fps)`, `On Hover`, and `Paused` (honoring accessibility and `prefers-reduced-motion`).
 - **Native Bottom Tab Navigation**: Thumb-friendly mobile bottom bar (`Home`, `Units`, `Billing`, `Payments`, `More`) with safe-area insets (`env(safe-area-inset-bottom)`).
 - **Off-Canvas Slide Drawer**: Hardware-accelerated mobile drawer for full module access without screen clutter.
 - **Bottom Sheet Modals**: Dialogs automatically convert into iOS/Android bottom sheets on mobile viewports.
