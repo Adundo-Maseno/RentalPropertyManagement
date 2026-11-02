@@ -31,6 +31,167 @@
   <style>
     body { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
     .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Higgsfield Cinema Studio Physics-Aware Camera Keyframes */
+    @keyframes hgDollyIn {
+      0% {
+        transform: scale(1.0) translate3d(0, 0, 0);
+      }
+      50% {
+        transform: scale(1.10) translate3d(-1.5%, -1%, 0);
+      }
+      100% {
+        transform: scale(1.0) translate3d(0, 0, 0);
+      }
+    }
+
+    @keyframes hgAerialArc {
+      0% {
+        transform: scale(1.12) rotate(0deg) translate3d(-2%, 1%, 0);
+      }
+      50% {
+        transform: scale(1.03) rotate(-1.5deg) translate3d(1.5%, -1%, 0);
+      }
+      100% {
+        transform: scale(1.12) rotate(0deg) translate3d(-2%, 1%, 0);
+      }
+    }
+
+    @keyframes hgPedestalPan {
+      0% {
+        transform: scale(1.08) translate3d(-3%, 0, 0);
+      }
+      50% {
+        transform: scale(1.08) translate3d(3%, -1%, 0);
+      }
+      100% {
+        transform: scale(1.08) translate3d(-3%, 0, 0);
+      }
+    }
+
+    @keyframes hg3DOrbit {
+      0% {
+        transform: perspective(1000px) rotateY(-4deg) rotateX(2deg) scale(1.06);
+      }
+      50% {
+        transform: perspective(1000px) rotateY(4deg) rotateX(-2deg) scale(1.10);
+      }
+      100% {
+        transform: perspective(1000px) rotateY(-4deg) rotateX(2deg) scale(1.06);
+      }
+    }
+
+    @keyframes hgVolumetricLight {
+      0% {
+        opacity: 0;
+        transform: translateX(-120%) rotate(25deg);
+      }
+      20% {
+        opacity: 0.35;
+      }
+      60% {
+        opacity: 0.5;
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(250%) rotate(25deg);
+      }
+    }
+
+    @keyframes hgTwilightGlow {
+      0% {
+        filter: brightness(1) saturate(1.05) contrast(1.02);
+      }
+      50% {
+        filter: brightness(0.86) saturate(1.35) contrast(1.12) hue-rotate(-12deg);
+      }
+      100% {
+        filter: brightness(1) saturate(1.05) contrast(1.02);
+      }
+    }
+
+    /* Higgsfield Applied Animation Classes */
+    .hg-anim-dolly {
+      animation: hgDollyIn 14s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      will-change: transform;
+    }
+
+    .hg-anim-aerial {
+      animation: hgAerialArc 18s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      will-change: transform;
+    }
+
+    .hg-anim-pan {
+      animation: hgPedestalPan 16s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      will-change: transform;
+    }
+
+    .hg-anim-orbit {
+      animation: hg3DOrbit 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      will-change: transform;
+    }
+
+    .hg-light-beam {
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 235, 180, 0.16) 45%,
+        rgba(255, 255, 255, 0.38) 50%,
+        rgba(255, 235, 180, 0.16) 55%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      pointer-events: none;
+      animation: hgVolumetricLight 9s ease-in-out infinite;
+      will-change: transform, opacity;
+    }
+
+    .hg-twilight {
+      animation: hgTwilightGlow 14s ease-in-out infinite;
+      will-change: filter;
+    }
+
+    /* 3D Perspective Card Container */
+    .hg-card-perspective {
+      perspective: 1000px;
+      transform-style: preserve-3d;
+    }
+
+    .hg-card-surface {
+      transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+      will-change: transform;
+    }
+
+    /* Cinematic HUD viewfinder */
+    .hg-hud-reticle {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-color: rgba(255, 255, 255, 0.65);
+      pointer-events: none;
+    }
+    .hg-hud-tl { top: 12px; left: 12px; border-top: 1.5px solid; border-left: 1.5px solid; }
+    .hg-hud-tr { top: 12px; right: 12px; border-top: 1.5px solid; border-right: 1.5px solid; }
+    .hg-hud-bl { bottom: 12px; left: 12px; border-bottom: 1.5px solid; border-left: 1.5px solid; }
+    .hg-hud-br { bottom: 12px; right: 12px; border-bottom: 1.5px solid; border-right: 1.5px solid; }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .hg-anim-dolly,
+      .hg-anim-aerial,
+      .hg-anim-pan,
+      .hg-anim-orbit,
+      .hg-light-beam,
+      .hg-twilight {
+        animation: none !important;
+        transform: none !important;
+        filter: none !important;
+      }
+    }
   </style>
 </head>
 <body class="min-h-full bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 flex flex-col justify-between antialiased selection:bg-emerald-500 selection:text-white transition-colors">
@@ -114,14 +275,27 @@
 
   <!-- Vacancy Listings Grid -->
   <main class="max-w-7xl mx-auto px-6 py-10 flex-1 w-full">
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
       <div>
         <h2 class="text-xl font-bold text-slate-900 dark:text-white">Currently Available Properties</h2>
         <p class="text-xs text-slate-500 dark:text-zinc-400" id="vacancies-count-label">Showing 3 verified vacant spaces ready for immediate occupancy</p>
       </div>
-      <div class="text-xs font-mono text-emerald-600 dark:text-emerald-400 flex items-center">
-        <i data-lucide="shield-check" class="w-4 h-4 mr-1"></i>
-        <span>No Agent Broker Fees</span>
+      
+      <!-- Higgsfield Camera Engine Switcher & Broker Fee Shield -->
+      <div class="flex items-center space-x-3 text-xs">
+        <div class="flex items-center space-x-2 bg-white dark:bg-zinc-900 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-2xs">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-[11px] font-mono text-slate-500 dark:text-zinc-400">Higgsfield Motion:</span>
+          <button id="btn-toggle-motion" onclick="toggleHiggsfieldGlobalMotion()" class="font-bold text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline flex items-center space-x-1">
+            <span id="label-motion-state">Cinematic (24fps)</span>
+            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+          </button>
+        </div>
+
+        <div class="hidden md:flex text-xs font-mono text-emerald-600 dark:text-emerald-400 items-center">
+          <i data-lucide="shield-check" class="w-4 h-4 mr-1"></i>
+          <span>No Broker Fees</span>
+        </div>
       </div>
     </div>
 
@@ -203,6 +377,152 @@
     </div>
   </div>
 
+  <!-- MODAL: Higgsfield Cinema Studio Virtual Walkthrough -->
+  <div id="modal-higgsfield-tour" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-6">
+    <div class="bg-zinc-950 text-white rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-white/10 relative flex flex-col max-h-[94vh] overflow-y-auto">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold">
+            <i data-lucide="video" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h3 class="font-bold text-sm sm:text-base text-white" id="tour-unit-title">Higgsfield Cinema Studio: Virtual Walkthrough</h3>
+              <span class="text-[10px] font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">4K 24FPS</span>
+            </div>
+            <p class="text-xs text-zinc-400" id="tour-unit-sub">Unit A202 &bull; Kilimani Royal Heights</p>
+          </div>
+        </div>
+
+        <button onclick="closeHiggsfieldModal()" class="p-2 text-zinc-400 hover:text-white rounded-xl bg-white/5 hover:bg-white/10 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Main Cinema Viewport (16:9 widescreen) -->
+      <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black mt-4 border border-white/10 shadow-inner group">
+        <!-- Animated Image Layer -->
+        <img id="tour-stage-img" src="" alt="Virtual Walkthrough" class="w-full h-full object-cover transition-all duration-700 hg-anim-dolly">
+        
+        <!-- Volumetric Golden Hour Light Beam -->
+        <div id="tour-stage-light" class="hg-light-beam"></div>
+
+        <!-- Cinema Viewfinder HUD Reticles -->
+        <div class="hg-hud-reticle hg-hud-tl"></div>
+        <div class="hg-hud-reticle hg-hud-tr"></div>
+        <div class="hg-hud-reticle hg-hud-bl"></div>
+        <div class="hg-hud-reticle hg-hud-br"></div>
+
+        <!-- Crosshair Center Reticle -->
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
+          <div class="w-8 h-8 border border-white/50 rounded-full flex items-center justify-center">
+            <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div>
+          </div>
+        </div>
+
+        <!-- Camera HUD Top Bar -->
+        <div class="absolute top-3 inset-x-3 flex items-center justify-between text-[11px] font-mono pointer-events-none">
+          <div class="flex items-center space-x-2 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-white">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            <span>REC</span>
+            <span id="tour-hud-timecode" class="text-zinc-300">00:00:14:18</span>
+          </div>
+          <div class="flex items-center space-x-2 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-zinc-300">
+            <span id="tour-hud-rig" class="text-emerald-400">DOLLY-IN (35MM)</span>
+            <span>&bull;</span>
+            <span>SHUTTER 180&deg;</span>
+            <span>&bull;</span>
+            <span>ISO 400</span>
+          </div>
+        </div>
+
+        <!-- Camera HUD Bottom Bar -->
+        <div class="absolute bottom-3 inset-x-3 flex items-center justify-between text-[10px] font-mono pointer-events-none">
+          <div class="bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-zinc-300 flex items-center space-x-1">
+            <i data-lucide="compass" class="w-3 h-3 text-emerald-400"></i>
+            <span id="tour-hud-camera-desc">Interior Living Room Tracking Glide</span>
+          </div>
+          <div class="bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-emerald-300">
+            Higgsfield.ai Cinema Engine
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Director Desk: Rig Selector -->
+      <div class="mt-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono">Camera Rig Director:</span>
+          <div class="flex items-center space-x-1.5 text-xs">
+            <span class="text-[11px] text-zinc-500 font-mono">Pace:</span>
+            <button id="pace-btn-05" onclick="setTourSpeed(0.5)" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] font-mono text-zinc-300 transition">0.5x Slow</button>
+            <button id="pace-btn-10" onclick="setTourSpeed(1.0)" class="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-mono text-emerald-300 transition">1.0x (24fps)</button>
+            <button id="pace-btn-15" onclick="setTourSpeed(1.5)" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] font-mono text-zinc-300 transition">1.5x Dynamic</button>
+          </div>
+        </div>
+
+        <!-- 4 Higgsfield Rig Buttons -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <button id="rig-btn-dolly" onclick="switchTourRig('dolly')" class="p-2.5 rounded-xl bg-white/10 border border-emerald-500/60 text-left transition hover:bg-white/15">
+            <div class="text-[10px] font-mono text-emerald-400 font-bold uppercase flex items-center">
+              <i data-lucide="video" class="w-3.5 h-3.5 mr-1"></i>
+              <span>Dolly-In Glide</span>
+            </div>
+            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Eye-level interior tracking</p>
+          </button>
+
+          <button id="rig-btn-aerial" onclick="switchTourRig('aerial')" class="p-2.5 rounded-xl bg-white/5 border border-white/10 text-left transition hover:bg-white/10">
+            <div class="text-[10px] font-mono text-zinc-300 font-bold uppercase flex items-center">
+              <i data-lucide="navigation" class="w-3.5 h-3.5 mr-1"></i>
+              <span>Aerial Pullback</span>
+            </div>
+            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Drone elevation reveal</p>
+          </button>
+
+          <button id="rig-btn-orbit" onclick="switchTourRig('orbit')" class="p-2.5 rounded-xl bg-white/5 border border-white/10 text-left transition hover:bg-white/10">
+            <div class="text-[10px] font-mono text-zinc-300 font-bold uppercase flex items-center">
+              <i data-lucide="rotate-3d" class="w-3.5 h-3.5 mr-1"></i>
+              <span>3D Facade Orbit</span>
+            </div>
+            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">180&deg; exterior rotation</p>
+          </button>
+
+          <button id="rig-btn-pan" onclick="switchTourRig('pan')" class="p-2.5 rounded-xl bg-white/5 border border-white/10 text-left transition hover:bg-white/10">
+            <div class="text-[10px] font-mono text-zinc-300 font-bold uppercase flex items-center">
+              <i data-lucide="sun" class="w-3.5 h-3.5 mr-1"></i>
+              <span>Golden Twilight</span>
+            </div>
+            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Day-to-night diffusion</p>
+          </button>
+        </div>
+
+        <!-- Higgsfield Prompt Grammar Box -->
+        <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-xs">
+          <div class="flex items-center space-x-1.5 text-emerald-400 font-mono text-[10px] uppercase font-bold mb-1">
+            <i data-lucide="sparkles" class="w-3 h-3"></i>
+            <span>Higgsfield AI Prompt Grammar</span>
+          </div>
+          <p id="tour-prompt-text" class="text-zinc-300 font-mono text-[11px] leading-relaxed">
+            "Cinematic 4K dolly in, 35mm lens, natural daylight streaming through floor-to-ceiling windows, subtle reflections on Italian tile floor, steadycam 24fps glide."
+          </p>
+        </div>
+
+        <!-- Modal Action Footer -->
+        <div class="flex items-center justify-between pt-2">
+          <button onclick="bookViewingFromTour()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs shadow-lg transition flex items-center space-x-2">
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+            <span>Schedule In-Person Viewing</span>
+          </button>
+
+          <a id="tour-whatsapp-link" href="#" target="_blank" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/15 transition flex items-center space-x-1.5">
+            <i data-lucide="message-circle" class="w-4 h-4 text-emerald-400"></i>
+            <span>Ask on WhatsApp</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Global Footer -->
   <footer class="w-full border-t border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 py-6 px-6 text-xs text-slate-500 dark:text-zinc-400">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
@@ -220,6 +540,9 @@
 
   <script>
     let allVacancies = [];
+    let globalMotionMode = 'cinematic'; // 'cinematic' | 'hover' | 'static'
+    let activeTourUnit = null;
+    let timecodeTimer = null;
 
     async function loadVacancies() {
       try {
@@ -230,6 +553,14 @@
       } catch (err) {
         console.error('Failed to load vacancies:', err);
       }
+    }
+
+    function getHiggsfieldClass(mode) {
+      if (globalMotionMode === 'static') return '';
+      if (mode === 'aerial') return 'hg-anim-aerial';
+      if (mode === 'pan') return 'hg-anim-pan';
+      if (mode === 'orbit') return 'hg-anim-orbit';
+      return 'hg-anim-dolly';
     }
 
     function renderVacancies(list) {
@@ -251,17 +582,60 @@
         return;
       }
 
-      container.innerHTML = list.map(v => `
-        <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200/90 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all duration-300 group">
-          <div>
-            <div class="relative h-48 w-full overflow-hidden bg-slate-100 dark:bg-zinc-800">
-              <img src="${v.photo}" alt="${v.unit_type}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-              <div class="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1 rounded-md">
-                ${v.city}
+      container.innerHTML = list.map(v => {
+        const hg = v.higgsfield || {};
+        const mode = hg.mode || (v.unit_type.includes('Commercial') ? 'pan' : v.unit_type.includes('Townhouse') ? 'aerial' : 'dolly');
+        const rigLabel = hg.rig || (mode === 'aerial' ? 'DRONE ARC' : mode === 'pan' ? 'PEDESTAL PAN' : 'DOLLY-IN');
+        const animClass = getHiggsfieldClass(mode);
+
+        return `
+        <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200/90 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-xl transition-all duration-300 group hg-card-perspective">
+          <div class="hg-card-surface" id="card-surface-${v.id}">
+            <!-- Higgsfield Animated Widescreen Camera Viewport -->
+            <div class="relative h-52 w-full overflow-hidden bg-slate-950 group cursor-pointer" onclick="openHiggsfieldModal(${v.id})" id="viewport-${v.id}">
+              <!-- Animated Image Layer -->
+              <img src="${v.photo}" alt="${v.unit_type}" class="w-full h-full object-cover ${animClass} group-hover:scale-105 transition-transform duration-700" id="img-unit-${v.id}">
+              
+              <!-- Volumetric Sunlight Shimmer -->
+              <div class="hg-light-beam ${globalMotionMode === 'static' ? 'hidden' : ''}"></div>
+
+              <!-- Viewfinder Reticles -->
+              <div class="hg-hud-reticle hg-hud-tl"></div>
+              <div class="hg-hud-reticle hg-hud-tr"></div>
+              <div class="hg-hud-reticle hg-hud-bl"></div>
+              <div class="hg-hud-reticle hg-hud-br"></div>
+
+              <!-- Camera Metadata Badge Top-Left -->
+              <div class="absolute top-3 left-3 flex items-center space-x-1.5 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-mono font-semibold px-2.5 py-1 rounded-md border border-white/10 shadow-sm">
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                <span>REC 24FPS</span>
+                <span class="text-white/40">|</span>
+                <span class="text-emerald-400 font-bold">${rigLabel}</span>
               </div>
-              <div class="absolute top-3 right-3 bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider flex items-center">
-                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse mr-1.5"></span>
-                Ready Now
+
+              <!-- Location Tag Top-Right -->
+              <div class="absolute top-3 right-3 flex items-center space-x-1.5">
+                <span class="bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-md border border-white/10">
+                  ${v.city}
+                </span>
+                <span class="bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider flex items-center">
+                  <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse mr-1"></span>
+                  Ready
+                </span>
+              </div>
+
+              <!-- Bottom Interactive Bar: Higgsfield Badge & Quick Tour -->
+              <div class="absolute bottom-2.5 inset-x-2.5 flex items-center justify-between pointer-events-none">
+                <div class="bg-slate-950/80 backdrop-blur-md text-[10px] text-zinc-300 px-2.5 py-1 rounded border border-white/10 flex items-center space-x-1.5 font-mono">
+                  <i data-lucide="video" class="w-3 h-3 text-emerald-400"></i>
+                  <span>Higgsfield Cinema</span>
+                </div>
+                <div class="pointer-events-auto">
+                  <button onclick="event.stopPropagation(); openHiggsfieldModal(${v.id})" class="px-2.5 py-1 rounded-md bg-white hover:bg-slate-100 text-slate-900 font-bold text-[10px] shadow-md flex items-center space-x-1 transition hover:scale-105 active:scale-95">
+                    <i data-lucide="play" class="w-3 h-3 fill-slate-900"></i>
+                    <span>Virtual Tour</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -319,9 +693,174 @@
             </div>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
+
+      // Attach 3D parallax gyro tilt to cards
+      attachCardParallaxListeners();
 
       if (window.lucide) lucide.createIcons();
+    }
+
+    function attachCardParallaxListeners() {
+      allVacancies.forEach(v => {
+        const vp = document.getElementById(`viewport-${v.id}`);
+        const surface = document.getElementById(`card-surface-${v.id}`);
+        if (!vp || !surface) return;
+
+        vp.addEventListener('mousemove', e => {
+          if (globalMotionMode === 'static') return;
+          const rect = vp.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          const rotX = ((y - centerY) / centerY) * -5;
+          const rotY = ((x - centerX) / centerX) * 5;
+          surface.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
+        });
+
+        vp.addEventListener('mouseleave', () => {
+          surface.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        });
+      });
+    }
+
+    function toggleHiggsfieldGlobalMotion() {
+      const label = document.getElementById('label-motion-state');
+      if (globalMotionMode === 'cinematic') {
+        globalMotionMode = 'hover';
+        if (label) label.textContent = 'On Hover';
+      } else if (globalMotionMode === 'hover') {
+        globalMotionMode = 'static';
+        if (label) label.textContent = 'Paused';
+      } else {
+        globalMotionMode = 'cinematic';
+        if (label) label.textContent = 'Cinematic (24fps)';
+      }
+      renderVacancies(allVacancies);
+    }
+
+    // Higgsfield Virtual Tour Modal Logic
+    function openHiggsfieldModal(unitId) {
+      const unit = allVacancies.find(u => u.id === unitId) || allVacancies[0];
+      if (!unit) return;
+      activeTourUnit = unit;
+
+      document.getElementById('tour-unit-title').textContent = `Higgsfield Tour: Unit ${unit.unit_number} (${unit.unit_type})`;
+      document.getElementById('tour-unit-sub').textContent = `${unit.property_name} • ${unit.city}`;
+      document.getElementById('tour-stage-img').src = unit.photo;
+
+      // Update WhatsApp direct link
+      document.getElementById('tour-whatsapp-link').href = `https://wa.me/254700112233?text=Hi%20BomaSphere%2C%20I%20just%20took%20the%20Higgsfield%20virtual%20tour%20for%20Unit%20${unit.unit_number}%20at%20${encodeURIComponent(unit.property_name)}%20and%20would%20like%20to%20inquire.`;
+
+      // Set default rig based on unit
+      const initialRig = unit.higgsfield?.mode || 'dolly';
+      switchTourRig(initialRig);
+
+      // Start live timecode counter
+      startTimecode();
+
+      document.getElementById('modal-higgsfield-tour').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeHiggsfieldModal() {
+      document.getElementById('modal-higgsfield-tour').classList.add('hidden');
+      if (timecodeTimer) clearInterval(timecodeTimer);
+    }
+
+    function switchTourRig(rig) {
+      const img = document.getElementById('tour-stage-img');
+      const hudRig = document.getElementById('tour-hud-rig');
+      const hudDesc = document.getElementById('tour-hud-camera-desc');
+      const promptText = document.getElementById('tour-prompt-text');
+
+      // Reset animation classes
+      img.className = 'w-full h-full object-cover transition-all duration-700';
+
+      // Reset active rig button styles
+      ['dolly', 'aerial', 'orbit', 'pan'].forEach(r => {
+        const btn = document.getElementById(`rig-btn-${r}`);
+        if (!btn) return;
+        btn.className = (r === rig)
+          ? 'p-2.5 rounded-xl bg-white/10 border border-emerald-500/60 text-left transition'
+          : 'p-2.5 rounded-xl bg-white/5 border border-white/10 text-left transition hover:bg-white/10';
+        const txt = btn.querySelector('span');
+        if (txt) txt.className = (r === rig) ? 'text-emerald-400 font-bold' : 'text-zinc-300 font-bold';
+      });
+
+      if (rig === 'dolly') {
+        img.classList.add('hg-anim-dolly');
+        hudRig.textContent = 'DOLLY-IN (35MM)';
+        hudDesc.textContent = 'Eye-Level Interior Tracking Glide';
+        promptText.textContent = `"Cinematic 4K dolly in, 35mm lens, natural daylight streaming through floor-to-ceiling windows, subtle reflections on Italian tile floor, steadycam 24fps glide, photorealistic."`;
+      } else if (rig === 'aerial') {
+        img.classList.add('hg-anim-aerial');
+        hudRig.textContent = 'DRONE PULLBACK (24MM)';
+        hudDesc.textContent = 'High-Altitude Aerial Elevation Reveal';
+        promptText.textContent = `"Cinematic drone aerial pullback, 4k ultra-high definition, slow smooth arc revealing modern architectural luxury development at golden hour, manicured lawns, warm ambient interior light."`;
+      } else if (rig === 'orbit') {
+        img.classList.add('hg-anim-orbit');
+        hudRig.textContent = '3D ORBIT (50MM)';
+        hudDesc.textContent = '180° Architectural Facade Rotation';
+        promptText.textContent = `"Smooth 180-degree 3D rotational camera orbit around luxury building exterior, natural sun glint across reflective double-glazed glass, physical depth parallax, 24fps cinema pace."`;
+      } else if (rig === 'pan') {
+        img.classList.add('hg-anim-pan', 'hg-twilight');
+        hudRig.textContent = 'GOLDEN TWILIGHT (28MM)';
+        hudDesc.textContent = 'Day-to-Night Dynamic Light Diffusion';
+        promptText.textContent = `"Controlled horizontal architectural pan, physics-aware day-to-night lighting transition, golden hour amber diffusion shifting to warm interior glow through panoramic glass windows."`;
+      }
+    }
+
+    function setTourSpeed(speed) {
+      const img = document.getElementById('tour-stage-img');
+      if (!img) return;
+
+      [0.5, 1.0, 1.5].forEach(s => {
+        const id = 'pace-btn-' + (s === 0.5 ? '05' : s === 1.0 ? '10' : '15');
+        const b = document.getElementById(id);
+        if (b) {
+          b.className = (s === speed)
+            ? 'px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-mono text-emerald-300 transition'
+            : 'px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] font-mono text-zinc-300 transition';
+        }
+      });
+
+      const baseSec = 14;
+      img.style.animationDuration = `${(baseSec / speed).toFixed(1)}s`;
+    }
+
+    function startTimecode() {
+      if (timecodeTimer) clearInterval(timecodeTimer);
+      let frames = 0;
+      let seconds = 14;
+      let minutes = 0;
+      const el = document.getElementById('tour-hud-timecode');
+
+      timecodeTimer = setInterval(() => {
+        frames++;
+        if (frames >= 24) {
+          frames = 0;
+          seconds++;
+          if (seconds >= 60) {
+            seconds = 0;
+            minutes++;
+          }
+        }
+        if (el) {
+          const mStr = String(minutes).padStart(2, '0');
+          const sStr = String(seconds).padStart(2, '0');
+          const fStr = String(frames).padStart(2, '0');
+          el.textContent = `00:${mStr}:${sStr}:${fStr}`;
+        }
+      }, 1000 / 24);
+    }
+
+    function bookViewingFromTour() {
+      if (!activeTourUnit) return;
+      closeHiggsfieldModal();
+      openViewingModal(activeTourUnit.id, activeTourUnit.unit_number, activeTourUnit.property_name, activeTourUnit.unit_type);
     }
 
     function applyFilters() {

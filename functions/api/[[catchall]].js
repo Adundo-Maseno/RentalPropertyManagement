@@ -394,15 +394,44 @@ export async function onRequest(context) {
       let bathrooms = 2;
       let sqft = 1100;
       let photo = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80';
+      let higgsfield = {
+        mode: 'dolly',
+        rig: 'Interior Tracking Glide (35mm Cine)',
+        fps: 24,
+        lighting: 'Golden hour ambient diffusion (3200K)',
+        prompt: 'Dolly forward through sunlit living room with teak finishes, open balcony overlooking gardens, natural light, 35mm lens, steadycam 24fps glide, photorealistic.'
+      };
+
       if (v.unit_type.includes('Commercial') || v.unit_type.includes('Office')) {
         bedrooms = 0; bathrooms = 1; sqft = 650;
         photo = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80';
+        higgsfield = {
+          mode: 'pan',
+          rig: 'Pedestal Horizontal Pan (24mm Cine)',
+          fps: 24,
+          lighting: 'Cool executive daylight & recessed LED ceiling glow',
+          prompt: 'Slow horizontal pedestal pan across open-plan executive commercial office suite, glass partition reflections, panoramic city view, 24fps smooth pan.'
+        };
       } else if (v.unit_type.includes('3-Bedroom') || v.unit_type.includes('DSQ')) {
         bedrooms = 3; bathrooms = 3; sqft = 1650;
         photo = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80';
+        higgsfield = {
+          mode: 'dolly',
+          rig: 'Steadicam Dolly In (35mm Anamorphic)',
+          fps: 24,
+          lighting: 'Warm afternoon golden hour ambient diffusion',
+          prompt: 'Dolly forward through sunlit living room with teak dining finishes, open balcony overlooking lush gardens, natural volumetric light, 35mm lens, photorealistic.'
+        };
       } else if (v.unit_type.includes('Townhouse') || v.unit_type.includes('Villa')) {
         bedrooms = 4; bathrooms = 4.5; sqft = 3200;
         photo = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80';
+        higgsfield = {
+          mode: 'aerial',
+          rig: 'Cinema Drone 3D Arc Pullback',
+          fps: 24,
+          lighting: 'Sunset golden hour with warm interior window glow',
+          prompt: 'Cinematic drone aerial pullback, 4k ultra-high definition, slow smooth arc revealing modern luxury villa at golden hour, private manicured lawn, warm ambient interior lighting visible through floor-to-ceiling glass.'
+        };
       }
       return {
         ...v,
@@ -413,6 +442,7 @@ export async function onRequest(context) {
         bedrooms, bathrooms, sqft, photo,
         deposit: v.base_rent * 2,
         total_monthly: v.base_rent + (v.service_charge || 0) + (v.garbage_fee || 0),
+        higgsfield,
         amenities: ['High-Speed Fiber', 'Borehole Water', '24/7 Manned Security', 'Backup Generator', 'Reserved Parking', 'Solar Water Heating']
       };
     });
