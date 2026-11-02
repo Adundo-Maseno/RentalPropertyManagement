@@ -42,11 +42,14 @@ class BomaSphereApp {
       occupancy: null
     };
 
+    this.deferredPwaPrompt = null;
+
     this.init();
   }
 
   async init() {
     this.restoreThemeAndMode();
+    this.initServiceWorkerAndPwa();
     this.setupNavigation();
     this.setupDateDisplay();
     await this.initAuthSession();
@@ -2395,6 +2398,72 @@ class BomaSphereApp {
       };
       this.showToast(`Applied Theme: ${names[themeName] || themeName}`, 'info');
     }
+  }
+
+  // ==========================================
+  // PROGRESSIVE WEB APP (PWA) & SERVICE WORKER
+  // ==========================================
+  initServiceWorkerAndPwa() {
+    // 1. Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => {
+            console.log('[PWA] Service Worker registered with scope:', reg.scope);
+          })
+          .catch(err => {
+            console.warn('[PWA] Service Worker registration failed:', err);
+          });
+      });
+    }
+
+    // 2. Capture BeforeInstallPrompt for native installability
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      this.deferredPwaPrompt = e;
+      console.log('[PWA] Captured beforeinstallprompt event. Ready for native install.');
+
+      // Unhide install buttons on desktop header & mobile topbar
+      const btn = document.getElementById('btn-pwa-install');
+      const mobileBtn = document.getElementById('btn-pwa-install-mobile');
+      if (btn) {
+        btn.classList.remove('hidden');
+        btn.classList.add('flex');
+      }
+      if (mobileBtn) {
+        mobileBtn.classList.remove('hidden');
+        mobileBtn.classList.add('flex');
+      }
+      if (window.lucide) lucide.createIcons();
+    });
+
+    // 3. Handle App Installed event
+    window.addEventListener('appinstalled', () => {
+      this.deferredPwaPrompt = null;
+      const btn = document.getElementById('btn-pwa-install');
+      const mobileBtn = document.getElementById('btn-pwa-install-mobile');
+      if (btn) btn.classList.add('hidden');
+      if (mobileBtn) mobileBtn.classList.add('hidden');
+      this.showToast('BomaSphere installed as a native app!', 'success');
+      console.log('[PWA] Application successfully installed.');
+    });
+  }
+
+  async promptPwaInstall() {
+    if (!this.deferredPwaPrompt) {
+      this.showToast('To install BomaSphere, tap your browser menu and choose "Install App" or "Add to Home Screen".', 'info');
+      return;
+    }
+
+    this.deferredPwaPrompt.prompt();
+    const choice = await this.deferredPwaPrompt.userChoice;
+    console.log('[PWA] User install choice outcome:', choice ? choice.outcome : 'unknown');
+    this.deferredPwaPrompt = null;
+
+    const btn = document.getElementById('btn-pwa-install');
+    const mobileBtn = document.getElementById('btn-pwa-install-mobile');
+    if (btn) btn.classList.add('hidden');
+    if (mobileBtn) mobileBtn.classList.add('hidden');
   }
 
   // Real Server-Enforced RBAC Session Initialization

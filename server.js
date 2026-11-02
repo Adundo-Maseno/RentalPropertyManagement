@@ -22,6 +22,7 @@ const MIME_TYPES = {
   '.css': 'text/css; charset=utf-8',
   '.js': 'application/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
+  '.webmanifest': 'application/manifest+json; charset=utf-8',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.svg': 'image/svg+xml',
@@ -1193,12 +1194,21 @@ async function handleRequest(req, res) {
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
+    // Extra PWA headers for Service Worker and Manifest
+    const extraHeaders = {};
+    if (path.basename(filePath) === 'sw.js') {
+      extraHeaders['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+      extraHeaders['Service-Worker-Allowed'] = '/';
+    } else if (path.basename(filePath) === 'manifest.json') {
+      extraHeaders['Content-Type'] = 'application/manifest+json; charset=utf-8';
+    }
+
     fs.readFile(filePath, (err, content) => {
       if (err) {
         res.writeHead(404, { 'Content-Type': 'text/plain', ...SECURITY_HEADERS });
         res.end('404 Not Found');
       } else {
-        res.writeHead(200, { 'Content-Type': contentType, ...SECURITY_HEADERS });
+        res.writeHead(200, { 'Content-Type': contentType, ...SECURITY_HEADERS, ...extraHeaders });
         res.end(content);
       }
     });

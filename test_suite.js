@@ -308,6 +308,43 @@ async function runTests() {
     console.log('      System wipe protected against anonymous callers');
   });
 
+  // 24. PWA: Web App Manifest
+  await test('PWA: Web App Manifest /manifest.json serves valid JSON with standalone display', async () => {
+    const res = await invokeHandler('/manifest.json');
+    if (res.statusCode !== 200) throw new Error(`Status ${res.statusCode}`);
+    if (!res.json || res.json.display !== 'standalone') throw new Error('Manifest missing display: standalone');
+    if (!Array.isArray(res.json.icons) || res.json.icons.length < 3) throw new Error('Manifest missing PWA icons array');
+    console.log(`      Manifest verified: name="${res.json.name}", icons=${res.json.icons.length}, display=${res.json.display}`);
+  });
+
+  // 25. PWA: Service Worker
+  await test('PWA: Service Worker /sw.js serves valid JS with no-cache headers', async () => {
+    const res = await invokeHandler('/sw.js');
+    if (res.statusCode !== 200) throw new Error(`Status ${res.statusCode}`);
+    if (!res.body.includes('bomasphere-cache')) throw new Error('sw.js missing cache initialization');
+    if (!res.headers['Cache-Control'] || !res.headers['Cache-Control'].includes('no-cache')) {
+      throw new Error('sw.js missing Cache-Control: no-cache header');
+    }
+    console.log('      Service Worker verified with Cache-Control: no-cache and service worker lifecycle');
+  });
+
+  // 26. PWA: App Icons & Favicon
+  await test('PWA: Favicon and Multi-Resolution PNG Icons serve 200 OK', async () => {
+    const favSvg = await invokeHandler('/favicon.svg');
+    if (favSvg.statusCode !== 200) throw new Error(`favicon.svg returned ${favSvg.statusCode}`);
+
+    const favIco = await invokeHandler('/favicon.ico');
+    if (favIco.statusCode !== 200) throw new Error(`favicon.ico returned ${favIco.statusCode}`);
+
+    const icon192 = await invokeHandler('/icons/icon-192.png');
+    if (icon192.statusCode !== 200) throw new Error(`icon-192.png returned ${icon192.statusCode}`);
+
+    const icon512 = await invokeHandler('/icons/icon-512.png');
+    if (icon512.statusCode !== 200) throw new Error(`icon-512.png returned ${icon512.statusCode}`);
+
+    console.log('      PWA Assets verified: favicon.svg, favicon.ico, icon-192.png, icon-512.png all 200 OK');
+  });
+
   console.log(`\n=======================================================`);
   console.log(` TESTS COMPLETED: ${passed} PASSED, ${failed} FAILED `);
   console.log(`=======================================================`);

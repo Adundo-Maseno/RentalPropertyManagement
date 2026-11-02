@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0f1d"/>
+      <stop offset="100%" stop-color="#040711"/>
+    </linearGradient>
+
+    <!-- Emerald Primary Gradient -->
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="50%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+
+    <!-- Secondary Teal Gradient -->
+    <linearGradient id="tealGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+
+    <!-- Subtle Border Glow -->
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.6"/>
+      <stop offset="50%" stop-color="#3b82f6" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Maskable Safe-Zone Rounded Canvas -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
+  <rect width="504" height="504" x="4" y="4" rx="108" fill="none" stroke="url(#glowGrad)" stroke-width="4"/>
+
+  <!-- Geometric Architectural Emblem (Modern Boma / Skyline) -->
+  <g transform="translate(64, 64) scale(0.75)">
+    <!-- Left Tower (Ascending Pillar) -->
+    <path d="M96 416 L96 220 L168 180 L168 416 Z" fill="url(#tealGrad)" opacity="0.9"/>
+    
+    <!-- Center Tower (Main Skyscraper with Pinnacle) -->
+    <path d="M192 416 L192 120 L256 70 L320 120 L320 416 Z" fill="url(#emeraldGrad)"/>
+    
+    <!-- Right Tower -->
+    <path d="M344 416 L344 200 L416 240 L416 416 Z" fill="url(#tealGrad)" opacity="0.85"/>
+
+    <!-- Geometric Roof Accent / Intersecting Boma Arch -->
+    <path d="M120 416 L256 260 L392 416 Z" fill="#040711" opacity="0.4"/>
+    <path d="M160 416 L256 310 L352 416 Z" fill="url(#bgGrad)"/>
+
+    <!-- Front Entrance Arch / Portal -->
+    <path d="M224 416 L224 340 L288 340 L288 416 Z" fill="url(#emeraldGrad)"/>
+
+    <!-- Light Slits / Windows (Minimalist High-Density Aesthetic) -->
+    <circle cx="256" cy="160" r="10" fill="#ffffff" opacity="0.9"/>
+    <circle cx="256" cy="205" r="10" fill="#ffffff" opacity="0.9"/>
+    <circle cx="256" cy="250" r="10" fill="#ffffff" opacity="0.9"/>
+    
+    <rect x="124" y="240" width="16" height="30" rx="3" fill="#ffffff" opacity="0.8"/>
+    <rect x="124" y="290" width="16" height="30" rx="3" fill="#ffffff" opacity="0.8"/>
+    <rect x="124" y="340" width="16" height="30" rx="3" fill="#ffffff" opacity="0.8"/>
+
+    <rect x="372" y="260" width="16" height="30" rx="3" fill="#ffffff" opacity="0.8"/>
+    <rect x="372" y="310" width="16" height="30" rx="3" fill="#ffffff" opacity="0.8"/>
+    <rect x="372" y="360" width="16" height="30" rx="3" fill="#ffffff" opacity="0.8"/>
+  </g>
+</svg>
