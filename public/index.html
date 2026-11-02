@@ -54,30 +54,48 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
-  <!-- Mobile Nav Header -->
-  <div class="lg:hidden flex items-center justify-between bg-white border-b border-slate-200 px-4 py-3 sticky top-0 z-50">
-    <div class="flex items-center space-x-2">
-      <img src="/icons/icon.svg" alt="BomaSphere" class="w-7 h-7 rounded shadow-xs shrink-0">
-      <span class="font-bold text-sm tracking-tight text-slate-900">BomaSphere <span class="text-xs font-normal text-slate-500">PMS</span></span>
+  <!-- Mobile Nav Header (Fixed Top Bar with Safe Insets & Polish) -->
+  <header class="lg:hidden flex items-center justify-between bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-zinc-800 px-4 py-2.5 sticky top-0 z-40 select-none">
+    <div class="flex items-center space-x-2.5">
+      <button onclick="app.toggleMobileDrawer(true)" class="p-2 -ml-1 text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition" title="Open Menu">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+      </button>
+      <div class="flex items-center space-x-2">
+        <img src="/icons/icon.svg" alt="BomaSphere" class="w-6 h-6 rounded shadow-xs shrink-0">
+        <span class="font-bold text-sm tracking-tight text-slate-900 dark:text-white">BomaSphere <span class="text-[10px] font-normal text-slate-400">PMS</span></span>
+      </div>
     </div>
-    <div class="flex items-center space-x-2">
-      <button id="btn-pwa-install-mobile" onclick="app.promptPwaInstall()" class="hidden items-center space-x-1 py-1 px-2 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-800 text-xs font-semibold">
+    
+    <div class="flex items-center space-x-1.5">
+      <!-- PWA Install Button (Mobile) -->
+      <button id="btn-pwa-install-mobile" onclick="app.promptPwaInstall()" class="hidden items-center space-x-1 py-1 px-2 rounded-md border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-xs font-semibold">
         <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-600"></i>
         <span>Install</span>
       </button>
-      <button id="mobile-menu-toggle" class="p-1.5 rounded-md text-slate-600 hover:bg-slate-100">
-        <i data-lucide="menu" class="w-5 h-5"></i>
+
+      <!-- Light / Dark Toggle (Mobile) -->
+      <button onclick="app.toggleDarkMode()" class="p-2 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition" title="Toggle Light / Dark Mode">
+        <i data-lucide="moon" class="w-4 h-4 dark-mode-icon-mobile"></i>
+      </button>
+
+      <!-- Authenticated User Chip (Mobile) -->
+      <button onclick="app.openAuthModal()" class="flex items-center space-x-1.5 py-1 px-2.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800/80 hover:bg-slate-100 dark:hover:bg-zinc-700 text-[11px] font-semibold text-slate-700 dark:text-zinc-200 transition" title="Switch User Role">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+        <span id="mobile-user-role-chip" class="max-w-[70px] truncate">Manager</span>
       </button>
     </div>
-  </div>
+  </header>
 
   <div class="flex-1 flex overflow-hidden">
+
+    <!-- Mobile Drawer Backdrop Overlay -->
+    <div id="sidebar-backdrop" onclick="app.toggleMobileDrawer(false)" class="lg:hidden fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 hidden transition-opacity duration-200 select-none"></div>
     
-    <!-- SIDEBAR NAVIGATION (Anti-Slop Clean Theme Surface) -->
-    <aside id="sidebar" class="hidden lg:flex flex-col w-60 border-r shrink-0 z-40 transition-all select-none">
+    <!-- SIDEBAR NAVIGATION (Desktop Docked + Mobile Off-Canvas Drawer) -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 w-72 lg:w-60 bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 shrink-0 z-50 flex flex-col transition-transform duration-300 ease-in-out select-none -translate-x-full lg:translate-x-0 shadow-2xl lg:shadow-none">
       
-      <!-- Logo Branding -->
-      <div class="h-14 flex items-center px-5 border-b sidebar-header">
+      <!-- Logo Branding & Mobile Close Button -->
+      <div class="h-14 flex items-center justify-between px-5 border-b sidebar-header shrink-0">
         <div class="flex items-center space-x-2.5">
           <img src="/icons/icon.svg" alt="BomaSphere" class="w-7 h-7 rounded shadow-xs shrink-0">
           <div>
@@ -85,6 +103,9 @@
             <p class="text-[10px] text-slate-500 -mt-0.5">Property Management</p>
           </div>
         </div>
+        <button onclick="app.toggleMobileDrawer(false)" class="lg:hidden p-2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 rounded-lg transition" title="Close Menu">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
       </div>
 
       <!-- Quick Portfolio Status -->
@@ -178,6 +199,17 @@
         </button>
       </nav>
 
+      <!-- Mobile Theme Switcher inside Drawer -->
+      <div class="lg:hidden px-4 py-2.5 border-t border-slate-200 dark:border-zinc-800">
+        <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Visual Theme</label>
+        <select onchange="app.setTheme(this.value)" class="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-md px-2.5 py-1.5 text-slate-700 dark:text-zinc-200 font-medium cursor-pointer">
+          <option value="swiss" selected>Swiss Minimal</option>
+          <option value="emerald">Savanna Emerald</option>
+          <option value="ivory">Warm Ivory</option>
+          <option value="obsidian">Obsidian Cyber</option>
+        </select>
+      </div>
+
       <!-- Sidebar Footer User Profile -->
       <div class="p-3 border-t border-slate-200 dark:border-zinc-800 text-xs">
         <div class="flex items-center justify-between">
@@ -205,8 +237,8 @@
     <!-- MAIN CONTENT AREA -->
     <main class="flex-1 flex flex-col min-w-0 overflow-y-auto bg-slate-50">
       
-      <!-- Top Header Bar (Quiet, Anti-Slop, Authoritative) -->
-      <header class="h-14 bg-white border-b border-slate-200/90 flex items-center justify-between px-6 sticky top-0 z-30">
+      <!-- Top Header Bar (Desktop Only: Quiet, Anti-Slop, Authoritative) -->
+      <header class="hidden lg:flex h-14 bg-white dark:bg-zinc-900 border-b border-slate-200/90 dark:border-zinc-800 items-center justify-between px-6 sticky top-0 z-30 shrink-0">
         <div class="flex items-center space-x-3">
           <h1 id="page-title" class="text-base font-bold text-slate-900 tracking-tight">
             <span>Executive Dashboard</span>
@@ -252,8 +284,8 @@
         </div>
       </header>
 
-      <!-- View Container -->
-      <div class="flex-1 p-6 max-w-7xl w-full mx-auto space-y-5">
+      <!-- View Container (Responsive Edge Padding & Mobile Bottom Nav Clearance) -->
+      <div class="flex-1 p-3.5 sm:p-6 max-w-7xl w-full mx-auto space-y-4 sm:space-y-5 pb-24 lg:pb-8">
 
         <!-- Server RBAC Policy Restriction Alert Banner (Dynamically Shown) -->
         <div id="rbac-restriction-banner" class="hidden p-3.5 rounded-lg border border-rose-200 bg-rose-50 text-rose-800 text-xs flex items-center justify-between">
@@ -309,6 +341,26 @@
               </div>
             </div>
 
+          </div>
+
+          <!-- Mobile Quick Operational Actions (Thumb-Friendly Touch Row) -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <button onclick="app.openMpesaModal()" class="flex items-center justify-center space-x-2 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition min-h-[44px]">
+              <i data-lucide="smartphone" class="w-4 h-4"></i>
+              <span>Lipa Na M-Pesa</span>
+            </button>
+            <button onclick="app.openWaterReadingModal()" class="flex items-center justify-center space-x-2 py-2.5 px-3 bg-slate-900 dark:bg-zinc-800 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition min-h-[44px]">
+              <i data-lucide="droplets" class="w-4 h-4"></i>
+              <span>Log Water</span>
+            </button>
+            <button onclick="app.openMaintenanceModal()" class="flex items-center justify-center space-x-2 py-2.5 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 hover:bg-slate-50 text-xs font-semibold shadow-xs transition min-h-[44px]">
+              <i data-lucide="wrench" class="w-4 h-4 text-amber-600"></i>
+              <span>New Ticket</span>
+            </button>
+            <button onclick="app.switchView('communications')" class="flex items-center justify-center space-x-2 py-2.5 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 hover:bg-slate-50 text-xs font-semibold shadow-xs transition min-h-[44px]">
+              <i data-lucide="message-square" class="w-4 h-4 text-sky-600"></i>
+              <span>SMS Notices</span>
+            </button>
           </div>
 
           <!-- Functional Billing Operations Toolbar (Replaces Marketing Billboard) -->
@@ -1956,6 +2008,33 @@
       </form>
     </div>
   </div>
+
+  <!-- MOBILE BOTTOM TAB NAVIGATION (Thumb-first Native Feel) -->
+  <nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-zinc-800 flex items-center justify-around px-2 py-1 select-none" style="padding-bottom: max(env(safe-area-inset-bottom), 6px);">
+    <button class="mobile-tab-btn active flex-1 flex flex-col items-center justify-center py-1.5 px-1 text-slate-500 transition-colors" data-view="dashboard">
+      <i data-lucide="layout-dashboard" class="w-5 h-5 mb-0.5"></i>
+      <span class="text-[10px] font-semibold tracking-tight">Home</span>
+    </button>
+    <button class="mobile-tab-btn flex-1 flex flex-col items-center justify-center py-1.5 px-1 text-slate-500 transition-colors" data-view="properties">
+      <i data-lucide="building-2" class="w-5 h-5 mb-0.5"></i>
+      <span class="text-[10px] font-semibold tracking-tight">Units</span>
+    </button>
+    <button class="mobile-tab-btn flex-1 flex flex-col items-center justify-center py-1.5 px-1 text-slate-500 transition-colors relative" data-view="invoices">
+      <div class="relative">
+        <i data-lucide="receipt" class="w-5 h-5 mb-0.5"></i>
+        <span id="mobile-nav-overdue-dot" class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-rose-500 hidden"></span>
+      </div>
+      <span class="text-[10px] font-semibold tracking-tight">Billing</span>
+    </button>
+    <button class="mobile-tab-btn flex-1 flex flex-col items-center justify-center py-1.5 px-1 text-slate-500 transition-colors" data-view="payments">
+      <i data-lucide="credit-card" class="w-5 h-5 mb-0.5"></i>
+      <span class="text-[10px] font-semibold tracking-tight">Payments</span>
+    </button>
+    <button id="btn-mobile-more" onclick="app.toggleMobileDrawer(true)" class="flex-1 flex flex-col items-center justify-center py-1.5 px-1 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors" title="All Modules">
+      <i data-lucide="menu" class="w-5 h-5 mb-0.5"></i>
+      <span class="text-[10px] font-semibold tracking-tight">More</span>
+    </button>
+  </nav>
 
   <!-- Toast Notification Container -->
   <div id="toast-container"></div>

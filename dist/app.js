@@ -70,20 +70,57 @@ class BomaSphereApp {
       });
     });
 
-    // Mobile menu toggle
-    const mobileToggle = document.getElementById('mobile-menu-toggle');
-    const sidebar = document.getElementById('sidebar');
-    if (mobileToggle && sidebar) {
-      mobileToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('hidden');
+    // Mobile bottom navigation tabs
+    const mobileTabBtns = document.querySelectorAll('.mobile-tab-btn');
+    mobileTabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const view = btn.dataset.view;
+        if (view) {
+          this.switchView(view);
+        }
       });
+    });
+
+    // Mobile drawer backdrop dismiss
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (backdrop) {
+      backdrop.addEventListener('click', () => {
+        this.toggleMobileDrawer(false);
+      });
+    }
+  }
+
+  toggleMobileDrawer(open) {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (!sidebar) return;
+
+    const isOpen = !sidebar.classList.contains('-translate-x-full');
+    const shouldOpen = open !== undefined ? open : !isOpen;
+
+    if (shouldOpen) {
+      if (backdrop) backdrop.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        if (backdrop) backdrop.classList.remove('opacity-0');
+        sidebar.classList.remove('-translate-x-full');
+      });
+      document.body.classList.add('overflow-hidden', 'lg:overflow-auto');
+    } else {
+      if (backdrop) backdrop.classList.add('opacity-0');
+      sidebar.classList.add('-translate-x-full');
+      document.body.classList.remove('overflow-hidden', 'lg:overflow-auto');
+      setTimeout(() => {
+        if (backdrop && sidebar.classList.contains('-translate-x-full')) {
+          backdrop.classList.add('hidden');
+        }
+      }, 250);
     }
   }
 
   switchView(viewName) {
     this.state.currentView = viewName;
 
-    // Update active nav link
+    // Update active nav link (desktop)
     document.querySelectorAll('.nav-link').forEach(link => {
       if (link.dataset.view === viewName) {
         link.classList.add('active');
@@ -91,6 +128,24 @@ class BomaSphereApp {
         link.classList.remove('active');
       }
     });
+
+    // Update active mobile tab button
+    document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+      if (btn.dataset.view === viewName) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    // Auto-close mobile drawer if open
+    this.toggleMobileDrawer(false);
+
+    // Scroll main viewport to top
+    const mainEl = document.querySelector('main');
+    if (mainEl) {
+      mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     // Hide all view panels and show the active one
     document.querySelectorAll('.view-panel').forEach(panel => {
@@ -256,6 +311,11 @@ class BomaSphereApp {
     if (navOverdue) {
       navOverdue.textContent = overdueCount;
       navOverdue.style.display = overdueCount > 0 ? 'inline-block' : 'none';
+    }
+
+    const mobileOverdueDot = document.getElementById('mobile-nav-overdue-dot');
+    if (mobileOverdueDot) {
+      mobileOverdueDot.classList.toggle('hidden', overdueCount === 0);
     }
 
     // Active tickets badge
@@ -2370,13 +2430,12 @@ class BomaSphereApp {
     const isDark = savedDark !== null ? savedDark === 'true' : prefersDark;
     if (isDark) {
       document.documentElement.classList.add('dark');
-      const icon = document.getElementById('dark-mode-icon');
-      if (icon) icon.setAttribute('data-lucide', 'sun');
     } else {
       document.documentElement.classList.remove('dark');
-      const icon = document.getElementById('dark-mode-icon');
-      if (icon) icon.setAttribute('data-lucide', 'moon');
     }
+    document.querySelectorAll('.dark-mode-icon, #dark-mode-icon, .dark-mode-icon-mobile').forEach(icon => {
+      icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+    });
 
     if (window.lucide) lucide.createIcons();
   }
@@ -2384,11 +2443,10 @@ class BomaSphereApp {
   toggleDarkMode() {
     const isDark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('bomasphere_dark', isDark ? 'true' : 'false');
-    const icon = document.getElementById('dark-mode-icon');
-    if (icon) {
+    document.querySelectorAll('.dark-mode-icon, #dark-mode-icon, .dark-mode-icon-mobile').forEach(icon => {
       icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-      if (window.lucide) lucide.createIcons();
-    }
+    });
+    if (window.lucide) lucide.createIcons();
     this.showToast(isDark ? 'Dark Mode Active' : 'Light Mode Active', 'info');
   }
 
@@ -2583,6 +2641,8 @@ class BomaSphereApp {
     if (sidebarAvatar) {
       sidebarAvatar.textContent = user.name.substring(0, 2).toUpperCase();
     }
+    const mobileRole = document.getElementById('mobile-user-role-chip');
+    if (mobileRole) mobileRole.textContent = formattedRole;
 
     // Role-based Navigation Enforcement
     const permissions = {
