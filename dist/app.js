@@ -35,7 +35,7 @@ class BomaSphereApp {
       expenses: [],
       users: [],
       currentResidentId: 1, // Default tenant for self-service portal
-      currency: 'KES',
+      currency: localStorage.getItem('bomasphere_currency') || 'KES',
       fxRates: { KES: 1, USD: 129.50, GBP: 168.20, EUR: 141.00 },
       leaseAgreements: [],
       inspections: [],
@@ -59,10 +59,18 @@ class BomaSphereApp {
     this.initServiceWorkerAndPwa();
     this.setupNavigation();
     this.setupDateDisplay();
+    this.syncCurrencySelector();
     await this.initAuthSession();
     await this.refreshAllData();
     this.initCharts();
     this.setupEventListeners();
+  }
+
+  syncCurrencySelector() {
+    const sel = document.getElementById('currency-selector');
+    if (sel) {
+      sel.value = this.state.currency || 'KES';
+    }
   }
 
   // ==========================================
@@ -404,24 +412,60 @@ class BomaSphereApp {
     }
   }
 
-  animateCounter(elementId, targetValue, prefix = '', suffix = '') {
+  animateCounter(elementId, targetValue, prefix = '', suffix = '', decimals = 0) {
     const el = document.getElementById(elementId);
     if (!el) return;
     if (!window.gsap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      el.textContent = `${prefix}${typeof targetValue === 'number' ? targetValue.toLocaleString() : targetValue}${suffix}`;
+      el.textContent = `${prefix}${typeof targetValue === 'number' ? targetValue.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) : targetValue}${suffix}`;
       return;
     }
     const currentVal = parseFloat((el.textContent || '0').replace(/[^0-9.-]+/g, '')) || 0;
     const obj = { val: currentVal };
     gsap.to(obj, {
       val: targetValue,
-      duration: 0.65,
+      duration: 0.45,
       ease: 'power2.out',
       onUpdate: () => {
-        const formatted = targetValue % 1 === 0 ? Math.round(obj.val).toLocaleString() : Number(obj.val.toFixed(1)).toLocaleString();
+        const formatted = obj.val.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
         el.textContent = `${prefix}${formatted}${suffix}`;
       }
     });
+  }
+
+  getCurrencySymbol() {
+    const c = this.state.currency || 'KES';
+    if (c === 'USD') return '$';
+    if (c === 'GBP') return '£';
+    if (c === 'EUR') return '€';
+    return 'KES ';
+  }
+
+  convertCurrency(amtKes) {
+    const val = Number(amtKes) || 0;
+    const c = this.state.currency || 'KES';
+    if (c === 'USD') return val / 129.50;
+    if (c === 'GBP') return val / 168.20;
+    if (c === 'EUR') return val / 141.00;
+    return val;
+  }
+
+  updateDashboardKPIs() {
+    const s = this.state.stats;
+    if (!s) return;
+    const sym = this.getCurrencySymbol();
+    const isKes = (this.state.currency || 'KES') === 'KES';
+    const decimals = isKes ? 0 : 2;
+
+    const convCollected = this.convertCurrency(s.total_collected);
+    const convBilled = this.convertCurrency(s.total_billed);
+    const convArrears = this.convertCurrency(s.total_arrears);
+
+    this.animateCounter('dash-total-collected', convCollected, sym, '', decimals);
+    const billedEl = document.getElementById('dash-total-billed');
+    if (billedEl) {
+      billedEl.textContent = `${sym}${convBilled.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
+    }
+    this.animateCounter('dash-total-arrears', convArrears, sym, '', decimals);
   }
 
   // 1. Dashboard
@@ -433,12 +477,10 @@ class BomaSphereApp {
     document.getElementById('dash-occupied-units').textContent = s.occupied_units;
     document.getElementById('dash-vacant-units').textContent = s.vacant_units;
 
-    this.animateCounter('dash-total-collected', s.total_collected, 'KES ');
-    document.getElementById('dash-total-billed').textContent = `KES ${s.total_billed.toLocaleString()}`;
+    this.updateDashboardKPIs();
     const collRate = s.collection_rate !== undefined ? s.collection_rate : (s.total_billed ? ((s.total_collected / s.total_billed) * 100).toFixed(1) : 0);
     document.getElementById('dash-collection-rate').textContent = `${collRate}%`;
 
-    this.animateCounter('dash-total-arrears', s.total_arrears, 'KES ');
     const invList = Array.isArray(this.state.invoices) ? this.state.invoices : [];
     const overdueCount = invList.filter(i => i.status === 'overdue').length;
     document.getElementById('dash-overdue-units-count').textContent = overdueCount;
@@ -468,7 +510,7 @@ class BomaSphereApp {
               </div>
             </div>
             <div class="text-right">
-              <p class="font-extrabold text-xs text-emerald-600">+KES ${Number(p.amount).toLocaleString()}</p>
+              <p class="font-extrabold text-xs text-emerald-600">+${this.formatMoney(p.amount)}</p>
               <p class="text-[10px] text-slate-400">${new Date(p.payment_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
             </div>
           </div>
@@ -571,10 +613,10 @@ class BomaSphereApp {
           <div>${u.unit_type}</div>
           <span class="text-[10px] text-slate-400">${u.floor}</span>
         </td>
-        <td class="py-3 px-4 font-bold text-slate-800">KES ${Number(u.base_rent).toLocaleString()}</td>
+        <td class="py-3 px-4 font-bold text-slate-800">${this.formatMoney(u.base_rent)}</td>
         <td class="py-3 px-4 text-slate-600 text-[11px]">
-          <div>Serv: KES ${Number(u.service_charge).toLocaleString()}</div>
-          <div>Garb: KES ${Number(u.garbage_fee).toLocaleString()}</div>
+          <div>Serv: ${this.formatMoney(u.service_charge)}</div>
+          <div>Garb: ${this.formatMoney(u.garbage_fee)}</div>
         </td>
         <td class="py-3 px-4 font-mono text-slate-600 text-[11px]">${u.meter_number || 'N/A'}</td>
         <td class="py-3 px-4">
@@ -665,13 +707,13 @@ class BomaSphereApp {
             ${t.lease_start ? `${t.lease_start} to ${t.lease_end}` : '<span class="text-slate-400">No active lease</span>'}
           </td>
           <td class="py-3 px-4 font-bold text-slate-800">
-            ${t.monthly_rent ? `KES ${Number(t.monthly_rent).toLocaleString()}` : '-'}
+            ${t.monthly_rent ? this.formatMoney(t.monthly_rent) : '-'}
           </td>
           <td class="py-3 px-4">
             ${balance > 0 ? `
-              <span class="font-bold text-rose-600 font-mono">KES ${balance.toLocaleString()} (Arrears)</span>
+              <span class="font-bold text-rose-600 font-mono">${this.formatMoney(balance)} (Arrears)</span>
             ` : `
-              <span class="font-bold text-emerald-600 font-mono">KES 0.00 (Cleared)</span>
+              <span class="font-bold text-emerald-600 font-mono">${this.formatMoney(0)} (Cleared)</span>
             `}
           </td>
           <td class="py-3 px-4">
@@ -714,9 +756,9 @@ class BomaSphereApp {
     const totalBalance = filtered.reduce((s, i) => s + Number(i.balance), 0);
     const collectionRate = totalBilled > 0 ? ((totalPaid / totalBilled) * 100).toFixed(1) : 0;
 
-    document.getElementById('inv-stat-total').textContent = `KES ${totalBilled.toLocaleString()}`;
-    document.getElementById('inv-stat-paid').textContent = `KES ${totalPaid.toLocaleString()}`;
-    document.getElementById('inv-stat-balance').textContent = `KES ${totalBalance.toLocaleString()}`;
+    document.getElementById('inv-stat-total').textContent = this.formatMoney(totalBilled);
+    document.getElementById('inv-stat-paid').textContent = this.formatMoney(totalPaid);
+    document.getElementById('inv-stat-balance').textContent = this.formatMoney(totalBalance);
     document.getElementById('inv-stat-rate').textContent = `${collectionRate}%`;
     document.getElementById('invoices-count-label').textContent = `${filtered.length} Total Invoices`;
 
@@ -728,13 +770,13 @@ class BomaSphereApp {
           <div class="text-[10px] text-slate-400">${i.property_name} &bull; Unit ${i.unit_number}</div>
         </td>
         <td class="py-3 px-4 font-mono text-[11px] text-slate-600">${i.month}</td>
-        <td class="py-3 px-4 font-mono text-slate-700">KES ${Number(i.rent_amount).toLocaleString()}</td>
-        <td class="py-3 px-4 font-mono text-slate-700">KES ${Number(i.water_amount).toLocaleString()}</td>
-        <td class="py-3 px-4 font-mono text-slate-700 text-[11px]">KES ${Number(Number(i.garbage_amount) + Number(i.service_charge)).toLocaleString()}</td>
-        <td class="py-3 px-4 font-mono font-bold text-slate-800">KES ${Number(i.total_amount).toLocaleString()}</td>
-        <td class="py-3 px-4 font-mono text-emerald-600 font-semibold">KES ${Number(i.amount_paid).toLocaleString()}</td>
+        <td class="py-3 px-4 font-mono text-slate-700">${this.formatMoney(i.rent_amount)}</td>
+        <td class="py-3 px-4 font-mono text-slate-700">${this.formatMoney(i.water_amount)}</td>
+        <td class="py-3 px-4 font-mono text-slate-700 text-[11px]">${this.formatMoney(Number(i.garbage_amount || 0) + Number(i.service_charge || 0))}</td>
+        <td class="py-3 px-4 font-mono font-bold text-slate-800">${this.formatMoney(i.total_amount)}</td>
+        <td class="py-3 px-4 font-mono text-emerald-600 font-semibold">${this.formatMoney(i.amount_paid)}</td>
         <td class="py-3 px-4 font-mono ${Number(i.balance) > 0 ? 'text-rose-600 font-bold' : 'text-slate-400'}">
-          KES ${Number(i.balance).toLocaleString()}
+          ${this.formatMoney(i.balance)}
         </td>
         <td class="py-3 px-4">
           <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${this.getInvoiceBadgeClass(i.status)}">
@@ -773,7 +815,7 @@ class BomaSphereApp {
           <div class="font-bold text-slate-800">${p.payer_name || p.tenant_name}</div>
           <div class="text-[10px] text-slate-400">${p.property_name || 'Kilimani'} &bull; Unit ${p.unit_number || 'A101'}</div>
         </td>
-        <td class="py-3 px-4 font-mono font-extrabold text-emerald-600">KES ${Number(p.amount).toLocaleString()}</td>
+        <td class="py-3 px-4 font-mono font-extrabold text-emerald-600">+${this.formatMoney(p.amount)}</td>
         <td class="py-3 px-4">
           <span class="px-2 py-0.5 rounded text-[11px] font-semibold ${p.payment_method === 'M-Pesa' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-blue-50 text-blue-800 border border-blue-200'}">
             ${p.payment_method}
@@ -814,8 +856,8 @@ class BomaSphereApp {
         <td class="py-3 px-4 font-mono text-slate-600">${w.previous_reading}</td>
         <td class="py-3 px-4 font-mono font-bold text-slate-800">${w.current_reading}</td>
         <td class="py-3 px-4 font-mono font-bold text-blue-600">${w.units_consumed} m³</td>
-        <td class="py-3 px-4 font-mono text-slate-600">KES ${w.rate_per_unit}</td>
-        <td class="py-3 px-4 font-mono font-bold text-emerald-600">KES ${Number(w.total_cost).toLocaleString()}</td>
+        <td class="py-3 px-4 font-mono text-slate-600">${this.formatMoney(w.rate_per_unit)}</td>
+        <td class="py-3 px-4 font-mono font-bold text-emerald-600">${this.formatMoney(w.total_cost)}</td>
         <td class="py-3 px-4">
           <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${w.invoiced ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}">
             ${w.invoiced ? 'Billed in Inv' : 'Pending Bill'}
@@ -852,9 +894,9 @@ class BomaSphereApp {
               <span class="font-semibold text-slate-700">${t.property_name}</span> &bull; ${t.unit_number}
             </div>
             ${t.actual_cost > 0 ? `
-              <span class="font-mono font-bold text-slate-800">KES ${Number(t.actual_cost).toLocaleString()}</span>
+              <span class="font-mono font-bold text-slate-800">${this.formatMoney(t.actual_cost)}</span>
             ` : (t.estimated_cost > 0 ? `
-              <span class="font-mono text-slate-400">Est: KES ${Number(t.estimated_cost).toLocaleString()}</span>
+              <span class="font-mono text-slate-400">Est: ${this.formatMoney(t.estimated_cost)}</span>
             ` : '')}
           </div>
 
@@ -965,7 +1007,7 @@ class BomaSphereApp {
           <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-between">
             <span class="text-slate-400 font-bold uppercase text-[10px]">Net Payout Payable</span>
             <div>
-              <span class="text-2xl font-extrabold text-emerald-600">KES ${st.net_remittance_payout.toLocaleString()}</span>
+              <span class="text-2xl font-extrabold text-emerald-600">${this.formatMoney(st.net_remittance_payout)}</span>
               <p class="text-[11px] text-slate-500">Gross Collections minus Agency Commission & Approved Expenses</p>
             </div>
           </div>
@@ -977,23 +1019,23 @@ class BomaSphereApp {
             <tbody class="divide-y divide-slate-100">
               <tr class="py-2">
                 <td class="py-2 text-slate-600">Gross Rent Billed (${month})</td>
-                <td class="py-2 font-mono text-right font-medium">KES ${st.total_billed.toLocaleString()}</td>
+                <td class="py-2 font-mono text-right font-medium">${this.formatMoney(st.total_billed)}</td>
               </tr>
               <tr class="py-2 bg-emerald-50/50">
                 <td class="py-2 text-slate-900 font-bold">Total Rent Collections Received</td>
-                <td class="py-2 font-mono text-right font-extrabold text-emerald-700">KES ${st.gross_collections.toLocaleString()}</td>
+                <td class="py-2 font-mono text-right font-extrabold text-emerald-700">${this.formatMoney(st.gross_collections)}</td>
               </tr>
               <tr class="py-2">
                 <td class="py-2 text-slate-600">Less: Agency Management Commission (${st.management_fee_rate}%)</td>
-                <td class="py-2 font-mono text-right text-rose-600 font-semibold">- KES ${st.management_fee_amount.toLocaleString()}</td>
+                <td class="py-2 font-mono text-right text-rose-600 font-semibold">-${this.formatMoney(st.management_fee_amount)}</td>
               </tr>
               <tr class="py-2">
                 <td class="py-2 text-slate-600">Less: Property Operating & Repair Expenses</td>
-                <td class="py-2 font-mono text-right text-rose-600 font-semibold">- KES ${st.operating_expenses.toLocaleString()}</td>
+                <td class="py-2 font-mono text-right text-rose-600 font-semibold">-${this.formatMoney(st.operating_expenses)}</td>
               </tr>
               <tr class="py-3 border-t-2 border-slate-900 bg-slate-900 text-white font-bold text-sm">
                 <td class="py-3 px-3">NET REMITTANCE TO LANDLORD</td>
-                <td class="py-3 px-3 font-mono text-right text-emerald-400 font-extrabold">KES ${st.net_remittance_payout.toLocaleString()}</td>
+                <td class="py-3 px-3 font-mono text-right text-emerald-400 font-extrabold">${this.formatMoney(st.net_remittance_payout)}</td>
               </tr>
             </tbody>
           </table>
@@ -1006,7 +1048,7 @@ class BomaSphereApp {
               ${st.expenses_breakdown.map(e => `
                 <div class="flex justify-between text-slate-600 py-1 border-b border-slate-100">
                   <span>${e.description} (${e.category})</span>
-                  <span class="font-mono">KES ${Number(e.amount).toLocaleString()}</span>
+                  <span class="font-mono">${this.formatMoney(e.amount)}</span>
                 </div>
               `).join('')}
             </div>
@@ -1036,7 +1078,7 @@ class BomaSphereApp {
           </span>
         </td>
         <td class="py-3 px-4 text-slate-600 text-[11px]">${e.description}</td>
-        <td class="py-3 px-4 font-mono font-bold text-rose-600">KES ${Number(e.amount).toLocaleString()}</td>
+        <td class="py-3 px-4 font-mono font-bold text-rose-600">-${this.formatMoney(e.amount)}</td>
         <td class="py-3 px-4 text-slate-700 text-[11px]">${e.paid_to}</td>
         <td class="py-3 px-4 text-slate-500 font-mono text-[11px]">${e.expense_date}</td>
       </tr>
@@ -1077,10 +1119,10 @@ class BomaSphereApp {
     document.getElementById('resident-portal-name').textContent = `Welcome back, ${currentTenant.name}!`;
     const balance = Number(currentTenant.total_balance || 0);
     const balanceEl = document.getElementById('resident-portal-balance');
-    balanceEl.textContent = `KES ${balance.toLocaleString()}`;
+    balanceEl.textContent = this.formatMoney(balance);
     balanceEl.className = balance > 0 ? 'text-2xl font-extrabold text-rose-600 mt-1' : 'text-2xl font-extrabold text-emerald-600 mt-1';
 
-    document.getElementById('resident-portal-rent').textContent = currentTenant.monthly_rent ? `KES ${Number(currentTenant.monthly_rent).toLocaleString()}` : 'KES 65,000';
+    document.getElementById('resident-portal-rent').textContent = this.formatMoney(currentTenant.monthly_rent || 65000);
 
     // Resident Invoices
     const tenantInvoices = this.state.invoices.filter(i => i.tenant_id === currentTenant.id);
@@ -1096,7 +1138,7 @@ class BomaSphereApp {
               <p class="text-[11px] text-slate-400 font-mono">${i.invoice_number} &bull; Due: ${i.due_date}</p>
             </div>
             <div class="text-right">
-              <p class="font-bold text-slate-800">KES ${Number(i.total_amount).toLocaleString()}</p>
+              <p class="font-bold text-slate-800">${this.formatMoney(i.total_amount)}</p>
               <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${this.getInvoiceBadgeClass(i.status)}">${i.status}</span>
             </div>
           </div>
@@ -1118,7 +1160,7 @@ class BomaSphereApp {
               <p class="text-[11px] text-slate-400">${p.payment_date}</p>
             </div>
             <div class="text-right">
-              <p class="font-extrabold text-emerald-600">+KES ${Number(p.amount).toLocaleString()}</p>
+              <p class="font-extrabold text-emerald-600">+${this.formatMoney(p.amount)}</p>
               <button onclick="app.viewPrintableReceipt(${p.id})" class="text-[11px] text-slate-500 hover:text-slate-800 underline">View Receipt</button>
             </div>
           </div>
@@ -3290,27 +3332,44 @@ class BomaSphereApp {
   // ==========================================
   setCurrency(curr) {
     this.state.currency = curr || 'KES';
+    try {
+      localStorage.setItem('bomasphere_currency', this.state.currency);
+    } catch (e) {}
+
     const sel = document.getElementById('currency-selector');
     if (sel && sel.value !== this.state.currency) {
       sel.value = this.state.currency;
     }
+
+    // Always update dashboard summary elements
+    this.updateDashboardKPIs();
+
+    // Re-render current active view
     this.renderCurrentView();
+
+    const currNames = { KES: 'Kenyan Shillings (KES)', USD: 'US Dollars ($)', GBP: 'British Pounds (£)', EUR: 'Euros (€)' };
+    this.showToast(`Active Currency: ${currNames[this.state.currency] || this.state.currency}`, 'info');
   }
 
   formatMoney(amt) {
-    if (amt === null || amt === undefined) return '-';
-    const val = Number(amt) || 0;
+    if (amt === null || amt === undefined || isNaN(Number(amt))) return '-';
+    const val = Number(amt);
+    const isNegative = val < 0;
+    const absVal = Math.abs(val);
     const c = this.state.currency || 'KES';
+
+    let formatted = '';
     if (c === 'USD') {
-      return '$' + (val / 129.50).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      formatted = '$' + (absVal / 129.50).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    } else if (c === 'GBP') {
+      formatted = '£' + (absVal / 168.20).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    } else if (c === 'EUR') {
+      formatted = '€' + (absVal / 141.00).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    } else {
+      formatted = 'KES ' + Math.round(absVal).toLocaleString();
     }
-    if (c === 'GBP') {
-      return '£' + (val / 168.20).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-    if (c === 'EUR') {
-      return '€' + (val / 141.00).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-    return 'KES ' + Math.round(val).toLocaleString();
+
+    return isNegative ? `-${formatted}` : formatted;
   }
 
   // MODULE 1: DIGITAL LEASE AGREEMENTS & E-SIGNATURES

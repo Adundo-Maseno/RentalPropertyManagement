@@ -228,14 +228,128 @@ export async function onRequest(context) {
     })));
   }
 
+  if (pathname === '/api/properties' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const newProp = {
+      id: DB.properties.length + 1,
+      name: b.name || 'New Property',
+      property_type: b.property_type || 'Residential',
+      address: b.address || '',
+      city: b.city || 'Nairobi',
+      landlord_name: b.landlord_name || '',
+      landlord_phone: b.landlord_phone || '',
+      landlord_email: b.landlord_email || '',
+      management_fee_pct: Number(b.management_fee_pct || 8.5),
+      paybill_number: b.paybill_number || '522522',
+      bank_name: b.bank_name || 'KCB Bank',
+      bank_account: b.bank_account || ''
+    };
+    DB.properties.push(newProp);
+    return json({ success: true, id: newProp.id, name: newProp.name, property: newProp }, 201);
+  }
+
   // 3. Units
   if (pathname === '/api/units' && method === 'GET') {
     return json(DB.units);
   }
 
+  if (pathname === '/api/units' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const prop = DB.properties.find(p => p.id === Number(b.property_id)) || DB.properties[0];
+    const newUnit = {
+      id: DB.units.length + 1,
+      property_id: Number(b.property_id || 1),
+      unit_number: b.unit_number || `U-${DB.units.length + 1}`,
+      floor: b.floor || 'Ground',
+      unit_type: b.unit_type || '2-Bedroom',
+      base_rent: Number(b.base_rent || 50000),
+      service_charge: Number(b.service_charge || 3000),
+      garbage_fee: Number(b.garbage_fee || 500),
+      status: b.status || 'vacant',
+      meter_number: b.meter_number || `WM-${Math.floor(100 + Math.random() * 900)}`,
+      property_name: prop ? prop.name : 'Kilimani Royal Heights'
+    };
+    DB.units.push(newUnit);
+    return json({ success: true, id: newUnit.id, unit_number: newUnit.unit_number, unit: newUnit }, 201);
+  }
+
+  if (pathname.startsWith('/api/units/') && method === 'PUT') {
+    const id = Number(pathname.split('/')[3]);
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const unit = DB.units.find(u => u.id === id);
+    if (!unit) return json({ error: 'Unit not found' }, 404);
+    if (b.status) unit.status = b.status;
+    if (b.base_rent) unit.base_rent = Number(b.base_rent);
+    return json({ success: true, unit });
+  }
+
   // 4. Tenants
   if (pathname === '/api/tenants' && method === 'GET') {
     return json(DB.tenants);
+  }
+
+  if (pathname === '/api/tenants' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const unitId = Number(b.unit_id || 0);
+    const unit = DB.units.find(u => u.id === unitId);
+    if (unit) unit.status = 'occupied';
+
+    const newTenant = {
+      id: DB.tenants.length + 1,
+      name: b.name || 'New Tenant',
+      phone: b.phone || '',
+      email: b.email || '',
+      id_number: b.id_number || '',
+      emergency_contact_name: b.emergency_contact_name || '',
+      emergency_contact_phone: b.emergency_contact_phone || '',
+      status: 'active',
+      unit_id: unitId || 1,
+      unit_number: unit ? unit.unit_number : 'A101',
+      property_name: unit ? unit.property_name : 'Kilimani Royal Heights',
+      balance: 0,
+      monthly_rent: unit ? unit.base_rent : 65000,
+      lease_start: b.lease_start_date || new Date().toISOString().slice(0, 10),
+      lease_end: b.lease_end_date || new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10)
+    };
+    DB.tenants.unshift(newTenant);
+    return json({ success: true, id: newTenant.id, name: newTenant.name, tenant: newTenant }, 201);
+  }
+
+  // Leases
+  if (pathname === '/api/leases' && method === 'GET') {
+    return json(DB.leaseAgreements);
+  }
+
+  if (pathname === '/api/leases' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const newLease = {
+      id: DB.leaseAgreements.length + 1,
+      unit_id: Number(b.unit_id || 1),
+      tenant_id: Number(b.tenant_id || 1),
+      start_date: b.start_date || new Date().toISOString().slice(0, 10),
+      end_date: b.end_date || '2027-12-31',
+      monthly_rent: Number(b.monthly_rent || 65000),
+      deposit_amount: Number(b.deposit_amount || 130000),
+      status: 'active',
+      agreement_code: `BS-LEASE-${Math.floor(1000 + Math.random() * 9000)}`
+    };
+    DB.leaseAgreements.unshift(newLease);
+    return json({ success: true, id: newLease.id, lease: newLease }, 201);
+  }
+
+  if (pathname.startsWith('/api/leases/') && method === 'PUT') {
+    const id = Number(pathname.split('/')[3]);
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const lease = DB.leaseAgreements.find(l => l.id === id);
+    if (!lease) return json({ error: 'Lease not found' }, 404);
+    if (b.status) lease.status = b.status;
+    return json({ success: true, lease });
   }
 
   // 5. Invoices
@@ -260,6 +374,44 @@ export async function onRequest(context) {
     };
     DB.invoices.unshift(newInv);
     return json({ success: true, id: newInv.id, invoice_number: newInv.invoice_number }, 201);
+  }
+
+  if (pathname === '/api/invoices/generate-monthly' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const month = b.month || '2026-12';
+    let generated = 0;
+    
+    for (const u of DB.units.filter(u => u.status === 'occupied')) {
+      const tenant = DB.tenants.find(t => t.unit_id === u.id) || DB.tenants[0];
+      const invNum = `INV-${month.replace('-', '')}-${String(u.id).padStart(3, '0')}`;
+      if (!DB.invoices.some(i => i.invoice_number === invNum)) {
+        const total = (u.base_rent || 0) + (u.service_charge || 0) + (u.garbage_fee || 0) + 2150;
+        DB.invoices.unshift({
+          id: DB.invoices.length + 1,
+          invoice_number: invNum,
+          unit_id: u.id,
+          tenant_id: tenant ? tenant.id : 1,
+          month: month,
+          issue_date: new Date().toISOString().slice(0, 10),
+          due_date: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
+          rent_amount: u.base_rent,
+          water_amount: 2150,
+          service_charge: u.service_charge,
+          garbage_amount: u.garbage_fee,
+          total_amount: total,
+          amount_paid: 0,
+          balance: total,
+          status: 'unpaid',
+          tenant_name: tenant ? tenant.name : 'Resident',
+          tenant_phone: tenant ? tenant.phone : '+254700000000',
+          unit_number: u.unit_number,
+          property_name: u.property_name
+        });
+        generated++;
+      }
+    }
+    return json({ success: true, count: generated, message: `Successfully generated ${generated} consolidated invoices for ${month}.` });
   }
 
   // 6. Payments
@@ -331,6 +483,19 @@ export async function onRequest(context) {
     return json({ success: true, id: newMaint.id, ticket_number: newMaint.ticket_number }, 201);
   }
 
+  if (pathname.startsWith('/api/maintenance/') && method === 'PUT') {
+    const id = Number(pathname.split('/')[3]);
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const ticket = DB.maintenance.find(m => m.id === id);
+    if (!ticket) return json({ error: 'Maintenance ticket not found' }, 404);
+    if (b.status) ticket.status = b.status;
+    if (b.assigned_contractor) ticket.assigned_contractor = b.assigned_contractor;
+    if (b.actual_cost) ticket.actual_cost = Number(b.actual_cost);
+    if (b.notes) ticket.notes = b.notes;
+    return json({ success: true, ticket });
+  }
+
   // 9. Communications
   if (pathname === '/api/communications' && method === 'GET') {
     return json(DB.communications);
@@ -338,6 +503,25 @@ export async function onRequest(context) {
 
   if (pathname === '/api/communications/broadcast' && method === 'POST') {
     return json({ success: true, count: 8, recipients_reached: 8 });
+  }
+
+  if (pathname === '/api/communications/send' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const tenant = DB.tenants.find(t => t.id === Number(b.tenant_id)) || DB.tenants[0];
+    const newComm = {
+      id: DB.communications.length + 1,
+      tenant_id: tenant ? tenant.id : 1,
+      recipient_name: tenant ? tenant.name : 'Resident',
+      recipient_phone: tenant ? tenant.phone : '+254700000000',
+      type: b.type || 'sms',
+      message: b.message || 'Notice from property management',
+      purpose: b.purpose || 'direct',
+      sent_at: new Date().toISOString().replace('T', ' ').slice(0, 19),
+      status: 'delivered'
+    };
+    DB.communications.unshift(newComm);
+    return json({ success: true, id: newComm.id, channel: newComm.type, recipient: newComm.recipient_phone, message: 'Message queued and delivered.' }, 201);
   }
 
   // 10. Expenses
@@ -385,6 +569,44 @@ export async function onRequest(context) {
   // 12. Users & Authentication
   if (pathname === '/api/users' && method === 'GET') {
     return json(DB.users);
+  }
+
+  if (pathname === '/api/users' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const newUser = {
+      id: DB.users.length + 1,
+      name: b.name || 'New SaaS User',
+      email: b.email || 'user@bomasphere.co.ke',
+      phone: b.phone || '+254700000000',
+      role: b.role || 'caretaker',
+      property_id: b.property_id ? Number(b.property_id) : null,
+      tenant_id: b.tenant_id ? Number(b.tenant_id) : null,
+      status: 'active'
+    };
+    DB.users.push(newUser);
+    return json({ success: true, user: newUser }, 201);
+  }
+
+  if (pathname.startsWith('/api/users/') && method === 'PUT') {
+    const id = Number(pathname.split('/')[3]);
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const user = DB.users.find(u => u.id === id);
+    if (!user) return json({ error: 'User not found' }, 404);
+    if (b.name) user.name = b.name;
+    if (b.phone) user.phone = b.phone;
+    if (b.role) user.role = b.role;
+    return json({ success: true, user });
+  }
+
+  if (pathname.startsWith('/api/users/') && method === 'DELETE') {
+    const id = Number(pathname.split('/')[3]);
+    const idx = DB.users.findIndex(u => u.id === id);
+    if (idx !== -1) {
+      DB.users.splice(idx, 1);
+    }
+    return json({ success: true, message: 'User deleted successfully' });
   }
 
   if (pathname === '/api/auth/me' && method === 'GET') {
