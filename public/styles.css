@@ -1,0 +1,293 @@
+/* High-Density Swiss & Curated SaaS Themes */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap');
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-serif: 'Newsreader', serif;
+
+  /* Default Swiss Light */
+  --bg-app: #fcfcfd;
+  --bg-card: #ffffff;
+  --bg-subtle: #f8fafc;
+  --border-subtle: #e4e4e7;
+  --border-muted: #f4f4f5;
+  --text-main: #09090b;
+  --text-secondary: #71717a;
+  --text-muted: #a1a1aa;
+  --brand-accent: #059669;
+}
+
+/* Dark Mode Tokens */
+html.dark {
+  --bg-app: #090a0f;
+  --bg-card: #12131a;
+  --bg-subtle: #181924;
+  --border-subtle: #27272a;
+  --border-muted: #1e1f2b;
+  --text-main: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --brand-accent: #10b981;
+}
+
+/* Theme 1: Savanna Emerald */
+html[data-theme="emerald"] {
+  --brand-accent: #059669;
+}
+html.dark[data-theme="emerald"] {
+  --bg-app: #04100c;
+  --bg-card: #081a14;
+  --bg-subtle: #0d261e;
+  --border-subtle: #133a2e;
+}
+
+/* Theme 2: Warm Editorial Ivory */
+html[data-theme="ivory"] {
+  --bg-app: #fbf9f5;
+  --bg-card: #ffffff;
+  --bg-subtle: #f5f0e6;
+  --border-subtle: #e6dfd3;
+  --text-main: #1c1917;
+  --brand-accent: #b45309;
+}
+html.dark[data-theme="ivory"] {
+  --bg-app: #14120f;
+  --bg-card: #1c1915;
+  --bg-subtle: #24201b;
+  --border-subtle: #332d26;
+  --text-main: #f5f5f4;
+  --brand-accent: #d97706;
+}
+
+/* Theme 3: Obsidian Cyber */
+html[data-theme="obsidian"] {
+  --brand-accent: #7c3aed;
+}
+html.dark[data-theme="obsidian"] {
+  --bg-app: #050508;
+  --bg-card: #0d0d14;
+  --bg-subtle: #141420;
+  --border-subtle: #1f1f33;
+  --brand-accent: #8b5cf6;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: 'tnum' 1, 'zero' 1;
+}
+
+/* Dark mode utility adaptors */
+html.dark .bg-white {
+  background-color: var(--bg-card) !important;
+  color: var(--text-main) !important;
+}
+
+html.dark .bg-slate-50 {
+  background-color: var(--bg-app) !important;
+}
+
+html.dark .bg-slate-100 {
+  background-color: var(--bg-subtle) !important;
+}
+
+html.dark .border-slate-200, 
+html.dark .border-slate-200\/80,
+html.dark .border-slate-200\/90,
+html.dark .border-slate-100 {
+  border-color: var(--border-subtle) !important;
+}
+
+html.dark .text-slate-800,
+html.dark .text-slate-900 {
+  color: #f4f4f5 !important;
+}
+
+html.dark .text-slate-600,
+html.dark .text-slate-700 {
+  color: #d4d4d8 !important;
+}
+
+html.dark .text-slate-500 {
+  color: #a1a1aa !important;
+}
+
+html.dark .text-slate-400 {
+  color: #71717a !important;
+}
+
+html.dark table thead {
+  background-color: var(--bg-subtle) !important;
+  color: #a1a1aa !important;
+}
+
+html.dark table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+html.dark input, 
+html.dark select, 
+html.dark textarea {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-subtle) !important;
+  color: #f4f4f5 !important;
+}
+
+/* Tactile Button Press */
+button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Custom Minimal Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #71717a;
+  border-radius: 4px;
+}
+
+/* Active Nav Link */
+#sidebar {
+  background-color: var(--bg-card);
+  border-right: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.sidebar-header {
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--bg-card);
+}
+
+.nav-link {
+  color: var(--text-secondary);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.12s ease;
+}
+
+.nav-link:hover {
+  background-color: var(--bg-subtle);
+  color: var(--text-main);
+}
+
+.nav-link.active {
+  background-color: var(--bg-subtle);
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.nav-link i, .nav-link svg {
+  color: var(--text-muted);
+}
+.nav-link.active i, .nav-link.active svg {
+  color: var(--brand-accent);
+}
+
+.nav-section-title {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 12px 12px 4px 12px;
+}
+
+/* Unified Flat KPI Strip */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background-color: var(--bg-card);
+  overflow: hidden;
+}
+
+.kpi-cell {
+  padding: 18px 20px;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.kpi-cell:last-child {
+  border-right: none;
+}
+
+@media (max-width: 1024px) {
+  .kpi-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .kpi-cell:nth-child(2) {
+    border-right: none;
+  }
+  .kpi-cell:nth-child(-n+2) {
+    border-bottom: 1px solid var(--border-subtle);
+  }
+}
+
+@media (max-width: 640px) {
+  .kpi-strip {
+    grid-template-columns: 1fr;
+  }
+  .kpi-cell {
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .kpi-cell:last-child {
+    border-bottom: none;
+  }
+}
+
+/* Toast Notifications */
+#toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Print Styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-area, #printable-area * {
+    visibility: visible;
+  }
+  #printable-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 24px;
+    background: white;
+    color: black;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

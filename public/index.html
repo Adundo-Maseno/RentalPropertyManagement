@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BomaSphere PMS | Next-Gen African & Global Property Management</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b'
+            },
+            safaricom: '#009a44' // Kenyan M-Pesa brand green
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- GSAP Animation Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- Mobile Nav Header -->
+  <div class="lg:hidden flex items-center justify-between bg-white border-b border-slate-200 px-4 py-3 sticky top-0 z-50">
+    <div class="flex items-center space-x-2">
+      <div class="w-7 h-7 rounded bg-slate-900 text-white flex items-center justify-center font-bold text-xs">B</div>
+      <span class="font-bold text-sm tracking-tight text-slate-900">BomaSphere <span class="text-xs font-normal text-slate-500">PMS</span></span>
+    </div>
+    <button id="mobile-menu-toggle" class="p-1.5 rounded-md text-slate-600 hover:bg-slate-100">
+      <i data-lucide="menu" class="w-5 h-5"></i>
+    </button>
+  </div>
+
+  <div class="flex-1 flex overflow-hidden">
+    
+    <!-- SIDEBAR NAVIGATION (Anti-Slop Clean Theme Surface) -->
+    <aside id="sidebar" class="hidden lg:flex flex-col w-60 border-r shrink-0 z-40 transition-all select-none">
+      
+      <!-- Logo Branding -->
+      <div class="h-14 flex items-center px-5 border-b sidebar-header">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-7 h-7 rounded bg-slate-900 dark:bg-white text-white dark:text-slate-950 flex items-center justify-center font-bold text-xs tracking-tight">
+            B
+          </div>
+          <div>
+            <div class="font-bold text-slate-900 dark:text-white text-sm tracking-tight">BomaSphere</div>
+            <p class="text-[10px] text-slate-500 -mt-0.5">Property Management</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Portfolio Status -->
+      <div class="px-4 py-2.5 border-b border-slate-200 dark:border-zinc-800 text-xs">
+        <div class="flex items-center justify-between text-[11px] text-slate-500 mb-0.5">
+          <span>PORTFOLIO</span>
+          <span class="text-emerald-700 dark:text-emerald-400 font-medium">Active</span>
+        </div>
+        <div class="font-semibold text-slate-800 dark:text-zinc-200 truncate" id="sidebar-portfolio-name">All Portfolios</div>
+        <div class="flex items-center justify-between text-[11px] text-slate-500 mt-1">
+          <span id="sidebar-units-count">12 Units</span>
+          <span id="sidebar-occupancy-badge" class="font-mono text-slate-700 dark:text-zinc-300">83.3% Occupied</span>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto">
+        <div class="nav-section-title">Operations</div>
+        
+        <button class="nav-link active w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="dashboard">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          <span>Dashboard</span>
+        </button>
+
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="properties">
+          <i data-lucide="building" class="w-4 h-4"></i>
+          <span>Properties &amp; Units</span>
+        </button>
+
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="tenants">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>Tenants &amp; Leases</span>
+        </button>
+
+        <div class="nav-section-title">Billing &amp; Finance</div>
+
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="invoices">
+          <i data-lucide="receipt" class="w-4 h-4"></i>
+          <span class="flex-1 text-left">Rent Roll Invoices</span>
+          <span id="nav-overdue-count" class="text-[10px] text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.2 rounded font-mono font-bold">1</span>
+        </button>
+
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="payments">
+          <i data-lucide="credit-card" class="w-4 h-4"></i>
+          <span class="flex-1 text-left">Payments &amp; M-Pesa</span>
+        </button>
+
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="water">
+          <i data-lucide="droplet" class="w-4 h-4"></i>
+          <span>Water Sub-Metering</span>
+        </button>
+
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="landlord">
+          <i data-lucide="file-text" class="w-4 h-4"></i>
+          <span>Owner Remittances</span>
+        </button>
+
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="expenses">
+          <i data-lucide="wallet" class="w-4 h-4"></i>
+          <span>Operating Expenses</span>
+        </button>
+
+        <div class="nav-section-title">Field &amp; Tenant</div>
+
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="maintenance">
+          <i data-lucide="wrench" class="w-4 h-4"></i>
+          <span class="flex-1 text-left">Maintenance Tickets</span>
+          <span id="nav-tickets-badge" class="text-[10px] text-slate-600 bg-slate-100 px-1.5 py-0.2 rounded font-mono">2</span>
+        </button>
+
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="communications">
+          <i data-lucide="message-square" class="w-4 h-4"></i>
+          <span>SMS &amp; Notices</span>
+        </button>
+
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="higgsfield">
+          <i data-lucide="video" class="w-4 h-4"></i>
+          <span>Virtual Walkthroughs</span>
+        </button>
+
+        <div class="nav-section-title">System &amp; Access</div>
+
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="users">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+          <span>RBAC Users &amp; Roles</span>
+        </button>
+
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2 text-emerald-700 dark:text-emerald-400 font-medium" data-view="tenant-portal">
+          <i data-lucide="user-check" class="w-4 h-4"></i>
+          <span>Resident Portal</span>
+        </button>
+      </nav>
+
+      <!-- Sidebar Footer User Profile -->
+      <div class="p-3 border-t border-slate-200 dark:border-zinc-800 text-xs">
+        <div class="flex items-center justify-between">
+          <button onclick="app.openAuthModal()" class="flex items-center space-x-2.5 text-left hover:opacity-80 transition">
+            <div id="sidebar-user-avatar" class="w-7 h-7 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
+              PM
+            </div>
+            <div>
+              <p id="sidebar-user-name" class="font-semibold text-slate-800 dark:text-zinc-200 text-xs truncate max-w-[110px]">Patrick Ndegwa</p>
+              <p id="sidebar-user-role" class="text-[10px] text-slate-500">Property Manager</p>
+            </div>
+          </button>
+          <div class="flex items-center space-x-1">
+            <button id="btn-seed-data" title="Re-seed sample data" class="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 rounded">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="app.openAuthModal()" title="Switch Account / Sign In" class="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 rounded">
+              <i data-lucide="log-in" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto bg-slate-50">
+      
+      <!-- Top Header Bar (Quiet, Anti-Slop, Authoritative) -->
+      <header class="h-14 bg-white border-b border-slate-200/90 flex items-center justify-between px-6 sticky top-0 z-30">
+        <div class="flex items-center space-x-3">
+          <h1 id="page-title" class="text-base font-bold text-slate-900 tracking-tight">
+            <span>Executive Dashboard</span>
+          </h1>
+          <span class="text-slate-300">&bull;</span>
+          <span class="text-xs text-slate-500 font-mono" id="live-date-display">Nov 2, 2026</span>
+        </div>
+
+        <div class="flex items-center space-x-3 text-xs">
+          <!-- Real Authenticated Account Status -->
+          <button onclick="app.openAuthModal()" class="flex items-center space-x-2 py-1 px-2.5 rounded-md border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 hover:bg-slate-100 text-xs transition">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span class="font-semibold text-slate-800 dark:text-zinc-200" id="header-user-name">Patrick Ndegwa</span>
+            <span class="text-[11px] text-slate-500" id="header-user-role">(Property Manager)</span>
+            <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 ml-1"></i>
+          </button>
+
+          <!-- Theme Selector (No Emojis) -->
+          <div class="hidden md:flex items-center space-x-1">
+            <select id="theme-selector" onchange="app.setTheme(this.value)" class="text-xs bg-slate-50 border border-slate-200 rounded-md px-2 py-1 text-slate-700 font-medium cursor-pointer">
+              <option value="swiss" selected>Swiss Minimal</option>
+              <option value="emerald">Savanna Emerald</option>
+              <option value="ivory">Warm Ivory</option>
+              <option value="obsidian">Obsidian Cyber</option>
+            </select>
+          </div>
+
+          <!-- Light / Dark Mode Toggle -->
+          <button id="dark-mode-toggle" onclick="app.toggleDarkMode()" class="p-1.5 rounded-md bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 transition" title="Toggle Light / Dark Mode">
+            <i data-lucide="moon" id="dark-mode-icon" class="w-3.5 h-3.5"></i>
+          </button>
+
+          <!-- Primary Operational Action -->
+          <button id="btn-quick-mpesa" onclick="app.openMpesaModal()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-xs font-semibold shadow-xs transition">
+            Lipa Na M-Pesa
+          </button>
+        </div>
+      </header>
+
+      <!-- View Container -->
+      <div class="flex-1 p-6 max-w-7xl w-full mx-auto space-y-5">
+
+        <!-- Server RBAC Policy Restriction Alert Banner (Dynamically Shown) -->
+        <div id="rbac-restriction-banner" class="hidden p-3.5 rounded-lg border border-rose-200 bg-rose-50 text-rose-800 text-xs flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-rose-600 shrink-0"></i>
+            <div>
+              <span class="font-bold">RBAC Permission Boundary:</span>
+              <span id="rbac-restriction-message" class="ml-1">Action blocked by server-side policy for this role.</span>
+            </div>
+          </div>
+          <button onclick="app.openAuthModal()" class="px-2.5 py-1 bg-rose-700 text-white rounded font-semibold text-[11px] hover:bg-rose-800 transition">
+            Switch Role
+          </button>
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- VIEW 1: DASHBOARD -->
+        <!-- ==================================================== -->
+        <section id="view-dashboard" class="view-panel space-y-5">
+          
+          <!-- Unified High-Density Flat KPI Strip (Anti-Slop Craft) -->
+          <div class="kpi-strip">
+            
+            <div class="kpi-cell">
+              <div class="text-xs text-slate-500 font-medium">Portfolio Occupancy</div>
+              <div class="mt-2 text-2xl font-bold font-mono text-slate-900 tabular-nums" id="dash-occupancy-rate">83.3%</div>
+              <div class="mt-1 text-[11px] text-slate-500">
+                <span id="dash-occupied-units" class="font-semibold text-slate-800 font-mono">10</span> occupied &bull; <span id="dash-vacant-units" class="font-semibold text-slate-800 font-mono">2</span> vacant
+              </div>
+            </div>
+
+            <div class="kpi-cell">
+              <div class="text-xs text-slate-500 font-medium">November Collections</div>
+              <div class="mt-2 text-2xl font-bold font-mono text-slate-900 tabular-nums" id="dash-total-collected">KES 451,759</div>
+              <div class="mt-1 text-[11px] text-slate-500">
+                Billed: <span id="dash-total-billed" class="font-semibold text-slate-800 font-mono">KES 668,884</span> (<span id="dash-collection-rate" class="font-mono">67.5%</span>)
+              </div>
+            </div>
+
+            <div class="kpi-cell">
+              <div class="text-xs text-slate-500 font-medium">Pending Arrears</div>
+              <div class="mt-2 text-2xl font-bold font-mono text-rose-600 tabular-nums" id="dash-total-arrears">KES 217,125</div>
+              <div class="mt-1 text-[11px] text-slate-500">
+                <span id="dash-overdue-units-count" class="font-semibold text-rose-600 font-mono">2</span> tenants past 5th due date
+              </div>
+            </div>
+
+            <div class="kpi-cell">
+              <div class="text-xs text-slate-500 font-medium">Open Work Orders</div>
+              <div class="mt-2 text-2xl font-bold font-mono text-slate-900 tabular-nums" id="dash-active-tickets">3</div>
+              <div class="mt-1 text-[11px] text-slate-500">
+                Fundis: <span class="font-medium text-slate-800">QuickFix &amp; Voltage Masters</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Functional Billing Operations Toolbar (Replaces Marketing Billboard) -->
+          <div class="bg-white border border-slate-200 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="font-bold text-slate-900 uppercase tracking-wide text-[11px]">Monthly Operations Cycle:</span>
+                <span class="font-mono font-semibold text-slate-800 bg-slate-100 px-2 py-0.5 rounded">November 2026</span>
+                <span class="text-slate-500">&bull;</span>
+                <span class="text-emerald-700 font-medium">M-Pesa Paybill 522522 Auto-Match Active</span>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-1">Water meters logged, consolidated tenant invoices debited, and M-Pesa STK push ready.</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="app.dispatchBulk5thReminders()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-semibold transition">
+                Send 5th SMS Notices
+              </button>
+              <button id="btn-quick-invoice" onclick="app.runBatchBilling()" class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-md font-semibold transition">
+                Run Monthly Invoicing
+              </button>
+            </div>
+          </div>
+
+          <!-- Charts and Real-time Activity Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Revenue & Collections Trend Chart (2 Cols) -->
+            <div class="lg:col-span-2 bg-white rounded-xl p-5 border border-slate-200/90 shadow-xs">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="font-bold text-slate-800 text-base">Monthly Billing vs. Collections</h3>
+                  <p class="text-xs text-slate-500">Historical performance across all properties (KES)</p>
+                </div>
+                <div class="flex items-center space-x-2 text-xs">
+                  <span class="inline-flex items-center text-slate-600"><span class="w-2.5 h-2.5 rounded-full bg-slate-800 mr-1.5"></span>Billed</span>
+                  <span class="inline-flex items-center text-slate-600"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1.5"></span>Collected</span>
+                </div>
+              </div>
+              <div class="h-64 relative">
+                <canvas id="revenueTrendChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Portfolio Occupancy Distribution (1 Col) -->
+            <div class="bg-white rounded-xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between">
+              <div>
+                <h3 class="font-bold text-slate-800 text-base">Unit Occupancy</h3>
+                <p class="text-xs text-slate-500">Current portfolio unit breakdown</p>
+                <div class="h-44 relative my-3 flex items-center justify-center">
+                  <canvas id="occupancyDoughnutChart"></canvas>
+                </div>
+              </div>
+              <div class="space-y-2 border-t border-slate-100 pt-3 text-xs">
+                <div class="flex items-center justify-between">
+                  <span class="flex items-center text-slate-600"><span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>Occupied Units</span>
+                  <span class="font-bold text-slate-800" id="dash-occupancy-legend-occ">10 units</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="flex items-center text-slate-600"><span class="w-2 h-2 rounded-full bg-sky-500 mr-2"></span>Vacant Units</span>
+                  <span class="font-bold text-slate-800" id="dash-occupancy-legend-vac">2 units</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="flex items-center text-slate-600"><span class="w-2 h-2 rounded-full bg-amber-500 mr-2"></span>Under Renovation</span>
+                  <span class="font-bold text-slate-800" id="dash-occupancy-legend-maint">1 unit</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Recent Payments & Maintenance Tickets Tables -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Recent Payments Feed (M-Pesa / Bank) -->
+            <div class="bg-white rounded-xl p-5 border border-slate-200/90 shadow-xs">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                  <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                    <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-800 text-sm">Live Payments Feed</h3>
+                    <p class="text-[11px] text-slate-400">Instant mobile money & bank confirmations</p>
+                  </div>
+                </div>
+                <button class="text-xs font-semibold text-emerald-600 hover:text-emerald-700" onclick="app.switchView('payments')">View All</button>
+              </div>
+
+              <div class="divide-y divide-slate-100" id="dash-recent-payments">
+                <!-- Loaded dynamically -->
+              </div>
+            </div>
+
+            <!-- Priority Maintenance Requests -->
+            <div class="bg-white rounded-xl p-5 border border-slate-200/90 shadow-xs">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                  <div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
+                    <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-800 text-sm">Urgent Maintenance Tickets</h3>
+                    <p class="text-[11px] text-slate-400">Work orders requiring attention</p>
+                  </div>
+                </div>
+                <button class="text-xs font-semibold text-emerald-600 hover:text-emerald-700" onclick="app.switchView('maintenance')">Manage Work</button>
+              </div>
+
+              <div class="divide-y divide-slate-100" id="dash-recent-tickets">
+                <!-- Loaded dynamically -->
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ==================================================== -->
+        <!-- VIEW 2: PROPERTIES & UNITS -->
+        <!-- ==================================================== -->
+        <section id="view-properties" class="view-panel hidden space-y-6">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">Portfolio Properties & Units</h2>
+              <p class="text-xs text-slate-500">Manage real estate assets, multi-unit complexes, and rental rates</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="app.openAddPropertyModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Add Property</span>
+              </button>
+              <button onclick="app.openAddUnitModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="home" class="w-3.5 h-3.5"></i>
+                <span>Add Unit</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Properties Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5" id="properties-grid">
+            <!-- Dynamic properties -->
+          </div>
+
+          <!-- Units Directory Table -->
+          <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
+              <div class="flex items-center space-x-2">
+                <i data-lucide="door-closed" class="w-4 h-4 text-slate-500"></i>
+                <h3 class="font-bold text-slate-800 text-sm">Units Directory</h3>
+                <span class="text-xs text-slate-400" id="units-table-count">(12 Units)</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <select id="filter-units-status" class="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-emerald-500 focus:border-emerald-500">
+                  <option value="all">All Statuses</option>
+                  <option value="occupied">Occupied</option>
+                  <option value="vacant">Vacant</option>
+                  <option value="maintenance">Maintenance</option>
+                </select>
+                <select id="filter-units-property" class="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-emerald-500 focus:border-emerald-500">
+                  <option value="all">All Properties</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th class="py-3 px-4">Unit #</th>
+                    <th class="py-3 px-4">Property</th>
+                    <th class="py-3 px-4">Type & Floor</th>
+                    <th class="py-3 px-4">Rent (KES)</th>
+                    <th class="py-3 px-4">Utilities/Service</th>
+                    <th class="py-3 px-4">Meter #</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4">Tenant</th>
+                    <th class="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium" id="units-table-body">
+                  <!-- Dynamic units -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ==================================================== -->
+        <!-- VIEW 3: TENANTS & LEASES -->
+        <!-- ==================================================== -->
+        <section id="view-tenants" class="view-panel hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">Tenants & Lease Agreements</h2>
+              <p class="text-xs text-slate-500">Manage tenant profiles, KYC documents, contact info, and active lease terms</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="app.openAddTenantModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                <span>Register Tenant</span>
+              </button>
+              <button onclick="app.openAddLeaseModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="file-signature" class="w-3.5 h-3.5"></i>
+                <span>Create Lease</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tenants Table -->
+          <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div class="relative w-72">
+                <input type="text" id="tenant-search-input" placeholder="Search tenant by name, phone or ID..." class="w-full text-xs pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2"></i>
+              </div>
+              <span class="text-xs text-slate-500" id="tenants-count-label">7 Registered Tenants</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th class="py-3 px-4">Tenant Name</th>
+                    <th class="py-3 px-4">Phone & National ID</th>
+                    <th class="py-3 px-4">Assigned Unit</th>
+                    <th class="py-3 px-4">Lease Period</th>
+                    <th class="py-3 px-4">Monthly Rent</th>
+                    <th class="py-3 px-4">Account Balance</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100" id="tenants-table-body">
+                  <!-- Dynamic tenants -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================== -->
+        <!-- VIEW 4: INVOICING & RENT LEDGER -->
+        <!-- ==================================================== -->
+        <section id="view-invoices" class="view-panel hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">Invoices & Rent Ledger</h2>
+              <p class="text-xs text-slate-500">Itemized bills including rent, water consumption, garbage, service charges, and late penalties</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="app.runBatchBilling()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i>
+                <span>⚡ Auto-Generate Invoices</span>
+              </button>
+              <button onclick="app.dispatchBulk5thReminders()" class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                <span>Send 5th Due SMS</span>
+              </button>
+              <button onclick="app.openCreateInvoiceModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Custom Invoice</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Invoice Stats Summary Cards -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+              <span class="text-xs text-slate-500 font-medium">Total Invoiced</span>
+              <p class="text-lg font-bold text-slate-800 mt-1" id="inv-stat-total">KES 668,884</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+              <span class="text-xs text-slate-500 font-medium">Total Paid</span>
+              <p class="text-lg font-bold text-emerald-600 mt-1" id="inv-stat-paid">KES 451,759</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+              <span class="text-xs text-slate-500 font-medium">Pending Arrears</span>
+              <p class="text-lg font-bold text-rose-600 mt-1" id="inv-stat-balance">KES 217,125</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+              <span class="text-xs text-slate-500 font-medium">Collection Rate</span>
+              <p class="text-lg font-bold text-slate-800 mt-1" id="inv-stat-rate">67.5%</p>
+            </div>
+          </div>
+
+          <!-- Invoices Table -->
+          <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
+              <div class="flex items-center space-x-2">
+                <select id="filter-invoice-status" class="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5">
+                  <option value="all">All Invoices</option>
+                  <option value="unpaid">Unpaid</option>
+                  <option value="partially_paid">Partially Paid</option>
+                  <option value="paid">Fully Paid</option>
+                  <option value="overdue">Overdue</option>
+                </select>
+              </div>
+              <span class="text-xs text-slate-500" id="invoices-count-label">7 Total Invoices</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th class="py-3 px-4">Invoice #</th>
+                    <th class="py-3 px-4">Tenant & Unit</th>
+                    <th class="py-3 px-4">Month</th>
+                    <th class="py-3 px-4">Rent</th>
+                    <th class="py-3 px-4">Water</th>
+                    <th class="py-3 px-4">Garbage/Serv.</th>
+                    <th class="py-3 px-4">Total Amount</th>
+                    <th class="py-3 px-4">Paid</th>
+                    <th class="py-3 px-4">Balance</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium" id="invoices-table-body">
+                  <!-- Dynamic invoices -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================== -->
+        <!-- VIEW 5: M-PESA & PAYMENTS HUB -->
+        <!-- ==================================================== -->
+        <section id="view-payments" class="view-panel hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">M-Pesa & Bank Reconciliation Hub</h2>
+              <p class="text-xs text-slate-500">Automated mobile money matching, Paybill/Till transactions, and digital receipts</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="app.openMpesaModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+                <span>Simulate M-Pesa STK Push</span>
+              </button>
+              <button onclick="app.openManualPaymentModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Record Bank / Cash Payment</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- M-Pesa Feature Highlights (BomaHut core feature) -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="bg-gradient-to-br from-emerald-800 to-emerald-950 p-5 rounded-2xl text-white shadow-sm border border-emerald-700">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-emerald-300 uppercase">M-Pesa Paybill / Till</span>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded font-mono font-bold">SAFARICOM</span>
+              </div>
+              <h3 class="text-xl font-bold mt-2">Instant STK Push Prompt</h3>
+              <p class="text-xs text-emerald-200 mt-1">Sends prompt straight to tenant's mobile phone: "Do you want to pay KES ... for Rent?" Automatic PIN confirmation.</p>
+              <button onclick="app.openMpesaModal()" class="mt-4 w-full py-2 bg-white text-emerald-900 font-bold text-xs rounded-lg hover:bg-emerald-50 transition">Trigger Test STK Push</button>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <span class="text-xs font-bold text-slate-500 uppercase">Bank Direct Ingestion</span>
+                <h3 class="text-base font-bold text-slate-800 mt-1">KCB, Equity & Co-op Feeds</h3>
+                <p class="text-xs text-slate-500 mt-1">Automatic account balance matching with landlord bank accounts. Eliminates fake screenshot fraud.</p>
+              </div>
+              <div class="flex items-center space-x-2 mt-4 text-[11px] font-semibold text-slate-600">
+                <span class="px-2 py-1 bg-slate-100 rounded">KCB Boma</span>
+                <span class="px-2 py-1 bg-slate-100 rounded">Equity Eazzy</span>
+                <span class="px-2 py-1 bg-slate-100 rounded">Co-op MCo-op</span>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <span class="text-xs font-bold text-slate-500 uppercase">Auto SMS Receipting</span>
+                <h3 class="text-base font-bold text-slate-800 mt-1">Instant Delivery</h3>
+                <p class="text-xs text-slate-500 mt-1">Both tenant and property manager receive instantaneous SMS confirmation with unique receipt code.</p>
+              </div>
+              <button onclick="app.switchView('communications')" class="mt-4 text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center">
+                <span>View SMS Delivery Log</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Payments Table -->
+          <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h3 class="font-bold text-slate-800 text-sm">Processed Payment Transactions</h3>
+              <span class="text-xs text-slate-500" id="payments-count-label">5 Transactions</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th class="py-3 px-4">Receipt #</th>
+                    <th class="py-3 px-4">Tenant & Unit</th>
+                    <th class="py-3 px-4">Amount (KES)</th>
+                    <th class="py-3 px-4">Method</th>
+                    <th class="py-3 px-4">Reference Code</th>
+                    <th class="py-3 px-4">Payment Date</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium" id="payments-table-body">
+                  <!-- Dynamic payments -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================== -->
+        <!-- VIEW 6: WATER METER BILLING -->
+        <!-- ==================================================== -->
+        <section id="view-water" class="view-panel hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">Water Meter Utility Billing Engine</h2>
+              <p class="text-xs text-slate-500">Record previous and current meter readings (m³ or units) with automatic cost calculation and invoice integration</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="app.openWaterReadingModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Record New Meter Reading</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Water Tariff Info Card -->
+          <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start space-x-3 text-blue-900 text-xs">
+            <i data-lucide="info" class="w-5 h-5 text-blue-600 shrink-0 mt-0.5"></i>
+            <div>
+              <p class="font-bold">Automated Utility Calculations:</p>
+              <p class="text-blue-700 mt-0.5">Standard municipal / borehole tariff configured at <strong>KES 175.00 per unit (m³)</strong>. When you log meter readings, units consumed are calculated instantly (Current - Previous), and automatically billed into the tenant's monthly rent invoice.</p>
+            </div>
+          </div>
+
+          <!-- Water Readings Table -->
+          <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h3 class="font-bold text-slate-800 text-sm">Monthly Water Meter Logs</h3>
+              <span class="text-xs text-slate-500" id="water-readings-count">11 Logged Readings</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th class="py-3 px-4">Property & Unit</th>
+                    <th class="py-3 px-4">Meter Number</th>
+                    <th class="py-3 px-4">Month</th>
+                    <th class="py-3 px-4">Previous (m³)</th>
+                    <th class="py-3 px-4">Current (m³)</th>
+                    <th class="py-3 px-4">Consumed</th>
+                    <th class="py-3 px-4">Rate (KES/m³)</th>
+                    <th class="py-3 px-4">Total Cost</th>
+                    <th class="py-3 px-4">Invoiced?</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium" id="water-readings-table-body">
+                  <!-- Dynamic water readings -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================== -->
+        <!-- VIEW 7: MAINTENANCE & WORK ORDERS -->
+        <!-- ==================================================== -->
+        <section id="view-maintenance" class="view-panel hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">Maintenance & Work Orders (AppFolio Style)</h2>
+              <p class="text-xs text-slate-500">Track tenant repair requests, dispatch contractors/fundis, and control property maintenance expenses</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="app.openNewTicketModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Create Work Order</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Work Order Kanban / Status Board -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="maintenance-kanban-board">
+            
+            <!-- Column 1: Open / Reported -->
+            <div class="bg-slate-100/70 rounded-xl p-3 border border-slate-200">
+              <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
+                <span class="text-xs font-bold text-slate-700 uppercase flex items-center">
+                  <span class="w-2 h-2 rounded-full bg-slate-400 mr-2"></span>Reported
+                </span>
+                <span class="text-xs bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-bold" id="kanban-count-open">0</span>
+              </div>
+              <div class="space-y-3 min-h-[150px]" id="kanban-col-open">
+                <!-- tickets -->
+              </div>
+            </div>
+
+            <!-- Column 2: Assigned -->
+            <div class="bg-slate-100/70 rounded-xl p-3 border border-slate-200">
+              <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
+                <span class="text-xs font-bold text-slate-700 uppercase flex items-center">
+                  <span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>Fundi Assigned
+                </span>
+                <span class="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold" id="kanban-count-assigned">1</span>
+              </div>
+              <div class="space-y-3 min-h-[150px]" id="kanban-col-assigned">
+                <!-- tickets -->
+              </div>
+            </div>
+
+            <!-- Column 3: In Progress -->
+            <div class="bg-slate-100/70 rounded-xl p-3 border border-slate-200">
+              <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
+                <span class="text-xs font-bold text-slate-700 uppercase flex items-center">
+                  <span class="w-2 h-2 rounded-full bg-amber-500 mr-2"></span>In Progress
+                </span>
+                <span class="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold" id="kanban-count-inprogress">2</span>
+              </div>
+              <div class="space-y-3 min-h-[150px]" id="kanban-col-in_progress">
+                <!-- tickets -->
+              </div>
+            </div>
+
+            <!-- Column 4: Completed -->
+            <div class="bg-slate-100/70 rounded-xl p-3 border border-slate-200">
+              <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
+                <span class="text-xs font-bold text-slate-700 uppercase flex items-center">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>Completed
+                </span>
+                <span class="text-xs bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold" id="kanban-count-completed">1</span>
+              </div>
+              <div class="space-y-3 min-h-[150px]" id="kanban-col-completed">
+                <!-- tickets -->
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ==================================================== -->
+        <!-- VIEW 8: SMS & WHATSAPP COMMUNICATIONS HUB -->
+        <!-- ==================================================== -->
+        <section id="view-communications" class="view-panel hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">SMS & WhatsApp Communications Hub</h2>
+              <p class="text-xs text-slate-500">Dispatch rent reminders, receipts, arrears alerts, and building broadcast notices</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="app.openBroadcastModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="radio" class="w-3.5 h-3.5"></i>
+                <span>Broadcast Building Notice</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Template Dispatcher -->
+          <div class="bg-white rounded-xl p-5 border border-slate-200/90 shadow-xs">
+            <h3 class="font-bold text-slate-800 text-sm mb-3">Quick Direct Message Composer</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Channel</label>
+                <select id="comm-channel-select" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-2">
+                  <option value="sms">SMS Text Message</option>
+                  <option value="whatsapp">WhatsApp Message</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Select Tenant</label>
+                <select id="comm-tenant-select" class="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-2">
+                  <!-- dynamic -->
+                </select>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Template / Message</label>
+                <div class="flex space-x-2">
+                  <input type="text" id="comm-message-text" placeholder="Type custom message or choose template..." class="flex-1 text-xs border border-slate-300 rounded-lg px-3 py-2">
+                  <button onclick="app.sendQuickComm()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg shadow-xs transition">Send</button>
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-100 text-[11px]">
+              <span class="text-slate-400 font-semibold self-center">Templates:</span>
+              <button onclick="app.useTemplate('arrears')" class="px-2 py-1 bg-rose-50 text-rose-700 rounded border border-rose-200 hover:bg-rose-100">Overdue Arrears Notice</button>
+              <button onclick="app.useTemplate('water')" class="px-2 py-1 bg-blue-50 text-blue-700 rounded border border-blue-200 hover:bg-blue-100">Water Tank Maintenance</button>
+              <button onclick="app.useTemplate('inspection')" class="px-2 py-1 bg-amber-50 text-amber-700 rounded border border-amber-200 hover:bg-amber-100">Annual Routine Inspection</button>
+            </div>
+          </div>
+
+          <!-- Sent Messages Log Table -->
+          <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h3 class="font-bold text-slate-800 text-sm">Dispatched Communications Audit Log</h3>
+              <span class="text-xs text-slate-500">Delivered via Africa's Talking / Twilio Gateway</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th class="py-3 px-4">Channel</th>
+                    <th class="py-3 px-4">Recipient</th>
+                    <th class="py-3 px-4">Phone Number</th>
+                    <th class="py-3 px-4">Message Content</th>
+                    <th class="py-3 px-4">Purpose</th>
+                    <th class="py-3 px-4">Date & Time</th>
+                    <th class="py-3 px-4">Delivery Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium" id="comms-table-body">
+                  <!-- Dynamic comms -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================== -->
+        <!-- VIEW 9: LANDLORD STATEMENTS & DISBURSAL (Buildium / AppFolio style) -->
+        <!-- ==================================================== -->
+        <section id="view-landlord" class="view-panel hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">Landlord Remittance & Owner Statements</h2>
+              <p class="text-xs text-slate-500">Calculate gross rent, subtract property management commissions and operating expenses, and print owner payouts</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <select id="statement-property-select" class="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-2 font-medium">
+                <!-- dynamic properties -->
+              </select>
+              <input type="month" id="statement-month-input" value="2026-11" class="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-2 font-medium">
+              <button onclick="app.generateLandlordStatement()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                <span>Generate Statement</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Statement Display Container -->
+          <div id="landlord-statement-container" class="bg-white rounded-2xl border border-slate-200/90 shadow-md p-8 max-w-4xl mx-auto">
+            <!-- Dynamic statement content -->
+          </div>
+        </section>
+
+        <!-- ==================================================== -->
+        <!-- VIEW 10: OPERATING EXPENSES -->
+        <!-- ==================================================== -->
+        <section id="view-expenses" class="view-panel hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">Property Operating Expenses</h2>
+              <p class="text-xs text-slate-500">Track caretaker salaries, security guards, power tokens, borehole maintenance, and repair vouchers</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="app.openAddExpenseModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Record New Expense</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Expenses Table -->
+          <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h3 class="font-bold text-slate-800 text-sm">Disbursed Property Expenses</h3>
+              <span class="text-xs text-slate-500" id="expenses-count-label">5 Recorded Vouchers</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th class="py-3 px-4">Voucher #</th>
+                    <th class="py-3 px-4">Property</th>
+                    <th class="py-3 px-4">Category</th>
+                    <th class="py-3 px-4">Description</th>
+                    <th class="py-3 px-4">Amount (KES)</th>
+                    <th class="py-3 px-4">Paid To</th>
+                    <th class="py-3 px-4">Date</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium" id="expenses-table-body">
+                  <!-- Dynamic expenses -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================== -->
+        <!-- VIEW 11: HIGGSFIELD.AI CINEMATIC TOUR STUDIO -->
+        <!-- ==================================================== -->
+        <section id="view-higgsfield" class="view-panel hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs font-mono font-bold uppercase tracking-wider bg-violet-100 text-violet-800 px-2 py-0.5 rounded border border-violet-200">Higgsfield.ai Cinema Studio &amp; Soul ID</span>
+                <span class="text-xs text-slate-400 font-mono">Physics-Aware Camera Engine</span>
+              </div>
+              <h2 class="text-lg font-bold text-slate-900 mt-1">Cinematic Virtual Tours &amp; AI Staging</h2>
+              <p class="text-xs text-slate-500">Produce 4K drone flythroughs, interior dolly walkthroughs, and move-in inspection proof.</p>
+            </div>
+            <!-- Mode Switcher -->
+            <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-medium">
+              <button id="hg-mode-vacant" onclick="app.setHiggsfieldMode('vacant')" class="px-3 py-1.5 rounded-md font-semibold bg-white text-slate-900 shadow-xs transition">Vacancy Syndication</button>
+              <button id="hg-mode-inspection" onclick="app.setHiggsfieldMode('inspection')" class="px-3 py-1.5 rounded-md font-semibold text-slate-600 hover:text-slate-900 transition">Move-In/Out Proof</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left Config Panel (5 Cols) -->
+            <div class="lg:col-span-5 bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs space-y-4 text-xs">
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Target Property &amp; Unit</label>
+                <select id="hg-unit-select" class="w-full border border-slate-300 rounded-lg p-2.5 font-medium" onchange="app.onHiggsfieldUnitChange(this.value)">
+                  <!-- dynamic units -->
+                </select>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block font-semibold text-slate-700 mb-1">Camera Rig Movement</label>
+                  <select id="hg-camera-motion" class="w-full border border-slate-300 rounded-lg p-2 text-xs" onchange="app.updateHiggsfieldPrompt()">
+                    <option value="dolly_interior" selected>Dolly Living Room Glide</option>
+                    <option value="drone_aerial">Aerial Drone Pullback</option>
+                    <option value="orbit_360">360° Facade Orbit</option>
+                    <option value="pedestal_balcony">Balcony Skyline Reveal</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block font-semibold text-slate-700 mb-1">Staging Aesthetic</label>
+                  <select id="hg-staging-style" class="w-full border border-slate-300 rounded-lg p-2 text-xs" onchange="app.updateHiggsfieldPrompt()">
+                    <option value="scandi">Nordic Teak &amp; Linen</option>
+                    <option value="luxury" selected>Penthouse Marble &amp; Brass</option>
+                    <option value="minimalist">Contemporary Japandi</option>
+                    <option value="coastal">Swahili Coastal Rattan</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Aspect Ratio &amp; Target Channel</label>
+                <div class="grid grid-cols-3 gap-2">
+                  <button type="button" class="aspect-btn active py-1.5 text-center border rounded-lg font-mono font-semibold" data-ratio="16:9" onclick="app.setHiggsfieldRatio(this, '16:9')">16:9 Web</button>
+                  <button type="button" class="aspect-btn py-1.5 text-center border rounded-lg font-mono font-semibold" data-ratio="9:16" onclick="app.setHiggsfieldRatio(this, '9:16')">9:16 Reels</button>
+                  <button type="button" class="aspect-btn py-1.5 text-center border rounded-lg font-mono font-semibold" data-ratio="1:1" onclick="app.setHiggsfieldRatio(this, '1:1')">1:1 Square</button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Generated Higgsfield Cinema Prompt</label>
+                <textarea id="hg-prompt-text" rows="3" readonly class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 font-mono text-[11px] text-slate-700"></textarea>
+              </div>
+
+              <button id="btn-hg-generate" onclick="app.generateHiggsfieldVideo()" class="w-full py-2.5 bg-violet-600 hover:bg-violet-700 active:scale-[0.98] text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center space-x-2">
+                <i data-lucide="video" class="w-4 h-4"></i>
+                <span>Render 4K Cinematic Walkthrough</span>
+              </button>
+            </div>
+
+            <!-- Right Preview & Playback Canvas (7 Cols) -->
+            <div class="lg:col-span-7 bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl flex flex-col justify-between text-white relative overflow-hidden min-h-[380px]">
+              
+              <!-- Video Screen Simulation -->
+              <div id="hg-video-viewport" class="relative flex-1 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden flex flex-col items-center justify-center text-center p-6 group">
+                
+                <!-- HUD Overlay -->
+                <div class="absolute top-3 left-3 right-3 flex items-center justify-between text-[10px] font-mono text-emerald-400 select-none pointer-events-none z-20">
+                  <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse mr-1.5"></span>REC &bull; 4K 60FPS</span>
+                  <span id="hg-hud-coords">CAM: [X: 14.2, Y: 8.4, Z: 2.1] &bull; 35mm f/1.8</span>
+                  <span class="text-violet-300">HIGGSFIELD ENGINE v3</span>
+                </div>
+
+                <!-- Scene Graphic / Video Placeholder -->
+                <div id="hg-viewport-graphic" class="space-y-3 z-10 transition-all duration-500">
+                  <div class="w-16 h-16 rounded-2xl bg-violet-600/20 border border-violet-500/40 text-violet-400 flex items-center justify-center mx-auto shadow-lg shadow-violet-500/10">
+                    <i data-lucide="play" class="w-8 h-8 ml-1"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-sm text-white" id="hg-preview-title">Kilimani Royal Heights &bull; Unit A202 Walkthrough</h4>
+                    <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto" id="hg-preview-desc">Click "Render 4K Cinematic Walkthrough" to generate physics-aware drone and interior tour footage.</p>
+                  </div>
+                </div>
+
+                <!-- Live Render Progress Bar -->
+                <div id="hg-render-bar-container" class="absolute inset-x-8 bottom-6 hidden z-30 space-y-1 text-xs">
+                  <div class="flex justify-between text-[11px] font-mono text-violet-300">
+                    <span id="hg-render-step">Generating frames with Cinema Studio...</span>
+                    <span id="hg-render-pct">0%</span>
+                  </div>
+                  <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div id="hg-render-bar" class="bg-gradient-to-r from-violet-500 to-emerald-400 h-full w-0 transition-all duration-100"></div>
+                  </div>
+                </div>
+
+                <!-- Gridlines Background -->
+                <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:32px_32px] opacity-25"></div>
+              </div>
+
+              <!-- Gallery Bar -->
+              <div class="mt-4 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+                <span class="font-mono text-[11px]">Recent Renders:</span>
+                <div class="flex space-x-2">
+                  <button onclick="app.loadSampleTour('kilimani')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition">Kilimani Balcony</button>
+                  <button onclick="app.loadSampleTour('nyali')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition">Nyali Ocean Breeze</button>
+                  <button onclick="app.loadSampleTour('westlands')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition">Westlands Executive</button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ==================================================== -->
+        <!-- VIEW 12: ROLES & SAAS USER MANAGEMENT (RBAC) -->
+        <!-- ==================================================== -->
+        <section id="view-users" class="view-panel hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs font-mono font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-200">SaaS Multi-Tenant RBAC</span>
+                <span class="text-xs text-slate-400 font-mono">Role-Based Access Control</span>
+              </div>
+              <h2 class="text-lg font-bold text-slate-900 mt-1">Users &amp; Role Permissions Directory</h2>
+              <p class="text-xs text-slate-500">Manage platform super admins, agency managers, field caretakers, property owners, and tenant portal logins.</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="app.openAddUserModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                <span>Invite SaaS User</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Role Cards Grid -->
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-xs">
+              <span class="font-bold text-slate-900 flex items-center">👑 Super Admin</span>
+              <p class="text-[11px] text-slate-500 mt-1">Global SaaS governance, billing subscriptions, all agencies.</p>
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-xs">
+              <span class="font-bold text-slate-900 flex items-center">🏢 Property Manager</span>
+              <p class="text-[11px] text-slate-500 mt-1">Rent invoicing, M-Pesa STK push, vendor dispatch, owner payout.</p>
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-xs">
+              <span class="font-bold text-slate-900 flex items-center">🛠️ Site Caretaker</span>
+              <p class="text-[11px] text-slate-500 mt-1">Mobile field tasks: log water meters, report unit maintenance.</p>
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-xs">
+              <span class="font-bold text-slate-900 flex items-center">📊 Landlord / Owner</span>
+              <p class="text-[11px] text-slate-500 mt-1">Read-only portfolio metrics &amp; monthly remittance statements.</p>
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-xs">
+              <span class="font-bold text-slate-900 flex items-center">👤 Resident Tenant</span>
+              <p class="text-[11px] text-slate-500 mt-1">Self-service billing, M-Pesa payments, and repair tickets.</p>
+            </div>
+          </div>
+
+          <!-- SaaS Users Table -->
+          <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h3 class="font-bold text-slate-800 text-sm">Provisioned System Users</h3>
+              <span class="text-xs text-slate-500" id="users-count-label">5 SaaS Users</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th class="py-3 px-4">User Name</th>
+                    <th class="py-3 px-4">Email &amp; Phone</th>
+                    <th class="py-3 px-4">Assigned Role</th>
+                    <th class="py-3 px-4">Property Scope</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium" id="users-table-body">
+                  <!-- Dynamic users -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Permissions Matrix Table -->
+          <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs p-5">
+            <h3 class="font-bold text-slate-800 text-sm mb-1">Role Permissions Matrix</h3>
+            <p class="text-xs text-slate-500 mb-4">Standard SaaS capability boundaries enforced at API and UI levels</p>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-600 font-semibold border-y text-[11px]">
+                  <tr>
+                    <th class="py-2.5 px-3">System Capability</th>
+                    <th class="py-2.5 px-3 text-center">Super Admin</th>
+                    <th class="py-2.5 px-3 text-center">Property Manager</th>
+                    <th class="py-2.5 px-3 text-center">Caretaker</th>
+                    <th class="py-2.5 px-3 text-center">Landlord</th>
+                    <th class="py-2.5 px-3 text-center">Tenant</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                  <tr>
+                    <td class="py-2 px-3 font-semibold">Properties &amp; Units Management</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">&check; Full</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">&check; Full</td>
+                    <td class="py-2 px-3 text-center text-slate-400">&minus;</td>
+                    <td class="py-2 px-3 text-center text-slate-600">View Assigned</td>
+                    <td class="py-2 px-3 text-center text-slate-400">&minus;</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 px-3 font-semibold">Rent Invoicing &amp; Automated Billing</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">&check; Full</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">&check; Full</td>
+                    <td class="py-2 px-3 text-center text-slate-400">&minus;</td>
+                    <td class="py-2 px-3 text-center text-slate-600">View Invoices</td>
+                    <td class="py-2 px-3 text-center text-slate-600">View Own</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 px-3 font-semibold">M-Pesa STK &amp; Bank Payments</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">&check; Full</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">&check; Full</td>
+                    <td class="py-2 px-3 text-center text-slate-400">&minus;</td>
+                    <td class="py-2 px-3 text-center text-slate-600">View Only</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">Lipa Na M-Pesa</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 px-3 font-semibold">Water Meter Sub-Meter Logging</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">&check; Full</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">&check; Full</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">&check; Enter Readings</td>
+                    <td class="py-2 px-3 text-center text-slate-400">&minus;</td>
+                    <td class="py-2 px-3 text-center text-slate-400">&minus;</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 px-3 font-semibold">Maintenance &amp; Work Orders</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">&check; Full</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">&check; Dispatch</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">&check; Update Status</td>
+                    <td class="py-2 px-3 text-center text-slate-600">View Expenses</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">Report Issues</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 px-3 font-semibold">Landlord Remittance Statements</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">&check; Full</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">&check; Generate &amp; Disburse</td>
+                    <td class="py-2 px-3 text-center text-slate-400">&minus;</td>
+                    <td class="py-2 px-3 text-center text-emerald-600 font-bold">&check; View Own</td>
+                    <td class="py-2 px-3 text-center text-slate-400">&minus;</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================== -->
+        <!-- VIEW 13: TENANT SELF-SERVICE PORTAL VIEW -->
+        <!-- ==================================================== -->
+        <section id="view-tenant-portal" class="view-panel hidden space-y-6">
+          <div class="bg-gradient-to-r from-emerald-800 to-teal-900 rounded-2xl p-6 text-white shadow-lg">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <span class="text-xs uppercase bg-emerald-500/20 text-emerald-300 font-extrabold px-2.5 py-0.5 rounded border border-emerald-400/30">Resident Self-Service Portal</span>
+                <h2 class="text-2xl font-bold mt-2" id="resident-portal-name">Welcome back, Kariuki James!</h2>
+                <p class="text-xs text-emerald-100 mt-0.5">Unit A101 &bull; Kilimani Royal Heights, Nairobi</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs text-emerald-200">Simulate logged-in tenant:</span>
+                <select id="resident-switch-select" class="text-xs bg-slate-900/80 border border-emerald-400/40 rounded-lg px-2.5 py-1.5 text-white font-medium" onchange="app.switchResident(this.value)">
+                  <!-- dynamic tenants -->
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resident Account Summary Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+              <span class="text-xs text-slate-500 font-medium">Current Account Balance</span>
+              <p class="text-2xl font-extrabold text-slate-800 mt-1" id="resident-portal-balance">KES 0.00</p>
+              <div class="mt-2 text-xs font-semibold text-emerald-600 flex items-center">
+                <i data-lucide="check-circle-2" class="w-4 h-4 mr-1"></i>
+                <span>All invoices settled</span>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+              <span class="text-xs text-slate-500 font-medium">Monthly Rent & Utilities</span>
+              <p class="text-2xl font-extrabold text-slate-800 mt-1" id="resident-portal-rent">KES 65,000</p>
+              <p class="text-xs text-slate-500 mt-2">Due on 5th of every month</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+              <div>
+                <span class="text-xs text-slate-500 font-medium">Quick Self-Service Action</span>
+                <p class="text-xs text-slate-600 mt-1">Make instant payment or request maintenance assistance</p>
+              </div>
+              <div class="flex space-x-2 mt-3">
+                <button onclick="app.openMpesaModal()" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1">
+                  <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+                  <span>Pay with M-Pesa</span>
+                </button>
+                <button onclick="app.openNewTicketModal()" class="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1">
+                  <i data-lucide="wrench" class="w-3.5 h-3.5"></i>
+                  <span>Report Issue</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resident Invoices & Receipts -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-xs p-5">
+              <h3 class="font-bold text-slate-800 text-sm mb-3">My Invoices</h3>
+              <div class="divide-y divide-slate-100" id="resident-invoices-list">
+                <!-- dynamic -->
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 shadow-xs p-5">
+              <h3 class="font-bold text-slate-800 text-sm mb-3">My Payment Receipts</h3>
+              <div class="divide-y divide-slate-100" id="resident-payments-list">
+                <!-- dynamic -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ==================================================== -->
+  <!-- MODALS -->
+  <!-- ==================================================== -->
+
+  <!-- MODAL: M-Pesa STK Push Simulator -->
+  <div id="modal-mpesa" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 relative overflow-hidden">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+            <i data-lucide="smartphone" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-800 text-base">Lipa Na M-Pesa STK Push</h3>
+            <p class="text-[11px] text-slate-500">Safaricom Daraja API Simulator</p>
+          </div>
+        </div>
+        <button onclick="app.closeModal('modal-mpesa')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-mpesa-stk" onsubmit="app.handleMpesaSubmit(event)" class="mt-4 space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Select Tenant / Unit</label>
+          <select id="mpesa-tenant-select" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs font-medium" onchange="app.onMpesaTenantChange(this.value)">
+            <!-- dynamic -->
+          </select>
+        </div>
+
+        <div id="mpesa-invoice-container">
+          <label class="block font-semibold text-slate-700 mb-1">Select Outstanding Invoice</label>
+          <select id="mpesa-invoice-select" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs font-medium" onchange="app.onMpesaInvoiceChange(this.value)">
+            <!-- dynamic -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Tenant Phone Number (Safaricom)</label>
+          <input type="text" id="mpesa-phone-input" placeholder="+2547XXXXXXXX" required class="w-full border border-slate-300 rounded-lg p-2.5 font-mono text-xs">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Amount to Pay (KES)</label>
+          <input type="number" id="mpesa-amount-input" required class="w-full border border-slate-300 rounded-lg p-2.5 font-bold text-slate-800 text-sm">
+        </div>
+
+        <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 text-[11px] text-emerald-800">
+          <p class="font-semibold">Simulated Flow:</p>
+          <p class="mt-0.5">Clicking "Send STK Prompt" simulates sending an instant USSD popup to the tenant's handset. Upon acceptance, payment code (e.g. QGH...) is issued and SMS receipt delivered.</p>
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-2">
+          <button type="button" onclick="app.closeModal('modal-mpesa')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
+          <button type="submit" id="btn-submit-stk" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md transition flex items-center space-x-1.5">
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            <span>Send STK Prompt</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Record Bank / Manual Payment -->
+  <div id="modal-manual-payment" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 class="font-bold text-slate-800 text-base">Record Bank / Cash Payment</h3>
+        <button onclick="app.closeModal('modal-manual-payment')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-manual-payment" onsubmit="app.handleManualPaymentSubmit(event)" class="mt-4 space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Select Tenant</label>
+          <select id="pay-manual-tenant" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs font-medium" onchange="app.onManualTenantChange(this.value)">
+            <!-- dynamic -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Invoice</label>
+          <select id="pay-manual-invoice" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs font-medium">
+            <!-- dynamic -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Payment Method</label>
+            <select id="pay-manual-method" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs">
+              <option value="Bank Transfer">Bank Transfer (EFT/RTGS)</option>
+              <option value="Direct Deposit">Cash Deposit at Branch</option>
+              <option value="Cash">Cash (Caretaker Handover)</option>
+              <option value="Cheque">Bankers Cheque</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Amount (KES)</label>
+            <input type="number" id="pay-manual-amount" required class="w-full border border-slate-300 rounded-lg p-2.5 font-bold">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Bank Reference Code / Cheque #</label>
+          <input type="text" id="pay-manual-ref" placeholder="e.g. KCB-TRX-882901" class="w-full border border-slate-300 rounded-lg p-2.5 font-mono">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Notes</label>
+          <input type="text" id="pay-manual-notes" placeholder="Optional reference notes" class="w-full border border-slate-300 rounded-lg p-2.5">
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-2">
+          <button type="button" onclick="app.closeModal('modal-manual-payment')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold shadow-md transition">Save & Issue Receipt</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Record Water Meter Reading -->
+  <div id="modal-water-reading" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 class="font-bold text-slate-800 text-base">Record Water Meter Reading</h3>
+        <button onclick="app.closeModal('modal-water-reading')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-water-reading" onsubmit="app.handleWaterSubmit(event)" class="mt-4 space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Select Unit</label>
+          <select id="water-unit-select" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs font-medium" onchange="app.onWaterUnitChange(this.value)">
+            <!-- dynamic -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Billing Month</label>
+            <input type="month" id="water-month-input" value="2026-11" required class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Reading Date</label>
+            <input type="date" id="water-date-input" required class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Previous Reading (m³)</label>
+            <input type="number" step="0.1" id="water-prev-input" required class="w-full border border-slate-300 rounded-lg p-2.5 font-mono" oninput="app.calcWaterCost()">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Current Reading (m³)</label>
+            <input type="number" step="0.1" id="water-curr-input" required class="w-full border border-slate-300 rounded-lg p-2.5 font-mono" oninput="app.calcWaterCost()">
+          </div>
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+          <div>
+            <span class="text-slate-500">Units Consumed:</span>
+            <strong id="water-calc-units" class="ml-1 text-slate-800">0 m³</strong>
+          </div>
+          <div>
+            <span class="text-slate-500">Calculated Cost:</span>
+            <strong id="water-calc-cost" class="ml-1 text-emerald-600 font-bold">KES 0.00</strong>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-2">
+          <button type="button" onclick="app.closeModal('modal-water-reading')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md transition">Save Reading</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Add Maintenance Ticket -->
+  <div id="modal-maintenance-ticket" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 class="font-bold text-slate-800 text-base">Create Maintenance Work Order</h3>
+        <button onclick="app.closeModal('modal-maintenance-ticket')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-ticket" onsubmit="app.handleTicketSubmit(event)" class="mt-4 space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Issue Title</label>
+          <input type="text" id="ticket-title" placeholder="e.g. Master bathroom tap leaking" required class="w-full border border-slate-300 rounded-lg p-2.5 font-medium">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Property & Unit</label>
+            <select id="ticket-unit-select" required class="w-full border border-slate-300 rounded-lg p-2.5">
+              <!-- dynamic -->
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Category</label>
+            <select id="ticket-category" class="w-full border border-slate-300 rounded-lg p-2.5">
+              <option value="Plumbing">Plumbing</option>
+              <option value="Electrical">Electrical</option>
+              <option value="HVAC">HVAC / Solar Water</option>
+              <option value="Carpentry">Carpentry & Locks</option>
+              <option value="Painting">Painting & Masonry</option>
+              <option value="Appliance">Appliance / Cooker</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Priority</label>
+            <select id="ticket-priority" class="w-full border border-slate-300 rounded-lg p-2.5">
+              <option value="emergency">🚨 Emergency (Immediate dispatch)</option>
+              <option value="high">High Priority</option>
+              <option value="medium" selected>Medium Priority</option>
+              <option value="low">Low / Routine</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Estimated Cost (KES)</label>
+            <input type="number" id="ticket-est-cost" placeholder="0" class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Assign Contractor / Fundi</label>
+          <input type="text" id="ticket-contractor" placeholder="e.g. QuickFix Plumbers (Fundi Juma)" class="w-full border border-slate-300 rounded-lg p-2.5">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Description of Issue</label>
+          <textarea id="ticket-desc" rows="3" placeholder="Provide details on the fault..." required class="w-full border border-slate-300 rounded-lg p-2.5"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-2">
+          <button type="button" onclick="app.closeModal('modal-maintenance-ticket')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold shadow-md transition">Create Work Order</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Printable Receipt & Invoice Viewer -->
+  <div id="modal-printable" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 no-print">
+        <h3 class="font-bold text-slate-800 text-base" id="printable-modal-title">Official Document</h3>
+        <div class="flex items-center space-x-2">
+          <button onclick="window.print()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-1">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span>Print / Save PDF</span>
+          </button>
+          <button onclick="app.closeModal('modal-printable')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="printable-area" class="mt-4">
+        <!-- Injected receipt or invoice -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Add Property -->
+  <div id="modal-add-property" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 class="font-bold text-slate-800 text-base">Add New Property</h3>
+        <button onclick="app.closeModal('modal-add-property')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-add-property" onsubmit="app.handleAddPropertySubmit(event)" class="mt-4 space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Property Name</label>
+          <input type="text" id="prop-name" placeholder="e.g. Parklands Heights Apartments" required class="w-full border border-slate-300 rounded-lg p-2.5">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Property Type</label>
+            <select id="prop-type" class="w-full border border-slate-300 rounded-lg p-2.5">
+              <option value="Residential Apartments">Residential Apartments</option>
+              <option value="Commercial Plaza">Commercial Plaza</option>
+              <option value="Mixed Commercial & Residential">Mixed Commercial</option>
+              <option value="Gated Townhouses">Gated Townhouses</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">City</label>
+            <input type="text" id="prop-city" value="Nairobi" required class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Physical Address</label>
+          <input type="text" id="prop-address" placeholder="Road, Neighborhood" required class="w-full border border-slate-300 rounded-lg p-2.5">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Landlord / Owner Name</label>
+            <input type="text" id="prop-landlord" placeholder="Owner Full Name" required class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Commission Fee (%)</label>
+            <input type="number" step="0.5" id="prop-fee" value="10.0" required class="w-full border border-slate-300 rounded-lg p-2.5 font-bold">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">M-Pesa Paybill / Till</label>
+            <input type="text" id="prop-paybill" placeholder="e.g. 522522 / Acc: PKL-01" class="w-full border border-slate-300 rounded-lg p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Bank Account</label>
+            <input type="text" id="prop-bank" placeholder="Bank Name & Acc No" class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-3">
+          <button type="button" onclick="app.closeModal('modal-add-property')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md transition">Save Property</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Add Unit -->
+  <div id="modal-add-unit" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 class="font-bold text-slate-800 text-base">Add Unit to Property</h3>
+        <button onclick="app.closeModal('modal-add-unit')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-add-unit" onsubmit="app.handleAddUnitSubmit(event)" class="mt-4 space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Property</label>
+          <select id="unit-prop-select" required class="w-full border border-slate-300 rounded-lg p-2.5">
+            <!-- dynamic -->
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Unit Number</label>
+            <input type="text" id="unit-number-input" placeholder="e.g. B204" required class="w-full border border-slate-300 rounded-lg p-2.5 font-bold">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Floor</label>
+            <input type="text" id="unit-floor-input" placeholder="e.g. 2nd Floor" class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Unit Type</label>
+          <select id="unit-type-input" class="w-full border border-slate-300 rounded-lg p-2.5">
+            <option value="Studio Apartment">Studio Apartment</option>
+            <option value="1-Bedroom Executive">1-Bedroom Executive</option>
+            <option value="2-Bedroom Master Ensuite" selected>2-Bedroom Master Ensuite</option>
+            <option value="3-Bedroom with DSQ">3-Bedroom with DSQ</option>
+            <option value="4-Bedroom Penthouse">4-Bedroom Penthouse</option>
+            <option value="Commercial Office Space">Commercial Office Space</option>
+            <option value="Ground Floor Retail Shop">Ground Floor Retail Shop</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Base Rent (KES)</label>
+            <input type="number" id="unit-rent-input" placeholder="60000" required class="w-full border border-slate-300 rounded-lg p-2.5 font-bold">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Service (KES)</label>
+            <input type="number" id="unit-service-input" value="3500" class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Garbage (KES)</label>
+            <input type="number" id="unit-garbage-input" value="500" class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Water Meter Number</label>
+          <input type="text" id="unit-meter-input" placeholder="e.g. WM-KIL-204" class="w-full border border-slate-300 rounded-lg p-2.5 font-mono">
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-3">
+          <button type="button" onclick="app.closeModal('modal-add-unit')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md transition">Add Unit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Register Tenant -->
+  <div id="modal-add-tenant" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 class="font-bold text-slate-800 text-base">Register New Tenant</h3>
+        <button onclick="app.closeModal('modal-add-tenant')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-add-tenant" onsubmit="app.handleAddTenantSubmit(event)" class="mt-4 space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Full Legal Name</label>
+          <input type="text" id="tenant-name-input" placeholder="First, Middle, Surname" required class="w-full border border-slate-300 rounded-lg p-2.5 font-medium">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Phone (M-Pesa enabled)</label>
+            <input type="text" id="tenant-phone-input" placeholder="+2547XXXXXXXX" required class="w-full border border-slate-300 rounded-lg p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">National ID / Passport</label>
+            <input type="text" id="tenant-idnum-input" placeholder="e.g. 29384756" required class="w-full border border-slate-300 rounded-lg p-2.5 font-mono">
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Email Address</label>
+          <input type="email" id="tenant-email-input" placeholder="tenant@example.com" class="w-full border border-slate-300 rounded-lg p-2.5">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Emergency Contact Name</label>
+            <input type="text" id="tenant-emg-name" placeholder="Relative / Kin" class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Emergency Contact Phone</label>
+            <input type="text" id="tenant-emg-phone" placeholder="+2547XXXXXXXX" class="w-full border border-slate-300 rounded-lg p-2.5 font-mono">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-3">
+          <button type="button" onclick="app.closeModal('modal-add-tenant')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md transition">Register Tenant</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Invite SaaS User -->
+  <div id="modal-add-user" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 class="font-bold text-slate-800 text-base">Invite / Provision SaaS User</h3>
+        <button onclick="app.closeModal('modal-add-user')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-add-user" onsubmit="app.handleAddUserSubmit(event)" class="mt-4 space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">User Full Name</label>
+          <input type="text" id="user-name-input" placeholder="e.g. Samuel Kiprop" required class="w-full border border-slate-300 rounded-lg p-2.5 font-medium">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Email Address (Login)</label>
+          <input type="email" id="user-email-input" placeholder="user@company.co.ke" required class="w-full border border-slate-300 rounded-lg p-2.5">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Phone Number</label>
+            <input type="text" id="user-phone-input" placeholder="+2547XXXXXXXX" class="w-full border border-slate-300 rounded-lg p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">SaaS Role</label>
+            <select id="user-role-input" class="w-full border border-slate-300 rounded-lg p-2.5 font-medium">
+              <option value="property_manager">Property Manager</option>
+              <option value="caretaker">Site Caretaker</option>
+              <option value="landlord">Landlord / Owner</option>
+              <option value="super_admin">Super Admin</option>
+              <option value="tenant">Resident Tenant</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Scoped Property (Optional)</label>
+          <select id="user-prop-input" class="w-full border border-slate-300 rounded-lg p-2.5">
+            <option value="">-- All Properties (Global Access) --</option>
+            <!-- dynamic properties -->
+          </select>
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-3">
+          <button type="button" onclick="app.closeModal('modal-add-user')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold shadow-md transition">Provision User</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Authentication & Role Switcher (Real Server-Enforced RBAC) -->
+  <div id="modal-auth-login" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800">
+        <div>
+          <h3 class="font-bold text-base tracking-tight">SaaS Role Authentication &amp; Sessions</h3>
+          <p class="text-xs text-slate-500">Server-enforced access boundaries with signed session tokens</p>
+        </div>
+        <button onclick="app.closeModal('modal-auth-login')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Quick Role Switcher (Issues Real Server Session Tokens) -->
+      <div class="mt-4">
+        <label class="block text-xs font-semibold text-slate-700 dark:text-zinc-300 uppercase tracking-wider mb-2">Switch Active Persona (Instant Real Token Auth)</label>
+        <div class="space-y-2">
+          
+          <button type="button" onclick="app.switchAuthAccount('property_manager')" class="w-full text-left p-3 rounded-lg border border-slate-200 dark:border-zinc-800 hover:border-slate-400 dark:hover:border-zinc-600 bg-slate-50/60 dark:bg-zinc-800/40 hover:bg-slate-100 transition flex items-start justify-between">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="font-bold text-xs text-slate-900 dark:text-zinc-100">Patrick Ndegwa</span>
+                <span class="text-[10px] font-semibold bg-slate-200 dark:bg-zinc-700 text-slate-800 dark:text-zinc-200 px-1.5 py-0.2 rounded">Property Manager</span>
+                <span class="text-[10px] text-emerald-700 font-mono">Full Ops</span>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-0.5">ndegwa@crownpeak.co.ke &bull; Rent roll, leases, dispatches, remittances</p>
+            </div>
+            <span class="text-xs font-semibold text-emerald-700">Select &rarr;</span>
+          </button>
+
+          <button type="button" onclick="app.switchAuthAccount('super_admin')" class="w-full text-left p-3 rounded-lg border border-slate-200 dark:border-zinc-800 hover:border-slate-400 dark:hover:border-zinc-600 bg-slate-50/60 dark:bg-zinc-800/40 hover:bg-slate-100 transition flex items-start justify-between">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="font-bold text-xs text-slate-900 dark:text-zinc-100">Sarah Cherono</span>
+                <span class="text-[10px] font-semibold bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300 px-1.5 py-0.2 rounded">Super Admin</span>
+                <span class="text-[10px] text-purple-700 font-mono">Master</span>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-0.5">admin@bomasphere.co.ke &bull; User provisioning, audit trails, multi-tenant</p>
+            </div>
+            <span class="text-xs font-semibold text-purple-700">Select &rarr;</span>
+          </button>
+
+          <button type="button" onclick="app.switchAuthAccount('caretaker')" class="w-full text-left p-3 rounded-lg border border-slate-200 dark:border-zinc-800 hover:border-slate-400 dark:hover:border-zinc-600 bg-slate-50/60 dark:bg-zinc-800/40 hover:bg-slate-100 transition flex items-start justify-between">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="font-bold text-xs text-slate-900 dark:text-zinc-100">John Otieno</span>
+                <span class="text-[10px] font-semibold bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 px-1.5 py-0.2 rounded">Site Caretaker</span>
+                <span class="text-[10px] text-amber-700 font-mono">Field Ops Only</span>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-0.5">otieno.caretaker@kilimaniheights.ke &bull; Water meters, tickets (Ledgers blocked)</p>
+            </div>
+            <span class="text-xs font-semibold text-blue-700">Select &rarr;</span>
+          </button>
+
+          <button type="button" onclick="app.switchAuthAccount('landlord')" class="w-full text-left p-3 rounded-lg border border-slate-200 dark:border-zinc-800 hover:border-slate-400 dark:hover:border-zinc-600 bg-slate-50/60 dark:bg-zinc-800/40 hover:bg-slate-100 transition flex items-start justify-between">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="font-bold text-xs text-slate-900 dark:text-zinc-100">Dr. Esther Wambui Ndung'u</span>
+                <span class="text-[10px] font-semibold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 px-1.5 py-0.2 rounded">Landlord</span>
+                <span class="text-[10px] text-amber-700 font-mono">Scoped: Riverside</span>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-0.5">esther.ndungu@gmail.com &bull; Owner payout statements for Riverside Court only</p>
+            </div>
+            <span class="text-xs font-semibold text-amber-700">Select &rarr;</span>
+          </button>
+
+          <button type="button" onclick="app.switchAuthAccount('tenant')" class="w-full text-left p-3 rounded-lg border border-slate-200 dark:border-zinc-800 hover:border-slate-400 dark:hover:border-zinc-600 bg-slate-50/60 dark:bg-zinc-800/40 hover:bg-slate-100 transition flex items-start justify-between">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="font-bold text-xs text-slate-900 dark:text-zinc-100">Kariuki James Mwangi</span>
+                <span class="text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 px-1.5 py-0.2 rounded">Resident Tenant</span>
+                <span class="text-[10px] text-emerald-700 font-mono">Unit A101</span>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-0.5">james.kariuki@techke.com &bull; Self-service invoices, M-Pesa receipts, work orders</p>
+            </div>
+            <span class="text-xs font-semibold text-emerald-700">Select &rarr;</span>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Password Login Form -->
+      <form id="form-auth-login" onsubmit="app.handlePasswordLogin(event)" class="mt-4 pt-4 border-t border-slate-200 dark:border-zinc-800 space-y-3 text-xs">
+        <label class="block text-xs font-semibold text-slate-700 dark:text-zinc-300 uppercase tracking-wider">Or Login with Credentials</label>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-600 text-[11px] mb-1">Work Email</label>
+            <input type="email" id="login-email-input" placeholder="admin@bomasphere.co.ke" value="admin@bomasphere.co.ke" required class="w-full border border-slate-300 dark:border-zinc-700 rounded p-2 text-xs">
+          </div>
+          <div>
+            <label class="block text-slate-600 text-[11px] mb-1">Password</label>
+            <input type="password" id="login-password-input" placeholder="••••••••" value="password123" required class="w-full border border-slate-300 dark:border-zinc-700 rounded p-2 text-xs">
+          </div>
+        </div>
+        <div class="flex items-center justify-between pt-1">
+          <span class="text-[11px] text-slate-500">Default password: <code class="font-mono bg-slate-100 dark:bg-zinc-800 px-1 py-0.5 rounded">password123</code></span>
+          <button type="submit" class="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded font-bold text-xs transition">
+            Sign In
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Core Frontend Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
+
