@@ -140,6 +140,26 @@
           <span>Tenants &amp; Leases</span>
         </button>
 
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="leases">
+          <i data-lucide="file-signature" class="w-4 h-4"></i>
+          <span>Digital Leases &amp; E-Sign</span>
+        </button>
+
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="inspections">
+          <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+          <span>Move-In/Exit Audits</span>
+        </button>
+
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="visitor-passes">
+          <i data-lucide="shield-alert" class="w-4 h-4"></i>
+          <span>Visitor Gate Passes</span>
+        </button>
+
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="amenities">
+          <i data-lucide="palmtree" class="w-4 h-4"></i>
+          <span>Estate Amenities</span>
+        </button>
+
         <div class="nav-section-title">Billing &amp; Finance</div>
 
         <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2" data-view="invoices">
@@ -264,6 +284,20 @@
             <span class="text-[11px] text-slate-500" id="header-user-role">(Property Manager)</span>
             <button onclick="app.logout()" class="ml-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition" title="Sign Out">
               <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+          <!-- Multi-Currency Selector & Diaspora ROI -->
+          <div class="flex items-center space-x-1.5">
+            <select id="currency-selector" onchange="app.setCurrency(this.value)" class="text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-md px-2 py-1 text-slate-800 dark:text-zinc-100 font-bold cursor-pointer" title="Switch Currency">
+              <option value="KES" selected>KES (KSh)</option>
+              <option value="USD">USD ($)</option>
+              <option value="GBP">GBP (£)</option>
+              <option value="EUR">EUR (€)</option>
+            </select>
+            <button onclick="app.openDiasporaRoiModal()" class="hidden sm:inline-flex items-center space-x-1 py-1 px-2.5 rounded-md border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-700 text-xs font-semibold transition" title="Diaspora Landlord Investment ROI">
+              <i data-lucide="trending-up" class="w-3.5 h-3.5 text-emerald-500"></i>
+              <span>Diaspora ROI</span>
             </button>
           </div>
 
@@ -1434,6 +1468,177 @@
         </section>
 
         <!-- ==================================================== -->
+        <!-- VIEW: DIGITAL LEASES & E-SIGNATURES (MODULE 1) -->
+        <!-- ==================================================== -->
+        <section id="view-leases" class="view-panel hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-800 dark:text-white">Digital Lease Agreements &amp; E-Signatures</h2>
+              <p class="text-xs text-slate-500 dark:text-zinc-400">Kenyan Landlord &amp; Tenant Act compliant digital lease contracts with verifiable cryptographic hashes</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="app.refreshAllData()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Refresh Agreements</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/90 dark:border-zinc-800 shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 font-semibold border-b border-slate-200 dark:border-zinc-700 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th class="py-3 px-4">Agreement Code</th>
+                    <th class="py-3 px-4">Property &amp; Unit</th>
+                    <th class="py-3 px-4">Tenant Name</th>
+                    <th class="py-3 px-4">Monthly Rent</th>
+                    <th class="py-3 px-4">Contract Period</th>
+                    <th class="py-3 px-4">Tenant E-Sign</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 font-medium" id="leases-table-body">
+                  <!-- dynamic lease agreements -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================== -->
+        <!-- VIEW: MOVE-IN / MOVE-OUT INSPECTIONS (MODULE 2) -->
+        <!-- ==================================================== -->
+        <section id="view-inspections" class="view-panel hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-800 dark:text-white">Move-In / Move-Out Condition Audits &amp; Deposit Settlement</h2>
+              <p class="text-xs text-slate-500 dark:text-zinc-400">Room-by-room condition inspection audits, photo damage logging, and automated security deposit refund settlements</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="app.openNewInspectionModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                <span>Log New Inspection</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/90 dark:border-zinc-800 shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 font-semibold border-b border-slate-200 dark:border-zinc-700 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th class="py-3 px-4">Inspection Type</th>
+                    <th class="py-3 px-4">Unit &amp; Property</th>
+                    <th class="py-3 px-4">Inspector / Date</th>
+                    <th class="py-3 px-4">Deposit Held</th>
+                    <th class="py-3 px-4">Deductions (Damages + Arrears)</th>
+                    <th class="py-3 px-4">Net Deposit Refund</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 font-medium" id="inspections-table-body">
+                  <!-- dynamic inspections -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================== -->
+        <!-- VIEW: GATED ESTATE VISITOR PASSES (MODULE 3) -->
+        <!-- ==================================================== -->
+        <section id="view-visitor-passes" class="view-panel hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-800 dark:text-white">Gated Estate Visitor Passes &amp; QR Gate Security</h2>
+              <p class="text-xs text-slate-500 dark:text-zinc-400">Resident guest entry passes with 6-digit gate PINs, QR security codes, and live barrier check-in/out logging</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="app.openGateSecurityScannerModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="scan" class="w-3.5 h-3.5"></i>
+                <span>Gate Guard Scanner</span>
+              </button>
+              <button onclick="app.openNewVisitorPassModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="ticket" class="w-3.5 h-3.5"></i>
+                <span>Issue Visitor Pass</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/90 dark:border-zinc-800 shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 font-semibold border-b border-slate-200 dark:border-zinc-700 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th class="py-3 px-4">Gate PIN / Code</th>
+                    <th class="py-3 px-4">Unit &amp; Host</th>
+                    <th class="py-3 px-4">Visitor Details</th>
+                    <th class="py-3 px-4">Vehicle Plate</th>
+                    <th class="py-3 px-4">Valid Date &amp; Slot</th>
+                    <th class="py-3 px-4">Gate Status</th>
+                    <th class="py-3 px-4 text-right">Security Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 font-medium" id="visitor-passes-table-body">
+                  <!-- dynamic visitor passes -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================== -->
+        <!-- VIEW: SHARED ESTATE AMENITIES (MODULE 5) -->
+        <!-- ==================================================== -->
+        <section id="view-amenities" class="view-panel hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-800 dark:text-white">Shared Estate Amenities &amp; Clubhouse Bookings</h2>
+              <p class="text-xs text-slate-500 dark:text-zinc-400">Reserve luxury facilities across estates with automatic conflict prevention and automated billing</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="app.openNewAmenityBookingModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
+                <span>Reserve Facility</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Amenities Showcase Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="amenities-showcase-grid">
+            <!-- dynamic amenity cards -->
+          </div>
+
+          <!-- Active Bookings Ledger -->
+          <div class="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/90 dark:border-zinc-800 shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
+              <h3 class="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-zinc-200">Scheduled Reservations</h3>
+              <span class="text-xs text-emerald-600 dark:text-emerald-400 font-mono">Live Booking Calendar</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 font-semibold border-b border-slate-200 dark:border-zinc-700 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th class="py-3 px-4">Booking Ref</th>
+                    <th class="py-3 px-4">Amenity</th>
+                    <th class="py-3 px-4">Reserved By</th>
+                    <th class="py-3 px-4">Date &amp; Hours</th>
+                    <th class="py-3 px-4">Total Fee</th>
+                    <th class="py-3 px-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 font-medium" id="amenity-bookings-table-body">
+                  <!-- dynamic bookings -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================== -->
         <!-- VIEW 13: TENANT SELF-SERVICE PORTAL VIEW -->
         <!-- ==================================================== -->
         <section id="view-tenant-portal" class="view-panel hidden space-y-6">
@@ -2249,6 +2454,363 @@
       <div class="py-4 space-y-3 text-xs" id="etims-cert-content">
         <!-- dynamic eTIMS QR & details -->
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Digital Lease Agreements & E-Signature Pad (Module 1) -->
+  <div id="modal-lease-sign" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative max-h-[92vh] overflow-y-auto">
+      <button onclick="app.closeModal('modal-lease-sign')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center space-x-3 pb-4 border-b border-slate-100 dark:border-zinc-800">
+        <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold">
+          <i data-lucide="file-signature" class="w-5 h-5 text-emerald-400"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-base text-slate-900 dark:text-white" id="modal-lease-code">Digital Tenancy Lease Agreement</h3>
+          <p class="text-xs text-slate-500" id="modal-lease-parties">Unit A101 &bull; Kariuki James Mwangi</p>
+        </div>
+      </div>
+
+      <div class="mt-4 space-y-4 text-xs">
+        <!-- Contract Metadata Cards -->
+        <div class="grid grid-cols-3 gap-2 p-3 bg-slate-50 dark:bg-zinc-800/60 rounded-xl text-center">
+          <div>
+            <span class="text-[10px] text-slate-400 font-bold uppercase">Monthly Rent</span>
+            <p class="font-bold text-slate-900 dark:text-white mt-0.5" id="modal-lease-rent">KES 65,000</p>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 font-bold uppercase">Security Deposit</span>
+            <p class="font-bold text-slate-900 dark:text-white mt-0.5" id="modal-lease-deposit">KES 130,000</p>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 font-bold uppercase">Governing Law</span>
+            <p class="font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">Kenya (Cap 296)</p>
+          </div>
+        </div>
+
+        <!-- Terms Clauses Scrollable Box -->
+        <div class="p-3.5 bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700/60 rounded-xl max-h-36 overflow-y-auto leading-relaxed text-slate-600 dark:text-zinc-300 font-mono text-[11px]" id="modal-lease-terms">
+          1. TERM &amp; RENT: Rent is due on or before the 5th day of every calendar month.
+          2. USE OF PREMISES: Strictly private residential dwelling. Subletting or Airbnb without express written consent is strictly prohibited.
+          3. SECURITY DEPOSIT: Deposit of 2 months rent held by Landlord. Refundable within 14 days of move-out inspection minus damages.
+          4. WATER &amp; UTILITIES: Billed monthly based on ultrasonic sub-meter consumption tariff.
+        </div>
+
+        <!-- Interactive HTML5 Canvas Signature Pad -->
+        <div class="border border-slate-200 dark:border-zinc-700 rounded-xl p-3 bg-slate-50/50 dark:bg-zinc-800/30">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-bold text-xs flex items-center text-slate-700 dark:text-zinc-300">
+              <i data-lucide="pen-tool" class="w-3.5 h-3.5 mr-1 text-emerald-600"></i>
+              <span>Draw or Type E-Signature (Finger or Mouse)</span>
+            </span>
+            <button onclick="app.clearLeaseSignature()" class="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 underline">
+              Clear Signature
+            </button>
+          </div>
+          <div class="border-2 border-dashed border-slate-300 dark:border-zinc-600 rounded-lg overflow-hidden bg-white dark:bg-zinc-950 flex justify-center">
+            <canvas id="lease-signature-pad" width="460" height="120" class="w-full cursor-crosshair touch-none"></canvas>
+          </div>
+          <div class="flex items-center justify-between mt-2 text-[10px] text-slate-400">
+            <span>By signing, you execute a legally binding contract under the Kenya Law of Contract.</span>
+            <span class="font-mono text-emerald-600">SHA-256 Verifiable</span>
+          </div>
+        </div>
+
+        <input type="hidden" id="modal-lease-id" value="">
+        <button onclick="app.submitLeaseSignature()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center space-x-1.5">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Execute &amp; Counter-Sign Digital Lease</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Move-In / Move-Out Inspection & Deposit Settlement (Module 2) -->
+  <div id="modal-new-inspection" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative max-h-[92vh] overflow-y-auto">
+      <button onclick="app.closeModal('modal-new-inspection')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center space-x-3 pb-3 border-b border-slate-100 dark:border-zinc-800">
+        <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold">
+          <i data-lucide="clipboard-check" class="w-5 h-5 text-emerald-400"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-base text-slate-900 dark:text-white">Property Condition Audit &amp; Deposit Settlement</h3>
+          <p class="text-xs text-slate-500">Record move-in baseline or calculate move-out damage deductions</p>
+        </div>
+      </div>
+
+      <form onsubmit="app.submitInspectionReport(event)" class="mt-4 space-y-4 text-xs">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Inspection Type</label>
+            <select id="insp-type" onchange="app.updateInspectionMath()" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs">
+              <option value="move_out">Move-Out Exit Audit (Deposit Settlement)</option>
+              <option value="move_in">Move-In Handover Baseline</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Unit to Inspect</label>
+            <select id="insp-unit-id" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs">
+              <!-- dynamic units -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Room-by-room Checklist -->
+        <div class="border border-slate-200 dark:border-zinc-700 rounded-xl p-3 bg-slate-50/50 dark:bg-zinc-800/30 space-y-2.5">
+          <span class="font-bold text-xs text-slate-700 dark:text-zinc-300 block">Room Condition &amp; Damage Ledger</span>
+
+          <div class="grid grid-cols-12 gap-2 text-[11px] items-center">
+            <span class="col-span-5 font-medium">Living Room Walls &amp; Paint</span>
+            <select id="insp-item-1-status" onchange="app.updateInspectionMath()" class="col-span-4 border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded p-1 text-[11px]">
+              <option value="Pristine">Pristine (KES 0)</option>
+              <option value="Damaged">Damaged (KES 4,500)</option>
+            </select>
+            <span class="col-span-3 text-right font-mono text-slate-600 dark:text-zinc-300" id="insp-item-1-cost">KES 0</span>
+          </div>
+
+          <div class="grid grid-cols-12 gap-2 text-[11px] items-center">
+            <span class="col-span-5 font-medium">Kitchen Sink &amp; Mixer Taps</span>
+            <select id="insp-item-2-status" onchange="app.updateInspectionMath()" class="col-span-4 border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded p-1 text-[11px]">
+              <option value="Pristine">Pristine (KES 0)</option>
+              <option value="Damaged">Damaged (KES 2,500)</option>
+            </select>
+            <span class="col-span-3 text-right font-mono text-slate-600 dark:text-zinc-300" id="insp-item-2-cost">KES 0</span>
+          </div>
+
+          <div class="grid grid-cols-12 gap-2 text-[11px] items-center">
+            <span class="col-span-5 font-medium">Bathroom Shower &amp; Mirror</span>
+            <select id="insp-item-3-status" onchange="app.updateInspectionMath()" class="col-span-4 border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded p-1 text-[11px]">
+              <option value="Pristine">Pristine (KES 0)</option>
+              <option value="Damaged">Damaged (KES 3,200)</option>
+            </select>
+            <span class="col-span-3 text-right font-mono text-slate-600 dark:text-zinc-300" id="insp-item-3-cost">KES 0</span>
+          </div>
+
+          <div class="grid grid-cols-12 gap-2 text-[11px] items-center">
+            <span class="col-span-5 font-medium">Sockets, Switches &amp; Fixtures</span>
+            <select id="insp-item-4-status" onchange="app.updateInspectionMath()" class="col-span-4 border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded p-1 text-[11px]">
+              <option value="Pristine">Pristine (KES 0)</option>
+              <option value="Damaged">Damaged (KES 1,800)</option>
+            </select>
+            <span class="col-span-3 text-right font-mono text-slate-600 dark:text-zinc-300" id="insp-item-4-cost">KES 0</span>
+          </div>
+        </div>
+
+        <!-- Deposit Settlement Formula Math -->
+        <div class="p-3 rounded-xl bg-slate-900 text-white space-y-1 text-xs">
+          <div class="flex justify-between text-slate-300">
+            <span>Security Deposit Held:</span>
+            <span class="font-mono">KES 130,000</span>
+          </div>
+          <div class="flex justify-between text-rose-400">
+            <span>Repair Damages Deducted:</span>
+            <span class="font-mono" id="insp-math-damages">- KES 0</span>
+          </div>
+          <div class="flex justify-between text-amber-400">
+            <span>Unpaid Utility Arrears:</span>
+            <span class="font-mono" id="insp-math-arrears">- KES 2,150</span>
+          </div>
+          <div class="pt-1.5 border-t border-white/20 flex justify-between font-bold text-sm text-emerald-400">
+            <span>Net Deposit Refund Voucher:</span>
+            <span class="font-mono" id="insp-math-net">KES 127,850</span>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center space-x-1.5">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Save Inspection &amp; Finalize Deposit Settlement</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Gated Estate Visitor Pass Creator (Module 3) -->
+  <div id="modal-new-visitor-pass" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative">
+      <button onclick="app.closeModal('modal-new-visitor-pass')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center space-x-3 pb-3 border-b border-slate-100 dark:border-zinc-800">
+        <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold">
+          <i data-lucide="ticket" class="w-5 h-5 text-emerald-400"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-base text-slate-900 dark:text-white">Issue Visitor Gate Pass</h3>
+          <p class="text-xs text-slate-500">Generate 6-digit gate security PIN and QR code for guest entry</p>
+        </div>
+      </div>
+
+      <form onsubmit="app.submitNewVisitorPass(event)" class="mt-4 space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Visitor Full Name</label>
+          <input type="text" id="pass-visitor-name" required placeholder="e.g. Dr. Samuel Makori" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Visitor Mobile</label>
+            <input type="tel" id="pass-visitor-phone" required placeholder="+2547XXXXXXXX" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Vehicle Plate (Optional)</label>
+            <input type="text" id="pass-vehicle-plate" placeholder="e.g. KDA 482B" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs uppercase">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Valid Date</label>
+            <input type="date" id="pass-valid-date" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Valid Time Slot</label>
+            <select id="pass-time-slot" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs">
+              <option value="08:00 AM - 01:00 PM">08:00 AM - 01:00 PM Morning</option>
+              <option value="02:00 PM - 06:00 PM" selected>02:00 PM - 06:00 PM Afternoon</option>
+              <option value="06:00 PM - 11:00 PM">06:00 PM - 11:00 PM Evening</option>
+              <option value="All Day Pass">All Day (24 Hours)</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center space-x-1.5">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span>Generate PIN &amp; Send Pass via WhatsApp</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Security Gate Guard Scanner (Module 3) -->
+  <div id="modal-visitor-scanner" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative">
+      <button onclick="app.closeModal('modal-visitor-scanner')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center space-x-3 pb-3 border-b border-slate-100 dark:border-zinc-800">
+        <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold">
+          <i data-lucide="scan" class="w-5 h-5 text-emerald-400"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-base text-slate-900 dark:text-white">Security Barrier Gate Scanner</h3>
+          <p class="text-xs text-slate-500">Scan QR or enter 4-digit guest PIN to log vehicle entry/exit</p>
+        </div>
+      </div>
+
+      <div class="mt-4 space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Enter Visitor Pass PIN</label>
+          <input type="text" id="scan-pass-code" placeholder="e.g. 8491 or PASS-8491" class="w-full border-2 border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-xl p-3 text-center text-lg font-mono font-bold tracking-widest text-slate-900 dark:text-white uppercase">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="app.validateGatePass('check_in')" class="py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center space-x-1.5">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+            <span>Log Check-In</span>
+          </button>
+          <button onclick="app.validateGatePass('check_out')" class="py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center space-x-1.5">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+            <span>Log Check-Out</span>
+          </button>
+        </div>
+
+        <div id="gate-scan-result" class="hidden p-3 rounded-xl bg-slate-50 dark:bg-zinc-800 border text-xs"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Diaspora Landlord Multi-Currency & ROI Hub (Module 4) -->
+  <div id="modal-diaspora-roi" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative max-h-[92vh] overflow-y-auto">
+      <button onclick="app.closeModal('modal-diaspora-roi')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center space-x-3 pb-3 border-b border-slate-100 dark:border-zinc-800">
+        <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold">
+          <i data-lucide="trending-up" class="w-5 h-5 text-emerald-400"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-base text-slate-900 dark:text-white">Diaspora Landlord Investment &amp; Multi-Currency Hub</h3>
+          <p class="text-xs text-slate-500">Live FX currency conversions, cap rates, and annualized rental yields</p>
+        </div>
+      </div>
+
+      <div class="mt-4 space-y-4 text-xs" id="diaspora-roi-content">
+        <!-- dynamic diaspora ROI metrics -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Estate Amenity Booking Form (Module 5) -->
+  <div id="modal-new-amenity-booking" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative">
+      <button onclick="app.closeModal('modal-new-amenity-booking')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center space-x-3 pb-3 border-b border-slate-100 dark:border-zinc-800">
+        <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold">
+          <i data-lucide="palmtree" class="w-5 h-5 text-emerald-400"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-base text-slate-900 dark:text-white">Reserve Estate Amenity</h3>
+          <p class="text-xs text-slate-500">Book shared rooftop, pool, gazebo, or executive boardroom</p>
+        </div>
+      </div>
+
+      <form onsubmit="app.submitAmenityBooking(event)" class="mt-4 space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Select Facility</label>
+          <select id="book-amenity-id" onchange="app.updateAmenityFee()" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs">
+            <!-- dynamic amenities -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Reservation Date</label>
+            <input type="date" id="book-amenity-date" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Start Time</label>
+            <select id="book-amenity-time" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs">
+              <option value="10:00 AM">10:00 AM Morning</option>
+              <option value="02:00 PM">02:00 PM Afternoon</option>
+              <option value="05:00 PM" selected>05:00 PM Sunset / Evening</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Duration (Hours)</label>
+          <select id="book-amenity-hours" onchange="app.updateAmenityFee()" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs">
+            <option value="2">2 Hours</option>
+            <option value="3" selected>3 Hours</option>
+            <option value="4">4 Hours</option>
+            <option value="6">6 Hours (Half Day)</option>
+          </select>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 dark:bg-zinc-800 border flex items-center justify-between">
+          <span class="text-slate-500">Total Booking Charge:</span>
+          <span class="font-bold text-sm text-slate-900 dark:text-white font-mono" id="book-amenity-total-fee">KES 4,500</span>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center space-x-1.5">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Confirm Amenity Reservation</span>
+        </button>
+      </form>
     </div>
   </div>
 

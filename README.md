@@ -3,7 +3,7 @@
 [![Deployment Status](https://img.shields.io/badge/Cloudflare_Pages-Live_Production-059669?style=flat&logo=cloudflare)](https://rentalpropertymanagement.pages.dev/)
 [![PWA](https://img.shields.io/badge/PWA-Installable_Native_App-blue?style=flat&logo=pwa)](https://rentalpropertymanagement.pages.dev/)
 [![Security RBAC](https://img.shields.io/badge/Security-5--Tier_Strict_RBAC-success?style=flat&logo=shield)](https://rentalpropertymanagement.pages.dev/)
-[![Tests](https://img.shields.io/badge/Tests-39%2F39_Passed-brightgreen?style=flat)](https://github.com/Adundo-Maseno/RentalPropertyManagement)
+[![Tests](https://img.shields.io/badge/Tests-44%2F44_Passed-brightgreen?style=flat)](https://github.com/Adundo-Maseno/RentalPropertyManagement)
 [![Node.js](https://img.shields.io/badge/Node.js-22%2B_Zero_Dependencies-339933?style=flat&logo=node.js)](https://nodejs.org/)
 
 > **Next-Generation Real Estate & Property Management Platform**  
@@ -110,6 +110,33 @@ BomaSphere enforces strict **Role-Based Access Control (RBAC)** across both the 
 
 ---
 
+## 💎 5 High-Impact Enterprise Modules
+
+1. **Digital Lease Agreements & In-Browser E-Signatures** (`/api/leases/agreements`, `/api/leases/agreements/:id/sign`):
+   - Kenyon Landlord & Tenant Act compliant electronic tenancy agreements with verifiable SHA-256 cryptographic hashes.
+   - Interactive HTML5 signature pad with dual touch and mouse capture support, real-time stroke smoothing, and instantaneous manager counter-signing.
+
+2. **Move-In / Move-Out Condition Audits & Automated Deposit Settlement** (`/api/inspections`, `/api/inspections/:id/settle-deposit`):
+   - Room-by-room condition audits (Living Room, Kitchen, Bathroom, Sockets/Fixtures) with baseline photo logging.
+   - Automated security deposit reconciliation formula:  
+     $$\text{Net Refund} = \max(0, \text{Deposit Held} - \text{Unpaid Arrears} - \text{Repair Damages})$$
+   - Generates official refund vouchers (`REF-DEP-...`) and queues automatic M-Pesa B2C tenant reimbursement.
+
+3. **Gated Estate Visitor Passes & QR Barrier Security** (`/api/visitor-passes`, `/api/visitor-passes/validate`):
+   - Resident-generated visitor access passes with unique 4-to-6 digit gate security PINs and scannable QR security tokens.
+   - Built-in Security Guard Scanner interface for estate entry barriers to log check-ins, verify vehicle license plates, and record check-outs.
+
+4. **Diaspora Landlord Multi-Currency Hub & Investment ROI** (`/api/reports/diaspora-roi`):
+   - Live FX currency conversion switcher (`KES`, `USD`, `GBP`, `EUR`) in the top navigation bar.
+   - Real-time capitalization rate (Cap Rate %) and net rental yield telemetry for overseas diaspora investors.
+   - Multi-currency remittance breakdown showcasing monthly and annualized disbursable amounts in overseas banking denominations.
+
+5. **Shared Estate Amenities & Clubhouse Booking Engine** (`/api/amenities`, `/api/amenity-bookings`):
+   - Luxury estate facility reservation system for rooftop BBQ lounges, heated swimming pools, executive boardrooms, and beachfront gazebos.
+   - Automatic double-booking conflict prevention, configurable hourly rates, and automated service fee ledger integration.
+
+---
+
 ## 🏗️ Technical Architecture & Tech Stack
 
 ```
@@ -145,7 +172,7 @@ node server.js
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### 3. Run the Automated Direct Test Suite
-To run all 39 integration, RBAC, authentication, PWA, IoT, and Next-Gen feature tests:
+To run all 44 integration, RBAC, authentication, PWA, IoT, and Enterprise module tests:
 ```bash
 node test_suite.js
 ```

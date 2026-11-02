@@ -504,6 +504,101 @@ async function runTests() {
     console.log('      Verified rentals.html: High-converting public vacancy showcase with viewing booking modal');
   });
 
+  // 40. Enterprise Module 1: Digital Lease Agreements & In-Browser E-Signatures
+  await test('Digital Leases: GET /api/leases/agreements & POST /api/leases/agreements/:id/sign executes legally binding contract', async () => {
+    const listRes = await invokeHandler('/api/leases/agreements');
+    if (listRes.statusCode !== 200) throw new Error(`Expected 200, got ${listRes.statusCode}`);
+    if (!Array.isArray(listRes.json.agreements) || listRes.json.agreements.length === 0) throw new Error('No agreements found');
+
+    const signRes = await invokeHandler('/api/leases/agreements/2/sign', 'POST', {
+      signature: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0xMCAxMCBMMTAwIDEwMCIvPjwvc3ZnPg==',
+      signer_role: 'manager',
+      signer_name: 'Lead Estate Manager'
+    });
+    if (signRes.statusCode !== 200) throw new Error(`Expected 200, got ${signRes.statusCode}`);
+    if (!signRes.json.agreement || !signRes.json.agreement.contract_hash) throw new Error('Missing contract hash in executed agreement');
+    console.log(`      Agreement ${signRes.json.agreement.agreement_code} signed with SHA-256 hash: ${signRes.json.agreement.contract_hash}`);
+  });
+
+  // 41. Enterprise Module 2: Move-In / Move-Out Condition Audits & Automated Deposit Settlement
+  await test('Property Inspections: POST /api/inspections & POST /settle-deposit computes net deposit refund', async () => {
+    const inspRes = await invokeHandler('/api/inspections', 'POST', {
+      unit_id: 2,
+      tenant_id: 2,
+      inspection_type: 'move_out',
+      inspector_name: 'Lead Estate Auditor',
+      checklist: [
+        { item: 'Living Room Walls', status: 'Damaged', repair_cost: 4500 },
+        { item: 'Kitchen Mixer Tap', status: 'Damaged', repair_cost: 2500 }
+      ],
+      deposit_held: 130000,
+      unpaid_utility_arrears: 2150
+    });
+    if (inspRes.statusCode !== 201) throw new Error(`Expected 201, got ${inspRes.statusCode}`);
+    if (inspRes.json.damages_total !== 7000) throw new Error(`Expected damages 7000, got ${inspRes.json.damages_total}`);
+    // Net refund: 130,000 - 7,000 - 2,150 = 120,850
+    if (inspRes.json.net_deposit_refund !== 120850) throw new Error(`Expected net refund 120850, got ${inspRes.json.net_deposit_refund}`);
+
+    const settleRes = await invokeHandler(`/api/inspections/${inspRes.json.id}/settle-deposit`, 'POST');
+    if (settleRes.statusCode !== 200) throw new Error(`Expected 200, got ${settleRes.statusCode}`);
+    if (!settleRes.json.voucher_number || !settleRes.json.voucher_number.startsWith('REF-DEP-')) throw new Error('Missing refund voucher number');
+    console.log(`      Deposit settled with voucher: ${settleRes.json.voucher_number}, net refund: KES ${settleRes.json.net_refund_amount.toLocaleString()}`);
+  });
+
+  // 42. Enterprise Module 3: Gated Estate Visitor Passes & Gate QR Security
+  await test('Visitor Gate Passes: POST /api/visitor-passes & POST /validate authorizes and tracks guest barrier access', async () => {
+    const createRes = await invokeHandler('/api/visitor-passes', 'POST', {
+      unit_id: 1,
+      tenant_id: 1,
+      visitor_name: 'Dr. Samuel Makori',
+      visitor_phone: '+254722334455',
+      vehicle_plate: 'KDA 482B',
+      valid_date: '2026-11-03',
+      time_slot: '02:00 PM - 06:00 PM'
+    });
+    if (createRes.statusCode !== 201) throw new Error(`Expected 201, got ${createRes.statusCode}`);
+    const passCode = createRes.json.pass_code;
+    if (!passCode.startsWith('PASS-')) throw new Error('Invalid pass code format');
+
+    const checkInRes = await invokeHandler('/api/visitor-passes/validate', 'POST', {
+      pass_code: passCode,
+      action: 'check_in'
+    });
+    if (checkInRes.statusCode !== 200) throw new Error(`Expected 200, got ${checkInRes.statusCode}`);
+    if (checkInRes.json.status !== 'checked_in') throw new Error(`Expected checked_in status, got ${checkInRes.json.status}`);
+    console.log(`      Barrier access verified for pass ${passCode}: Check-In granted for ${checkInRes.json.pass.visitor_name}`);
+  });
+
+  // 43. Enterprise Module 4: Diaspora Landlord Multi-Currency Hub & Investment ROI Telemetry
+  await test('Diaspora ROI Hub: GET /api/reports/diaspora-roi computes valuation, cap rate & live FX rates', async () => {
+    const res = await invokeHandler('/api/reports/diaspora-roi');
+    if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
+    if (!res.json.portfolio_summary || !res.json.fx_rates) throw new Error('Missing portfolio summary or fx_rates');
+    const ps = res.json.portfolio_summary;
+    if (!ps.total_valuation_usd || !ps.total_valuation_gbp || !ps.total_valuation_eur) throw new Error('Missing multi-currency valuations');
+    console.log(`      Portfolio Gross Rent: KES ${ps.total_annual_rent_kes.toLocaleString()} | USD: $${ps.total_annual_rent_usd.toLocaleString()} | Cap Rate: ${ps.average_cap_rate}`);
+  });
+
+  // 44. Enterprise Module 5: Shared Estate Amenities & Booking Engine
+  await test('Estate Amenities: GET /api/amenities & POST /api/amenity-bookings reserves luxury facility', async () => {
+    const listRes = await invokeHandler('/api/amenities');
+    if (listRes.statusCode !== 200) throw new Error(`Expected 200, got ${listRes.statusCode}`);
+    if (!Array.isArray(listRes.json.amenities) || listRes.json.amenities.length === 0) throw new Error('No amenities available');
+
+    const amenity = listRes.json.amenities[0];
+    const bookRes = await invokeHandler('/api/amenity-bookings', 'POST', {
+      amenity_id: amenity.id,
+      unit_id: 1,
+      tenant_id: 1,
+      booking_date: '2026-11-08',
+      start_time: '04:00 PM',
+      hours: 3
+    });
+    if (bookRes.statusCode !== 201) throw new Error(`Expected 201, got ${bookRes.statusCode}`);
+    if (!bookRes.json.booking_reference || !bookRes.json.booking_reference.startsWith('BK-')) throw new Error('Missing booking reference');
+    console.log(`      Reserved ${amenity.name} with reference ${bookRes.json.booking_reference} (Fee: KES ${bookRes.json.total_fee.toLocaleString()})`);
+  });
+
   console.log(`\n=======================================================`);
   console.log(` TESTS COMPLETED: ${passed} PASSED, ${failed} FAILED `);
   console.log(`=======================================================`);

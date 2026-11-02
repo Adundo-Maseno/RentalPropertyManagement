@@ -295,6 +295,90 @@ function initSchema() {
       notes TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    /* 1. Digital Lease Agreements & E-Signatures */
+    CREATE TABLE IF NOT EXISTS lease_agreements (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      lease_id INTEGER NOT NULL REFERENCES leases(id) ON DELETE CASCADE,
+      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,
+      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+      agreement_code TEXT UNIQUE NOT NULL,
+      rent_amount REAL NOT NULL,
+      deposit_amount REAL NOT NULL,
+      start_date DATE NOT NULL,
+      end_date DATE NOT NULL,
+      terms_clauses TEXT,
+      tenant_signature TEXT,
+      tenant_signed_at DATETIME,
+      manager_signature TEXT,
+      manager_signed_at DATETIME,
+      status TEXT DEFAULT 'pending_tenant',
+      contract_hash TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    /* 2. Move-In / Move-Out Digital Inspections & Deposit Settlement */
+    CREATE TABLE IF NOT EXISTS property_inspections (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,
+      tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,
+      inspection_type TEXT NOT NULL,
+      inspection_date DATE NOT NULL,
+      inspector_name TEXT NOT NULL,
+      checklist_json TEXT NOT NULL,
+      damages_total REAL DEFAULT 0.0,
+      deposit_held REAL DEFAULT 0.0,
+      unpaid_utility_arrears REAL DEFAULT 0.0,
+      net_deposit_refund REAL DEFAULT 0.0,
+      status TEXT DEFAULT 'completed',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    /* 3. Gated Estate Visitor Passes & Gate QR Security */
+    CREATE TABLE IF NOT EXISTS visitor_passes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      pass_code TEXT UNIQUE NOT NULL,
+      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,
+      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+      visitor_name TEXT NOT NULL,
+      visitor_phone TEXT NOT NULL,
+      vehicle_plate TEXT,
+      valid_date DATE NOT NULL,
+      time_slot TEXT NOT NULL,
+      status TEXT DEFAULT 'active',
+      checked_in_at DATETIME,
+      checked_out_at DATETIME,
+      qr_data TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    /* 4 & 5. Estate Shared Amenities & Booking */
+    CREATE TABLE IF NOT EXISTS estate_amenities (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      description TEXT,
+      category TEXT DEFAULT 'Recreation',
+      capacity INTEGER DEFAULT 20,
+      hourly_fee REAL DEFAULT 0.0,
+      photo TEXT,
+      status TEXT DEFAULT 'available'
+    );
+
+    CREATE TABLE IF NOT EXISTS amenity_bookings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      booking_reference TEXT UNIQUE NOT NULL,
+      amenity_id INTEGER NOT NULL REFERENCES estate_amenities(id) ON DELETE CASCADE,
+      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,
+      booking_date DATE NOT NULL,
+      start_time TEXT NOT NULL,
+      end_time TEXT NOT NULL,
+      total_fee REAL DEFAULT 0.0,
+      status TEXT DEFAULT 'confirmed',
+      invoiced INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   // Ensure columns exist if table was created previously
@@ -579,6 +663,128 @@ function seedNextGenFeatures() {
       const mri = Math.round(inv.rent_amount * 0.075);
       insertEtims.run(inv.id, code, qrUrl, 'MRI_7.5_PCT', inv.rent_amount, mri, 'transmitted');
     });
+  }
+
+  // 1. Digital Lease Agreements & E-Signatures
+  const leaseAgrCount = db.prepare('SELECT count(*) as total FROM lease_agreements').get()?.total || 0;
+  if (leaseAgrCount === 0) {
+    const insertAgr = db.prepare(`
+      INSERT INTO lease_agreements (
+        lease_id, unit_id, tenant_id, agreement_code, rent_amount, deposit_amount,
+        start_date, end_date, terms_clauses, tenant_signature, tenant_signed_at,
+        manager_signature, manager_signed_at, status, contract_hash
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    insertAgr.run(
+      1, 1, 1, 'BS-LEASE-2026-A101', 65000, 130000, '2026-01-01', '2026-12-31',
+      'Residential Tenancy Agreement governed by the Laws of Kenya (Landlord and Tenant Act). Rent payable on or before 5th. No subletting. Security deposit refundable within 14 days of move-out inspection.',
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="50"><path d="M10 35 Q50 10 90 35 T170 30" stroke="%23059669" stroke-width="2" fill="none"/></svg>',
+      '2026-01-02 11:20:00',
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="50"><path d="M10 25 Q60 40 110 20 T180 35" stroke="%230f172a" stroke-width="2" fill="none"/></svg>',
+      '2026-01-02 14:15:00',
+      'executed',
+      'SHA256-8A9F1C03BE49E7802D9F88A1'
+    );
+    insertAgr.run(
+      2, 2, 2, 'BS-LEASE-2026-A102', 65000, 130000, '2026-02-01', '2027-01-31',
+      'Residential Tenancy Agreement governed by the Laws of Kenya. Rent due by 5th. Standard Kenyan residential terms.',
+      null, null,
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="50"><path d="M10 25 Q60 40 110 20 T180 35" stroke="%230f172a" stroke-width="2" fill="none"/></svg>',
+      '2026-01-28 09:30:00',
+      'pending_tenant',
+      'SHA256-112B4C99A0E32551'
+    );
+  }
+
+  // 2. Move-In / Move-Out Property Inspections
+  const inspCount = db.prepare('SELECT count(*) as total FROM property_inspections').get()?.total || 0;
+  if (inspCount === 0) {
+    const insertInsp = db.prepare(`
+      INSERT INTO property_inspections (
+        unit_id, tenant_id, inspection_type, inspection_date, inspector_name,
+        checklist_json, damages_total, deposit_held, unpaid_utility_arrears,
+        net_deposit_refund, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    insertInsp.run(
+      1, 1, 'move_in', '2026-01-01', 'John Otieno (Site Caretaker)',
+      JSON.stringify([
+        { item: 'Living Room Walls & Paint', status: 'Pristine', notes: 'Fresh coat of soft white emulsion.' },
+        { item: 'Kitchen Sink & Mixer', status: 'Pristine', notes: 'No leaks, good water pressure.' },
+        { item: 'Bathroom Tiles & Shower', status: 'Pristine', notes: 'Clean grouting, instantaneous heater functional.' },
+        { item: 'Electrical Sockets & Switches', status: 'Pristine', notes: 'All tested and live.' },
+        { item: 'Door Locks & Keys', status: 'Pristine', notes: '3 master keys and gate fob issued.' }
+      ]),
+      0.0, 130000, 0.0, 130000, 'completed'
+    );
+    insertInsp.run(
+      3, 3, 'move_out', '2026-10-31', 'John Otieno (Site Caretaker)',
+      JSON.stringify([
+        { item: 'Living Room Walls & Paint', status: 'Damaged', repair_cost: 4500, notes: 'Picture hook plaster tears requiring patching.' },
+        { item: 'Kitchen Sink & Mixer', status: 'Pristine', repair_cost: 0, notes: 'Clean and leak-free.' },
+        { item: 'Bathroom Mirror & Cabinet', status: 'Damaged', repair_cost: 3200, notes: 'Cracked cabinet hinge.' },
+        { item: 'Electrical Sockets & Switches', status: 'Pristine', repair_cost: 0, notes: 'All working.' }
+      ]),
+      7700.0, 130000, 2150.0, 120150.0, 'settled'
+    );
+  }
+
+  // 3. Visitor Passes & Gate QR Security
+  const passCount = db.prepare('SELECT count(*) as total FROM visitor_passes').get()?.total || 0;
+  if (passCount === 0) {
+    const insertPass = db.prepare(`
+      INSERT INTO visitor_passes (
+        pass_code, unit_id, tenant_id, visitor_name, visitor_phone,
+        vehicle_plate, valid_date, time_slot, status, qr_data
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    insertPass.run('PASS-8491', 1, 1, 'Dr. Samuel Makori', '+254722334455', 'KDA 482B', '2026-11-03', '02:00 PM - 06:00 PM', 'active', 'BOMASPHERE:PASS-8491:UNIT-A101');
+    insertPass.run('PASS-3312', 1, 1, 'DHL Express Courier', '+254700998877', 'KCM 119Z', '2026-11-03', '10:00 AM - 01:00 PM', 'active', 'BOMASPHERE:PASS-3312:UNIT-A101');
+  }
+
+  // 4 & 5. Estate Shared Amenities & Bookings
+  const amenityCount = db.prepare('SELECT count(*) as total FROM estate_amenities').get()?.total || 0;
+  if (amenityCount === 0) {
+    const insertAmenity = db.prepare(`
+      INSERT INTO estate_amenities (property_id, name, description, category, capacity, hourly_fee, photo, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    insertAmenity.run(
+      1, 'Kilimani Sunset Rooftop BBQ Lounge',
+      'Panoramic rooftop deck with built-in stainless steel charcoal grill, wet bar, ambient string lighting, and Nairobi skyline views.',
+      'Lounge & BBQ', 35, 1500,
+      'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=800&auto=format&fit=crop&q=80',
+      'available'
+    );
+    insertAmenity.run(
+      1, 'Heated Swimming Pool & Sundeck',
+      '20-meter heated lap pool with poolside loungers and shower facilities.',
+      'Recreation', 25, 0,
+      'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=800&auto=format&fit=crop&q=80',
+      'available'
+    );
+    insertAmenity.run(
+      2, 'Westlands Executive Boardroom',
+      '12-person glass boardroom with 4K display, high-speed dedicated fiber, and teleconferencing gear.',
+      'Business & Meeting', 12, 2500,
+      'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80',
+      'available'
+    );
+    insertAmenity.run(
+      4, 'Nyali Ocean Breeze Gazebo',
+      'Beachfront covered pavilion with tropical garden lawn, power hookups, and ocean breeze.',
+      'Event & Social', 50, 3000,
+      'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&auto=format&fit=crop&q=80',
+      'available'
+    );
+
+    // Initial booking for Kariuki James Mwangi
+    db.prepare(`
+      INSERT INTO amenity_bookings (
+        booking_reference, amenity_id, tenant_id, unit_id,
+        booking_date, start_time, end_time, total_fee, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run('BK-8942', 1, 1, 1, '2026-11-08', '03:00 PM', '07:00 PM', 6000, 'confirmed');
   }
 }
 

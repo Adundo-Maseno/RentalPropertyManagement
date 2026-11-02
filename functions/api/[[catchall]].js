@@ -114,6 +114,63 @@ const DB = {
   ],
   viewingLeads: [
     { id: 1, unit_id: 4, prospect_name: "Caroline Achieng", phone: "+254712445566", email: "carol.achieng@gmail.com", preferred_date: "2026-11-05", time_slot: "10:00 AM", status: "confirmed", notes: "Interested in 3BR Kilimani unit." }
+  ],
+  leaseAgreements: [
+    {
+      id: 1, lease_id: 1, unit_id: 1, tenant_id: 1, agreement_code: "BS-LEASE-2026-A101",
+      rent_amount: 65000, deposit_amount: 130000, start_date: "2026-01-01", end_date: "2026-12-31",
+      terms_clauses: "Residential Tenancy Agreement governed by the Laws of Kenya (Landlord and Tenant Act). Rent payable on or before 5th. No subletting.",
+      tenant_signature: "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"50\"><path d=\"M10 35 Q50 10 90 35 T170 30\" stroke=\"%23059669\" stroke-width=\"2\" fill=\"none\"/></svg>",
+      tenant_signed_at: "2026-01-02 11:20:00",
+      manager_signature: "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"50\"><path d=\"M10 25 Q60 40 110 20 T180 35\" stroke=\"%230f172a\" stroke-width=\"2\" fill=\"none\"/></svg>",
+      manager_signed_at: "2026-01-02 14:15:00", status: "executed", contract_hash: "SHA256-8A9F1C03BE49E7802D9F88A1",
+      tenant_name: "Kariuki James Mwangi", tenant_phone: "+254722889900", unit_number: "A101", property_name: "Kilimani Royal Heights"
+    },
+    {
+      id: 2, lease_id: 2, unit_id: 2, tenant_id: 2, agreement_code: "BS-LEASE-2026-A102",
+      rent_amount: 65000, deposit_amount: 130000, start_date: "2026-02-01", end_date: "2027-01-31",
+      terms_clauses: "Standard Kenyan residential tenancy agreement.",
+      tenant_signature: null, tenant_signed_at: null,
+      manager_signature: "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"50\"><path d=\"M10 25 Q60 40 110 20 T180 35\" stroke=\"%230f172a\" stroke-width=\"2\" fill=\"none\"/></svg>",
+      manager_signed_at: "2026-01-28 09:30:00", status: "pending_tenant", contract_hash: "SHA256-112B4C99A0E32551",
+      tenant_name: "Amina Hassan Mohamed", tenant_phone: "+254710123456", unit_number: "A102", property_name: "Kilimani Royal Heights"
+    }
+  ],
+  inspections: [
+    {
+      id: 1, unit_id: 1, tenant_id: 1, inspection_type: "move_in", inspection_date: "2026-01-01",
+      inspector_name: "John Otieno (Site Caretaker)", damages_total: 0, deposit_held: 130000,
+      unpaid_utility_arrears: 0, net_deposit_refund: 130000, status: "completed",
+      unit_number: "A101", property_name: "Kilimani Royal Heights", tenant_name: "Kariuki James Mwangi",
+      checklist: [
+        { item: "Living Room Walls & Paint", status: "Pristine", notes: "Fresh coat of soft white emulsion." },
+        { item: "Kitchen Sink & Mixer", status: "Pristine", notes: "No leaks, good water pressure." },
+        { item: "Bathroom Tiles & Shower", status: "Pristine", notes: "Clean grouting, functional." }
+      ]
+    },
+    {
+      id: 2, unit_id: 3, tenant_id: 3, inspection_type: "move_out", inspection_date: "2026-10-31",
+      inspector_name: "John Otieno (Site Caretaker)", damages_total: 7700, deposit_held: 130000,
+      unpaid_utility_arrears: 2150, net_deposit_refund: 120150, status: "settled",
+      unit_number: "A201", property_name: "Kilimani Royal Heights", tenant_name: "Brian Omondi Otieno",
+      checklist: [
+        { item: "Living Room Walls & Paint", status: "Damaged", repair_cost: 4500, notes: "Plaster tears." },
+        { item: "Bathroom Mirror & Cabinet", status: "Damaged", repair_cost: 3200, notes: "Cracked hinge." }
+      ]
+    }
+  ],
+  visitorPasses: [
+    { id: 1, pass_code: "PASS-8491", unit_id: 1, tenant_id: 1, visitor_name: "Dr. Samuel Makori", visitor_phone: "+254722334455", vehicle_plate: "KDA 482B", valid_date: "2026-11-03", time_slot: "02:00 PM - 06:00 PM", status: "active", qr_data: "BOMASPHERE:PASS-8491:UNIT-A101", unit_number: "A101", property_name: "Kilimani Royal Heights", host_name: "Kariuki James Mwangi" },
+    { id: 2, pass_code: "PASS-3312", unit_id: 1, tenant_id: 1, visitor_name: "DHL Express Courier", visitor_phone: "+254700998877", vehicle_plate: "KCM 119Z", valid_date: "2026-11-03", time_slot: "10:00 AM - 01:00 PM", status: "active", qr_data: "BOMASPHERE:PASS-3312:UNIT-A101", unit_number: "A101", property_name: "Kilimani Royal Heights", host_name: "Kariuki James Mwangi" }
+  ],
+  amenities: [
+    { id: 1, property_id: 1, name: "Kilimani Sunset Rooftop BBQ Lounge", description: "Panoramic rooftop deck with built-in stainless steel charcoal grill, wet bar, ambient string lighting, and Nairobi skyline views.", category: "Lounge & BBQ", capacity: 35, hourly_fee: 1500, photo: "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=800&auto=format&fit=crop&q=80", status: "available", property_name: "Kilimani Royal Heights", city: "Nairobi" },
+    { id: 2, property_id: 1, name: "Heated Swimming Pool & Sundeck", description: "20-meter heated lap pool with poolside loungers and shower facilities.", category: "Recreation", capacity: 25, hourly_fee: 0, photo: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=800&auto=format&fit=crop&q=80", status: "available", property_name: "Kilimani Royal Heights", city: "Nairobi" },
+    { id: 3, property_id: 2, name: "Westlands Executive Boardroom", description: "12-person glass boardroom with 4K display, high-speed dedicated fiber, and teleconferencing gear.", category: "Business & Meeting", capacity: 12, hourly_fee: 2500, photo: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80", status: "available", property_name: "Westlands Executive Suites", city: "Nairobi" },
+    { id: 4, property_id: 4, name: "Nyali Ocean Breeze Gazebo", description: "Beachfront covered pavilion with tropical garden lawn, power hookups, and ocean breeze.", category: "Event & Social", capacity: 50, hourly_fee: 3000, photo: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&auto=format&fit=crop&q=80", status: "available", property_name: "Nyali Ocean Breeze Villas", city: "Mombasa" }
+  ],
+  amenityBookings: [
+    { id: 1, booking_reference: "BK-8942", amenity_id: 1, tenant_id: 1, unit_id: 1, booking_date: "2026-11-08", start_time: "03:00 PM", end_time: "07:00 PM", total_fee: 6000, status: "confirmed", amenity_name: "Kilimani Sunset Rooftop BBQ Lounge", unit_number: "A101", tenant_name: "Kariuki James Mwangi" }
   ]
 };
 
@@ -549,6 +606,158 @@ export async function onRequest(context) {
   if (pathname === '/api/marketplace/escrow/release' && method === 'POST') {
     const ref = 'B2C-MPESA-' + Math.random().toString(36).substring(2, 9).toUpperCase();
     return json({ success: true, status: 'disbursed', b2c_disbursement_ref: ref, message: `Escrow released and disbursed via M-Pesa B2C (${ref}).` });
+  }
+
+  // 19. Digital Lease Agreements & E-Signatures
+  if (pathname === '/api/leases/agreements' && method === 'GET') {
+    return json({ success: true, count: DB.leaseAgreements.length, agreements: DB.leaseAgreements });
+  }
+
+  if (pathname.startsWith('/api/leases/agreements/') && pathname.endsWith('/sign') && method === 'POST') {
+    const id = Number(pathname.split('/')[4]);
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const agr = DB.leaseAgreements.find(a => a.id === id) || DB.leaseAgreements[0];
+    agr.status = 'executed';
+    agr.tenant_signature = b.signature || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="50"><path d="M10 35 Q50 10 90 35 T170 30" stroke="%23059669" stroke-width="2" fill="none"/></svg>';
+    agr.tenant_signed_at = new Date().toISOString().replace('T', ' ').slice(0, 19);
+    return json({ success: true, agreement: agr, is_executed: true, message: `Lease ${agr.agreement_code} signed and legally executed!` });
+  }
+
+  // 20. Move-In / Move-Out Inspections & Deposit Settlement
+  if (pathname === '/api/inspections' && method === 'GET') {
+    return json({ success: true, count: DB.inspections.length, inspections: DB.inspections });
+  }
+
+  if (pathname === '/api/inspections' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const items = b.checklist || [];
+    const damages = items.reduce((s, it) => s + (Number(it.repair_cost) || 0), 0);
+    const held = Number(b.deposit_held || 130000);
+    const arrears = Number(b.unpaid_utility_arrears || 0);
+    const net = Math.max(0, held - arrears - damages);
+    const newInsp = {
+      id: DB.inspections.length + 1,
+      unit_id: b.unit_id || 1,
+      tenant_id: b.tenant_id || 1,
+      inspection_type: b.inspection_type || 'move_out',
+      inspection_date: new Date().toISOString().slice(0, 10),
+      inspector_name: b.inspector_name || 'John Otieno (Site Caretaker)',
+      damages_total: damages,
+      deposit_held: held,
+      unpaid_utility_arrears: arrears,
+      net_deposit_refund: net,
+      status: 'completed',
+      unit_number: 'A101',
+      property_name: 'Kilimani Royal Heights',
+      tenant_name: 'Kariuki James Mwangi',
+      checklist: items
+    };
+    DB.inspections.unshift(newInsp);
+    return json({ success: true, id: newInsp.id, damages_total: damages, net_deposit_refund: net, message: 'Inspection recorded successfully.' }, 201);
+  }
+
+  if (pathname.startsWith('/api/inspections/') && pathname.endsWith('/settle-deposit') && method === 'POST') {
+    const voucher = 'REF-DEP-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+    return json({ success: true, voucher_number: voucher, message: `Deposit refund settled (${voucher}) via M-Pesa B2C.` });
+  }
+
+  // 21. Gated Estate Visitor Passes & Gate QR Security
+  if (pathname === '/api/visitor-passes' && method === 'GET') {
+    return json({ success: true, count: DB.visitorPasses.length, passes: DB.visitorPasses });
+  }
+
+  if (pathname === '/api/visitor-passes' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const code = 'PASS-' + Math.floor(1000 + Math.random() * 9000);
+    const newPass = {
+      id: DB.visitorPasses.length + 1,
+      pass_code: code,
+      unit_id: b.unit_id || 1,
+      tenant_id: b.tenant_id || 1,
+      visitor_name: b.visitor_name || 'Guest',
+      visitor_phone: b.visitor_phone || '+254700000000',
+      vehicle_plate: b.vehicle_plate || 'KDA 000A',
+      valid_date: b.valid_date || new Date().toISOString().slice(0, 10),
+      time_slot: b.time_slot || '08:00 AM - 08:00 PM',
+      status: 'active',
+      qr_data: `BOMASPHERE:${code}:UNIT-1`,
+      unit_number: 'A101',
+      property_name: 'Kilimani Royal Heights',
+      host_name: 'Kariuki James Mwangi'
+    };
+    DB.visitorPasses.unshift(newPass);
+    return json({ success: true, id: newPass.id, pass_code: code, qr_data: newPass.qr_data, message: `Visitor Gate Pass ${code} generated.` }, 201);
+  }
+
+  if (pathname === '/api/visitor-passes/validate' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const pass = DB.visitorPasses.find(p => p.pass_code === b.pass_code) || DB.visitorPasses[0];
+    pass.status = b.action === 'check_out' ? 'completed' : 'checked_in';
+    return json({ success: true, action: b.action || 'check_in', status: pass.status, pass, message: `Pass validated for ${pass.visitor_name}.` });
+  }
+
+  // 22. Diaspora Landlord Multi-Currency Hub & ROI
+  if (pathname === '/api/reports/diaspora-roi' && method === 'GET') {
+    const totalValuationKES = 880000000;
+    return json({
+      success: true,
+      fx_rates: { USD: 129.50, GBP: 168.20, EUR: 141.00 },
+      portfolio_summary: {
+        total_valuation_kes: totalValuationKES,
+        total_valuation_usd: Math.round(totalValuationKES / 129.50),
+        total_valuation_gbp: Math.round(totalValuationKES / 168.20),
+        total_valuation_eur: Math.round(totalValuationKES / 141.00),
+        total_annual_rent_kes: 74800000,
+        average_cap_rate: '7.8%',
+        average_net_yield: '8.5%'
+      },
+      properties: DB.properties.map(p => ({
+        id: p.id,
+        name: p.name,
+        city: p.city,
+        estimated_valuation_kes: Math.round(totalValuationKES / DB.properties.length),
+        net_yield_pct: 8.5,
+        cap_rate_pct: 7.8
+      }))
+    });
+  }
+
+  // 23. Shared Estate Amenities & Booking
+  if (pathname === '/api/amenities' && method === 'GET') {
+    return json({ success: true, count: DB.amenities.length, amenities: DB.amenities });
+  }
+
+  if (pathname === '/api/amenity-bookings' && method === 'GET') {
+    return json({ success: true, count: DB.amenityBookings.length, bookings: DB.amenityBookings });
+  }
+
+  if (pathname === '/api/amenity-bookings' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const ref = 'BK-' + Math.floor(1000 + Math.random() * 9000);
+    const amenity = DB.amenities.find(a => a.id === Number(b.amenity_id)) || DB.amenities[0];
+    const totalFee = (amenity.hourly_fee || 0) * Number(b.hours || 3);
+    const newBk = {
+      id: DB.amenityBookings.length + 1,
+      booking_reference: ref,
+      amenity_id: amenity.id,
+      tenant_id: b.tenant_id || 1,
+      unit_id: b.unit_id || 1,
+      booking_date: b.booking_date || new Date().toISOString().slice(0, 10),
+      start_time: b.start_time || '03:00 PM',
+      end_time: b.end_time || '06:00 PM',
+      total_fee: totalFee,
+      status: 'confirmed',
+      amenity_name: amenity.name,
+      unit_number: 'A101',
+      tenant_name: 'Kariuki James Mwangi'
+    };
+    DB.amenityBookings.unshift(newBk);
+    return json({ success: true, id: newBk.id, booking_reference: ref, total_fee: totalFee, amenity_name: amenity.name, message: `Booking ${ref} confirmed for ${amenity.name}.` }, 201);
   }
 
   // Catch-all 404 for unmatched API routes

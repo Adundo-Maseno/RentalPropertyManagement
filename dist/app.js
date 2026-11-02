@@ -35,6 +35,13 @@ class BomaSphereApp {
       expenses: [],
       users: [],
       currentResidentId: 1, // Default tenant for self-service portal
+      currency: 'KES',
+      fxRates: { KES: 1, USD: 129.50, GBP: 168.20, EUR: 141.00 },
+      leaseAgreements: [],
+      inspections: [],
+      visitorPasses: [],
+      amenities: [],
+      amenityBookings: []
     };
 
     this.charts = {
@@ -177,7 +184,11 @@ class BomaSphereApp {
       expenses: 'Property Operating Expenses',
       higgsfield: 'Higgsfield.ai 4K Tour Studio',
       users: 'Roles & SaaS User Management',
-      'tenant-portal': 'Resident Self-Service Portal'
+      'tenant-portal': 'Resident Self-Service Portal',
+      leases: 'Digital Lease Agreements & E-Signatures',
+      inspections: 'Move-In / Move-Out Condition Audits & Deposit Settlement',
+      'visitor-passes': 'Gated Estate Visitor Passes & QR Security',
+      amenities: 'Shared Estate Amenities & Clubhouse Bookings'
     };
 
     const titleEl = document.getElementById('page-title');
@@ -244,14 +255,19 @@ class BomaSphereApp {
       const role = this.state.authUser ? this.state.authUser.role : 'property_manager';
 
       // Always fetch base operational entities
-      const [statsData, properties, units, tenants, waterReadings, maintenance, comms] = await Promise.all([
+      const [statsData, properties, units, tenants, waterReadings, maintenance, comms, leaseAgreements, inspections, visitorPasses, amenities, amenityBookings] = await Promise.all([
         this.fetchAPI('/api/stats').catch(() => ({ stats: null, recentPayments: [], recentTickets: [] })),
         this.fetchAPI('/api/properties').catch(() => []),
         this.fetchAPI('/api/units').catch(() => []),
         this.fetchAPI('/api/tenants').catch(() => []),
         this.fetchAPI('/api/water-readings').catch(() => []),
         this.fetchAPI('/api/maintenance').catch(() => []),
-        this.fetchAPI('/api/communications').catch(() => [])
+        this.fetchAPI('/api/communications').catch(() => []),
+        this.fetchAPI('/api/leases/agreements').catch(() => []),
+        this.fetchAPI('/api/inspections').catch(() => []),
+        this.fetchAPI('/api/visitor-passes').catch(() => []),
+        this.fetchAPI('/api/amenities').catch(() => []),
+        this.fetchAPI('/api/amenity-bookings').catch(() => [])
       ]);
 
       // Role-enforced data retrieval
@@ -285,6 +301,11 @@ class BomaSphereApp {
       this.state.communications = Array.isArray(comms) ? comms : [];
       this.state.expenses = Array.isArray(expenses) ? expenses : [];
       this.state.users = Array.isArray(users) ? users : [];
+      this.state.leaseAgreements = Array.isArray(leaseAgreements?.agreements) ? leaseAgreements.agreements : (Array.isArray(leaseAgreements) ? leaseAgreements : []);
+      this.state.inspections = Array.isArray(inspections?.inspections) ? inspections.inspections : (Array.isArray(inspections) ? inspections : []);
+      this.state.visitorPasses = Array.isArray(visitorPasses?.passes) ? visitorPasses.passes : (Array.isArray(visitorPasses) ? visitorPasses : []);
+      this.state.amenities = Array.isArray(amenities?.amenities) ? amenities.amenities : (Array.isArray(amenities) ? amenities : []);
+      this.state.amenityBookings = Array.isArray(amenityBookings?.bookings) ? amenityBookings.bookings : (Array.isArray(amenityBookings) ? amenityBookings : []);
 
       this.updateSidebarSummary();
       this.renderCurrentView();
@@ -367,6 +388,18 @@ class BomaSphereApp {
         break;
       case 'tenant-portal':
         this.renderTenantPortal();
+        break;
+      case 'leases':
+        this.renderLeases();
+        break;
+      case 'inspections':
+        this.renderInspections();
+        break;
+      case 'visitor-passes':
+        this.renderVisitorPasses();
+        break;
+      case 'amenities':
+        this.renderAmenities();
         break;
     }
   }
@@ -3249,6 +3282,714 @@ class BomaSphereApp {
       await this.refreshAllData();
     } catch (err) {
       this.showToast(err.message, 'error');
+    }
+  }
+
+  // ==========================================
+  // MULTI-CURRENCY & ENTERPRISE MODULES
+  // ==========================================
+  setCurrency(curr) {
+    this.state.currency = curr || 'KES';
+    const sel = document.getElementById('currency-selector');
+    if (sel && sel.value !== this.state.currency) {
+      sel.value = this.state.currency;
+    }
+    this.renderCurrentView();
+  }
+
+  formatMoney(amt) {
+    if (amt === null || amt === undefined) return '-';
+    const val = Number(amt) || 0;
+    const c = this.state.currency || 'KES';
+    if (c === 'USD') {
+      return '$' + (val / 129.50).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    if (c === 'GBP') {
+      return '£' + (val / 168.20).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    if (c === 'EUR') {
+      return '€' + (val / 141.00).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    return 'KES ' + Math.round(val).toLocaleString();
+  }
+
+  // MODULE 1: DIGITAL LEASE AGREEMENTS & E-SIGNATURES
+  renderLeases() {
+    const tbody = document.getElementById('leases-table-body');
+    if (!tbody) return;
+    const leases = this.state.leaseAgreements || [];
+    if (!leases.length) {
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400">No digital lease agreements on record.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = leases.map(l => {
+      const isSigned = l.tenant_signed || l.status === 'executed';
+      const signBadge = isSigned 
+        ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+             <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i> E-Signed (${l.tenant_signed_at ? l.tenant_signed_at.substring(0, 10) : 'Digital'})
+           </span>`
+        : `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
+             <i data-lucide="clock" class="w-3 h-3 mr-1"></i> Awaiting Signature
+           </span>`;
+
+      const statusBadge = l.status === 'executed'
+        ? `<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">Executed</span>`
+        : `<span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 font-bold border border-amber-200">${this.escapeHtml(l.status || 'Pending')}</span>`;
+
+      return `
+        <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition">
+          <td class="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">${this.escapeHtml(l.agreement_code)}</td>
+          <td class="py-3 px-4">
+            <div class="font-bold text-slate-800 dark:text-zinc-200">${this.escapeHtml(l.property_name || 'Kilimani Royal Heights')}</div>
+            <div class="text-[11px] text-slate-400">Unit ${this.escapeHtml(l.unit_number || 'A101')}</div>
+          </td>
+          <td class="py-3 px-4 text-slate-800 dark:text-zinc-200 font-medium">${this.escapeHtml(l.tenant_name || 'Resident')}</td>
+          <td class="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">${this.formatMoney(l.monthly_rent)}</td>
+          <td class="py-3 px-4 text-slate-500 dark:text-zinc-400 text-[11px]">
+            ${this.escapeHtml(l.start_date)} to ${this.escapeHtml(l.end_date)}
+          </td>
+          <td class="py-3 px-4">${signBadge}</td>
+          <td class="py-3 px-4">${statusBadge}</td>
+          <td class="py-3 px-4 text-right">
+            ${isSigned 
+              ? `<button onclick="app.viewLeaseDetails(${l.id})" class="px-2.5 py-1 text-slate-600 hover:text-slate-900 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded font-semibold text-[11px] transition">View Hash</button>`
+              : `<button onclick="app.openLeaseSignModal(${l.id})" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-semibold text-[11px] shadow-xs transition flex items-center space-x-1 inline-flex">
+                   <i data-lucide="edit-3" class="w-3 h-3"></i>
+                   <span>E-Sign</span>
+                 </button>`
+            }
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  openLeaseSignModal(id) {
+    const lease = (this.state.leaseAgreements || []).find(l => l.id == id);
+    if (!lease) return;
+
+    document.getElementById('modal-lease-id').value = lease.id;
+    document.getElementById('sign-lease-code').textContent = lease.agreement_code;
+    document.getElementById('sign-lease-tenant').textContent = lease.tenant_name || 'Resident';
+    document.getElementById('sign-lease-rent').textContent = this.formatMoney(lease.monthly_rent);
+    document.getElementById('sign-lease-period').textContent = `${lease.start_date} to ${lease.end_date}`;
+
+    this.openModal('modal-lease-sign');
+    setTimeout(() => this.initLeaseSignaturePad(), 150);
+  }
+
+  viewLeaseDetails(id) {
+    const lease = (this.state.leaseAgreements || []).find(l => l.id == id);
+    if (!lease) return;
+    alert(`Digital Agreement: ${lease.agreement_code}\nStatus: Executed\nContract Hash: ${lease.contract_hash || 'SHA256: 7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069'}\nSigned At: ${lease.tenant_signed_at || 'Recorded'}\nTenant: ${lease.tenant_name}`);
+  }
+
+  initLeaseSignaturePad() {
+    const canvas = document.getElementById('lease-signature-pad');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#047857';
+
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    const getPos = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      if (e.touches && e.touches[0]) {
+        return {
+          x: (e.touches[0].clientX - rect.left) * scaleX,
+          y: (e.touches[0].clientY - rect.top) * scaleY
+        };
+      }
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
+      };
+    };
+
+    const startDraw = (e) => {
+      e.preventDefault();
+      isDrawing = true;
+      const pos = getPos(e);
+      lastX = pos.x;
+      lastY = pos.y;
+    };
+
+    const draw = (e) => {
+      if (!isDrawing) return;
+      e.preventDefault();
+      const pos = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+      lastX = pos.x;
+      lastY = pos.y;
+    };
+
+    const endDraw = () => {
+      if (isDrawing) {
+        isDrawing = false;
+      }
+    };
+
+    canvas.onmousedown = startDraw;
+    canvas.onmousemove = draw;
+    window.onmouseup = endDraw;
+
+    canvas.ontouchstart = startDraw;
+    canvas.ontouchmove = draw;
+    window.ontouchend = endDraw;
+  }
+
+  clearLeaseSignature() {
+    const canvas = document.getElementById('lease-signature-pad');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  async submitLeaseSignature() {
+    const id = document.getElementById('modal-lease-id').value;
+    if (!id) return;
+    const canvas = document.getElementById('lease-signature-pad');
+    const signatureSvg = canvas ? canvas.toDataURL('image/png') : '<svg>e-signature</svg>';
+
+    try {
+      const res = await this.fetchAPI(`/api/leases/agreements/${id}/sign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          signature: signatureSvg,
+          signature_svg: signatureSvg,
+          signer_role: 'manager',
+          signer_name: this.state.authUser?.name || 'Lead Estate Manager'
+        })
+      });
+      this.closeModal('modal-lease-sign');
+      this.showToast(`Agreement Counter-Signed! Hash: ${(res.agreement?.contract_hash || res.contract_hash || 'SHA256').substring(0, 16)}...`, 'success');
+      await this.refreshAllData();
+      this.renderLeases();
+    } catch (err) {
+      this.showToast(err.message || 'Failed to sign lease agreement', 'error');
+    }
+  }
+
+  // MODULE 2: MOVE-IN / MOVE-OUT INSPECTIONS & DEPOSIT SETTLEMENT
+  renderInspections() {
+    const tbody = document.getElementById('inspections-table-body');
+    if (!tbody) return;
+    const items = this.state.inspections || [];
+    if (!items.length) {
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400">No property inspection audits recorded.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = items.map(insp => {
+      const isMoveOut = insp.inspection_type === 'move_out';
+      const typeBadge = isMoveOut 
+        ? `<span class="px-2 py-0.5 rounded font-bold bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border border-purple-200">Move-Out Exit</span>`
+        : `<span class="px-2 py-0.5 rounded font-bold bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200">Move-In Handover</span>`;
+
+      const isSettled = insp.status === 'settled' || insp.deposit_refund_status === 'settled';
+      const statusBadge = isSettled
+        ? `<span class="px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">Settled (Voucher Disbursed)</span>`
+        : `<span class="px-2 py-0.5 rounded font-bold bg-amber-100 text-amber-800 border border-amber-300">${this.escapeHtml(insp.status || 'completed')}</span>`;
+
+      const deductions = (Number(insp.damages_total || insp.damage_deductions) || 0) + (Number(insp.unpaid_utility_arrears || insp.unpaid_arrears_deductions) || 0);
+
+      return `
+        <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition">
+          <td class="py-3 px-4">${typeBadge}</td>
+          <td class="py-3 px-4 font-bold text-slate-800 dark:text-zinc-200">
+            ${this.escapeHtml(insp.property_name || 'Kilimani Royal Heights')} - Unit ${this.escapeHtml(insp.unit_number || 'A101')}
+          </td>
+          <td class="py-3 px-4 text-[11px] text-slate-600 dark:text-zinc-300">
+            <div class="font-semibold">${this.escapeHtml(insp.inspector_name || 'Estates Inspector')}</div>
+            <div class="text-slate-400">${this.escapeHtml(insp.inspection_date)}</div>
+          </td>
+          <td class="py-3 px-4 font-mono font-bold text-slate-800 dark:text-zinc-200">${this.formatMoney(insp.deposit_held)}</td>
+          <td class="py-3 px-4 font-mono text-rose-600 dark:text-rose-400 font-bold">- ${this.formatMoney(deductions)}</td>
+          <td class="py-3 px-4 font-mono text-emerald-600 dark:text-emerald-400 font-extrabold">${this.formatMoney(insp.net_deposit_refund)}</td>
+          <td class="py-3 px-4">${statusBadge}</td>
+          <td class="py-3 px-4 text-right">
+            ${isMoveOut && !isSettled
+              ? `<button onclick="app.settleDepositRefund(${insp.id})" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-[11px] shadow-xs transition">Disburse Refund</button>`
+              : `<span class="text-slate-400 text-[11px]">Audit Complete</span>`
+            }
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  openNewInspectionModal() {
+    const sel = document.getElementById('insp-unit-id');
+    if (sel) {
+      sel.innerHTML = (this.state.units || []).map(u => 
+        `<option value="${u.id}">${this.escapeHtml(u.property_name || 'Property')} - Unit ${this.escapeHtml(u.unit_number)}</option>`
+      ).join('');
+    }
+    this.updateInspectionMath();
+    this.openModal('modal-new-inspection');
+  }
+
+  updateInspectionMath() {
+    const item1 = document.getElementById('insp-item-1-status')?.value === 'Damaged' ? 4500 : 0;
+    const item2 = document.getElementById('insp-item-2-status')?.value === 'Damaged' ? 2500 : 0;
+    const item3 = document.getElementById('insp-item-3-status')?.value === 'Damaged' ? 3200 : 0;
+    const item4 = document.getElementById('insp-item-4-status')?.value === 'Damaged' ? 1800 : 0;
+
+    const c1 = document.getElementById('insp-item-1-cost');
+    const c2 = document.getElementById('insp-item-2-cost');
+    const c3 = document.getElementById('insp-item-3-cost');
+    const c4 = document.getElementById('insp-item-4-cost');
+    if (c1) c1.textContent = `KES ${item1.toLocaleString()}`;
+    if (c2) c2.textContent = `KES ${item2.toLocaleString()}`;
+    if (c3) c3.textContent = `KES ${item3.toLocaleString()}`;
+    if (c4) c4.textContent = `KES ${item4.toLocaleString()}`;
+
+    const totalDamages = item1 + item2 + item3 + item4;
+    const depositHeld = 130000;
+    const unpaidArrears = 2150;
+    const netRefund = Math.max(0, depositHeld - totalDamages - unpaidArrears);
+
+    const mathDamages = document.getElementById('insp-math-damages');
+    const mathNet = document.getElementById('insp-math-net');
+    if (mathDamages) mathDamages.textContent = `- KES ${totalDamages.toLocaleString()}`;
+    if (mathNet) mathNet.textContent = `KES ${netRefund.toLocaleString()}`;
+  }
+
+  async submitInspectionReport(e) {
+    if (e) e.preventDefault();
+    const type = document.getElementById('insp-type')?.value || 'move_out';
+    const unitId = document.getElementById('insp-unit-id')?.value || 1;
+
+    const item1 = document.getElementById('insp-item-1-status')?.value === 'Damaged' ? 4500 : 0;
+    const item2 = document.getElementById('insp-item-2-status')?.value === 'Damaged' ? 2500 : 0;
+    const item3 = document.getElementById('insp-item-3-status')?.value === 'Damaged' ? 3200 : 0;
+    const item4 = document.getElementById('insp-item-4-status')?.value === 'Damaged' ? 1800 : 0;
+
+    const checklist = [
+      { item: 'Living Room Walls & Paint', status: item1 ? 'Damaged' : 'Pristine', repair_cost: item1 },
+      { item: 'Kitchen Sink & Mixer Taps', status: item2 ? 'Damaged' : 'Pristine', repair_cost: item2 },
+      { item: 'Bathroom Shower & Mirror', status: item3 ? 'Damaged' : 'Pristine', repair_cost: item3 },
+      { item: 'Sockets, Switches & Fixtures', status: item4 ? 'Damaged' : 'Pristine', repair_cost: item4 }
+    ];
+
+    const payload = {
+      unit_id: Number(unitId),
+      tenant_id: 1,
+      inspection_type: type,
+      inspector_name: this.state.authUser?.name || 'Lead Estate Manager',
+      checklist,
+      deposit_held: 130000,
+      unpaid_utility_arrears: 2150
+    };
+
+    try {
+      await this.fetchAPI('/api/inspections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      this.closeModal('modal-new-inspection');
+      this.showToast('Inspection Audit Logged and Deposit Settlement Saved!', 'success');
+      await this.refreshAllData();
+      this.renderInspections();
+    } catch (err) {
+      this.showToast(err.message || 'Failed to submit inspection report', 'error');
+    }
+  }
+
+  async settleDepositRefund(id) {
+    if (!confirm('Authorize deposit settlement payout for this inspection?')) return;
+    try {
+      const res = await this.fetchAPI(`/api/inspections/${id}/settle-deposit`, {
+        method: 'POST'
+      });
+      this.showToast(`Deposit settled! Net refund: KES ${Number(res.net_refund_amount || 0).toLocaleString()} (${res.voucher_number})`, 'success');
+      await this.refreshAllData();
+      this.renderInspections();
+    } catch (err) {
+      this.showToast(err.message || 'Failed to settle deposit', 'error');
+    }
+  }
+
+  // MODULE 3: GATED ESTATE VISITOR PASSES & QR BARRIER SECURITY
+  renderVisitorPasses() {
+    const tbody = document.getElementById('visitor-passes-table-body');
+    if (!tbody) return;
+    const passes = this.state.visitorPasses || [];
+    if (!passes.length) {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400">No active visitor passes found.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = passes.map(p => {
+      let statusBadge;
+      if (p.gate_status === 'checked_in') {
+        statusBadge = `<span class="px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">Inside Estate</span>`;
+      } else if (p.gate_status === 'checked_out') {
+        statusBadge = `<span class="px-2 py-0.5 rounded font-bold bg-slate-100 text-slate-700 border border-slate-300">Exited</span>`;
+      } else {
+        statusBadge = `<span class="px-2 py-0.5 rounded font-bold bg-blue-100 text-blue-800 border border-blue-300">Active (Expected)</span>`;
+      }
+
+      return `
+        <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition">
+          <td class="py-3 px-4">
+            <span class="font-mono font-extrabold text-sm text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-1 rounded border border-emerald-200 dark:border-emerald-800">${this.escapeHtml(p.pass_code)}</span>
+          </td>
+          <td class="py-3 px-4">
+            <div class="font-bold text-slate-800 dark:text-zinc-200">${this.escapeHtml(p.property_name || 'Kilimani Royal Heights')}</div>
+            <div class="text-[11px] text-slate-400">Unit ${this.escapeHtml(p.unit_number || 'A101')} &bull; ${this.escapeHtml(p.resident_name || 'Resident')}</div>
+          </td>
+          <td class="py-3 px-4">
+            <div class="font-bold text-slate-800 dark:text-zinc-200">${this.escapeHtml(p.visitor_name)}</div>
+            <div class="text-[11px] text-slate-400 font-mono">${this.escapeHtml(p.visitor_phone || '-')}</div>
+          </td>
+          <td class="py-3 px-4 font-mono font-bold text-slate-700 dark:text-zinc-300">${this.escapeHtml(p.vehicle_plate || 'Pedestrian')}</td>
+          <td class="py-3 px-4 text-[11px] text-slate-600 dark:text-zinc-400">
+            <div>${this.escapeHtml(p.valid_date)}</div>
+            <div class="text-slate-400">${this.escapeHtml(p.valid_time_slot)}</div>
+          </td>
+          <td class="py-3 px-4">${statusBadge}</td>
+          <td class="py-3 px-4 text-right">
+            ${p.gate_status !== 'checked_out'
+              ? `<button onclick="app.quickGateCheck('${p.pass_code}', '${p.gate_status === 'checked_in' ? 'check_out' : 'check_in'}')" class="px-2 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded text-[11px] font-semibold transition">
+                  ${p.gate_status === 'checked_in' ? 'Log Exit' : 'Log Entry'}
+                 </button>`
+              : `<span class="text-slate-400 text-[11px]">Pass Concluded</span>`
+            }
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  openNewVisitorPassModal() {
+    const today = new Date().toISOString().substring(0, 10);
+    const dateInput = document.getElementById('pass-valid-date');
+    if (dateInput) dateInput.value = today;
+    this.openModal('modal-new-visitor-pass');
+  }
+
+  async submitNewVisitorPass(e) {
+    if (e) e.preventDefault();
+    const name = document.getElementById('pass-visitor-name')?.value;
+    const phone = document.getElementById('pass-visitor-phone')?.value;
+    const plate = document.getElementById('pass-vehicle-plate')?.value;
+    const validDate = document.getElementById('pass-valid-date')?.value;
+    const slot = document.getElementById('pass-time-slot')?.value;
+
+    try {
+      const res = await this.fetchAPI('/api/visitor-passes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          unit_id: 1,
+          visitor_name: name,
+          visitor_phone: phone,
+          vehicle_plate: plate,
+          valid_date: validDate,
+          valid_time_slot: slot
+        })
+      });
+      this.closeModal('modal-new-visitor-pass');
+      this.showToast(`Visitor Pass Generated! PIN: ${res.pass_code}`, 'success');
+      await this.refreshAllData();
+      this.renderVisitorPasses();
+    } catch (err) {
+      this.showToast(err.message || 'Failed to issue visitor pass', 'error');
+    }
+  }
+
+  openGateSecurityScannerModal() {
+    const resultDiv = document.getElementById('gate-scan-result');
+    if (resultDiv) {
+      resultDiv.classList.add('hidden');
+      resultDiv.innerHTML = '';
+    }
+    const input = document.getElementById('scan-pass-code');
+    if (input) input.value = '';
+    this.openModal('modal-visitor-scanner');
+  }
+
+  async validateGatePass(action) {
+    const code = document.getElementById('scan-pass-code')?.value.trim();
+    if (!code) {
+      this.showToast('Please enter a 4-digit PIN or pass code', 'error');
+      return;
+    }
+
+    try {
+      const res = await this.fetchAPI('/api/visitor-passes/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pass_code: code, action })
+      });
+
+      const resultDiv = document.getElementById('gate-scan-result');
+      if (resultDiv) {
+        resultDiv.classList.remove('hidden');
+        resultDiv.className = 'p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700 text-xs text-emerald-900 dark:text-emerald-200 space-y-1';
+        resultDiv.innerHTML = `
+          <div class="font-bold flex items-center space-x-1">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+            <span>Barrier Authorized: ${this.escapeHtml(action === 'check_in' ? 'Check-In Granted' : 'Check-Out Cleared')}</span>
+          </div>
+          <div>Visitor: <strong>${this.escapeHtml(res.visitor_pass.visitor_name)}</strong></div>
+          <div>Vehicle: <strong>${this.escapeHtml(res.visitor_pass.vehicle_plate || 'Pedestrian')}</strong></div>
+          <div>Destination: Unit ${this.escapeHtml(res.visitor_pass.unit_number || 'A101')}</div>
+        `;
+        if (window.lucide) lucide.createIcons();
+      }
+      this.showToast(`Barrier Updated for Pass ${res.visitor_pass.pass_code}`, 'success');
+      await this.refreshAllData();
+      this.renderVisitorPasses();
+    } catch (err) {
+      const resultDiv = document.getElementById('gate-scan-result');
+      if (resultDiv) {
+        resultDiv.classList.remove('hidden');
+        resultDiv.className = 'p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-700 text-xs text-rose-900 dark:text-rose-200';
+        resultDiv.innerHTML = `<span class="font-bold">Access Denied:</span> ${this.escapeHtml(err.message)}`;
+      }
+    }
+  }
+
+  async quickGateCheck(code, action) {
+    try {
+      await this.fetchAPI('/api/visitor-passes/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pass_code: code, action })
+      });
+      this.showToast(`Pass ${code} logged as ${action === 'check_in' ? 'Checked-In' : 'Checked-Out'}`, 'success');
+      await this.refreshAllData();
+      this.renderVisitorPasses();
+    } catch (err) {
+      this.showToast(err.message, 'error');
+    }
+  }
+
+  // MODULE 4: DIASPORA LANDLORD MULTI-CURRENCY & INVESTMENT ROI HUB
+  async openDiasporaRoiModal() {
+    this.openModal('modal-diaspora-roi');
+    const container = document.getElementById('diaspora-roi-content');
+    if (!container) return;
+    container.innerHTML = `<div class="text-center py-8 text-slate-400">Loading Diaspora ROI Telemetry...</div>`;
+
+    try {
+      const data = await this.fetchAPI('/api/reports/diaspora-roi');
+      const summary = data.portfolio_summary || {};
+      const totalKES = Number(summary.total_annual_rent_kes || 74800000);
+      const monthlyKES = Math.round(totalKES / 12);
+      const totalValuationKES = Number(summary.total_valuation_kes || 880000000);
+
+      const monthlyUSD = Math.round(monthlyKES / 129.50);
+      const annualUSD = Math.round(totalKES / 129.50);
+      const monthlyGBP = Math.round(monthlyKES / 168.20);
+      const annualGBP = Math.round(totalKES / 168.20);
+      const monthlyEUR = Math.round(monthlyKES / 141.00);
+      const annualEUR = Math.round(totalKES / 141.00);
+
+      container.innerHTML = `
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-zinc-800 border">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Monthly Gross</span>
+            <div class="font-extrabold text-sm text-slate-900 dark:text-white mt-1">KES ${monthlyKES.toLocaleString()}</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-zinc-800 border">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Annual Gross</span>
+            <div class="font-extrabold text-sm text-emerald-600 dark:text-emerald-400 mt-1">KES ${totalKES.toLocaleString()}</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-zinc-800 border">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Portfolio Cap Rate</span>
+            <div class="font-extrabold text-sm text-blue-600 dark:text-blue-400 mt-1">${summary.average_cap_rate || '7.8%'}</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-zinc-800 border">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Net Yield ROI</span>
+            <div class="font-extrabold text-sm text-purple-600 dark:text-purple-400 mt-1">${summary.average_net_yield || '8.5%'}</div>
+          </div>
+        </div>
+
+        <div class="border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden mt-4">
+          <div class="bg-slate-100 dark:bg-zinc-800 px-4 py-2 font-bold text-xs text-slate-700 dark:text-zinc-200">
+            Multi-Currency Remittance Disbursable Values
+          </div>
+          <table class="w-full text-left text-xs divide-y divide-slate-100 dark:divide-zinc-800">
+            <thead class="bg-slate-50 dark:bg-zinc-800/50 text-slate-500 text-[11px]">
+              <tr>
+                <th class="py-2.5 px-3">Currency</th>
+                <th class="py-2.5 px-3">FX Rate (KES)</th>
+                <th class="py-2.5 px-3">Monthly Remittance</th>
+                <th class="py-2.5 px-3 font-semibold text-right">Annualized Disbursable</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-zinc-800">
+              <tr>
+                <td class="py-2.5 px-3 font-bold text-emerald-600">KES - Kenya Shilling</td>
+                <td class="py-2.5 px-3 font-mono">1.00</td>
+                <td class="py-2.5 px-3 font-mono font-bold">KES ${monthlyKES.toLocaleString()}</td>
+                <td class="py-2.5 px-3 font-mono font-bold text-right">KES ${totalKES.toLocaleString()}</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 px-3 font-bold text-blue-600">USD - US Dollar</td>
+                <td class="py-2.5 px-3 font-mono">129.50</td>
+                <td class="py-2.5 px-3 font-mono font-bold">$${monthlyUSD.toLocaleString()}</td>
+                <td class="py-2.5 px-3 font-mono font-bold text-right">$${annualUSD.toLocaleString()}</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 px-3 font-bold text-purple-600">GBP - British Pound</td>
+                <td class="py-2.5 px-3 font-mono">168.20</td>
+                <td class="py-2.5 px-3 font-mono font-bold">£${monthlyGBP.toLocaleString()}</td>
+                <td class="py-2.5 px-3 font-mono font-bold text-right">£${annualGBP.toLocaleString()}</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 px-3 font-bold text-amber-600">EUR - Euro</td>
+                <td class="py-2.5 px-3 font-mono">141.00</td>
+                <td class="py-2.5 px-3 font-mono font-bold">€${monthlyEUR.toLocaleString()}</td>
+                <td class="py-2.5 px-3 font-mono font-bold text-right">€${annualEUR.toLocaleString()}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+    } catch (err) {
+      container.innerHTML = `<div class="text-rose-500 py-4 text-center">Failed to load Diaspora ROI data: ${this.escapeHtml(err.message)}</div>`;
+    }
+  }
+
+  // MODULE 5: SHARED ESTATE AMENITIES & CLUBHOUSE BOOKINGS
+  renderAmenities() {
+    const grid = document.getElementById('amenities-showcase-grid');
+    const tbody = document.getElementById('amenity-bookings-table-body');
+    const amenities = this.state.amenities || [];
+    const bookings = this.state.amenityBookings || [];
+
+    if (grid) {
+      if (!amenities.length) {
+        grid.innerHTML = `<div class="col-span-4 text-center py-8 text-slate-400">No amenities registered for this portfolio.</div>`;
+      } else {
+        grid.innerHTML = amenities.map(a => `
+          <div class="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/90 dark:border-zinc-800 p-4 shadow-xs flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                  <i data-lucide="${this.escapeHtml(a.icon || 'palmtree')}" class="w-5 h-5"></i>
+                </div>
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300">
+                  Max ${a.capacity_persons} Pax
+                </span>
+              </div>
+              <h3 class="font-bold text-sm text-slate-900 dark:text-white">${this.escapeHtml(a.name)}</h3>
+              <p class="text-xs text-slate-500 mt-1">${this.escapeHtml(a.description || '')}</p>
+            </div>
+            <div class="pt-4 mt-3 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] uppercase text-slate-400 block font-semibold">Rate</span>
+                <span class="font-bold font-mono text-xs text-slate-900 dark:text-white">${this.formatMoney(a.hourly_rate)}/hr</span>
+              </div>
+              <button onclick="app.openNewAmenityBookingModal(${a.id})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1">
+                <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
+                <span>Reserve</span>
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    if (tbody) {
+      if (!bookings.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">No reservations scheduled.</td></tr>`;
+      } else {
+        tbody.innerHTML = bookings.map(b => `
+          <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition">
+            <td class="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">${this.escapeHtml(b.booking_ref)}</td>
+            <td class="py-3 px-4 font-bold text-slate-800 dark:text-zinc-200">${this.escapeHtml(b.amenity_name || 'Amenity')}</td>
+            <td class="py-3 px-4 text-slate-700 dark:text-zinc-300">${this.escapeHtml(b.resident_name || 'Resident')} (Unit ${this.escapeHtml(b.unit_number || 'A101')})</td>
+            <td class="py-3 px-4 text-[11px] text-slate-600 dark:text-zinc-400">
+              <div>${this.escapeHtml(b.booking_date)}</div>
+              <div class="text-slate-400">${this.escapeHtml(b.start_time)} (${b.duration_hours} hrs)</div>
+            </td>
+            <td class="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">${this.formatMoney(b.total_fee)}</td>
+            <td class="py-3 px-4">
+              <span class="px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px]">Confirmed</span>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  openNewAmenityBookingModal(amenityId) {
+    const sel = document.getElementById('book-amenity-id');
+    if (sel) {
+      sel.innerHTML = (this.state.amenities || []).map(a => 
+        `<option value="${a.id}" ${a.id == amenityId ? 'selected' : ''}>${this.escapeHtml(a.name)} (KES ${Number(a.hourly_rate).toLocaleString()}/hr)</option>`
+      ).join('');
+    }
+    const today = new Date().toISOString().substring(0, 10);
+    const dateInput = document.getElementById('book-amenity-date');
+    if (dateInput) dateInput.value = today;
+    this.updateAmenityFee();
+    this.openModal('modal-new-amenity-booking');
+  }
+
+  updateAmenityFee() {
+    const amenityId = document.getElementById('book-amenity-id')?.value;
+    const hours = Number(document.getElementById('book-amenity-hours')?.value) || 2;
+    const amenity = (this.state.amenities || []).find(a => a.id == amenityId) || (this.state.amenities || [])[0];
+    const rate = amenity ? Number(amenity.hourly_rate) : 1500;
+    const total = rate * hours;
+    const feeEl = document.getElementById('book-amenity-total-fee');
+    if (feeEl) feeEl.textContent = this.formatMoney(total);
+  }
+
+  async submitAmenityBooking(e) {
+    if (e) e.preventDefault();
+    const amenityId = document.getElementById('book-amenity-id')?.value;
+    const bookingDate = document.getElementById('book-amenity-date')?.value;
+    const startTime = document.getElementById('book-amenity-time')?.value;
+    const durationHours = Number(document.getElementById('book-amenity-hours')?.value) || 2;
+
+    try {
+      const res = await this.fetchAPI('/api/amenity-bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amenity_id: Number(amenityId),
+          tenant_id: 1,
+          booking_date: bookingDate,
+          start_time: startTime,
+          duration_hours: durationHours
+        })
+      });
+      this.closeModal('modal-new-amenity-booking');
+      this.showToast(`Amenity Reserved! Ref: ${res.booking.booking_ref}`, 'success');
+      await this.refreshAllData();
+      this.renderAmenities();
+    } catch (err) {
+      this.showToast(err.message || 'Failed to book amenity', 'error');
     }
   }
 

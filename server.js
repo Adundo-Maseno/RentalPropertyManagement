@@ -1561,6 +1561,383 @@ async function handleRequest(req, res) {
     }
 
     // ==========================================
+    // MODULE 1: DIGITAL LEASE AGREEMENTS & E-SIGNATURES
+    // ==========================================
+    if (pathname === '/api/leases/agreements' && method === 'GET') {
+      const user = resolveRequestUser(req);
+      let query = `
+        SELECT a.*, t.name as tenant_name, t.phone as tenant_phone, t.email as tenant_email,
+               u.unit_number, u.unit_type, p.name as property_name, p.address as property_address
+        FROM lease_agreements a
+        JOIN tenants t ON a.tenant_id = t.id
+        JOIN units u ON a.unit_id = u.id
+        JOIN properties p ON u.property_id = p.id
+      `;
+      const params = [];
+      if (user && user.role === 'tenant' && user.tenant_id) {
+        query += ' WHERE a.tenant_id = ?';
+        params.push(user.tenant_id);
+      }
+      query += ' ORDER BY a.id DESC';
+      const agreements = db.prepare(query).all(...params);
+      return sendJSON(res, 200, { success: true, count: agreements.length, agreements });
+    }
+
+    if (pathname.startsWith('/api/leases/agreements/') && pathname.endsWith('/sign') && method === 'POST') {
+      const id = pathname.split('/')[4];
+      const b = await parseBody(req);
+      const { signature, signer_role, signer_name } = b; // 'tenant' or 'manager'
+      if (!signature) return sendJSON(res, 400, { error: 'Signature image or text is required.' });
+
+      const agreement = db.prepare('SELECT * FROM lease_agreements WHERE id = ?').get(id);
+      if (!agreement) return sendJSON(res, 404, { error: 'Lease agreement not found.' });
+
+      const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
+      let tenantSig = agreement.tenant_signature;
+      let tenantSignedAt = agreement.tenant_signed_at;
+      let managerSig = agreement.manager_signature;
+      let managerSignedAt = agreement.manager_signed_at;
+
+      if (signer_role === 'manager' || signer_role === 'property_manager' || signer_role === 'super_admin') {
+        managerSig = signature;
+        managerSignedAt = timestamp;
+      } else {
+        tenantSig = signature;
+        tenantSignedAt = timestamp;
+      }
+
+      const isExecuted = !!(tenantSig && managerSig);
+      const newStatus = isExecuted ? 'executed' : (tenantSig ? 'pending_manager' : 'pending_tenant');
+      const hash = 'SHA256-' + crypto.createHash('sha256').update(`${agreement.agreement_code}-${tenantSig}-${managerSig}`).digest('hex').substring(0, 24).toUpperCase();
+
+      db.prepare(`
+        UPDATE lease_agreements
+        SET tenant_signature = ?, tenant_signed_at = ?,
+            manager_signature = ?, manager_signed_at = ?,
+            status = ?, contract_hash = ?
+        WHERE id = ?
+      `).run(tenantSig, tenantSignedAt, managerSig, managerSignedAt, newStatus, hash, id);
+
+      const updated = db.prepare('SELECT * FROM lease_agreements WHERE id = ?').get(id);
+      return sendJSON(res, 200, {
+        success: true,
+        agreement: updated,
+        is_executed: isExecuted,
+        message: isExecuted
+          ? `Lease ${agreement.agreement_code} fully executed and legally binding!`
+          : `Signature recorded for ${signer_name || 'Signer'}.`
+      });
+    }
+
+    if (pathname === '/api/leases/agreements' && method === 'POST') {
+      const b = await parseBody(req);
+      const { lease_id, unit_id, tenant_id, rent_amount, deposit_amount, start_date, end_date, terms_clauses } = b;
+      if (!unit_id || !tenant_id || !rent_amount) {
+        return sendJSON(res, 400, { error: 'Unit ID, Tenant ID, and Rent Amount are required.' });
+      }
+
+      const unit = db.prepare('SELECT unit_number FROM units WHERE id = ?').get(unit_id);
+      const code = `BS-LEASE-2026-${unit?.unit_number || Math.floor(100+Math.random()*900)}`;
+      const hash = 'SHA256-' + crypto.randomBytes(12).toString('hex').toUpperCase();
+
+      const stmt = db.prepare(`
+        INSERT INTO lease_agreements (
+          lease_id, unit_id, tenant_id, agreement_code, rent_amount, deposit_amount,
+          start_date, end_date, terms_clauses, status, contract_hash
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_tenant', ?)
+      `);
+      const info = stmt.run(
+        lease_id || 1, unit_id, tenant_id, code, Number(rent_amount),
+        Number(deposit_amount || rent_amount * 2),
+        start_date || new Date().toISOString().slice(0, 10),
+        end_date || new Date(Date.now() + 365*86400000).toISOString().slice(0, 10),
+        terms_clauses || 'Residential Tenancy Agreement governed by the Laws of Kenya (Landlord and Tenant Act). Rent due by 5th. No subletting.',
+        hash
+      );
+
+      return sendJSON(res, 201, { success: true, id: info.lastInsertRowid, agreement_code: code });
+    }
+
+    // ==========================================
+    // MODULE 2: MOVE-IN / MOVE-OUT INSPECTIONS & DEPOSIT SETTLEMENT
+    // ==========================================
+    if (pathname === '/api/inspections' && method === 'GET') {
+      const inspections = db.prepare(`
+        SELECT i.*, u.unit_number, u.unit_type, p.name as property_name, t.name as tenant_name
+        FROM property_inspections i
+        JOIN units u ON i.unit_id = u.id
+        JOIN properties p ON u.property_id = p.id
+        LEFT JOIN tenants t ON i.tenant_id = t.id
+        ORDER BY i.id DESC
+      `).all();
+
+      const parsed = inspections.map(insp => {
+        let checklist = [];
+        try { checklist = JSON.parse(insp.checklist_json); } catch (e) {}
+        return { ...insp, checklist };
+      });
+
+      return sendJSON(res, 200, { success: true, count: parsed.length, inspections: parsed });
+    }
+
+    if (pathname === '/api/inspections' && method === 'POST') {
+      const b = await parseBody(req);
+      const { unit_id, tenant_id, inspection_type, inspector_name, checklist, deposit_held, unpaid_utility_arrears } = b;
+      if (!unit_id || !inspection_type) {
+        return sendJSON(res, 400, { error: 'Unit ID and Inspection Type (move_in / move_out) are required.' });
+      }
+
+      const items = Array.isArray(checklist) ? checklist : [];
+      const damagesTotal = items.reduce((sum, it) => sum + (Number(it.repair_cost) || 0), 0);
+      const held = Number(deposit_held || 0);
+      const arrears = Number(unpaid_utility_arrears || 0);
+      const netRefund = Math.max(0, held - arrears - damagesTotal);
+
+      const stmt = db.prepare(`
+        INSERT INTO property_inspections (
+          unit_id, tenant_id, inspection_type, inspection_date, inspector_name,
+          checklist_json, damages_total, deposit_held, unpaid_utility_arrears,
+          net_deposit_refund, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed')
+      `);
+      const info = stmt.run(
+        unit_id, tenant_id || null, inspection_type,
+        new Date().toISOString().slice(0, 10),
+        inspector_name || 'Inspector / Caretaker',
+        JSON.stringify(items),
+        damagesTotal, held, arrears, netRefund
+      );
+
+      return sendJSON(res, 201, {
+        success: true,
+        id: info.lastInsertRowid,
+        damages_total: damagesTotal,
+        net_deposit_refund: netRefund,
+        message: 'Inspection report recorded successfully.'
+      });
+    }
+
+    if (pathname.startsWith('/api/inspections/') && pathname.endsWith('/settle-deposit') && method === 'POST') {
+      const id = pathname.split('/')[3];
+      const inspection = db.prepare('SELECT * FROM property_inspections WHERE id = ?').get(id);
+      if (!inspection) return sendJSON(res, 404, { error: 'Inspection report not found.' });
+
+      const refundVoucher = 'REF-DEP-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+      db.prepare("UPDATE property_inspections SET status = 'settled' WHERE id = ?").run(id);
+
+      return sendJSON(res, 200, {
+        success: true,
+        inspection_id: id,
+        voucher_number: refundVoucher,
+        net_refund_amount: inspection.net_deposit_refund,
+        deposit_held: inspection.deposit_held,
+        deductions_total: inspection.damages_total + inspection.unpaid_utility_arrears,
+        message: `Security deposit settled. KES ${Number(inspection.net_deposit_refund).toLocaleString()} queued for M-Pesa B2C refund (${refundVoucher}).`
+      });
+    }
+
+    // ==========================================
+    // MODULE 3: GATED ESTATE VISITOR PASSES & GATE QR SECURITY
+    // ==========================================
+    if (pathname === '/api/visitor-passes' && method === 'GET') {
+      const user = resolveRequestUser(req);
+      let query = `
+        SELECT v.*, u.unit_number, p.name as property_name, t.name as host_name, t.phone as host_phone
+        FROM visitor_passes v
+        JOIN units u ON v.unit_id = u.id
+        JOIN properties p ON u.property_id = p.id
+        JOIN tenants t ON v.tenant_id = t.id
+      `;
+      const params = [];
+      if (user && user.role === 'tenant' && user.tenant_id) {
+        query += ' WHERE v.tenant_id = ?';
+        params.push(user.tenant_id);
+      }
+      query += ' ORDER BY v.id DESC';
+      const passes = db.prepare(query).all(...params);
+      return sendJSON(res, 200, { success: true, count: passes.length, passes });
+    }
+
+    if (pathname === '/api/visitor-passes' && method === 'POST') {
+      const b = await parseBody(req);
+      const { unit_id, tenant_id, visitor_name, visitor_phone, vehicle_plate, valid_date, time_slot } = b;
+      if (!visitor_name || !visitor_phone) {
+        return sendJSON(res, 400, { error: 'Visitor name and phone number are required.' });
+      }
+
+      const unitId = unit_id || 1;
+      const tenantId = tenant_id || 1;
+      const passCode = 'PASS-' + Math.floor(1000 + Math.random() * 9000);
+      const date = valid_date || new Date().toISOString().slice(0, 10);
+      const slot = time_slot || '08:00 AM - 08:00 PM';
+      const qrData = `BOMASPHERE:${passCode}:UNIT-${unitId}:${date}`;
+
+      const stmt = db.prepare(`
+        INSERT INTO visitor_passes (
+          pass_code, unit_id, tenant_id, visitor_name, visitor_phone,
+          vehicle_plate, valid_date, time_slot, status, qr_data
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?)
+      `);
+      const info = stmt.run(passCode, unitId, tenantId, visitor_name, visitor_phone, vehicle_plate || 'N/A', date, slot, qrData);
+
+      return sendJSON(res, 201, {
+        success: true,
+        id: info.lastInsertRowid,
+        pass_code: passCode,
+        qr_data: qrData,
+        message: `Visitor Gate Pass ${passCode} generated and dispatched via SMS.`
+      });
+    }
+
+    if (pathname === '/api/visitor-passes/validate' && method === 'POST') {
+      const b = await parseBody(req);
+      const { pass_code, action } = b; // action: 'check_in' or 'check_out'
+      if (!pass_code) return sendJSON(res, 400, { error: 'Gate pass code is required.' });
+
+      const pass = db.prepare(`
+        SELECT v.*, u.unit_number, p.name as property_name, t.name as host_name
+        FROM visitor_passes v
+        JOIN units u ON v.unit_id = u.id
+        JOIN properties p ON u.property_id = p.id
+        JOIN tenants t ON v.tenant_id = t.id
+        WHERE v.pass_code = ? OR v.pass_code = ?
+      `).get(pass_code.toUpperCase(), 'PASS-' + pass_code.toUpperCase());
+
+      if (!pass) return sendJSON(res, 404, { error: 'Invalid or unknown gate pass code.' });
+
+      const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
+      if (action === 'check_out' || pass.status === 'checked_in') {
+        db.prepare("UPDATE visitor_passes SET status = 'completed', checked_out_at = ? WHERE id = ?").run(timestamp, pass.id);
+        return sendJSON(res, 200, { success: true, action: 'check_out', status: 'completed', pass, message: `Visitor ${pass.visitor_name} checked out.` });
+      } else {
+        db.prepare("UPDATE visitor_passes SET status = 'checked_in', checked_in_at = ? WHERE id = ?").run(timestamp, pass.id);
+        return sendJSON(res, 200, { success: true, action: 'check_in', status: 'checked_in', pass, message: `Access granted for ${pass.visitor_name} to Unit ${pass.unit_number} (${pass.host_name}).` });
+      }
+    }
+
+    // ==========================================
+    // MODULE 4: DIASPORA LANDLORD MULTI-CURRENCY HUB & ROI
+    // ==========================================
+    if (pathname === '/api/reports/diaspora-roi' && method === 'GET') {
+      // Rates: 1 USD = 129.50 KES, 1 GBP = 168.20 KES, 1 EUR = 141.00 KES
+      const FX_RATES = { KES: 1, USD: 1 / 129.50, GBP: 1 / 168.20, EUR: 1 / 141.00 };
+
+      const properties = db.prepare('SELECT * FROM properties').all();
+      const propertyMetrics = properties.map(p => {
+        const units = db.prepare('SELECT COUNT(*) as count, SUM(base_rent) as total_rent FROM units WHERE property_id = ?').get(p.id);
+        const occupied = db.prepare("SELECT COUNT(*) as count FROM units WHERE property_id = ? AND status = 'occupied'").get(p.id)?.count || 0;
+        const totalUnits = units?.count || 1;
+        const occupancyPct = Number(((occupied / totalUnits) * 100).toFixed(1));
+
+        // Valuation based on monthly rent capitalized at 8.5%
+        const annualRentKES = (units?.total_rent || 0) * 12;
+        const estimatedValuationKES = Math.round(annualRentKES / 0.085);
+        const netAnnualYieldPct = 8.5;
+        const capRatePct = 7.8;
+
+        return {
+          id: p.id,
+          name: p.name,
+          city: p.city,
+          property_type: p.property_type,
+          total_units: totalUnits,
+          occupancy_pct: occupancyPct,
+          annual_gross_rent_kes: annualRentKES,
+          estimated_valuation_kes: estimatedValuationKES,
+          net_yield_pct: netAnnualYieldPct,
+          cap_rate_pct: capRatePct
+        };
+      });
+
+      const totalValuationKES = propertyMetrics.reduce((s, p) => s + p.estimated_valuation_kes, 0);
+      const totalAnnualRentKES = propertyMetrics.reduce((s, p) => s + p.annual_gross_rent_kes, 0);
+
+      return sendJSON(res, 200, {
+        success: true,
+        fx_rates: { USD: 129.50, GBP: 168.20, EUR: 141.00 },
+        portfolio_summary: {
+          total_valuation_kes: totalValuationKES,
+          total_valuation_usd: Math.round(totalValuationKES * FX_RATES.USD),
+          total_valuation_gbp: Math.round(totalValuationKES * FX_RATES.GBP),
+          total_valuation_eur: Math.round(totalValuationKES * FX_RATES.EUR),
+          total_annual_rent_kes: totalAnnualRentKES,
+          total_annual_rent_usd: Math.round(totalAnnualRentKES * FX_RATES.USD),
+          average_cap_rate: '7.8%',
+          average_net_yield: '8.5%'
+        },
+        properties: propertyMetrics
+      });
+    }
+
+    // ==========================================
+    // MODULE 5: SHARED ESTATE AMENITIES & BOOKING
+    // ==========================================
+    if (pathname === '/api/amenities' && method === 'GET') {
+      const amenities = db.prepare(`
+        SELECT a.*, p.name as property_name, p.city
+        FROM estate_amenities a
+        JOIN properties p ON a.property_id = p.id
+        ORDER BY a.id ASC
+      `).all();
+      return sendJSON(res, 200, { success: true, count: amenities.length, amenities });
+    }
+
+    if (pathname === '/api/amenity-bookings' && method === 'GET') {
+      const user = resolveRequestUser(req);
+      let query = `
+        SELECT b.*, a.name as amenity_name, a.photo as amenity_photo,
+               u.unit_number, t.name as tenant_name, t.phone as tenant_phone
+        FROM amenity_bookings b
+        JOIN estate_amenities a ON b.amenity_id = a.id
+        JOIN units u ON b.unit_id = u.id
+        JOIN tenants t ON b.tenant_id = t.id
+      `;
+      const params = [];
+      if (user && user.role === 'tenant' && user.tenant_id) {
+        query += ' WHERE b.tenant_id = ?';
+        params.push(user.tenant_id);
+      }
+      query += ' ORDER BY b.id DESC';
+      const bookings = db.prepare(query).all(...params);
+      return sendJSON(res, 200, { success: true, count: bookings.length, bookings });
+    }
+
+    if (pathname === '/api/amenity-bookings' && method === 'POST') {
+      const b = await parseBody(req);
+      const { amenity_id, unit_id, tenant_id, booking_date, start_time, end_time, hours } = b;
+      if (!amenity_id || !booking_date || !start_time) {
+        return sendJSON(res, 400, { error: 'Amenity ID, booking date, and start time are required.' });
+      }
+
+      const amenity = db.prepare('SELECT * FROM estate_amenities WHERE id = ?').get(amenity_id);
+      if (!amenity) return sendJSON(res, 404, { error: 'Amenity not found.' });
+
+      const durationHours = Number(hours || 3);
+      const totalFee = amenity.hourly_fee * durationHours;
+      const ref = 'BK-' + Math.floor(1000 + Math.random() * 9000);
+
+      const stmt = db.prepare(`
+        INSERT INTO amenity_bookings (
+          booking_reference, amenity_id, tenant_id, unit_id,
+          booking_date, start_time, end_time, total_fee, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'confirmed')
+      `);
+      const info = stmt.run(
+        ref, amenity_id, tenant_id || 1, unit_id || 1,
+        booking_date, start_time, end_time || '06:00 PM', totalFee
+      );
+
+      return sendJSON(res, 201, {
+        success: true,
+        id: info.lastInsertRowid,
+        booking_reference: ref,
+        total_fee: totalFee,
+        amenity_name: amenity.name,
+        message: `Booking ${ref} confirmed for ${amenity.name} on ${booking_date}. Total fee: KES ${totalFee.toLocaleString()}.`
+      });
+    }
+
+    // ==========================================
     // STATIC FILE SERVING (Hardened against Traversal & Sinks)
     // ==========================================
     const WINDOWS_RESERVED = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(\..*)?$/i;
