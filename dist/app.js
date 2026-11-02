@@ -1985,10 +1985,6 @@ class BomaSphereApp {
         ${u.property_name} - Unit ${u.unit_number} (${this.formatMoney(u.base_rent)}/mo) [Vacant]
       </option>
     `).join('');
-      <option value="${u.id}" ${preselectedUnitId && Number(preselectedUnitId) === u.id ? 'selected' : ''}>
-        ${u.property_name} - Unit ${u.unit_number} (${this.formatMoney(u.base_rent)}/mo)
-      </option>
-    `).join('');
 
     tenantSelect.innerHTML = this.state.tenants.map(t => `
       <option value="${t.id}">${t.name} (${t.phone || 'No phone'})</option>
@@ -4508,34 +4504,6 @@ class BomaSphereApp {
       setTimeout(() => toast.remove(), 400);
     }, 4000);
   }
-}
-
-// Prototype and window fallbacks
-BomaSphereApp.prototype.openMaintenanceModal = function() {
-  return this.openNewTicketModal();
-};
-
-// Global instance
-let app;
-function initApp() {
-  if (!window.app) {
-    app = new BomaSphereApp();
-    window.app = app;
-  }
-  // Ensure alias is always accessible on window and instance
-  if (window.app && !window.app.openMaintenanceModal) {
-    window.app.openMaintenanceModal = function() {
-      return window.app.openNewTicketModal();
-    };
-  }
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initApp);
-} else {
-  initApp();
-}
-
 
   // ==========================================
   // VIEWING LEADS & PROSPECT TOURS
@@ -4653,6 +4621,22 @@ if (document.readyState === 'loading') {
       this.showToast(err.message || 'Failed to update viewing lead', 'error');
     }
   }
+}
+
+// Global instance & initialization
+let app;
+function initApp() {
+  if (!window.app) {
+    app = new BomaSphereApp();
+    window.app = app;
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 
 // Universal Backward Compatibility Prototype Aliases
 BomaSphereApp.prototype.openMaintenanceModal = BomaSphereApp.prototype.openNewTicketModal;

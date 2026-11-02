@@ -12,7 +12,7 @@ const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'SAMEORIGIN',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'",
+  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cdn.jsdelivr.net https://unpkg.com",
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
 };
 
@@ -520,7 +520,8 @@ async function handleRequest(req, res) {
       db.prepare("UPDATE units SET status = 'occupied' WHERE id = ?").run(unitId);
 
       // Automatically populate Digital Leases & E-sign (lease_agreements)
-      const agreementCode = `BS-LEASE-2026-${unit.unit_number.replace(/\s+/g, '')}`;
+      const suffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+      const agreementCode = `BS-LEASE-2026-${unit.unit_number.replace(/\s+/g, '')}-${suffix}`;
       const contractHash = 'SHA256-' + crypto.randomBytes(12).toString('hex').toUpperCase();
 
       db.prepare(`

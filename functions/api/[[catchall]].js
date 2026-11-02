@@ -371,7 +371,8 @@ export async function onRequest(context) {
 
     if (unit) unit.status = 'occupied';
 
-    const code = `BS-LEASE-2026-${unit ? unit.unit_number.replace(/\s+/g, '') : Math.floor(1000 + Math.random() * 9000)}`;
+    const suffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const code = `BS-LEASE-2026-${unit ? unit.unit_number.replace(/\s+/g, '') : Math.floor(1000 + Math.random() * 9000)}-${suffix}`;
     const hash = 'SHA256-' + Math.random().toString(36).substring(2, 14).toUpperCase();
     const newLease = {
       id: DB.leaseAgreements.length + 1,

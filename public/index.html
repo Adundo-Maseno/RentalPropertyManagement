@@ -102,6 +102,11 @@
         <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
         <span id="mobile-user-role-chip" class="max-w-[70px] truncate">Manager</span>
       </button>
+      <!-- Mobile Sign Out Button -->
+      <button onclick="app.logout()" class="p-1.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-md text-xs font-semibold flex items-center space-x-1 transition" title="Sign Out">
+        <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+        <span class="text-[10px]">Exit</span>
+      </button>
     </div>
   </header>
 
@@ -268,17 +273,16 @@
             <div id="sidebar-user-avatar" class="w-7 h-7 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shrink-0">
               PM
             </div>
-            <div class="min-w-0">
-              <p id="sidebar-user-name" class="font-semibold text-slate-800 dark:text-zinc-200 text-xs truncate max-w-[110px]">Patrick Ndegwa</p>
+            <div class="min-w-0 flex-1">
+              <p id="sidebar-user-name" class="font-semibold text-slate-800 dark:text-zinc-200 text-xs truncate">Patrick Ndegwa</p>
               <p id="sidebar-user-role" class="text-[10px] text-slate-500 truncate">Property Manager</p>
             </div>
           </div>
-          <div class="flex items-center space-x-1 shrink-0">
-            <button onclick="app.logout()" title="Sign Out of Session" class="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-md transition">
-              <i data-lucide="log-out" class="w-4 h-4"></i>
-            </button>
-          </div>
         </div>
+        <button onclick="app.logout()" class="w-full mt-2.5 py-1.5 px-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          <span>Sign Out</span>
+        </button>
       </div>
     </aside>
 
@@ -301,10 +305,13 @@
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
             <span class="font-semibold text-slate-800 dark:text-zinc-200" id="header-user-name">Patrick Ndegwa</span>
             <span class="text-[11px] text-slate-500" id="header-user-role">(Property Manager)</span>
-            <button onclick="app.logout()" class="ml-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition" title="Sign Out">
-              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-            </button>
           </div>
+
+          <!-- Visible Sign Out Button -->
+          <button onclick="app.logout()" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/80 rounded-md font-bold text-xs flex items-center space-x-1.5 transition shadow-2xs" title="Sign Out of Session">
+            <i data-lucide="log-out" class="w-3.5 h-3.5 text-rose-600 dark:text-rose-400"></i>
+            <span>Sign Out</span>
+          </button>
 
           <!-- Multi-Currency Selector & Diaspora ROI -->
           <div class="flex items-center space-x-1.5">
@@ -3237,7 +3244,7 @@
   <div id="toast-container"></div>
 
   <!-- Core Frontend Application Logic -->
-  <script src="app.js?v=2.8"></script>
+  <script src="app.js?v=3.0"></script>
 </body>
 </html>
 
