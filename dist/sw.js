@@ -1,10 +1,10 @@
 /**
  * BomaSphere Property Management System (PMS)
  * Production Progressive Web App (PWA) Service Worker
- * Cache Version: bomasphere-v1.0.0
+ * Cache Version: bomasphere-v2.0.0
  */
 
-const CACHE_NAME = 'bomasphere-cache-v1';
+const CACHE_NAME = 'bomasphere-cache-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -19,42 +19,22 @@ const STATIC_ASSETS = [
   '/icons/apple-touch-icon.png'
 ];
 
-// External CDN dependencies to pre-cache for offline resilience
-const CDN_ASSETS = [
-  'https://cdn.tailwindcss.com',
-  'https://cdn.jsdelivr.net/npm/chart.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js',
-  'https://unpkg.com/lucide@latest'
-];
-
 // Install Event: Cache Core App Shell
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
-      console.log('[SW] Pre-caching static assets and CDN bundles...');
+      console.log('[SW] Pre-caching static assets...');
       try {
         await cache.addAll(STATIC_ASSETS);
       } catch (err) {
         console.warn('[SW] Some local static assets failed to cache:', err);
       }
-      
-      // Best-effort CDN caching
-      for (const url of CDN_ASSETS) {
-        try {
-          const res = await fetch(url, { mode: 'cors' });
-          if (res && res.status === 200) {
-            await cache.put(url, res);
-          }
-        } catch (e) {
-          // Non-blocking CDN fetch
-        }
-      }
     })
   );
 });
 
-// Activate Event: Clear Old Cache Versions & Claim Clients
+// Activate Event: Clear Old Cache Versions & Claim Clients Immediately
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
@@ -70,13 +50,19 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch Event Strategy: Stale-While-Revalidate for Assets, Network-First for APIs
+// Fetch Event Strategy: Stale-While-Revalidate for Same-Origin Assets, Network-First for APIs
 self.addEventListener('fetch', event => {
   const req = event.request;
   const url = new URL(req.url);
 
   // Ignore non-GET requests (e.g. POST payments, invoices)
   if (req.method !== 'GET') {
+    return;
+  }
+
+  // Only handle same-origin requests. Allow external CDNs (Tailwind, Chart.js, Google Fonts, etc.)
+  // to be handled directly by the browser network stack without SW interception.
+  if (url.origin !== self.location.origin) {
     return;
   }
 
@@ -116,7 +102,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Handle Static Assets (CSS, JS, Images, Fonts): Stale-While-Revalidate
+  // Handle Static Assets (CSS, JS, Images): Stale-While-Revalidate
   event.respondWith(
     caches.match(req).then(cachedRes => {
       const fetchPromise = fetch(req).then(networkRes => {

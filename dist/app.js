@@ -1027,6 +1027,10 @@ class BomaSphereApp {
   // CHART INITIALIZATION & UPDATES
   // ==========================================
   initCharts() {
+    if (typeof Chart === 'undefined') {
+      console.warn('[BomaSphere] Chart.js is not loaded; skipping chart init.');
+      return;
+    }
     // 1. Revenue trend bar chart
     const revCtx = document.getElementById('revenueTrendChart')?.getContext('2d');
     if (revCtx) {
@@ -1102,6 +1106,7 @@ class BomaSphereApp {
   }
 
   updateCharts() {
+    if (typeof Chart === 'undefined') return;
     if (!this.state.stats) return;
     const s = this.state.stats;
 
