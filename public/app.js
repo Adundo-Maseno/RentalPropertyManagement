@@ -52,6 +52,16 @@ class BomaSphereApp {
     };
 
     this.deferredPwaPrompt = null;
+    // Robust Aliases for dashboard buttons and modal openers
+    this.openMaintenanceModal = this.openNewTicketModal.bind(this);
+    this.openCreateLeaseModal = this.openAddLeaseModal.bind(this);
+    this.openCustomInvoiceModal = this.openCreateInvoiceModal.bind(this);
+    this.openRecordExpenseModal = this.openAddExpenseModal.bind(this);
+    this.open5thSmsModal = this.openBulk5thSMSModal.bind(this);
+    this.dispatch5thDueSms = this.openBulk5thSMSModal.bind(this);
+    this.dispatchBulk5thReminders = this.openBulk5thSMSModal.bind(this);
+    this.openBroadcastNoticeModal = this.openBroadcastModal.bind(this);
+
 
     this.init();
   }
@@ -2243,27 +2253,58 @@ class BomaSphereApp {
   // ==========================================
   // BROADCAST & EXPENSES
   // ==========================================
-  async openBroadcastModal() {
-    const msg = prompt('Enter Announcement / Notice to Broadcast to All Tenants:\n\n(e.g., Routine tank cleaning scheduled for Wednesday 10am)');
-    if (!msg) return;
+  openBroadcastModal() {
+    const propSelect = document.getElementById('broadcast-property-select');
+    if (propSelect && this.state.properties) {
+      propSelect.innerHTML = '<option value="">All Managed Properties (All Active Tenants)</option>' +
+        this.state.properties.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    }
+    const msgInput = document.getElementById('broadcast-message-input');
+    if (msgInput) msgInput.value = '';
+    this.openModal('modal-broadcast');
+  }
 
-    const channel = prompt('Choose Channel (sms or whatsapp):', 'sms') || 'sms';
+  async handleBroadcastSubmit(e) {
+    if (e) e.preventDefault();
+    const propId = document.getElementById('broadcast-property-select')?.value;
+    const channel = document.querySelector('input[name="broadcast-channel"]:checked')?.value || 'sms';
+    const message = document.getElementById('broadcast-message-input')?.value?.trim();
+    if (!message) {
+      this.showToast('Please enter an announcement message.', 'warning');
+      return;
+    }
+
+    const btn = document.getElementById('btn-broadcast-submit');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span>Sending...</span>';
+    }
 
     try {
+      const payload = {
+        type: channel,
+        message: message
+      };
+      if (propId) payload.property_id = Number(propId);
+
       const res = await this.fetchAPI('/api/communications/broadcast', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: channel,
-          message: msg
-        })
+        body: JSON.stringify(payload)
       });
 
-      this.showToast(`Broadcast notice sent to ${res.recipients_reached} registered tenants!`, 'success');
+      this.closeModal('modal-broadcast');
+      this.showToast(`Broadcast notice sent to ${res.recipients_reached || res.count || 0} registered tenants!`, 'success');
       await this.refreshAllData();
       this.switchView('communications');
     } catch (err) {
-      console.error(err);
+      this.showToast(err.message || 'Failed to send broadcast.', 'error');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="send" class="w-3.5 h-3.5"></i><span>Send Broadcast</span>';
+        if (window.lucide) lucide.createIcons();
+      }
     }
   }
 
@@ -4481,3 +4522,13 @@ if (document.readyState === 'loading') {
 } else {
   initApp();
 }
+
+// Universal Backward Compatibility Prototype Aliases
+BomaSphereApp.prototype.openMaintenanceModal = BomaSphereApp.prototype.openNewTicketModal;
+BomaSphereApp.prototype.openCreateLeaseModal = BomaSphereApp.prototype.openAddLeaseModal;
+BomaSphereApp.prototype.openCustomInvoiceModal = BomaSphereApp.prototype.openCreateInvoiceModal;
+BomaSphereApp.prototype.openRecordExpenseModal = BomaSphereApp.prototype.openAddExpenseModal;
+BomaSphereApp.prototype.open5thSmsModal = BomaSphereApp.prototype.openBulk5thSMSModal;
+BomaSphereApp.prototype.dispatch5thDueSms = BomaSphereApp.prototype.openBulk5thSMSModal;
+BomaSphereApp.prototype.dispatchBulk5thReminders = BomaSphereApp.prototype.openBulk5thSMSModal;
+BomaSphereApp.prototype.openBroadcastNoticeModal = BomaSphereApp.prototype.openBroadcastModal;

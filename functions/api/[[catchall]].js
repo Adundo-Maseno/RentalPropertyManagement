@@ -556,7 +556,7 @@ export async function onRequest(context) {
       reported_date: new Date().toISOString().replace('T', ' ').slice(0, 19)
     };
     DB.maintenance.unshift(newMaint);
-    return json({ success: true, id: newMaint.id, ticket_number: newMaint.ticket_number }, 201);
+    return json({ success: true, id: newMaint.id, ticket_number: newMaint.ticket_number, ticket: newMaint.ticket_number }, 201);
   }
 
   if (pathname.startsWith('/api/maintenance/') && method === 'PUT') {
@@ -578,7 +578,7 @@ export async function onRequest(context) {
   }
 
   if (pathname === '/api/communications/broadcast' && method === 'POST') {
-    return json({ success: true, count: 8, recipients_reached: 8 });
+    return json({ success: true, count: 8, recipients_reached: 8, recipient_count: 8 });
   }
 
   if (pathname === '/api/communications/send' && method === 'POST') {
@@ -652,6 +652,7 @@ export async function onRequest(context) {
         property: prop,
         month: url.searchParams.get('month') || '2026-11',
         gross_collections: 451759,
+        gross_rent_collected: 451759,
         total_billed: 688960,
         total_arrears: 237201,
         management_fee_rate: prop.management_fee_pct,
@@ -847,7 +848,12 @@ export async function onRequest(context) {
     let b = {};
     try { b = await request.json(); } catch(e) {}
     const ref = 'VIEW-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-    return json({ success: true, reference: ref, message: 'Viewing booked successfully. SMS dispatched.' }, 201);
+    return json({
+      success: true,
+      reference: ref,
+      booking_reference: ref,
+      message: 'Viewing booked successfully. SMS dispatched.'
+    }, 201);
   }
 
   // 14. WhatsApp Business Bot
@@ -882,13 +888,21 @@ export async function onRequest(context) {
     const income = Number(b.monthly_income || 250000);
     const rent = 65000;
     const ratio = Number(((rent / income) * 100).toFixed(1));
-    return json({
-      success: true,
+    const analysisData = {
       applicant_name: b.applicant_name || 'Applicant',
       crb_score: ratio > 40 ? 590 : 765,
       risk_category: ratio > 40 ? 'High Risk' : 'Low Risk',
       rent_to_income_pct: ratio,
       recommendation: ratio > 40 ? 'Declined: Rent exceeds 40% threshold' : 'Approved: Clean credit history'
+    };
+    return json({
+      success: true,
+      applicant_name: analysisData.applicant_name,
+      crb_score: analysisData.crb_score,
+      risk_category: analysisData.risk_category,
+      rent_to_income_pct: ratio,
+      recommendation: analysisData.recommendation,
+      analysis: analysisData
     }, 201);
   }
 
@@ -940,9 +954,17 @@ export async function onRequest(context) {
     return json({ success: true, escrow_id: 99, status: 'held', message: `KES ${Number(b.amount || 3500).toLocaleString()} locked in escrow` }, 201);
   }
 
-  if (pathname === '/api/marketplace/escrow/release' && method === 'POST') {
+  if (((pathname === '/api/marketplace/escrow/release') ||
+      (pathname.startsWith('/api/artisan-marketplace/fundi-escrow/') && pathname.endsWith('/release')) ||
+      (pathname.startsWith('/api/marketplace/escrows/') && pathname.endsWith('/release'))) && method === 'POST') {
     const ref = 'B2C-MPESA-' + Math.random().toString(36).substring(2, 9).toUpperCase();
-    return json({ success: true, status: 'disbursed', b2c_disbursement_ref: ref, message: `Escrow released and disbursed via M-Pesa B2C (${ref}).` });
+    return json({
+      success: true,
+      status: 'disbursed',
+      b2c_disbursement_ref: ref,
+      b2c_reference: ref,
+      message: `Escrow released and disbursed via M-Pesa B2C (${ref}).`
+    });
   }
 
   // 19. Digital Lease Agreements & E-Signatures
@@ -996,8 +1018,21 @@ export async function onRequest(context) {
   }
 
   if (pathname.startsWith('/api/inspections/') && pathname.endsWith('/settle-deposit') && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const held = Number(b.deposit_held || 130000);
+    const deductions = Number(b.deductions_damages || 0) + Number(b.deductions_arrears || 0);
+    const net = Math.max(0, held - deductions);
     const voucher = 'REF-DEP-' + Math.random().toString(36).substring(2, 9).toUpperCase();
-    return json({ success: true, voucher_number: voucher, message: `Deposit refund settled (${voucher}) via M-Pesa B2C.` });
+    return json({
+      success: true,
+      voucher_number: voucher,
+      net_refund: net,
+      net_refund_amount: net,
+      deposit_held: held,
+      deductions_total: deductions,
+      message: `Deposit refund settled (${voucher}) via M-Pesa B2C.`
+    });
   }
 
   // 21. Gated Estate Visitor Passes & Gate QR Security

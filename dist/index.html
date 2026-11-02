@@ -3116,6 +3116,62 @@
       </div>
     </div>
   </div>
+  <!-- MODAL: Broadcast Notice / Announcement to Tenants -->
+  <div id="modal-broadcast" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-zinc-800 shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <i data-lucide="radio" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">Broadcast Tenant Notice</h3>
+            <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Send instant SMS or WhatsApp blast to all active tenants</p>
+          </div>
+        </div>
+        <button onclick="app.closeModal('modal-broadcast')" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-broadcast-notice" onsubmit="app.handleBroadcastSubmit(event)" class="mt-4 space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Target Property</label>
+          <select id="broadcast-property-select" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5">
+            <option value="">All Managed Properties (All Active Tenants)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Delivery Channel</label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex items-center space-x-2 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-800">
+              <input type="radio" name="broadcast-channel" value="sms" checked class="text-emerald-600">
+              <span class="font-semibold text-slate-800 dark:text-zinc-200">SMS Gateway</span>
+            </label>
+            <label class="flex items-center space-x-2 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-800">
+              <input type="radio" name="broadcast-channel" value="whatsapp" class="text-emerald-600">
+              <span class="font-semibold text-slate-800 dark:text-zinc-200">WhatsApp Business</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Announcement Message</label>
+          <textarea id="broadcast-message-input" rows="4" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5 text-xs" placeholder="e.g. Dear Residents, routine overhead water tank cleaning is scheduled for Wednesday 9:00 AM to 1:00 PM. Water supply will be temporarily paused."></textarea>
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-zinc-800 shrink-0">
+          <button type="button" onclick="app.closeModal('modal-broadcast')" class="px-4 py-2 border border-slate-300 dark:border-zinc-700 rounded-lg text-slate-600 dark:text-zinc-300 font-semibold text-xs hover:bg-slate-50 dark:hover:bg-zinc-800 transition">Cancel</button>
+          <button type="submit" id="btn-broadcast-submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs shadow-md transition flex items-center space-x-1.5">
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            <span>Send Broadcast</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 
   <!-- MOBILE BOTTOM TAB NAVIGATION (Thumb-first Native Feel) -->
   <nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-zinc-800 flex items-center justify-around px-2 py-1 select-none" style="padding-bottom: max(env(safe-area-inset-bottom), 6px);">
