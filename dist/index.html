@@ -420,10 +420,10 @@
               <p class="text-[11px] text-slate-500 mt-1">Water meters logged, consolidated tenant invoices debited, and M-Pesa STK push ready.</p>
             </div>
             <div class="flex items-center space-x-2">
-              <button onclick="app.dispatchBulk5thReminders()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-semibold transition">
+              <button data-rbac="invoicing" onclick="app.dispatchBulk5thReminders()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md font-semibold transition">
                 Send 5th SMS Notices
               </button>
-              <button id="btn-quick-invoice" onclick="app.runBatchBilling()" class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-md font-semibold transition">
+              <button data-rbac="invoicing" id="btn-quick-invoice" onclick="app.runBatchBilling()" class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-md font-semibold transition">
                 Run Monthly Invoicing
               </button>
             </div>
@@ -534,11 +534,11 @@
               <p class="text-xs text-slate-500">Manage real estate assets, multi-unit complexes, and rental rates</p>
             </div>
             <div class="flex items-center space-x-2">
-              <button onclick="app.openAddPropertyModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+              <button data-rbac="leasing" onclick="app.openAddPropertyModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 <span>Add Property</span>
               </button>
-              <button onclick="app.openAddUnitModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+              <button data-rbac="leasing" onclick="app.openAddUnitModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
                 <i data-lucide="home" class="w-3.5 h-3.5"></i>
                 <span>Add Unit</span>
               </button>
@@ -609,11 +609,11 @@
                 <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
                 <span>AI Tenant Vetting &amp; CRB</span>
               </button>
-              <button onclick="app.openAddTenantModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+              <button data-rbac="leasing" onclick="app.openAddTenantModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
                 <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
                 <span>Register Tenant</span>
               </button>
-              <button onclick="app.openAddLeaseModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+              <button data-rbac="leasing" onclick="app.openAddLeaseModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
                 <i data-lucide="file-signature" class="w-3.5 h-3.5"></i>
                 <span>Create Lease</span>
               </button>
@@ -662,15 +662,15 @@
               <p class="text-xs text-slate-500">Itemized bills including rent, water consumption, garbage, service charges, and late penalties</p>
             </div>
             <div class="flex items-center space-x-2">
-              <button onclick="app.runBatchBilling()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+              <button data-rbac="invoicing" onclick="app.runBatchBilling()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
                 <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i>
                 <span>⚡ Auto-Generate Invoices</span>
               </button>
-              <button onclick="app.dispatchBulk5thReminders()" class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+              <button data-rbac="invoicing" onclick="app.dispatchBulk5thReminders()" class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
                 <i data-lucide="send" class="w-3.5 h-3.5"></i>
                 <span>Send 5th Due SMS</span>
               </button>
-              <button onclick="app.openCreateInvoiceModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+              <button data-rbac="invoicing" onclick="app.openCreateInvoiceModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 <span>Custom Invoice</span>
               </button>
@@ -1164,7 +1164,7 @@
               <p class="text-xs text-slate-500">Track caretaker salaries, security guards, power tokens, borehole maintenance, and repair vouchers</p>
             </div>
             <div class="flex items-center space-x-2">
-              <button onclick="app.openAddExpenseModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+              <button data-rbac="expense" onclick="app.openAddExpenseModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 <span>Record New Expense</span>
               </button>
@@ -1339,7 +1339,7 @@
               <p class="text-xs text-slate-500">Manage platform super admins, agency managers, field caretakers, property owners, and tenant portal logins.</p>
             </div>
             <div class="flex items-center space-x-2">
-              <button onclick="app.openAddUserModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+              <button data-rbac="admin" onclick="app.openAddUserModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
                 <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
                 <span>Invite SaaS User</span>
               </button>
@@ -2814,6 +2814,290 @@
     </div>
   </div>
 
+  <!-- MODAL: Execute Tenancy Lease Agreement -->
+  <div id="modal-create-lease" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-zinc-800">
+        <div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Execute Tenancy Lease Agreement</h3>
+          <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Assign a unit to a tenant with binding terms and deposits</p>
+        </div>
+        <button onclick="app.closeModal('modal-create-lease')" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-create-lease" onsubmit="app.handleCreateLeaseSubmit(event)" class="mt-4 space-y-3.5 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Select Unit to Lease</label>
+            <select id="lease-unit-select" required onchange="app.onLeaseUnitSelected(this.value)" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5">
+              <!-- dynamic units -->
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Select Tenant</label>
+            <select id="lease-tenant-select" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5">
+              <!-- dynamic tenants -->
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Monthly Rent (KES)</label>
+            <input type="number" id="lease-rent-input" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Rent Deposit (KES)</label>
+            <input type="number" id="lease-deposit-input" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Water Deposit (KES)</label>
+            <input type="number" id="lease-water-dep-input" value="5000" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5 font-mono">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Lease Commencement Date</label>
+            <input type="date" id="lease-start-date" value="2026-11-01" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Lease Expiry Date</label>
+            <input type="date" id="lease-end-date" value="2027-10-31" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Agreement Terms / Conditions</label>
+          <textarea id="lease-terms-input" rows="2" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5" placeholder="Standard 1-Year Residential Tenancy Agreement">Standard 1-Year Tenancy Agreement with 1 month notice for termination and rent due on the 5th.</textarea>
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100 dark:border-zinc-800">
+          <button type="button" onclick="app.closeModal('modal-create-lease')" class="px-4 py-2 border border-slate-300 dark:border-zinc-700 rounded-lg text-slate-600 dark:text-zinc-300 font-semibold hover:bg-slate-50 dark:hover:bg-zinc-800 transition">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md transition">Execute &amp; Activate Lease</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Custom Billing Invoice -->
+  <div id="modal-custom-invoice" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-zinc-800">
+        <div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Generate Custom Billing Invoice</h3>
+          <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Issue an itemized rent &amp; utility statement to an active tenant</p>
+        </div>
+        <button onclick="app.closeModal('modal-custom-invoice')" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-custom-invoice" onsubmit="app.handleCustomInvoiceSubmit(event)" class="mt-4 space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Select Leased Tenant</label>
+          <select id="invoice-tenant-select" required onchange="app.onInvoiceTenantSelected(this.value)" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5">
+            <!-- dynamic tenants -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Billing Month</label>
+            <input type="text" id="invoice-month-input" value="2026-11" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Due Date</label>
+            <input type="date" id="invoice-due-date" value="2026-11-05" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Base Rent (KES)</label>
+            <input type="number" id="invoice-rent-input" required oninput="app.calculateInvoiceTotal()" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Water Charge (KES)</label>
+            <input type="number" id="invoice-water-input" value="0" oninput="app.calculateInvoiceTotal()" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Service Charge (KES)</label>
+            <input type="number" id="invoice-service-input" value="0" oninput="app.calculateInvoiceTotal()" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Garbage Fee (KES)</label>
+            <input type="number" id="invoice-garbage-input" value="500" oninput="app.calculateInvoiceTotal()" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Late Penalty (KES)</label>
+            <input type="number" id="invoice-late-input" value="0" oninput="app.calculateInvoiceTotal()" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Other Charges (KES)</label>
+            <input type="number" id="invoice-other-input" value="0" oninput="app.calculateInvoiceTotal()" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5 font-mono">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Invoice Notes / Description</label>
+          <input type="text" id="invoice-notes-input" placeholder="e.g. Custom invoice with utility reconciliation" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5">
+        </div>
+
+        <!-- Calculated Total Banner -->
+        <div class="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-center justify-between">
+          <span class="font-bold text-emerald-900 dark:text-emerald-200 text-xs">Total Billable Amount:</span>
+          <span id="invoice-calculated-total" class="font-mono font-bold text-emerald-700 dark:text-emerald-400 text-base">KES 0</span>
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100 dark:border-zinc-800">
+          <button type="button" onclick="app.closeModal('modal-custom-invoice')" class="px-4 py-2 border border-slate-300 dark:border-zinc-700 rounded-lg text-slate-600 dark:text-zinc-300 font-semibold hover:bg-slate-50 dark:hover:bg-zinc-800 transition">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold shadow-md transition">Issue &amp; Save Invoice</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Record Property Operating Expense -->
+  <div id="modal-add-expense" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-zinc-800">
+        <div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Record Operating Expense</h3>
+          <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Disburse property operational funds, contractor vouchers or utility bills</p>
+        </div>
+        <button onclick="app.closeModal('modal-add-expense')" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-add-expense" onsubmit="app.handleAddExpenseSubmit(event)" class="mt-4 space-y-3.5 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Property</label>
+            <select id="expense-property-select" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5">
+              <!-- dynamic properties -->
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Expense Category</label>
+            <select id="expense-category-select" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5">
+              <option value="Repairs">Repairs &amp; Maintenance</option>
+              <option value="Security">Security Guard Patrol</option>
+              <option value="Cleaning">Cleaning &amp; Janitorial</option>
+              <option value="Electricity">Electricity / Generator Diesel</option>
+              <option value="Caretaker Salary">Caretaker / Staff Salary</option>
+              <option value="Water">Borehole &amp; Water Supply</option>
+              <option value="Legal &amp; Admin">Legal &amp; Admin Fees</option>
+              <option value="Other">Other Operating Expense</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Description / Purpose</label>
+          <input type="text" id="expense-desc-input" placeholder="e.g. Generator diesel 200L refill &amp; engine filter service" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Amount (KES)</label>
+            <input type="number" id="expense-amount-input" placeholder="e.g. 15000" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Paid To (Vendor / Technician)</label>
+            <input type="text" id="expense-paidto-input" placeholder="e.g. Nairobi Fuel Depot Ltd" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Expense Date</label>
+            <input type="date" id="expense-date-input" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Voucher / Receipt Reference</label>
+            <input type="text" id="expense-voucher-input" placeholder="e.g. VCH-202611-04" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 rounded-lg p-2.5 font-mono">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100 dark:border-zinc-800">
+          <button type="button" onclick="app.closeModal('modal-add-expense')" class="px-4 py-2 border border-slate-300 dark:border-zinc-700 rounded-lg text-slate-600 dark:text-zinc-300 font-semibold hover:bg-slate-50 dark:hover:bg-zinc-800 transition">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md transition">Log Operating Expense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Send 5th Due SMS Notices -->
+  <div id="modal-send-5th-sms" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-zinc-800 shrink-0">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+            <i data-lucide="message-square" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">5th Rent Due Automated SMS Dispatcher</h3>
+            <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Send bulk rent payment reminder notices to tenants with overdue or pending balances</p>
+          </div>
+        </div>
+        <button onclick="app.closeModal('modal-send-5th-sms')" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto flex-1 my-4 space-y-4 pr-1">
+        <!-- Summary Stats Banner -->
+        <div id="sms-summary-banner" class="p-3.5 bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700/60 rounded-xl flex items-center justify-between text-xs">
+          <div>
+            <span class="text-slate-500 dark:text-zinc-400">Target Recipients:</span>
+            <span id="sms-recipients-count" class="font-bold text-slate-800 dark:text-zinc-100 ml-1">0 Tenants</span>
+          </div>
+          <div>
+            <span class="text-slate-500 dark:text-zinc-400">Total Pending Arrears:</span>
+            <span id="sms-total-arrears" class="font-mono font-bold text-rose-600 dark:text-rose-400 ml-1">KES 0</span>
+          </div>
+        </div>
+
+        <!-- Recipients List -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label class="font-semibold text-xs text-slate-700 dark:text-zinc-300">Recipients with Pending Balances</label>
+            <button type="button" onclick="app.toggleAllSmsRecipients()" class="text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-semibold">Toggle All</button>
+          </div>
+          <div id="sms-recipients-list" class="divide-y divide-slate-100 dark:divide-zinc-800 border border-slate-200 dark:border-zinc-800 rounded-xl max-h-52 overflow-y-auto bg-white dark:bg-zinc-900">
+            <!-- populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Message Preview -->
+        <div>
+          <label class="block font-semibold text-xs text-slate-700 dark:text-zinc-300 mb-1">SMS Template Preview</label>
+          <div class="p-3 bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700 rounded-xl text-slate-600 dark:text-zinc-300 font-mono text-[11px] leading-relaxed" id="sms-preview-text">
+            Dear {TenantName}, rent for Unit {UnitNumber} ({Month}) is due on 5th. Total: KES {Balance} (incl. utilities). Pay via Paybill 522522, Acc: {Account}. - BomaSphere Management
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-zinc-800 shrink-0">
+        <span class="text-[11px] text-slate-500 dark:text-zinc-400 flex items-center space-x-1">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <span>M-Pesa Paybill &amp; SMS Gateway Connected</span>
+        </span>
+        <div class="flex items-center space-x-2">
+          <button type="button" onclick="app.closeModal('modal-send-5th-sms')" class="px-4 py-2 border border-slate-300 dark:border-zinc-700 rounded-lg text-slate-600 dark:text-zinc-300 font-semibold text-xs hover:bg-slate-50 dark:hover:bg-zinc-800 transition">Cancel</button>
+          <button type="button" id="btn-dispatch-5th-sms" onclick="app.executeBulk5thSmsDispatch()" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold text-xs shadow-md transition flex items-center space-x-1.5">
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            <span id="btn-dispatch-5th-sms-text">Dispatch Reminders</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MOBILE BOTTOM TAB NAVIGATION (Thumb-first Native Feel) -->
   <nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-zinc-800 flex items-center justify-around px-2 py-1 select-none" style="padding-bottom: max(env(safe-area-inset-bottom), 6px);">
     <button class="mobile-tab-btn active flex-1 flex flex-col items-center justify-center py-1.5 px-1 text-slate-500 transition-colors" data-view="dashboard">
@@ -2845,7 +3129,7 @@
   <div id="toast-container"></div>
 
   <!-- Core Frontend Application Logic -->
-  <script src="app.js?v=2.3"></script>
+  <script src="app.js?v=2.4"></script>
 </body>
 </html>
 

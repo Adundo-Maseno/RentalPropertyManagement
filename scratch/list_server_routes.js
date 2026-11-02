@@ -24,3 +24,4 @@ console.log('Total routes found in server.js:', routes.length);
 for (const r of routes) {
   console.log(`${r.method.padEnd(6)} ${r.path} (line ${r.line})`);
 }
+

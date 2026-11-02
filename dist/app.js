@@ -133,6 +133,35 @@ class BomaSphereApp {
   }
 
   switchView(viewName) {
+    const userRole = this.state.authUser?.role || 'property_manager';
+    const permissions = {
+      super_admin: ['dashboard', 'properties', 'tenants', 'invoices', 'payments', 'water', 'maintenance', 'communications', 'landlord', 'expenses', 'higgsfield', 'users', 'tenant-portal', 'leases', 'inspections', 'visitor-passes', 'amenities'],
+      property_manager: ['dashboard', 'properties', 'tenants', 'invoices', 'payments', 'water', 'maintenance', 'communications', 'landlord', 'expenses', 'higgsfield', 'users', 'tenant-portal', 'leases', 'inspections', 'visitor-passes', 'amenities'],
+      caretaker: ['dashboard', 'properties', 'water', 'maintenance', 'communications', 'inspections', 'visitor-passes'],
+      landlord: ['dashboard', 'properties', 'landlord', 'maintenance', 'expenses', 'higgsfield'],
+      tenant: ['tenant-portal', 'visitor-passes', 'amenities']
+    };
+
+    const allowed = permissions[userRole] || permissions.property_manager;
+    if (!allowed.includes(viewName)) {
+      const banner = document.getElementById('rbac-restriction-banner');
+      const msgEl = document.getElementById('rbac-restriction-message');
+      if (banner && msgEl) {
+        msgEl.textContent = `Access Restricted (403): Role '${userRole}' is not authorized to access '${viewName}'.`;
+        banner.classList.remove('hidden');
+      }
+      this.showToast(`Access Restricted: '${viewName}' is not accessible by ${userRole}.`, 'error');
+      if (!allowed.includes(this.state.currentView)) {
+        this.switchView(allowed[0]);
+      }
+      return;
+    } else {
+      const banner = document.getElementById('rbac-restriction-banner');
+      if (banner && !banner.dataset.manual) {
+        banner.classList.add('hidden');
+      }
+    }
+
     this.state.currentView = viewName;
 
     // Update active nav link (desktop)
@@ -1507,11 +1536,19 @@ class BomaSphereApp {
   }
 
   // Maintenance tickets
+  openMaintenanceModal() {
+    this.openNewTicketModal();
+  }
+
   openNewTicketModal() {
     const select = document.getElementById('ticket-unit-select');
-    select.innerHTML = this.state.units.map(u => `
-      <option value="${u.id}">${u.property_name} - Unit ${u.unit_number}</option>
-    `).join('');
+    if (select && this.state.units) {
+      select.innerHTML = this.state.units.map(u => `
+        <option value="${u.id}">${u.property_name} - Unit ${u.unit_number} (${u.status.toUpperCase()})</option>
+      `).join('');
+    }
+    const form = document.getElementById('form-ticket');
+    if (form) form.reset();
     this.openModal('modal-maintenance-ticket');
   }
 
@@ -1896,35 +1933,96 @@ class BomaSphereApp {
     }
   }
 
-  openAddLeaseModal() {
+  openAddLeaseModal(preselectedUnitId = null) {
+    const unitSelect = document.getElementById('lease-unit-select');
+    const tenantSelect = document.getElementById('lease-tenant-select');
+    if (!unitSelect || !tenantSelect) return;
+
     const vacantUnits = this.state.units.filter(u => u.status === 'vacant');
-    if (vacantUnits.length === 0) {
-      alert('All units are currently occupied or in maintenance! Please add a new vacant unit first.');
+    let targetUnits = [...vacantUnits];
+    if (preselectedUnitId) {
+      const selected = this.state.units.find(u => u.id === Number(preselectedUnitId));
+      if (selected && !targetUnits.some(u => u.id === selected.id)) {
+        targetUnits = [selected, ...targetUnits];
+      }
+    }
+
+    if (targetUnits.length === 0) {
+      this.showToast('All units are currently occupied or in maintenance! Please add a vacant unit first.', 'warning');
       return;
     }
 
-    const tenantOptions = this.state.tenants.map(t => `${t.id}: ${t.name}`).join('\n');
-    const unitOptions = vacantUnits.map(u => `${u.id}: ${u.property_name} - Unit ${u.unit_number} (KES ${u.base_rent})`).join('\n');
+    unitSelect.innerHTML = targetUnits.map(u => `
+      <option value="${u.id}" ${preselectedUnitId && Number(preselectedUnitId) === u.id ? 'selected' : ''}>
+        ${u.property_name} - Unit ${u.unit_number} (${this.formatMoney(u.base_rent)}/mo)
+      </option>
+    `).join('');
 
-    const unitChoice = prompt(`Enter Unit ID to Lease:\n\n${unitOptions}`);
-    if (!unitChoice) return;
+    tenantSelect.innerHTML = this.state.tenants.map(t => `
+      <option value="${t.id}">${t.name} (${t.phone || 'No phone'})</option>
+    `).join('');
 
-    const tenantChoice = prompt(`Enter Tenant ID:\n\n${tenantOptions}`);
-    if (!tenantChoice) return;
+    const initialUnitId = unitSelect.value;
+    this.onLeaseUnitSelected(initialUnitId);
 
-    const selectedUnit = this.state.units.find(u => u.id === Number(unitChoice));
-    const selectedTenant = this.state.tenants.find(t => t.id === Number(tenantChoice));
+    const startDate = document.getElementById('lease-start-date');
+    const endDate = document.getElementById('lease-end-date');
+    if (startDate) startDate.value = '2026-11-01';
+    if (endDate) endDate.value = '2027-10-31';
 
-    if (!selectedUnit || !selectedTenant) {
-      alert('Invalid unit or tenant ID entered');
-      return;
+    this.openModal('modal-create-lease');
+  }
+
+  openAssignTenantModal(unitId) {
+    this.openAddLeaseModal(unitId);
+  }
+
+  onLeaseUnitSelected(unitId) {
+    const unit = this.state.units.find(u => u.id === Number(unitId));
+    if (!unit) return;
+    const rentInput = document.getElementById('lease-rent-input');
+    const depositInput = document.getElementById('lease-deposit-input');
+    if (rentInput) rentInput.value = unit.base_rent;
+    if (depositInput) depositInput.value = unit.base_rent;
+  }
+
+  async handleCreateLeaseSubmit(e) {
+    e.preventDefault();
+    const unitId = Number(document.getElementById('lease-unit-select').value);
+    const tenantId = Number(document.getElementById('lease-tenant-select').value);
+    const monthlyRent = Number(document.getElementById('lease-rent-input').value);
+    const depositPaid = Number(document.getElementById('lease-deposit-input').value);
+    const waterDeposit = Number(document.getElementById('lease-water-dep-input').value || 5000);
+    const startDate = document.getElementById('lease-start-date').value;
+    const endDate = document.getElementById('lease-end-date').value;
+    const terms = document.getElementById('lease-terms-input').value;
+
+    try {
+      await this.fetchAPI('/api/leases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          unit_id: unitId,
+          tenant_id: tenantId,
+          start_date: startDate,
+          end_date: endDate,
+          monthly_rent: monthlyRent,
+          deposit_paid: depositPaid,
+          water_deposit: waterDeposit,
+          terms: terms || 'Standard 1-year tenancy agreement'
+        })
+      });
+
+      this.closeModal('modal-create-lease');
+      this.showToast('New digital lease executed successfully! Unit marked occupied.', 'success');
+      await this.refreshAllData();
+      this.renderUnits();
+      this.renderTenants();
+      if (this.state.currentView === 'leases') this.renderLeaseAgreementsInit();
+    } catch (err) {
+      console.error(err);
+      this.showToast(err.message || 'Failed to execute lease', 'error');
     }
-
-    const monthlyRent = selectedUnit.base_rent;
-    const startDate = '2026-11-01';
-    const endDate = '2027-10-31';
-
-    this.createLease(selectedUnit.id, selectedTenant.id, monthlyRent, startDate, endDate);
   }
 
   async createLease(unitId, tenantId, rent, startDate, endDate) {
@@ -1953,42 +2051,80 @@ class BomaSphereApp {
     }
   }
 
-  openAssignTenantModal(unitId) {
-    const tenantOptions = this.state.tenants.map(t => `${t.id}: ${t.name}`).join('\n');
-    const tenantChoice = prompt(`Select Tenant ID to lease this unit:\n\n${tenantOptions}`);
-    if (!tenantChoice) return;
-
-    const unit = this.state.units.find(u => u.id === unitId);
-    if (!unit) return;
-
-    this.createLease(unitId, Number(tenantChoice), unit.base_rent, '2026-11-01', '2027-10-31');
-  }
-
   // ==========================================
   // INVOICING & PAYMENT HELPERS
   // ==========================================
   openCreateInvoiceModal() {
-    const tenantChoice = prompt(`Enter Tenant ID for custom invoice:\n\n` + this.state.tenants.map(t => `${t.id}: ${t.name} (Unit ${t.unit_number || 'N/A'})`).join('\n'));
-    if (!tenantChoice) return;
+    const select = document.getElementById('invoice-tenant-select');
+    if (!select) return;
 
-    const tenant = this.state.tenants.find(t => t.id === Number(tenantChoice));
-    if (!tenant || !tenant.unit_id) {
-      alert('Selected tenant has no active leased unit.');
+    const activeTenants = this.state.tenants.filter(t => t.unit_id);
+    const tenantsList = activeTenants.length > 0 ? activeTenants : this.state.tenants;
+
+    if (tenantsList.length === 0) {
+      this.showToast('No registered tenants found to invoice.', 'warning');
       return;
     }
 
-    const rent = prompt('Enter Rent Amount (KES):', tenant.monthly_rent || 60000);
-    if (!rent) return;
+    select.innerHTML = tenantsList.map(t => `
+      <option value="${t.id}">${t.name} (${t.property_name || 'Property'} - Unit ${t.unit_number || 'N/A'})</option>
+    `).join('');
 
-    const water = prompt('Enter Water Charges (KES):', '2500') || 0;
-    const service = prompt('Enter Service Charge (KES):', '3500') || 0;
-
-    this.createCustomInvoice(tenant.id, tenant.unit_id, Number(rent), Number(water), Number(service));
+    this.onInvoiceTenantSelected(select.value);
+    this.openModal('modal-custom-invoice');
   }
 
-  async createCustomInvoice(tenantId, unitId, rent, water, service) {
+  onInvoiceTenantSelected(tenantId) {
+    const tenant = this.state.tenants.find(t => t.id === Number(tenantId));
+    if (!tenant) return;
+    const unit = this.state.units.find(u => u.id === tenant.unit_id) || {};
+
+    const rentInput = document.getElementById('invoice-rent-input');
+    const waterInput = document.getElementById('invoice-water-input');
+    const serviceInput = document.getElementById('invoice-service-input');
+    const garbageInput = document.getElementById('invoice-garbage-input');
+    const notesInput = document.getElementById('invoice-notes-input');
+
+    if (rentInput) rentInput.value = tenant.monthly_rent || unit.base_rent || 60000;
+    if (waterInput) waterInput.value = 2500;
+    if (serviceInput) serviceInput.value = unit.service_charge || 3500;
+    if (garbageInput) garbageInput.value = unit.garbage_fee || 500;
+    if (notesInput) notesInput.value = `Monthly billing for Unit ${tenant.unit_number || unit.unit_number || 'N/A'}`;
+
+    this.calculateInvoiceTotal();
+  }
+
+  calculateInvoiceTotal() {
+    const rent = Number(document.getElementById('invoice-rent-input')?.value || 0);
+    const water = Number(document.getElementById('invoice-water-input')?.value || 0);
+    const service = Number(document.getElementById('invoice-service-input')?.value || 0);
+    const garbage = Number(document.getElementById('invoice-garbage-input')?.value || 0);
+    const late = Number(document.getElementById('invoice-late-input')?.value || 0);
+    const other = Number(document.getElementById('invoice-other-input')?.value || 0);
+
+    const total = rent + water + service + garbage + late + other;
+    const totalEl = document.getElementById('invoice-calculated-total');
+    if (totalEl) totalEl.textContent = this.formatMoney(total);
+  }
+
+  async handleCustomInvoiceSubmit(e) {
+    e.preventDefault();
+    const tenantId = Number(document.getElementById('invoice-tenant-select').value);
+    const tenant = this.state.tenants.find(t => t.id === tenantId);
+    const unitId = tenant ? (tenant.unit_id || 1) : 1;
+    const month = document.getElementById('invoice-month-input').value || '2026-11';
+    const dueDate = document.getElementById('invoice-due-date').value || '2026-11-05';
+    const rent = Number(document.getElementById('invoice-rent-input').value || 0);
+    const water = Number(document.getElementById('invoice-water-input').value || 0);
+    const service = Number(document.getElementById('invoice-service-input').value || 0);
+    const garbage = Number(document.getElementById('invoice-garbage-input').value || 0);
+    const late = Number(document.getElementById('invoice-late-input').value || 0);
+    const other = Number(document.getElementById('invoice-other-input').value || 0);
+    const notes = document.getElementById('invoice-notes-input').value;
+
+    const lease = this.state.leases?.find(l => l.tenant_id === tenantId && l.status === 'active') || { id: 1 };
+
     try {
-      const lease = this.state.leases.find(l => l.tenant_id === tenantId && l.status === 'active') || { id: 1 };
       const res = await this.fetchAPI('/api/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1996,21 +2132,25 @@ class BomaSphereApp {
           lease_id: lease.id,
           tenant_id: tenantId,
           unit_id: unitId,
-          month: '2026-11',
+          month,
+          due_date: dueDate,
           rent_amount: rent,
           water_amount: water,
           service_charge: service,
-          garbage_amount: 500,
-          late_fee: 0,
-          notes: 'Special custom billing'
+          garbage_amount: garbage,
+          late_fee: late,
+          other_charges: other,
+          notes: notes || 'Custom billing statement'
         })
       });
 
-      this.showToast(`Invoice ${res.invoice_number} created!`, 'success');
+      this.closeModal('modal-custom-invoice');
+      this.showToast(`Custom invoice ${res.invoice_number || 'created'} issued successfully!`, 'success');
       await this.refreshAllData();
-      this.switchView('invoices');
+      this.renderInvoices();
     } catch (err) {
       console.error(err);
+      this.showToast(err.message || 'Failed to generate invoice', 'error');
     }
   }
 
@@ -2114,37 +2254,67 @@ class BomaSphereApp {
     }
   }
 
-  async openAddExpenseModal() {
-    const propChoice = prompt('Select Property ID for Expense:\n\n' + this.state.properties.map(p => `${p.id}: ${p.name}`).join('\n'));
-    if (!propChoice) return;
+  openAddExpenseModal() {
+    const select = document.getElementById('expense-property-select');
+    if (!select || !this.state.properties) return;
 
-    const desc = prompt('Expense Description (e.g. Generator Diesel Refill):');
-    if (!desc) return;
+    select.innerHTML = this.state.properties.map(p => `
+      <option value="${p.id}">${p.name} (${p.city})</option>
+    `).join('');
 
-    const cat = prompt('Category (Repairs, Security, Electricity, Caretaker Salary, Water):', 'Repairs') || 'Repairs';
-    const amount = prompt('Amount (KES):', '15000');
-    if (!amount) return;
+    const dateInput = document.getElementById('expense-date-input');
+    if (dateInput) dateInput.value = new Date().toISOString().slice(0, 10);
 
-    const paidTo = prompt('Paid To (Vendor/Technician):', 'Nairobi Fuel Depot') || '';
+    const voucherInput = document.getElementById('expense-voucher-input');
+    if (voucherInput) {
+      voucherInput.value = `VCH-${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}-${Math.floor(10 + Math.random()*90)}`;
+    }
+
+    const form = document.getElementById('form-add-expense');
+    if (form) {
+      const descEl = document.getElementById('expense-desc-input');
+      const amtEl = document.getElementById('expense-amount-input');
+      const paidEl = document.getElementById('expense-paidto-input');
+      if (descEl) descEl.value = '';
+      if (amtEl) amtEl.value = '';
+      if (paidEl) paidEl.value = '';
+    }
+
+    this.openModal('modal-add-expense');
+  }
+
+  async handleAddExpenseSubmit(e) {
+    e.preventDefault();
+    const propId = Number(document.getElementById('expense-property-select').value);
+    const cat = document.getElementById('expense-category-select').value;
+    const desc = document.getElementById('expense-desc-input').value;
+    const amount = Number(document.getElementById('expense-amount-input').value);
+    const paidTo = document.getElementById('expense-paidto-input').value;
+    const expDate = document.getElementById('expense-date-input').value;
+    const voucher = document.getElementById('expense-voucher-input').value;
 
     try {
       await this.fetchAPI('/api/expenses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          property_id: Number(propChoice),
+          property_id: propId,
           category: cat,
           description: desc,
-          amount: Number(amount),
-          paid_to: paidTo
+          amount,
+          paid_to: paidTo,
+          expense_date: expDate,
+          receipt_voucher: voucher
         })
       });
 
-      this.showToast('Property expense voucher logged!', 'success');
+      this.closeModal('modal-add-expense');
+      this.showToast('Property expense voucher recorded successfully!', 'success');
       await this.refreshAllData();
-      this.switchView('expenses');
+      this.renderExpenses();
     } catch (err) {
       console.error(err);
+      this.showToast(err.message || 'Failed to record expense', 'error');
     }
   }
 
@@ -2317,37 +2487,110 @@ class BomaSphereApp {
   // ==========================================
   // BOMAHUT CORE: BULK 5TH RENT DUE REMINDERS & TENANT LEDGER
   // ==========================================
-  async dispatchBulk5thReminders() {
+  dispatchBulk5thReminders() {
+    this.openBulk5thSMSModal();
+  }
+
+  openBulk5thSMSModal() {
     const pendingInvoices = this.state.invoices.filter(i => Number(i.balance) > 0);
+    const listEl = document.getElementById('sms-recipients-list');
+    const countEl = document.getElementById('sms-recipients-count');
+    const totalEl = document.getElementById('sms-total-arrears');
+    const dispatchBtn = document.getElementById('btn-dispatch-5th-sms');
+
+    if (!listEl) return;
+
     if (pendingInvoices.length === 0) {
-      alert('All tenants are fully paid up for this period! No reminders needed.');
+      listEl.innerHTML = `
+        <div class="p-6 text-center text-xs text-slate-500 dark:text-zinc-400">
+          <i data-lucide="check-circle-2" class="w-8 h-8 text-emerald-500 mx-auto mb-2"></i>
+          <p class="font-bold text-slate-800 dark:text-zinc-200">All tenants are fully paid up!</p>
+          <p class="mt-0.5">No overdue balances detected for the current billing cycle.</p>
+        </div>
+      `;
+      if (countEl) countEl.textContent = '0 Tenants';
+      if (totalEl) totalEl.textContent = this.formatMoney(0);
+      if (dispatchBtn) dispatchBtn.disabled = true;
+      this.openModal('modal-send-5th-sms');
+      if (window.lucide) lucide.createIcons();
       return;
     }
 
-    if (!confirm(`Dispatch automated 5th Rent Due SMS reminders to ${pendingInvoices.length} tenants with pending balances?`)) {
+    const totalArrears = pendingInvoices.reduce((acc, i) => acc + Number(i.balance), 0);
+    if (countEl) countEl.textContent = `${pendingInvoices.length} Tenants`;
+    if (totalEl) totalEl.textContent = this.formatMoney(totalArrears);
+    if (dispatchBtn) dispatchBtn.disabled = false;
+
+    listEl.innerHTML = pendingInvoices.map(inv => `
+      <label class="flex items-center justify-between p-3 hover:bg-slate-50 dark:hover:bg-zinc-800/50 cursor-pointer text-xs">
+        <div class="flex items-center space-x-3">
+          <input type="checkbox" name="sms-invoice-check" value="${inv.id}" checked class="rounded border-slate-300 text-rose-600 focus:ring-rose-500 w-4 h-4">
+          <div>
+            <div class="font-bold text-slate-900 dark:text-zinc-100">${inv.tenant_name}</div>
+            <div class="text-[11px] text-slate-500 dark:text-zinc-400 font-mono">${inv.property_name || 'Property'} &bull; Unit ${inv.unit_number} &bull; ${inv.tenant_phone}</div>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="font-mono font-bold text-rose-600 dark:text-rose-400">${this.formatMoney(inv.balance)}</div>
+          <div class="text-[10px] text-slate-400 uppercase font-semibold">${inv.status}</div>
+        </div>
+      </label>
+    `).join('');
+
+    this.openModal('modal-send-5th-sms');
+    if (window.lucide) lucide.createIcons();
+  }
+
+  toggleAllSmsRecipients() {
+    const checkboxes = document.querySelectorAll('input[name="sms-invoice-check"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    checkboxes.forEach(cb => cb.checked = !allChecked);
+  }
+
+  async executeBulk5thSmsDispatch() {
+    const checkedBoxes = document.querySelectorAll('input[name="sms-invoice-check"]:checked');
+    if (checkedBoxes.length === 0) {
+      this.showToast('Please select at least one tenant to send reminder.', 'warning');
       return;
     }
+
+    const selectedIds = Array.from(checkedBoxes).map(cb => Number(cb.value));
+    const targetInvoices = this.state.invoices.filter(i => selectedIds.includes(i.id));
+
+    const btnText = document.getElementById('btn-dispatch-5th-sms-text');
+    const dispatchBtn = document.getElementById('btn-dispatch-5th-sms');
+    if (dispatchBtn) dispatchBtn.disabled = true;
 
     let dispatched = 0;
-    for (const inv of pendingInvoices) {
+    for (let idx = 0; idx < targetInvoices.length; idx++) {
+      const inv = targetInvoices[idx];
+      if (btnText) btnText.textContent = `Sending (${idx + 1}/${targetInvoices.length})...`;
+
       const msg = `Dear ${inv.tenant_name}, rent for Unit ${inv.unit_number} (${inv.month}) is due on 5th. Total: KES ${Number(inv.balance).toLocaleString()} (incl. water/utilities). Pay via ${inv.paybill_number || 'Paybill 522522'}. - BomaSphere Management`;
-      
-      await this.fetchAPI('/api/communications/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'sms',
-          recipient_name: inv.tenant_name,
-          recipient_phone: inv.tenant_phone,
-          tenant_id: inv.tenant_id,
-          message: msg,
-          purpose: 'rent_reminder'
-        })
-      });
-      dispatched++;
+
+      try {
+        await this.fetchAPI('/api/communications/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'sms',
+            recipient_name: inv.tenant_name,
+            recipient_phone: inv.tenant_phone,
+            tenant_id: inv.tenant_id,
+            message: msg,
+            purpose: 'rent_reminder'
+          })
+        });
+        dispatched++;
+      } catch (err) {
+        console.error('Failed to dispatch reminder to', inv.tenant_name, err);
+      }
     }
 
-    this.showToast(`⚡ Dispatched ${dispatched} automated SMS rent due reminders!`, 'success');
+    if (btnText) btnText.textContent = 'Dispatch Reminders';
+    if (dispatchBtn) dispatchBtn.disabled = false;
+    this.closeModal('modal-send-5th-sms');
+    this.showToast(`⚡ Successfully dispatched ${dispatched} automated SMS rent due reminders!`, 'success');
     await this.refreshAllData();
     this.switchView('communications');
   }
@@ -2800,11 +3043,11 @@ class BomaSphereApp {
 
     // Role-based Navigation Enforcement
     const permissions = {
-      super_admin: ['dashboard', 'properties', 'tenants', 'invoices', 'payments', 'water', 'maintenance', 'communications', 'landlord', 'expenses', 'higgsfield', 'users', 'tenant-portal'],
-      property_manager: ['dashboard', 'properties', 'tenants', 'invoices', 'payments', 'water', 'maintenance', 'communications', 'landlord', 'expenses', 'higgsfield', 'users', 'tenant-portal'],
-      caretaker: ['dashboard', 'properties', 'water', 'maintenance', 'communications'],
-      landlord: ['dashboard', 'properties', 'landlord', 'maintenance', 'higgsfield'],
-      tenant: ['tenant-portal']
+      super_admin: ['dashboard', 'properties', 'tenants', 'invoices', 'payments', 'water', 'maintenance', 'communications', 'landlord', 'expenses', 'higgsfield', 'users', 'tenant-portal', 'leases', 'inspections', 'visitor-passes', 'amenities'],
+      property_manager: ['dashboard', 'properties', 'tenants', 'invoices', 'payments', 'water', 'maintenance', 'communications', 'landlord', 'expenses', 'higgsfield', 'users', 'tenant-portal', 'leases', 'inspections', 'visitor-passes', 'amenities'],
+      caretaker: ['dashboard', 'properties', 'water', 'maintenance', 'communications', 'inspections', 'visitor-passes'],
+      landlord: ['dashboard', 'properties', 'landlord', 'maintenance', 'expenses', 'higgsfield'],
+      tenant: ['tenant-portal', 'visitor-passes', 'amenities']
     };
 
     const allowed = permissions[user.role] || permissions.property_manager;
@@ -2818,14 +3061,88 @@ class BomaSphereApp {
       }
     });
 
+    // Enforce mobile bottom navigation tabs
+    document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+      const view = btn.dataset.view;
+      if (view) {
+        if (allowed.includes(view)) {
+          btn.style.display = 'flex';
+        } else {
+          btn.style.display = 'none';
+        }
+      }
+    });
+
+    // Enforce action buttons and feature permissions
+    this.enforceActionRBAC(user.role);
+
     if (!allowed.includes(this.state.currentView)) {
       this.switchView(allowed[0]);
     }
   }
 
+  enforceActionRBAC(role) {
+    const isCaretaker = role === 'caretaker';
+    const isTenant = role === 'tenant';
+    const isLandlord = role === 'landlord';
+
+    document.querySelectorAll('[data-rbac]').forEach(el => {
+      const rbacType = el.getAttribute('data-rbac');
+      if (rbacType === 'financial' && (isCaretaker || isTenant)) {
+        el.style.display = 'none';
+      } else if (rbacType === 'invoicing' && (isCaretaker || isTenant || isLandlord)) {
+        el.style.display = 'none';
+      } else if (rbacType === 'admin' && (isCaretaker || isTenant || isLandlord)) {
+        el.style.display = 'none';
+      } else if (rbacType === 'expense' && (isCaretaker || isTenant)) {
+        el.style.display = 'none';
+      } else if (rbacType === 'leasing' && (isCaretaker || isTenant || isLandlord)) {
+        el.style.display = 'none';
+      } else {
+        el.style.display = '';
+      }
+    });
+
+    // Caretaker financial masking on dashboard
+    if (isCaretaker) {
+      const collectionsEl = document.getElementById('dash-total-collections');
+      const billedEl = document.getElementById('dash-gross-billed');
+      const arrearsEl = document.getElementById('dash-aging-arrears');
+      if (collectionsEl) collectionsEl.textContent = '🔒 Restricted';
+      if (billedEl) billedEl.textContent = '🔒 Restricted';
+      if (arrearsEl) arrearsEl.textContent = '🔒 Restricted';
+    }
+  }
+
+  async switchAuthAccount(role, refresh = true) {
+    try {
+      const res = await this.fetchAPI('/api/auth/switch-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role })
+      });
+      if (res && res.user) {
+        this.state.authUser = res.user;
+        this.state.authToken = res.token || `token_${res.user.role}`;
+        localStorage.setItem('bomasphere_token', this.state.authToken);
+        this.updateUserSessionDisplay();
+        if (refresh) await this.refreshAllData();
+        this.showToast(`Switched active profile to ${res.user.name}`, 'info');
+      }
+    } catch (err) {
+      console.error('Failed to switch auth account:', err);
+      // Fallback local switch
+      const fallbackUser = this.state.users?.find(u => u.role === role) || { role, name: role };
+      this.state.authUser = fallbackUser;
+      this.state.authToken = `token_${role}`;
+      localStorage.setItem('bomasphere_token', this.state.authToken);
+      this.updateUserSessionDisplay();
+    }
+  }
+
   // Alias for backward compatibility
-  switchUserRole(role) {
-    this.switchAuthAccount(role, true);
+  async switchUserRole(role) {
+    return await this.switchAuthAccount(role, true);
   }
 
   renderUsers() {

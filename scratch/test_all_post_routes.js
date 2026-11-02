@@ -107,3 +107,4 @@ if (missingCount === 0) {
 } else {
   console.log(`\nFound ${missingCount} missing route handlers.`);
 }
+

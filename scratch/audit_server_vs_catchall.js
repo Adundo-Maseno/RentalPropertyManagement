@@ -36,3 +36,4 @@ for (const cond of serverRoutes) {
 }
 
 console.log(`\nTotal missing in catchall: ${missingInCatchall.length}`);
+

@@ -79,11 +79,11 @@ const DB = {
   ],
 
   users: [
-    { id: 1, name: "Sarah Cherono (Platform Super Admin)", email: "admin@bomasphere.co.ke", phone: "+254700112233", role: "super_admin", property_id: null, tenant_id: null, status: "active" },
-    { id: 2, name: "Patrick Ndegwa (Property Manager)", email: "ndegwa@crownpeak.co.ke", phone: "+254711333444", role: "property_manager", property_id: null, tenant_id: null, status: "active" },
-    { id: 3, name: "John Otieno (Site Caretaker)", email: "otieno.caretaker@kilimaniheights.ke", phone: "+254722556677", role: "caretaker", property_id: 1, tenant_id: null, status: "active" },
-    { id: 4, name: "Dr. Esther Wambui Ndung'u (Landlord / Investor)", email: "esther.ndungu@gmail.com", phone: "+254733555777", role: "landlord", property_id: 3, tenant_id: null, status: "active" },
-    { id: 5, name: "Kariuki James Mwangi (Resident Tenant)", email: "james.kariuki@techke.com", phone: "+254722889900", role: "tenant", property_id: 1, tenant_id: 1, status: "active" }
+    { id: 1, name: "Sarah Cherono (Platform Super Admin)", email: "admin@bomasphere.co.ke", phone: "+254700112233", role: "super_admin", property_id: null, tenant_id: null, status: "active", session_token: "token_super_admin" },
+    { id: 2, name: "Patrick Ndegwa (Property Manager)", email: "ndegwa@crownpeak.co.ke", phone: "+254711333444", role: "property_manager", property_id: null, tenant_id: null, status: "active", session_token: "token_property_manager" },
+    { id: 3, name: "John Otieno (Site Caretaker)", email: "otieno.caretaker@kilimaniheights.ke", phone: "+254722556677", role: "caretaker", property_id: 1, tenant_id: null, status: "active", session_token: "token_caretaker" },
+    { id: 4, name: "Dr. Esther Wambui Ndung'u (Landlord / Investor)", email: "esther.ndungu@gmail.com", phone: "+254733555777", role: "landlord", property_id: 3, tenant_id: null, status: "active", session_token: "token_landlord" },
+    { id: 5, name: "Kariuki James Mwangi (Resident Tenant)", email: "james.kariuki@techke.com", phone: "+254722889900", role: "tenant", property_id: 1, tenant_id: 1, status: "active", session_token: "token_tenant" }
   ],
 
   iotDevices: [
@@ -174,6 +174,30 @@ const DB = {
   ]
 };
 
+function resolveRequestUser(request) {
+  const authHeader = request.headers.get('authorization') || '';
+  const tokenHeader = request.headers.get('x-auth-token') || '';
+  const roleHeader = request.headers.get('x-role') || '';
+  let token = tokenHeader;
+  if (authHeader.startsWith('Bearer ')) {
+    token = authHeader.slice(7).trim();
+  }
+  if (token) {
+    const user = DB.users.find(u => u.session_token === token || `token_${u.role}` === token);
+    if (user) return user;
+    if (token.startsWith('token_')) {
+      const r = token.replace('token_', '');
+      const uByRole = DB.users.find(u => u.role === r);
+      if (uByRole) return uByRole;
+    }
+  }
+  if (roleHeader) {
+    const uByRole = DB.users.find(u => u.role === roleHeader);
+    if (uByRole) return uByRole;
+  }
+  return null;
+}
+
 export async function onRequest(context) {
   const { request } = context;
   const url = new URL(request.url);
@@ -184,7 +208,7 @@ export async function onRequest(context) {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Auth-Token'
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Auth-Token, X-Role'
   };
 
   if (method === 'OPTIONS') {
@@ -325,6 +349,10 @@ export async function onRequest(context) {
   }
 
   if (pathname === '/api/leases' && method === 'POST') {
+    const user = resolveRequestUser(request);
+    if (user && (user.role === 'caretaker' || user.role === 'tenant')) {
+      return json({ error: '403 Forbidden: Authorizing lease agreements requires Property Manager or Admin privileges.' }, 403);
+    }
     let b = {};
     try { b = await request.json(); } catch(e) {}
     const newLease = {
@@ -343,6 +371,10 @@ export async function onRequest(context) {
   }
 
   if (pathname.startsWith('/api/leases/') && method === 'PUT') {
+    const user = resolveRequestUser(request);
+    if (user && (user.role === 'caretaker' || user.role === 'tenant')) {
+      return json({ error: '403 Forbidden: Modifying lease agreements requires Property Manager or Admin privileges.' }, 403);
+    }
     const id = Number(pathname.split('/')[3]);
     let b = {};
     try { b = await request.json(); } catch(e) {}
@@ -354,10 +386,29 @@ export async function onRequest(context) {
 
   // 5. Invoices
   if (pathname === '/api/invoices' && method === 'GET') {
-    return json(DB.invoices);
+    const user = resolveRequestUser(request);
+    if (user && user.role === 'caretaker') {
+      return json({ 
+        error: '403 Forbidden: Caretakers are restricted from accessing financial ledgers and billing records.',
+        role: user.role
+      }, 403);
+    }
+    let list = DB.invoices;
+    if (user && user.role === 'tenant') {
+      list = list.filter(i => i.tenant_id === (user.tenant_id || 1));
+    } else if (user && user.role === 'landlord' && user.property_id) {
+      const prop = DB.properties.find(p => p.id === user.property_id);
+      if (prop) list = list.filter(i => i.property_name === prop.name);
+    }
+    return json(list);
   }
 
   if (pathname === '/api/invoices' && method === 'POST') {
+    const user = resolveRequestUser(request);
+    if (!user) return json({ error: '401 Unauthorized: Valid authentication token required.' }, 401);
+    if (user.role === 'caretaker' || user.role === 'tenant' || user.role === 'landlord') {
+      return json({ error: '403 Forbidden: Invoicing authority is restricted to Property Managers and Super Admins.' }, 403);
+    }
     let b = {};
     try { b = await request.json(); } catch(e) {}
     const newInv = {
@@ -377,6 +428,10 @@ export async function onRequest(context) {
   }
 
   if (pathname === '/api/invoices/generate-monthly' && method === 'POST') {
+    const user = resolveRequestUser(request);
+    if (user && (user.role === 'caretaker' || user.role === 'tenant' || user.role === 'landlord')) {
+      return json({ error: '403 Forbidden: Batch monthly invoicing requires Property Manager privileges.' }, 403);
+    }
     let b = {};
     try { b = await request.json(); } catch(e) {}
     const month = b.month || '2026-12';
@@ -416,12 +471,33 @@ export async function onRequest(context) {
 
   // 6. Payments
   if (pathname === '/api/payments' && method === 'GET') {
-    return json(DB.payments);
+    const user = resolveRequestUser(request);
+    if (user && user.role === 'caretaker') {
+      return json({ 
+        error: '403 Forbidden: Caretakers are restricted from accessing financial ledgers and payment receipts.',
+        role: user.role
+      }, 403);
+    }
+    let list = DB.payments;
+    if (user && user.role === 'tenant') {
+      list = list.filter(p => p.tenant_id === (user.tenant_id || 1));
+    } else if (user && user.role === 'landlord' && user.property_id) {
+      const prop = DB.properties.find(p => p.id === user.property_id);
+      if (prop) list = list.filter(p => p.property_name === prop.name);
+    }
+    return json(list);
   }
 
   if (pathname === '/api/payments' && method === 'POST') {
+    const user = resolveRequestUser(request);
+    if (user && user.role === 'caretaker') {
+      return json({ error: '403 Forbidden: Caretakers cannot process payment receipts.' }, 403);
+    }
     let b = {};
     try { b = await request.json(); } catch(e) {}
+    if (user && user.role === 'tenant' && b.tenant_id && b.tenant_id !== user.tenant_id) {
+      return json({ error: '403 Forbidden: Tenants can only make payments on their own accounts.' }, 403);
+    }
     const newPay = {
       id: DB.payments.length + 1,
       receipt_number: `REC-20261102-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -526,12 +602,27 @@ export async function onRequest(context) {
 
   // 10. Expenses
   if (pathname === '/api/expenses' && method === 'GET') {
-    return json(DB.expenses);
+    const user = resolveRequestUser(request);
+    if (user && (user.role === 'caretaker' || user.role === 'tenant')) {
+      return json({ error: '403 Forbidden: Caretakers and Tenants are not permitted to inspect property operating expenses.' }, 403);
+    }
+    let list = DB.expenses;
+    if (user && user.role === 'landlord' && user.property_id) {
+      list = list.filter(e => e.property_id === user.property_id);
+    }
+    return json(list);
   }
 
   if (pathname === '/api/expenses' && method === 'POST') {
+    const user = resolveRequestUser(request);
+    if (user && (user.role === 'caretaker' || user.role === 'tenant')) {
+      return json({ error: '403 Forbidden: Only Property Managers and Landlords can log operating expense vouchers.' }, 403);
+    }
     let b = {};
     try { b = await request.json(); } catch(e) {}
+    if (user && user.role === 'landlord' && b.property_id && Number(b.property_id) !== user.property_id) {
+      return json({ error: `403 Forbidden: Landlord '${user.name}' is only authorized to log expenses for Property ID ${user.property_id}.` }, 403);
+    }
     const newExp = {
       id: DB.expenses.length + 1,
       property_id: b.property_id || 1,
@@ -547,7 +638,14 @@ export async function onRequest(context) {
 
   // 11. Landlord Remittance Statement
   if (pathname === '/api/reports/landlord-statement' && method === 'GET') {
+    const user = resolveRequestUser(request);
+    if (user && (user.role === 'caretaker' || user.role === 'tenant')) {
+      return json({ error: '403 Forbidden: Access to owner remittance statements is restricted to Landlords and Property Managers.' }, 403);
+    }
     const propId = Number(url.searchParams.get('property_id') || 1);
+    if (user && user.role === 'landlord' && user.property_id && propId !== user.property_id) {
+      return json({ error: `403 Forbidden: Landlord '${user.name}' is only authorized to view statements for Property ID ${user.property_id}.` }, 403);
+    }
     const prop = DB.properties.find(p => p.id === propId) || DB.properties[0];
     return json({
       statement: {
@@ -568,10 +666,20 @@ export async function onRequest(context) {
 
   // 12. Users & Authentication
   if (pathname === '/api/users' && method === 'GET') {
+    const user = resolveRequestUser(request);
+    if (!user) return json({ error: '401 Unauthorized: Valid authentication token required.' }, 401);
+    if (user.role !== 'super_admin' && user.role !== 'property_manager') {
+      return json({ error: `403 Forbidden: Role '${user.role}' is not authorized to inspect system user directories.` }, 403);
+    }
     return json(DB.users);
   }
 
   if (pathname === '/api/users' && method === 'POST') {
+    const user = resolveRequestUser(request);
+    if (!user) return json({ error: '401 Unauthorized: Valid authentication token required.' }, 401);
+    if (user.role !== 'super_admin' && user.role !== 'property_manager') {
+      return json({ error: '403 Forbidden: Provisioning SaaS users requires Administrative privileges.' }, 403);
+    }
     let b = {};
     try { b = await request.json(); } catch(e) {}
     const newUser = {
@@ -589,24 +697,32 @@ export async function onRequest(context) {
   }
 
   if (pathname.startsWith('/api/users/') && method === 'PUT') {
+    const user = resolveRequestUser(request);
+    if (!user) return json({ error: '401 Unauthorized: Valid authentication token required.' }, 401);
+    if (user.role !== 'super_admin' && user.role !== 'property_manager') {
+      return json({ error: '403 Forbidden: Modifying user accounts requires Administrative privileges.' }, 403);
+    }
     const id = Number(pathname.split('/')[3]);
     let b = {};
     try { b = await request.json(); } catch(e) {}
-    const user = DB.users.find(u => u.id === id);
-    if (!user) return json({ error: 'User not found' }, 404);
-    if (b.name) user.name = b.name;
-    if (b.phone) user.phone = b.phone;
-    if (b.role) user.role = b.role;
-    return json({ success: true, user });
+    const targetUser = DB.users.find(u => u.id === id);
+    if (!targetUser) return json({ error: 'User not found' }, 404);
+    if (b.name) targetUser.name = b.name;
+    if (b.phone) targetUser.phone = b.phone;
+    if (b.role) targetUser.role = b.role;
+    return json({ success: true, user: targetUser });
   }
 
   if (pathname.startsWith('/api/users/') && method === 'DELETE') {
+    const user = resolveRequestUser(request);
+    if (!user) return json({ error: '401 Unauthorized: Valid authentication token required.' }, 401);
+    if (user.role !== 'super_admin' && user.role !== 'property_manager') {
+      return json({ error: '403 Forbidden: Deleting user accounts requires Administrative privileges.' }, 403);
+    }
     const id = Number(pathname.split('/')[3]);
     const idx = DB.users.findIndex(u => u.id === id);
-    if (idx !== -1) {
-      DB.users.splice(idx, 1);
-    }
-    return json({ success: true, message: 'User deleted successfully' });
+    if (idx !== -1) DB.users.splice(idx, 1);
+    return json({ success: true, message: 'User deactivated and removed' });
   }
 
   if (pathname === '/api/auth/me' && method === 'GET') {
@@ -662,6 +778,10 @@ export async function onRequest(context) {
   }
 
   if (pathname === '/api/reset-seed' && method === 'POST') {
+    const user = resolveRequestUser(request);
+    if (!user || user.role !== 'super_admin') {
+      return json({ error: '403 Forbidden: System database reset requires Super Admin authentication.' }, 403);
+    }
     return json({ success: true, message: 'Sample data refreshed successfully' });
   }
 
