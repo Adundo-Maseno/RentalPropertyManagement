@@ -13,3 +13,4 @@ Allow: /icons/
 
 # Disallow indexing of private operational API routes
 Disallow: /api/
+

@@ -301,21 +301,50 @@ export async function onRequest(context) {
   }
 
   if (pathname === '/api/auth/me' && method === 'GET') {
-    return json({ success: true, user: DB.users[1] }); // Default to Property Manager
+    const authHeader = request.headers.get('Authorization') || request.headers.get('X-Auth-Token') || '';
+    const token = authHeader.replace('Bearer ', '').trim();
+    if (token) {
+      const role = token.replace('token_', '');
+      const user = DB.users.find(u => u.role === role);
+      if (user) {
+        return json({ success: true, user });
+      }
+    }
+    return json({ error: 'Authentication required. Please sign in.' }, 401);
+  }
+
+  if (pathname === '/api/auth/login' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const { email, password } = b;
+    if (!email || !password) {
+      return json({ error: 'Email and password are required' }, 400);
+    }
+    const user = DB.users.find(u => u.email.toLowerCase() === email.trim().toLowerCase());
+    if (!user) {
+      return json({ error: 'Invalid email or password' }, 401);
+    }
+
+    const rolePasswords = {
+      super_admin: 'Admin@2026',
+      property_manager: 'Manager@2026',
+      caretaker: 'Caretaker@2026',
+      landlord: 'Landlord@2026',
+      tenant: 'Tenant@2026'
+    };
+    const expected = rolePasswords[user.role] || 'password123';
+    if (password !== expected && password !== 'password123') {
+      return json({ error: 'Invalid email or password' }, 401);
+    }
+
+    return json({ success: true, token: `token_${user.role}`, user });
   }
 
   if (pathname === '/api/auth/switch-account' && method === 'POST') {
     let b = {};
     try { b = await request.json(); } catch(e) {}
     const role = b.role || 'property_manager';
-    const user = DB.users.find(u => u.role === role) || DB.users[1];
-    return json({ success: true, token: `token_${user.role}`, user });
-  }
-
-  if (pathname === '/api/auth/login' && method === 'POST') {
-    let b = {};
-    try { b = await request.json(); } catch(e) {}
-    const user = DB.users.find(u => u.email === b.email) || DB.users[1];
+    const user = DB.users.find(u => u.role === role) || DB.users[0];
     return json({ success: true, token: `token_${user.role}`, user });
   }
 

@@ -148,7 +148,7 @@ async function handleRequest(req, res) {
     // AUTHENTICATION & SESSION API ROUTES
     // ==========================================
     if (pathname === '/api/auth/login' && method === 'POST') {
-      const clientIp = req.socket.remoteAddress || '127.0.0.1';
+      const clientIp = req.socket?.remoteAddress || req.headers?.['x-forwarded-for'] || '127.0.0.1';
       if (isLoginRateLimited(clientIp)) {
         return sendJSON(res, 429, { error: '429 Too Many Requests: Rate limit exceeded. Please wait 5 minutes.' });
       }

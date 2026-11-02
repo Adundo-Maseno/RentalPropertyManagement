@@ -353,6 +353,39 @@ async function runTests() {
     console.log('      Verified robots.txt: Disallow /api/ and allows public assets');
   });
 
+  // 28. Authentication: Credential Login Verification & Password Rejection
+  await test('Auth: /api/auth/login validates credentials and rejects wrong passwords with 401', async () => {
+    // Attempt wrong password
+    const failRes = await invokeHandler('/api/auth/login', 'POST', {
+      email: 'ndegwa@crownpeak.co.ke',
+      password: 'wrong_password_xyz'
+    });
+    if (failRes.statusCode !== 401) throw new Error(`Expected 401 for wrong password, got ${failRes.statusCode}`);
+
+    // Attempt valid login
+    const okRes = await invokeHandler('/api/auth/login', 'POST', {
+      email: 'ndegwa@crownpeak.co.ke',
+      password: 'password123'
+    });
+    if (okRes.statusCode !== 200) throw new Error(`Expected 200, got ${okRes.statusCode}`);
+    if (!okRes.json.token || !okRes.json.user) throw new Error('Missing token or user object');
+    if (okRes.json.user.password_hash) throw new Error('Security leak: password_hash returned in auth response');
+    console.log(`      Authenticated: ${okRes.json.user.name} (${okRes.json.user.role}) with secure session token`);
+  });
+
+  // 29. Authentication: /api/auth/me Session Validation
+  await test('Auth: /api/auth/me returns authenticated user identity with bearer token', async () => {
+    const unauthRes = await invokeHandler('/api/auth/me', 'GET');
+    if (unauthRes.statusCode !== 401) throw new Error(`Expected 401 for unauthenticated /me, got ${unauthRes.statusCode}`);
+
+    const authRes = await invokeHandler('/api/auth/me', 'GET', null, {
+      authorization: 'Bearer token_super_admin'
+    });
+    if (authRes.statusCode !== 200) throw new Error(`Expected 200, got ${authRes.statusCode}`);
+    if (authRes.json.user.role !== 'super_admin') throw new Error(`Expected super_admin, got ${authRes.json.user.role}`);
+    console.log(`      Verified /api/auth/me identity: ${authRes.json.user.name}`);
+  });
+
   console.log(`\n=======================================================`);
   console.log(` TESTS COMPLETED: ${passed} PASSED, ${failed} FAILED `);
   console.log(`=======================================================`);

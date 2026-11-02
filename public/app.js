@@ -20,7 +20,7 @@ class BomaSphereApp {
     this.escapeHtml = escapeHtml;
     this.state = {
       currentView: 'dashboard',
-      authToken: localStorage.getItem('bomasphere_token') || 'token_property_manager',
+      authToken: localStorage.getItem('bomasphere_token') || null,
       authUser: null,
       stats: null,
       properties: [],
@@ -2534,58 +2534,57 @@ class BomaSphereApp {
 
   // Real Server-Enforced RBAC Session Initialization
   async initAuthSession() {
-    try {
-      const res = await this.fetchAPI('/api/auth/me');
-      if (res && res.user) {
-        this.state.authUser = res.user;
-        this.updateUserSessionDisplay();
+    const savedToken = localStorage.getItem('bomasphere_token');
+    if (savedToken) {
+      this.state.authToken = savedToken;
+      try {
+        const res = await this.fetchAPI('/api/auth/me');
+        if (res && res.user) {
+          this.state.authUser = res.user;
+          this.updateUserSessionDisplay();
+          return;
+        }
+      } catch (e) {
+        console.warn('Session expired or invalid, please sign in.');
       }
-    } catch (e) {
-      await this.switchAuthAccount('property_manager', false);
     }
-  }
-
-  async switchAuthAccount(role, showToast = true) {
-    try {
-      const res = await fetch('/api/auth/switch-account', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role })
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error);
-
-      this.state.authToken = data.token;
-      this.state.authUser = data.user;
-      localStorage.setItem('bomasphere_token', data.token);
-
-      this.closeModal('modal-auth-login');
-      this.updateUserSessionDisplay();
-
-      const banner = document.getElementById('rbac-restriction-banner');
-      if (banner) banner.classList.add('hidden');
-
-      if (showToast) {
-        this.showToast(`Authenticated as: ${data.user.name} (${data.user.role.replace('_', ' ')})`, 'success');
-      }
-
-      await this.refreshAllData();
-
-      if (data.user.role === 'tenant') {
-        this.switchView('tenant-portal');
-      } else if (data.user.role === 'caretaker' && (this.state.currentView === 'invoices' || this.state.currentView === 'users' || this.state.currentView === 'landlord')) {
-        this.switchView('water');
-      }
-    } catch (err) {
-      console.error('Account switch failed:', err);
-      this.showToast(err.message, 'error');
-    }
+    // If no valid authenticated session, present the clean Sign In screen
+    this.openAuthModal();
   }
 
   async handlePasswordLogin(e) {
-    e.preventDefault();
-    const email = document.getElementById('login-email-input').value;
-    const password = document.getElementById('login-password-input').value;
+    if (e && e.preventDefault) e.preventDefault();
+    const emailEl = document.getElementById('login-email-input');
+    const passwordEl = document.getElementById('login-password-input');
+    const errAlert = document.getElementById('login-error-alert');
+    const errText = document.getElementById('login-error-text');
+    const submitBtn = document.getElementById('login-submit-btn');
+
+    if (errAlert) errAlert.classList.add('hidden');
+    if (!emailEl || !passwordEl) return;
+
+    const email = emailEl.value.trim();
+    const password = passwordEl.value;
+
+    if (!email || !password) {
+      if (errAlert && errText) {
+        errText.textContent = 'Please enter both your work email and password.';
+        errAlert.classList.remove('hidden');
+      }
+      return;
+    }
+
+    const origBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>Signing In...</span>
+      `;
+    }
 
     try {
       const res = await fetch('/api/auth/login', {
@@ -2594,7 +2593,9 @@ class BomaSphereApp {
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
-      if (!data.success) throw new Error(data.error);
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Invalid email or password');
+      }
 
       this.state.authToken = data.token;
       this.state.authUser = data.user;
@@ -2602,12 +2603,82 @@ class BomaSphereApp {
 
       this.closeModal('modal-auth-login');
       this.updateUserSessionDisplay();
-      this.showToast(`Signed in as: ${data.user.name}`, 'success');
+      this.showToast(`Welcome back, ${data.user.name}!`, 'success');
+
+      const banner = document.getElementById('rbac-restriction-banner');
+      if (banner) banner.classList.add('hidden');
+
       await this.refreshAllData();
+
+      if (data.user.role === 'tenant') {
+        this.switchView('tenant-portal');
+      } else if (data.user.role === 'caretaker') {
+        this.switchView('water');
+      } else if (data.user.role === 'landlord') {
+        this.switchView('landlord');
+      } else {
+        this.switchView('dashboard');
+      }
     } catch (err) {
-      console.error('Login failed:', err);
-      this.showToast(err.message, 'error');
+      console.error('Sign in failed:', err);
+      if (errAlert && errText) {
+        errText.textContent = err.message || 'Invalid email or password. Please try again.';
+        errAlert.classList.remove('hidden');
+      } else {
+        this.showToast(err.message || 'Sign in failed', 'error');
+      }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origBtnHtml;
+      }
     }
+  }
+
+  logout() {
+    try {
+      fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': this.state.authToken ? `Bearer ${this.state.authToken}` : ''
+        }
+      }).catch(() => {});
+    } catch (e) {}
+
+    this.state.authToken = null;
+    this.state.authUser = null;
+    localStorage.removeItem('bomasphere_token');
+
+    const emailInput = document.getElementById('login-email-input');
+    const passwordInput = document.getElementById('login-password-input');
+    const errAlert = document.getElementById('login-error-alert');
+    if (emailInput) emailInput.value = '';
+    if (passwordInput) passwordInput.value = '';
+    if (errAlert) errAlert.classList.add('hidden');
+
+    this.showToast('You have been signed out successfully.', 'info');
+    this.openAuthModal();
+  }
+
+  toggleLoginPasswordVisibility() {
+    const input = document.getElementById('login-password-input');
+    const btn = document.getElementById('btn-toggle-password');
+    if (!input) return;
+    if (input.type === 'password') {
+      input.type = 'text';
+      if (btn) btn.textContent = 'Hide';
+    } else {
+      input.type = 'password';
+      if (btn) btn.textContent = 'Show';
+    }
+  }
+
+  copyUserEmail(email) {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(email);
+    }
+    this.showToast(`Email copied: ${email}`, 'info');
   }
 
   openAuthModal() {
@@ -2732,8 +2803,8 @@ class BomaSphereApp {
             </span>
           </td>
           <td class="py-3 px-4 text-right space-x-1.5">
-            <button onclick="app.switchAuthAccount('${u.role}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-semibold text-[11px] transition">
-              Sign In As
+            <button onclick="app.copyUserEmail('${u.email}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-medium text-[11px] transition">
+              Copy Email
             </button>
             <button onclick="app.deleteUser(${u.id})" class="p-1 text-slate-400 hover:text-rose-600 rounded transition" title="Delete User">
               <i data-lucide="trash-2" class="w-4 h-4 inline"></i>
