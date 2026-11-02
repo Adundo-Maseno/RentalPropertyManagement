@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Available Rentals &amp; Vacancies | BomaSphere Properties</title>
+  <meta name="description" content="Browse verified executive apartments, beachfront villas, townhouses, and prime commercial suites across Nairobi and Mombasa. Managed by BomaSphere PMS.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#10b981', 600: '#059669', 700: '#047857' }
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="min-h-full bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 flex flex-col justify-between antialiased selection:bg-emerald-500 selection:text-white transition-colors">
+
+  <!-- Top Navigation Header -->
+  <header class="w-full border-b border-slate-200/90 dark:border-zinc-800 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md py-3.5 px-6 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <a href="/" class="flex items-center space-x-2.5 group">
+        <div class="w-8 h-8 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-bold text-sm shadow-xs transition group-hover:scale-105">
+          <img src="/icons/icon.svg" alt="BomaSphere" class="w-5 h-5">
+        </div>
+        <div class="flex flex-col">
+          <span class="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white">BomaSphere Properties</span>
+          <span class="text-[10px] text-slate-400 font-medium -mt-0.5">Verified Vacancy Showcase</span>
+        </div>
+      </a>
+
+      <div class="flex items-center space-x-3">
+        <a href="/" class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-zinc-700 transition">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+          <span>Resident Portal / Sign In</span>
+        </a>
+
+        <button onclick="toggleDarkMode()" class="p-2 text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition" title="Toggle Theme">
+          <i data-lucide="moon" class="w-4 h-4 hidden dark:inline"></i>
+          <i data-lucide="sun" class="w-4 h-4 inline dark:hidden"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-b from-white via-slate-50 to-slate-100/50 dark:from-zinc-900 dark:via-zinc-950 dark:to-zinc-950 border-b border-slate-200 dark:border-zinc-800 py-12 px-6">
+    <div class="max-w-5xl mx-auto text-center space-y-4">
+      <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Real-Time Vacancy Feed &bull; Direct Management Rates</span>
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+        Find Your Next Home in Nairobi &amp; Mombasa
+      </h1>
+      <p class="text-sm sm:text-base text-slate-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+        High-specification residential apartments, townhouses, and prime commercial suites managed directly with automated M-Pesa billing, borehole water, and 24/7 security.
+      </p>
+
+      <!-- Search & Filter Controls -->
+      <div class="bg-white dark:bg-zinc-900 p-3 sm:p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-md max-w-4xl mx-auto mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Neighborhood</label>
+          <select id="filter-location" class="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-slate-900">
+            <option value="all">All Locations (Nairobi &amp; Mombasa)</option>
+            <option value="Kilimani">Kilimani, Nairobi</option>
+            <option value="Westlands">Westlands, Nairobi</option>
+            <option value="Riverside">Riverside Drive, Nairobi</option>
+            <option value="Nyali">Nyali Beach, Mombasa</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Unit Type</label>
+          <select id="filter-type" class="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-slate-900">
+            <option value="all">All Types</option>
+            <option value="Bedroom">Apartments (2BR / 3BR)</option>
+            <option value="Townhouse">Townhouses &amp; Villas</option>
+            <option value="Commercial">Commercial Office Suites</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Max Budget (KES / mo)</label>
+          <select id="filter-budget" class="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-slate-900">
+            <option value="999999">Any Budget</option>
+            <option value="80000">Up to KES 80,000</option>
+            <option value="100000">Up to KES 100,000</option>
+            <option value="200000">Up to KES 200,000</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vacancy Listings Grid -->
+  <main class="max-w-7xl mx-auto px-6 py-10 flex-1 w-full">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Currently Available Properties</h2>
+        <p class="text-xs text-slate-500 dark:text-zinc-400" id="vacancies-count-label">Showing 3 verified vacant spaces ready for immediate occupancy</p>
+      </div>
+      <div class="text-xs font-mono text-emerald-600 dark:text-emerald-400 flex items-center">
+        <i data-lucide="shield-check" class="w-4 h-4 mr-1"></i>
+        <span>No Agent Broker Fees</span>
+      </div>
+    </div>
+
+    <!-- Listings Container -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="vacancies-grid">
+      <!-- Dynamic units loaded via JavaScript -->
+    </div>
+  </main>
+
+  <!-- MODAL: Schedule a Viewing -->
+  <div id="modal-viewing" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 relative">
+      <button onclick="closeViewingModal()" class="absolute top-5 right-5 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded-lg">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center space-x-3 pb-3 border-b border-slate-100 dark:border-zinc-800">
+        <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold">
+          <i data-lucide="calendar" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-base text-slate-900 dark:text-white" id="modal-viewing-title">Schedule Property Viewing</h3>
+          <p class="text-xs text-slate-500 dark:text-zinc-400" id="modal-viewing-sub">Unit A202 &bull; Kilimani Royal Heights</p>
+        </div>
+      </div>
+
+      <div id="viewing-success-box" class="hidden my-4 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-200 space-y-1 text-xs">
+        <div class="font-bold flex items-center text-sm">
+          <i data-lucide="check-circle" class="w-4 h-4 mr-1.5 text-emerald-600"></i>
+          <span>Viewing Confirmed!</span>
+        </div>
+        <p id="viewing-success-msg">Your viewing reference has been dispatched via SMS.</p>
+      </div>
+
+      <form id="form-viewing" onsubmit="submitViewing(event)" class="mt-4 space-y-3.5 text-xs">
+        <input type="hidden" id="viewing-unit-id" value="4">
+
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Your Full Name</label>
+          <input type="text" id="viewing-name" placeholder="e.g. Caroline Achieng" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Mobile Phone (Safaricom)</label>
+            <input type="tel" id="viewing-phone" placeholder="+2547XXXXXXXX" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 font-mono text-xs text-slate-900 dark:text-white">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Email Address</label>
+            <input type="email" id="viewing-email" placeholder="name@domain.com" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Preferred Date</label>
+            <input type="date" id="viewing-date" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Preferred Time Slot</label>
+            <select id="viewing-time" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+              <option value="10:00 AM">10:00 AM Morning</option>
+              <option value="02:00 PM">02:00 PM Afternoon</option>
+              <option value="04:30 PM">04:30 PM Evening</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Notes / Questions (Optional)</label>
+          <textarea id="viewing-notes" rows="2" placeholder="e.g. Interested in parking slot availability" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white"></textarea>
+        </div>
+
+        <button type="submit" id="btn-submit-viewing" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-zinc-100 rounded-lg font-bold text-xs shadow-md transition flex items-center justify-center space-x-2">
+          <span>Confirm Viewing Appointment</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Global Footer -->
+  <footer class="w-full border-t border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 py-6 px-6 text-xs text-slate-500 dark:text-zinc-400">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2">
+        <div class="w-5 h-5 rounded bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-bold text-[10px]">B</div>
+        <span>&copy; 2026 BomaSphere Real Estate Management. Direct Landlord Leases &bull; KRA eTIMS Compliant.</span>
+      </div>
+      <div class="flex items-center space-x-4 text-[11px]">
+        <a href="mailto:leasing@bomasphere.co.ke" class="hover:text-slate-800 dark:hover:text-white transition">leasing@bomasphere.co.ke</a>
+        <a href="tel:+254700112233" class="hover:text-slate-800 dark:hover:text-white transition">+254 (0) 700 112 233</a>
+        <a href="/" class="hover:text-slate-800 dark:hover:text-white transition">Management Login</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    let allVacancies = [];
+
+    async function loadVacancies() {
+      try {
+        const res = await fetch('/api/public/vacancies');
+        const data = await res.json();
+        allVacancies = data.vacancies || [];
+        renderVacancies(allVacancies);
+      } catch (err) {
+        console.error('Failed to load vacancies:', err);
+      }
+    }
+
+    function renderVacancies(list) {
+      const container = document.getElementById('vacancies-grid');
+      const countEl = document.getElementById('vacancies-count-label');
+      if (countEl) countEl.textContent = `Showing ${list.length} verified vacant spaces ready for immediate occupancy`;
+
+      if (!container) return;
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-12 text-center text-slate-400 dark:text-zinc-500 space-y-2">
+            <i data-lucide="home" class="w-8 h-8 mx-auto text-slate-300 dark:text-zinc-600"></i>
+            <p class="font-medium text-sm">No vacancies currently match your search criteria.</p>
+            <p class="text-xs">Adjust your budget or location filters to see other spaces.</p>
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = list.map(v => `
+        <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200/90 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all duration-300 group">
+          <div>
+            <div class="relative h-48 w-full overflow-hidden bg-slate-100 dark:bg-zinc-800">
+              <img src="${v.photo}" alt="${v.unit_type}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <div class="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1 rounded-md">
+                ${v.city}
+              </div>
+              <div class="absolute top-3 right-3 bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider flex items-center">
+                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse mr-1.5"></span>
+                Ready Now
+              </div>
+            </div>
+
+            <div class="p-5 space-y-3">
+              <div>
+                <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">${v.property_name}</span>
+                <h3 class="text-base font-extrabold text-slate-900 dark:text-white mt-0.5">Unit ${v.unit_number} &bull; ${v.unit_type}</h3>
+                <p class="text-xs text-slate-500 dark:text-zinc-400 flex items-center mt-1">
+                  <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-slate-400"></i>
+                  <span>${v.address}</span>
+                </p>
+              </div>
+
+              <!-- Key Specs -->
+              <div class="grid grid-cols-3 gap-2 py-2.5 border-y border-slate-100 dark:border-zinc-800 text-center text-xs">
+                <div>
+                  <span class="text-[10px] text-slate-400 uppercase font-semibold">Rooms</span>
+                  <p class="font-bold text-slate-800 dark:text-zinc-200">${v.bedrooms > 0 ? v.bedrooms + ' Beds' : 'Commercial'}</p>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 uppercase font-semibold">Baths</span>
+                  <p class="font-bold text-slate-800 dark:text-zinc-200">${v.bathrooms} Baths</p>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 uppercase font-semibold">Size</span>
+                  <p class="font-bold text-slate-800 dark:text-zinc-200">${v.sqft} sqft</p>
+                </div>
+              </div>
+
+              <!-- Amenities Pills -->
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                ${v.amenities.slice(0, 4).map(a => `<span class="text-[10px] bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 px-2 py-0.5 rounded">${a}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div class="p-5 pt-0">
+            <div class="flex items-baseline justify-between mb-3">
+              <div>
+                <span class="text-xl font-extrabold text-slate-900 dark:text-white">KES ${Number(v.base_rent).toLocaleString()}</span>
+                <span class="text-xs text-slate-400 font-medium">/ month</span>
+              </div>
+              <span class="text-[10px] text-slate-400">Deposit: KES ${Number(v.deposit).toLocaleString()}</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="openViewingModal(${v.id}, '${v.unit_number}', '${v.property_name}', '${v.unit_type}')" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-zinc-100 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1">
+                <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                <span>View Space</span>
+              </button>
+              <a href="https://wa.me/254700112233?text=Hi%20BomaSphere%2C%20I%20am%20interested%20in%20Unit%20${v.unit_number}%20at%20${encodeURIComponent(v.property_name)}" target="_blank" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                <span>WhatsApp</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function applyFilters() {
+      const loc = document.getElementById('filter-location').value;
+      const type = document.getElementById('filter-type').value;
+      const budget = Number(document.getElementById('filter-budget').value);
+
+      const filtered = allVacancies.filter(v => {
+        const matchesLoc = loc === 'all' || v.city.includes(loc) || v.property_name.includes(loc);
+        const matchesType = type === 'all' || v.unit_type.includes(type);
+        const matchesBudget = v.base_rent <= budget;
+        return matchesLoc && matchesType && matchesBudget;
+      });
+
+      renderVacancies(filtered);
+    }
+
+    document.getElementById('filter-location')?.addEventListener('change', applyFilters);
+    document.getElementById('filter-type')?.addEventListener('change', applyFilters);
+    document.getElementById('filter-budget')?.addEventListener('change', applyFilters);
+
+    function openViewingModal(unitId, unitNum, propName, unitType) {
+      document.getElementById('viewing-unit-id').value = unitId;
+      document.getElementById('modal-viewing-title').textContent = `Schedule Viewing: Unit ${unitNum}`;
+      document.getElementById('modal-viewing-sub').textContent = `${unitType} &bull; ${propName}`;
+      document.getElementById('viewing-success-box').classList.add('hidden');
+      document.getElementById('form-viewing').classList.remove('hidden');
+
+      // Default date to tomorrow
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      document.getElementById('viewing-date').value = tomorrow.toISOString().split('T')[0];
+
+      document.getElementById('modal-viewing').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeViewingModal() {
+      document.getElementById('modal-viewing').classList.add('hidden');
+    }
+
+    async function submitViewing(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit-viewing');
+      btn.disabled = true;
+      btn.textContent = 'Booking...';
+
+      const unitId = document.getElementById('viewing-unit-id').value;
+      const name = document.getElementById('viewing-name').value;
+      const phone = document.getElementById('viewing-phone').value;
+      const email = document.getElementById('viewing-email').value;
+      const date = document.getElementById('viewing-date').value;
+      const time = document.getElementById('viewing-time').value;
+      const notes = document.getElementById('viewing-notes').value;
+
+      try {
+        const res = await fetch('/api/public/book-viewing', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ unit_id: unitId, prospect_name: name, phone, email, preferred_date: date, time_slot: time, notes })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        document.getElementById('viewing-success-msg').textContent = `Appointment Reference: ${data.reference}. Confirmation SMS sent to ${phone}. Our caretaker will be ready to show you the space on ${date} at ${time}.`;
+        document.getElementById('viewing-success-box').classList.remove('hidden');
+        document.getElementById('form-viewing').classList.add('hidden');
+      } catch (err) {
+        alert(err.message || 'Viewing booking failed');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Confirm Viewing Appointment</span><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>';
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    // Theme sync
+    function initTheme() {
+      const savedTheme = localStorage.getItem('bomasphere_theme_mode');
+      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    }
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('bomasphere_theme_mode', isDark ? 'dark' : 'light');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    initTheme();
+    loadVacancies();
+  </script>
+</body>
+</html>

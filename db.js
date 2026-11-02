@@ -203,6 +203,98 @@ function initSchema() {
       status TEXT DEFAULT 'active',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS iot_devices (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      meter_number TEXT UNIQUE NOT NULL,
+      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+      unit_id INTEGER REFERENCES units(id) ON DELETE SET NULL,
+      device_type TEXT DEFAULT 'Ultrasonic Water Meter',
+      battery_pct INTEGER DEFAULT 98,
+      signal_rssi INTEGER DEFAULT -78,
+      flow_rate_lph REAL DEFAULT 0.0,
+      total_cubic_meters REAL DEFAULT 142.5,
+      valve_status TEXT DEFAULT 'open',
+      last_telemetry_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS leak_alerts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      device_id INTEGER NOT NULL REFERENCES iot_devices(id) ON DELETE CASCADE,
+      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,
+      severity TEXT DEFAULT 'warning',
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      flow_detected_lph REAL NOT NULL,
+      status TEXT DEFAULT 'active',
+      detected_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS etims_records (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      invoice_id INTEGER NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+      control_code TEXT UNIQUE NOT NULL,
+      qr_code_url TEXT,
+      tax_type TEXT DEFAULT 'MRI_7.5_PCT',
+      taxable_amount REAL NOT NULL,
+      tax_payable REAL NOT NULL,
+      kra_status TEXT DEFAULT 'transmitted',
+      validated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS artisan_marketplace (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      trade TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      rating REAL DEFAULT 4.8,
+      jobs_completed INTEGER DEFAULT 24,
+      id_verified INTEGER DEFAULT 1,
+      daily_rate REAL DEFAULT 2500,
+      availability TEXT DEFAULT 'available',
+      location TEXT DEFAULT 'Nairobi'
+    );
+
+    CREATE TABLE IF NOT EXISTS maintenance_escrows (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ticket_id INTEGER NOT NULL REFERENCES maintenance_requests(id) ON DELETE CASCADE,
+      fundi_id INTEGER REFERENCES artisan_marketplace(id) ON DELETE SET NULL,
+      amount REAL NOT NULL,
+      status TEXT DEFAULT 'held',
+      b2c_disbursement_ref TEXT,
+      milestone_desc TEXT,
+      released_at DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS tenant_vettings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      applicant_name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      email TEXT,
+      id_number TEXT,
+      requested_unit_id INTEGER REFERENCES units(id) ON DELETE SET NULL,
+      monthly_income REAL NOT NULL,
+      crb_score INTEGER NOT NULL,
+      risk_category TEXT NOT NULL,
+      rent_to_income_pct REAL NOT NULL,
+      recommendation TEXT NOT NULL,
+      kra_pin_verified INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS viewing_leads (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,
+      prospect_name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      email TEXT,
+      preferred_date DATE NOT NULL,
+      time_slot TEXT NOT NULL,
+      status TEXT DEFAULT 'pending',
+      notes TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   // Ensure columns exist if table was created previously
@@ -416,10 +508,85 @@ function seedUsersIfEmpty() {
   updateTokens.run('token_tenant', tnHash, 'james.kariuki@techke.com');
 }
 
+function seedNextGenFeatures() {
+  // Check if already seeded
+  const iotCount = db.prepare('SELECT count(*) as total FROM iot_devices').get()?.total || 0;
+  if (iotCount === 0) {
+    const insertIot = db.prepare(`
+      INSERT INTO iot_devices (meter_number, property_id, unit_id, device_type, battery_pct, signal_rssi, flow_rate_lph, total_cubic_meters, valve_status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    insertIot.run('IOT-KRH-A101', 1, 1, 'Ultrasonic LoRaWAN Meter', 96, -72, 0.0, 154.2, 'open');
+    insertIot.run('IOT-KRH-A102', 1, 2, 'Ultrasonic LoRaWAN Meter', 98, -69, 1.2, 89.6, 'open');
+    insertIot.run('IOT-KRH-A202', 1, 4, 'Ultrasonic LoRaWAN Meter', 94, -75, 14.8, 12.4, 'open'); // Vacant unit with active leak
+    insertIot.run('IOT-WES-101', 2, 6, 'NB-IoT Smart Sub-meter', 91, -81, 0.0, 310.5, 'open');
+
+    // Midnight leak anomaly alert on vacant unit A202
+    db.prepare(`
+      INSERT INTO leak_alerts (device_id, unit_id, severity, title, message, flow_detected_lph, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(3, 4, 'critical', 'Midnight Continuous Flow in Vacant Unit A202', 'Ultrasonic sensor detected continuous 14.8 L/hr flow between 01:00 AM and 04:30 AM in vacant unit. Probable toilet cistern bypass or pipe joint weeping.', 14.8, 'active');
+  }
+
+  const fundiCount = db.prepare('SELECT count(*) as total FROM artisan_marketplace').get()?.total || 0;
+  if (fundiCount === 0) {
+    const insertFundi = db.prepare(`
+      INSERT INTO artisan_marketplace (name, trade, phone, rating, jobs_completed, id_verified, daily_rate, availability, location)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    insertFundi.run('Kamau Mwangi', 'Plumbing & Drainage', '+254711223344', 4.9, 42, 1, 2500, 'available', 'Kilimani, Nairobi');
+    insertFundi.run('Ouma Electrical Solutions', 'Certified Electrical & Solar', '+254722334455', 4.8, 38, 1, 3000, 'available', 'Westlands, Nairobi');
+    insertFundi.run('ChillTech HVAC Engineers', 'AC & Cold Room Repair', '+254733445566', 4.7, 19, 1, 3500, 'busy', 'Nairobi');
+    insertFundi.run('Juma Coastal Carpentry', 'Carpentry & Cabinetry', '+254720556677', 4.9, 29, 1, 2200, 'available', 'Nyali, Mombasa');
+
+    // Sample escrow
+    db.prepare(`
+      INSERT INTO maintenance_escrows (ticket_id, fundi_id, amount, status, b2c_disbursement_ref, milestone_desc)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(1, 1, 3500, 'held', null, 'Milestone 1: Replace corroded shower mixer and seal pipe joints with brass couplings.');
+  }
+
+  const vettingsCount = db.prepare('SELECT count(*) as total FROM tenant_vettings').get()?.total || 0;
+  if (vettingsCount === 0) {
+    const insertVetting = db.prepare(`
+      INSERT INTO tenant_vettings (applicant_name, phone, email, id_number, requested_unit_id, monthly_income, crb_score, risk_category, rent_to_income_pct, recommendation)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    insertVetting.run('Faith Njeri Karanja', '+254721990011', 'faith.karanja@equity.co.ke', '32114590', 4, 280000, 785, 'Low Risk', 30.4, 'Approved: Excellent CRB repayment history; 6-month M-Pesa statements verified.');
+    insertVetting.run('Dennis Kiprono Rotich', '+254715887766', 'dennis.rotich@agriltd.ke', '29871032', 7, 190000, 620, 'Medium Risk', 39.5, 'Conditional Approval: Request 2 months security deposit due to debt service ratio.');
+  }
+
+  const leadsCount = db.prepare('SELECT count(*) as total FROM viewing_leads').get()?.total || 0;
+  if (leadsCount === 0) {
+    const insertLead = db.prepare(`
+      INSERT INTO viewing_leads (unit_id, prospect_name, phone, email, preferred_date, time_slot, status, notes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    insertLead.run(4, 'Caroline Achieng', '+254712445566', 'carol.achieng@gmail.com', '2026-11-05', '10:00 AM', 'confirmed', 'Interested in 3BR Kilimani unit. Family of 3.');
+  }
+
+  // Pre-seed eTIMS records for existing invoices
+  const etimsCount = db.prepare('SELECT count(*) as total FROM etims_records').get()?.total || 0;
+  if (etimsCount === 0) {
+    const invoices = db.prepare('SELECT id, total_amount, rent_amount FROM invoices LIMIT 5').all();
+    const insertEtims = db.prepare(`
+      INSERT INTO etims_records (invoice_id, control_code, qr_code_url, tax_type, taxable_amount, tax_payable, kra_status)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    invoices.forEach(inv => {
+      const code = `KRA-ETIMS-${inv.id}-` + Math.random().toString(36).substring(2, 8).toUpperCase();
+      const qrUrl = `https://itax.kra.go.ke/KRA-Portal/invoiceVerification.htm?controlCode=${code}`;
+      const mri = Math.round(inv.rent_amount * 0.075);
+      insertEtims.run(inv.id, code, qrUrl, 'MRI_7.5_PCT', inv.rent_amount, mri, 'transmitted');
+    });
+  }
+}
+
 // Call initSchema and seedDatabase
 initSchema();
 seedDatabase();
 seedUsersIfEmpty();
+seedNextGenFeatures();
 
 module.exports = {
   db,

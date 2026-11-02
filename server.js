@@ -1158,6 +1158,380 @@ async function handleRequest(req, res) {
     }
 
     // ==========================================
+    // PUBLIC VACANCIES & VIEWING BOOKING API
+    // ==========================================
+    if (pathname === '/api/public/vacancies' && method === 'GET') {
+      const vacancies = db.prepare(`
+        SELECT 
+          u.id, u.unit_number, u.floor, u.unit_type, u.base_rent, u.service_charge, u.garbage_fee,
+          u.status, u.notes,
+          p.id as property_id, p.name as property_name, p.property_type, p.address, p.city
+        FROM units u
+        JOIN properties p ON u.property_id = p.id
+        WHERE u.status = 'vacant'
+        ORDER BY u.base_rent ASC
+      `).all();
+
+      const enriched = vacancies.map(v => {
+        let bedrooms = 2;
+        let bathrooms = 2;
+        let sqft = 1100;
+        let photo = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80';
+
+        if (v.unit_type.includes('Commercial') || v.unit_type.includes('Office')) {
+          bedrooms = 0;
+          bathrooms = 1;
+          sqft = 650;
+          photo = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80';
+        } else if (v.unit_type.includes('3-Bedroom') || v.unit_type.includes('DSQ')) {
+          bedrooms = 3;
+          bathrooms = 3;
+          sqft = 1650;
+          photo = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80';
+        } else if (v.unit_type.includes('Townhouse') || v.unit_type.includes('Villa')) {
+          bedrooms = 4;
+          bathrooms = 4.5;
+          sqft = 3200;
+          photo = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80';
+        }
+
+        const deposit = v.base_rent * 2;
+        const totalMonthly = v.base_rent + (v.service_charge || 0) + (v.garbage_fee || 0);
+
+        return {
+          ...v,
+          bedrooms,
+          bathrooms,
+          sqft,
+          photo,
+          deposit,
+          total_monthly: totalMonthly,
+          amenities: ['High-Speed Fiber', 'Borehole Water', '24/7 Manned Security', 'Backup Generator', 'Reserved Parking', 'Solar Water Heating']
+        };
+      });
+
+      return sendJSON(res, 200, { success: true, count: enriched.length, vacancies: enriched });
+    }
+
+    if (pathname === '/api/public/book-viewing' && method === 'POST') {
+      const b = await parseBody(req);
+      const { unit_id, prospect_name, phone, email, preferred_date, time_slot, notes } = b;
+      if (!unit_id || !prospect_name || !phone || !preferred_date) {
+        return sendJSON(res, 400, { error: 'Unit ID, prospect name, phone, and preferred date are required.' });
+      }
+
+      const ref = 'VIEW-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      db.prepare(`
+        INSERT INTO viewing_leads (unit_id, prospect_name, phone, email, preferred_date, time_slot, status, notes)
+        VALUES (?, ?, ?, ?, ?, ?, 'confirmed', ?)
+      `).run(unit_id, prospect_name, phone, email || null, preferred_date, time_slot || '10:00 AM', notes || null);
+
+      db.prepare(`
+        INSERT INTO communications (type, recipient_name, recipient_phone, message, status, purpose)
+        VALUES ('sms', ?, ?, ?, 'delivered', 'viewing_confirmation')
+      `).run(prospect_name, phone, `Hello ${prospect_name}, your viewing reference is ${ref} for ${preferred_date} at ${time_slot || '10:00 AM'}. Our property caretaker will welcome you. - BomaSphere Management`);
+
+      return sendJSON(res, 201, {
+        success: true,
+        reference: ref,
+        message: 'Viewing successfully booked. Confirmation SMS dispatched.'
+      });
+    }
+
+    // ==========================================
+    // FEATURE 1: WHATSAPP BUSINESS BOT WEBHOOK
+    // ==========================================
+    if (pathname === '/api/whatsapp/webhook' && method === 'POST') {
+      const b = await parseBody(req);
+      const phone = b.phone || b.From || '+254722889900';
+      const incomingText = (b.message || b.Body || '').trim();
+
+      let tenant = db.prepare("SELECT * FROM tenants WHERE phone LIKE ? OR phone LIKE ?").get(`%${phone.slice(-9)}%`, phone);
+      if (!tenant) tenant = db.prepare("SELECT * FROM tenants LIMIT 1").get();
+
+      const cmd = incomingText.toUpperCase();
+      let replyText = '';
+      let action = 'menu';
+
+      if (cmd.includes('BALANCE') || cmd === '1') {
+        const inv = db.prepare("SELECT * FROM invoices WHERE tenant_id = ? ORDER BY id DESC LIMIT 1").get(tenant.id);
+        const bal = inv ? inv.balance : 0;
+        replyText = `Jambo ${tenant.name}! Your current BomaSphere balance is KES ${Number(bal).toLocaleString()}. Due date: 5th of this month. Pay easily via Paybill 522522, Account: ${inv?.invoice_number || 'RENT'}. Reply 'PAY' to trigger instant M-Pesa prompt.`;
+        action = 'balance';
+      } else if (cmd.includes('RECEIPT') || cmd === '2') {
+        const pmt = db.prepare("SELECT * FROM payments WHERE tenant_id = ? ORDER BY id DESC LIMIT 1").get(tenant.id);
+        if (pmt) {
+          replyText = `Official BomaSphere Receipt: ${pmt.receipt_number}. Paid KES ${Number(pmt.amount).toLocaleString()} via ${pmt.payment_method} on ${pmt.payment_date}. Ref: ${pmt.reference_code}. Status: Verified.`;
+        } else {
+          replyText = `No recent receipts found for account ${tenant.name}.`;
+        }
+        action = 'receipt';
+      } else if (cmd.includes('PAY') || cmd === '3') {
+        const inv = db.prepare("SELECT * FROM invoices WHERE tenant_id = ? AND balance > 0 ORDER BY id DESC LIMIT 1").get(tenant.id);
+        const amount = inv ? inv.balance : 65000;
+        const ref = 'QG' + Math.random().toString(36).substring(2, 10).toUpperCase();
+        replyText = `Daraja M-Pesa STK push initiated for KES ${Number(amount).toLocaleString()} to ${phone}. Enter your M-Pesa PIN on handset prompt. Receipt ${ref} will follow.`;
+        action = 'pay';
+      } else if (cmd.startsWith('TICKET') || cmd === '4') {
+        const issue = incomingText.replace(/^TICKET/i, '').trim() || 'General repairs needed';
+        const tktNum = 'TKT-' + Math.floor(1000 + Math.random() * 9000);
+        const unit = db.prepare("SELECT * FROM units LIMIT 1").get();
+        db.prepare(`
+          INSERT INTO maintenance_requests (ticket_number, property_id, unit_id, tenant_id, title, description, category, priority, status)
+          VALUES (?, ?, ?, ?, ?, ?, 'plumbing', 'medium', 'open')
+        `).run(tktNum, unit.property_id, unit.id, tenant.id, 'WhatsApp: ' + issue.substring(0, 40), issue);
+        replyText = `Maintenance ticket ${tktNum} logged successfully for ${tenant.name}! Our site caretaker has been notified and will contact you shortly.`;
+        action = 'ticket';
+      } else {
+        replyText = `Welcome to BomaSphere WhatsApp Business Bot!\n\nReply with a number or keyword:\n1. BALANCE - Check your current rent & water dues\n2. RECEIPT - View latest official payment receipt\n3. PAY - Receive 1-tap Lipa Na M-Pesa prompt\n4. TICKET <issue> - Report a maintenance issue\n\nOur office is open Mon-Fri 8AM - 5PM.`;
+      }
+
+      db.prepare(`
+        INSERT INTO communications (type, recipient_name, recipient_phone, message, status, purpose)
+        VALUES ('whatsapp', ?, ?, ?, 'delivered', ?)
+      `).run(tenant.name, phone, replyText, action);
+
+      return sendJSON(res, 200, {
+        success: true,
+        tenant_name: tenant.name,
+        incoming: incomingText,
+        reply: replyText,
+        action
+      });
+    }
+
+    if (pathname === '/api/whatsapp/history' && method === 'GET') {
+      const messages = db.prepare(`
+        SELECT * FROM communications WHERE type = 'whatsapp' ORDER BY id DESC LIMIT 20
+      `).all();
+      return sendJSON(res, 200, { success: true, messages });
+    }
+
+    // ==========================================
+    // FEATURE 2: AI TENANT VETTING & CRB SCORING
+    // ==========================================
+    if (pathname === '/api/tenant-vetting' && method === 'GET') {
+      const list = db.prepare(`
+        SELECT v.*, u.unit_number, u.base_rent, p.name as property_name
+        FROM tenant_vettings v
+        LEFT JOIN units u ON v.requested_unit_id = u.id
+        LEFT JOIN properties p ON u.property_id = p.id
+        ORDER BY v.id DESC
+      `).all();
+      return sendJSON(res, 200, { success: true, vettings: list });
+    }
+
+    if (pathname === '/api/tenant-vetting/analyze' && method === 'POST') {
+      const b = await parseBody(req);
+      const { applicant_name, phone, email, id_number, requested_unit_id, monthly_income } = b;
+      if (!applicant_name || !monthly_income || !requested_unit_id) {
+        return sendJSON(res, 400, { error: 'Applicant name, monthly income, and requested unit ID are required.' });
+      }
+
+      const unit = db.prepare('SELECT * FROM units WHERE id = ?').get(requested_unit_id);
+      if (!unit) return sendJSON(res, 404, { error: 'Target unit not found.' });
+
+      const income = Number(monthly_income);
+      const rent = unit.base_rent;
+      const rentToIncome = Number(((rent / income) * 100).toFixed(1));
+
+      let crbScore = 750;
+      let riskCategory = 'Low Risk';
+      let recommendation = 'Approved: Clean CRB credit report and healthy rent-to-income ratio.';
+
+      if (rentToIncome > 45) {
+        crbScore = 580;
+        riskCategory = 'High Risk';
+        recommendation = 'Declined: Rent exceeds 45% of verified monthly income. Guarantor required.';
+      } else if (rentToIncome > 35) {
+        crbScore = 660;
+        riskCategory = 'Medium Risk';
+        recommendation = 'Conditional Approval: Require 2 months security deposit and direct debit authorization.';
+      } else {
+        crbScore = Math.floor(740 + Math.random() * 80);
+      }
+
+      const resInsert = db.prepare(`
+        INSERT INTO tenant_vettings (applicant_name, phone, email, id_number, requested_unit_id, monthly_income, crb_score, risk_category, rent_to_income_pct, recommendation)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(applicant_name, phone || '+254700000000', email || null, id_number || 'ID-VERIFIED', requested_unit_id, income, crbScore, riskCategory, rentToIncome, recommendation);
+
+      return sendJSON(res, 201, {
+        success: true,
+        vetting_id: resInsert.lastInsertRowid,
+        applicant_name,
+        crb_score: crbScore,
+        risk_category: riskCategory,
+        rent_to_income_pct: rentToIncome,
+        recommendation
+      });
+    }
+
+    // ==========================================
+    // FEATURE 3: SMART IOT WATER TELEMETRY
+    // ==========================================
+    if (pathname === '/api/iot/devices' && method === 'GET') {
+      const devices = db.prepare(`
+        SELECT d.*, u.unit_number, p.name as property_name
+        FROM iot_devices d
+        JOIN properties p ON d.property_id = p.id
+        LEFT JOIN units u ON d.unit_id = u.id
+        ORDER BY d.id ASC
+      `).all();
+      return sendJSON(res, 200, { success: true, count: devices.length, devices });
+    }
+
+    if (pathname === '/api/iot/leak-alerts' && method === 'GET') {
+      const alerts = db.prepare(`
+        SELECT a.*, d.meter_number, u.unit_number, p.name as property_name
+        FROM leak_alerts a
+        JOIN iot_devices d ON a.device_id = d.id
+        JOIN units u ON a.unit_id = u.id
+        JOIN properties p ON d.property_id = p.id
+        ORDER BY a.id DESC
+      `).all();
+      return sendJSON(res, 200, { success: true, count: alerts.length, alerts });
+    }
+
+    if (pathname === '/api/iot/valve-toggle' && method === 'POST') {
+      const b = await parseBody(req);
+      const { device_id, valve_status } = b;
+      if (!device_id || !valve_status) {
+        return sendJSON(res, 400, { error: 'Device ID and valve status (open/closed) are required.' });
+      }
+
+      db.prepare('UPDATE iot_devices SET valve_status = ? WHERE id = ?').run(valve_status, device_id);
+      const updated = db.prepare('SELECT * FROM iot_devices WHERE id = ?').get(device_id);
+      return sendJSON(res, 200, { success: true, message: `Smart valve ${valve_status.toUpperCase()} command acknowledged.`, device: updated });
+    }
+
+    // ==========================================
+    // FEATURE 4: MULTI-PROPERTY KRA eTIMS & 7.5% MRI
+    // ==========================================
+    if (pathname === '/api/tax/etims-summary' && method === 'GET') {
+      const records = db.prepare(`
+        SELECT e.*, i.invoice_number, i.month, u.unit_number, p.name as property_name, t.name as tenant_name
+        FROM etims_records e
+        JOIN invoices i ON e.invoice_id = i.id
+        JOIN units u ON i.unit_id = u.id
+        JOIN properties p ON u.property_id = p.id
+        JOIN tenants t ON i.tenant_id = t.id
+        ORDER BY e.id DESC
+      `).all();
+
+      const totals = db.prepare(`
+        SELECT 
+          COUNT(*) as total_transmitted,
+          SUM(taxable_amount) as total_taxable_rent,
+          SUM(tax_payable) as total_mri_tax
+        FROM etims_records
+      `).get();
+
+      return sendJSON(res, 200, {
+        success: true,
+        stats: {
+          total_transmitted: totals.total_transmitted || 0,
+          total_taxable_rent: totals.total_taxable_rent || 0,
+          total_mri_tax: totals.total_mri_tax || 0,
+          mri_rate: '7.5%'
+        },
+        records
+      });
+    }
+
+    if (pathname === '/api/tax/etims/generate' && method === 'POST') {
+      const b = await parseBody(req);
+      const { invoice_id } = b;
+      if (!invoice_id) return sendJSON(res, 400, { error: 'Invoice ID is required' });
+
+      const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoice_id);
+      if (!invoice) return sendJSON(res, 404, { error: 'Invoice not found' });
+
+      const existing = db.prepare('SELECT * FROM etims_records WHERE invoice_id = ?').get(invoice_id);
+      if (existing) {
+        return sendJSON(res, 200, { success: true, record: existing, message: 'Existing eTIMS record returned' });
+      }
+
+      const controlCode = `KRA-ETIMS-${invoice.id}-` + Math.random().toString(36).substring(2, 8).toUpperCase();
+      const qrUrl = `https://itax.kra.go.ke/KRA-Portal/invoiceVerification.htm?controlCode=${controlCode}`;
+      const mri = Math.round(invoice.rent_amount * 0.075);
+
+      db.prepare(`
+        INSERT INTO etims_records (invoice_id, control_code, qr_code_url, tax_type, taxable_amount, tax_payable, kra_status)
+        VALUES (?, ?, ?, 'MRI_7.5_PCT', ?, ?, 'transmitted')
+      `).run(invoice.id, controlCode, qrUrl, invoice.rent_amount, mri);
+
+      const record = db.prepare('SELECT * FROM etims_records WHERE invoice_id = ?').get(invoice_id);
+      return sendJSON(res, 201, { success: true, record });
+    }
+
+    // ==========================================
+    // FEATURE 5: ARTISAN ESCROW MARKETPLACE
+    // ==========================================
+    if (pathname === '/api/marketplace/fundis' && method === 'GET') {
+      const fundis = db.prepare('SELECT * FROM artisan_marketplace ORDER BY rating DESC').all();
+      return sendJSON(res, 200, { success: true, count: fundis.length, fundis });
+    }
+
+    if (pathname === '/api/marketplace/escrows' && method === 'GET') {
+      const escrows = db.prepare(`
+        SELECT e.*, m.title as ticket_title, m.ticket_number, f.name as fundi_name, f.trade as fundi_trade, f.phone as fundi_phone
+        FROM maintenance_escrows e
+        JOIN maintenance_requests m ON e.ticket_id = m.id
+        LEFT JOIN artisan_marketplace f ON e.fundi_id = f.id
+        ORDER BY e.id DESC
+      `).all();
+      return sendJSON(res, 200, { success: true, count: escrows.length, escrows });
+    }
+
+    if (pathname === '/api/marketplace/escrow/allocate' && method === 'POST') {
+      const b = await parseBody(req);
+      const { ticket_id, fundi_id, amount, milestone_desc } = b;
+      if (!ticket_id || !amount) {
+        return sendJSON(res, 400, { error: 'Ticket ID and escrow allocation amount are required.' });
+      }
+
+      const resInsert = db.prepare(`
+        INSERT INTO maintenance_escrows (ticket_id, fundi_id, amount, status, milestone_desc)
+        VALUES (?, ?, ?, 'held', ?)
+      `).run(ticket_id, fundi_id || null, Number(amount), milestone_desc || 'Repair milestone deposit');
+
+      return sendJSON(res, 201, {
+        success: true,
+        escrow_id: resInsert.lastInsertRowid,
+        status: 'held',
+        message: `KES ${Number(amount).toLocaleString()} successfully locked in escrow for Ticket #${ticket_id}.`
+      });
+    }
+
+    if (pathname === '/api/marketplace/escrow/release' && method === 'POST') {
+      const b = await parseBody(req);
+      const { escrow_id } = b;
+      if (!escrow_id) return sendJSON(res, 400, { error: 'Escrow ID is required' });
+
+      const escrow = db.prepare('SELECT * FROM maintenance_escrows WHERE id = ?').get(escrow_id);
+      if (!escrow) return sendJSON(res, 404, { error: 'Escrow record not found' });
+
+      const b2cRef = 'B2C-MPESA-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+      db.prepare(`
+        UPDATE maintenance_escrows
+        SET status = 'disbursed', b2c_disbursement_ref = ?, released_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `).run(b2cRef, escrow_id);
+
+      db.prepare("UPDATE maintenance_requests SET status = 'completed', actual_cost = ?, completed_date = CURRENT_TIMESTAMP WHERE id = ?")
+        .run(escrow.amount, escrow.ticket_id);
+
+      return sendJSON(res, 200, {
+        success: true,
+        status: 'disbursed',
+        b2c_disbursement_ref: b2cRef,
+        amount: escrow.amount,
+        message: `Escrow released! KES ${Number(escrow.amount).toLocaleString()} disbursed via M-Pesa B2C (${b2cRef}).`
+      });
+    }
+
+    // ==========================================
     // STATIC FILE SERVING (Hardened against Traversal & Sinks)
     // ==========================================
     const WINDOWS_RESERVED = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(\..*)?$/i;

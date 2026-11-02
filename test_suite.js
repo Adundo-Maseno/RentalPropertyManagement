@@ -406,6 +406,104 @@ async function runTests() {
     console.log('      Verified 500 page: Branded Internal Server Error with incident ID and telemetry');
   });
 
+  // 32. Public Vacancies Listing API
+  await test('Public Rentals: GET /api/public/vacancies returns available units with specs', async () => {
+    const res = await invokeHandler('/api/public/vacancies');
+    if (res.statusCode !== 200) throw new Error(`Status ${res.statusCode}`);
+    if (!res.json.vacancies || !Array.isArray(res.json.vacancies)) throw new Error('Expected vacancies array');
+    const first = res.json.vacancies[0];
+    if (!first || !first.photo || first.bedrooms === undefined || !first.total_monthly) {
+      throw new Error('Vacant listing missing enriched attributes');
+    }
+    console.log(`      Found ${res.json.count} public vacant spaces. Example: Unit ${first.unit_number} (${first.unit_type}) at KES ${first.base_rent.toLocaleString()}/mo`);
+  });
+
+  // 33. Public Viewing Appointment Booking
+  await test('Public Rentals: POST /api/public/book-viewing schedules prospect viewing', async () => {
+    const res = await invokeHandler('/api/public/book-viewing', 'POST', {
+      unit_id: 4,
+      prospect_name: 'Wanjiku Mwangi',
+      phone: '+254711998877',
+      email: 'wanjiku@kenyabiz.co.ke',
+      preferred_date: '2026-11-06',
+      time_slot: '02:00 PM',
+      notes: 'Interested in parking bay allocation'
+    });
+    if (res.statusCode !== 201) throw new Error(`Expected 201, got ${res.statusCode}`);
+    if (!res.json.reference || !res.json.reference.startsWith('VIEW-')) throw new Error('Missing VIEW reference');
+    console.log(`      Viewing appointment confirmed with reference: ${res.json.reference}`);
+  });
+
+  // 34. Feature 1: WhatsApp Business Interactive Bot
+  await test('WhatsApp Bot: POST /api/whatsapp/webhook handles 2-way BALANCE command', async () => {
+    const res = await invokeHandler('/api/whatsapp/webhook', 'POST', {
+      phone: '+254722889900',
+      message: 'BALANCE'
+    });
+    if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
+    if (!res.json.reply || !res.json.reply.includes('KES')) throw new Error('Invalid WhatsApp balance reply');
+    console.log(`      WhatsApp Bot response: "${res.json.reply.substring(0, 75)}..."`);
+  });
+
+  // 35. Feature 2: AI Tenant Vetting & CRB Scoring
+  await test('AI Vetting: POST /api/tenant-vetting/analyze computes CRB risk tier', async () => {
+    const res = await invokeHandler('/api/tenant-vetting/analyze', 'POST', {
+      applicant_name: 'Kevin Omondi',
+      phone: '+254720112233',
+      id_number: '31984512',
+      monthly_income: 260000,
+      requested_unit_id: 4
+    });
+    if (res.statusCode !== 201) throw new Error(`Expected 201, got ${res.statusCode}`);
+    if (!res.json.crb_score || !res.json.risk_category) throw new Error('Missing CRB score or risk tier');
+    console.log(`      Vetted ${res.json.applicant_name}: CRB Score ${res.json.crb_score}, Risk: ${res.json.risk_category}`);
+  });
+
+  // 36. Feature 3: Smart IoT Water Telemetry & Remote Valve Control
+  await test('IoT Telemetry: GET /api/iot/devices & POST /api/iot/valve-toggle controls smart valves', async () => {
+    const devRes = await invokeHandler('/api/iot/devices');
+    if (devRes.statusCode !== 200) throw new Error(`Expected 200, got ${devRes.statusCode}`);
+    if (!Array.isArray(devRes.json.devices) || devRes.json.devices.length === 0) throw new Error('No IoT devices returned');
+
+    const toggleRes = await invokeHandler('/api/iot/valve-toggle', 'POST', {
+      device_id: 1,
+      valve_status: 'closed'
+    });
+    if (toggleRes.statusCode !== 200) throw new Error(`Expected 200, got ${toggleRes.statusCode}`);
+    if (toggleRes.json.device.valve_status !== 'closed') throw new Error('Valve status not updated');
+    console.log(`      IoT Smart Meter #${devRes.json.devices[0].meter_number} valve successfully shut off via remote command`);
+  });
+
+  // 37. Feature 4: KRA eTIMS & 7.5% MRI Tax Automation
+  await test('Tax Automation: GET /api/tax/etims-summary calculates 7.5% MRI withholding', async () => {
+    const res = await invokeHandler('/api/tax/etims-summary');
+    if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
+    if (!res.json.stats || res.json.stats.mri_rate !== '7.5%') throw new Error('Missing MRI 7.5% tax statistics');
+    console.log(`      eTIMS Active Invoices: ${res.json.stats.total_transmitted}, Total MRI Tax: KES ${res.json.stats.total_mri_tax.toLocaleString()}`);
+  });
+
+  // 38. Feature 5: Artisan Escrow Marketplace
+  await test('Artisan Escrow: Marketplace lists fundis and handles milestone release', async () => {
+    const fundisRes = await invokeHandler('/api/marketplace/fundis');
+    if (fundisRes.statusCode !== 200) throw new Error(`Expected 200, got ${fundisRes.statusCode}`);
+    if (fundisRes.json.fundis.length === 0) throw new Error('No vetted fundis found');
+
+    const releaseRes = await invokeHandler('/api/marketplace/escrow/release', 'POST', { escrow_id: 1 });
+    if (releaseRes.statusCode !== 200) throw new Error(`Expected 200, got ${releaseRes.statusCode}`);
+    if (!releaseRes.json.b2c_disbursement_ref.startsWith('B2C-MPESA-')) throw new Error('Missing B2C reference');
+    console.log(`      Fundi Escrow released: ${releaseRes.json.b2c_disbursement_ref} for KES ${releaseRes.json.amount.toLocaleString()}`);
+  });
+
+  // 39. Public Rentals Showcase HTML
+  await test('Public Rentals: /rentals.html serves public listing catalog with 200 OK', async () => {
+    const res = await invokeHandler('/rentals.html');
+    if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
+    if (!res.body.includes('Find Your Next Home in Nairobi') || !res.body.includes('BomaSphere Properties')) {
+      throw new Error('rentals.html missing expected branding');
+    }
+    console.log('      Verified rentals.html: High-converting public vacancy showcase with viewing booking modal');
+  });
+
   console.log(`\n=======================================================`);
   console.log(` TESTS COMPLETED: ${passed} PASSED, ${failed} FAILED `);
   console.log(`=======================================================`);

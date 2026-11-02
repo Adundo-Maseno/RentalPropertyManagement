@@ -3,13 +3,14 @@
 [![Deployment Status](https://img.shields.io/badge/Cloudflare_Pages-Live_Production-059669?style=flat&logo=cloudflare)](https://rentalpropertymanagement.pages.dev/)
 [![PWA](https://img.shields.io/badge/PWA-Installable_Native_App-blue?style=flat&logo=pwa)](https://rentalpropertymanagement.pages.dev/)
 [![Security RBAC](https://img.shields.io/badge/Security-5--Tier_Strict_RBAC-success?style=flat&logo=shield)](https://rentalpropertymanagement.pages.dev/)
-[![Tests](https://img.shields.io/badge/Tests-31%2F31_Passed-brightgreen?style=flat)](https://github.com/Adundo-Maseno/RentalPropertyManagement)
+[![Tests](https://img.shields.io/badge/Tests-39%2F39_Passed-brightgreen?style=flat)](https://github.com/Adundo-Maseno/RentalPropertyManagement)
 [![Node.js](https://img.shields.io/badge/Node.js-22%2B_Zero_Dependencies-339933?style=flat&logo=node.js)](https://nodejs.org/)
 
 > **Next-Generation Real Estate & Property Management Platform**  
 > *Combining the localized financial power of **BomaHut** (M-Pesa STK push, water sub-metering, fundi tracking) with the enterprise architecture of **AppFolio**, **Buildium**, and **DoorLoop**.*
 
-🌐 **Live Production URL:** [https://rentalpropertymanagement.pages.dev/](https://rentalpropertymanagement.pages.dev/)
+🌐 **Live Production Application:** [https://rentalpropertymanagement.pages.dev/](https://rentalpropertymanagement.pages.dev/)  
+🏢 **Public Vacancy Showcase:** [https://rentalpropertymanagement.pages.dev/rentals.html](https://rentalpropertymanagement.pages.dev/rentals.html)
 
 ---
 
@@ -77,28 +78,29 @@ BomaSphere enforces strict **Role-Based Access Control (RBAC)** across both the 
 
 ---
 
-## 💡 5 High-Impact Recommended Next-Gen Features
+## 🚀 5 Next-Generation Implemented Features
 
-1. **Automated WhatsApp Business API Interactive Gateway & Bot**:
-   - Enable 2-way conversational interactions where tenants text *"Balance"* or *"Receipt"* to BomaSphere's WhatsApp Business number and immediately receive their statement PDF and an M-Pesa STK push.
-   - Interactive message buttons for 1-tap maintenance reporting with photo/video uploads.
+1. **Automated WhatsApp Business API Interactive Gateway & Bot** (`/api/whatsapp/webhook`):
+   - 2-way conversational messaging: prospects and tenants can send commands like `BALANCE`, `RECEIPT`, `PAY`, or `TICKET` to BomaSphere's WhatsApp Business endpoint and receive immediate statement data, PDF receipts, and Lipa Na M-Pesa STK prompts.
+   - Interactive WhatsApp command tester directly within the Communications module.
 
-2. **AI-Powered Tenant Vetting & Financial Risk Scoring (CRB + M-Pesa OCR)**:
-   - Automated OCR parsing of uploaded 6-month M-Pesa and bank statement PDFs to verify legitimate income consistency and detect tampered statements.
-   - Direct API integration with Kenyan Credit Reference Bureaus (Metropol / TransUnion) to screen habitual rent defaulters before lease signing.
+2. **AI Tenant Vetting & Financial Risk Scoring** (`/api/tenant-vetting/analyze`):
+   - Integrated Credit Reference Bureau (CRB Metropol/TransUnion) risk score calculation and M-Pesa cashflow consistency analyzer.
+   - Computes automated risk tiers (Low Risk / Medium Risk / High Risk) and provides approval/denial recommendations with required security deposits.
 
-3. **Smart IoT Water & Electricity Telemetry (LoRaWAN / GSM Ultrasonic Meters)**:
-   - Direct telemetry integration with smart ultrasonic pulse water meters and prepaid sub-meters.
-   - Eliminates manual door-to-door meter reading on the 28th of every month.
-   - Automated midnight leak detection alerts when water consumption is detected in vacant units between 1 AM and 5 AM.
+3. **Smart IoT Water & Electricity Telemetry** (`/api/iot/devices`, `/api/iot/valve-toggle`):
+   - Real-time telemetry monitoring with LoRaWAN ultrasonic water sub-meters.
+   - Automated midnight leak & burst anomaly detection with visual status indicators.
+   - Remote digital shutoff valve control directly from the Water module.
 
-4. **Multi-Property Owner Portal with KRA eTIMS & Withholding Tax (WHT) Automation**:
-   - Automated electronic tax invoice signing via KRA eTIMS API for commercial and residential rent receipts.
-   - Automatic Monthly Rental Income Tax (MRI at 7.5%) calculation and withholding tax deduction from owner payout schedules.
+4. **KRA eTIMS Tax Compliance & 7.5% MRI Automation** (`/api/tax/etims-summary`, `/api/tax/etims/generate`):
+   - Full compliance with Kenya Revenue Authority (KRA) electronic Tax Invoice Management System (eTIMS).
+   - Generates eTIMS electronic signatures, control numbers, and printable QR codes for rental invoices.
+   - Automatic 7.5% Monthly Rental Income (MRI) withholding tax calculation and landlord net disbursement reconciliation.
 
-5. **Vendor & Artisan Marketplace with Milestone Escrow Payouts**:
-   - Integrated network of vetted local fundis (plumbers, electricians, painters, carpenters) with tenant satisfaction ratings.
-   - Escrow payouts: repair budgets are held and only disbursed via M-Pesa B2C once the tenant or caretaker confirms the repair with before/after photos.
+5. **Artisan Escrow Marketplace & Milestone Payouts** (`/api/marketplace/fundis`, `/api/marketplace/escrow/release`):
+   - Vetted directory of certified local fundis (plumbers, electricians, HVAC technicians, carpenters).
+   - Milestone-based escrow security: landlord funds are safely locked until work order completion, then instantly disbursed via M-Pesa B2C payout.
 
 ---
 
@@ -137,7 +139,7 @@ node server.js
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### 3. Run the Automated Direct Test Suite
-To run all 31 integration, RBAC, authentication, and error-handling tests:
+To run all 39 integration, RBAC, authentication, PWA, IoT, and Next-Gen feature tests:
 ```bash
 node test_suite.js
 ```

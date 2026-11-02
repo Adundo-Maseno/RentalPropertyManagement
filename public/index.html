@@ -197,6 +197,14 @@
           <i data-lucide="user-check" class="w-4 h-4"></i>
           <span>Resident Portal</span>
         </button>
+
+        <a href="/rentals.html" target="_blank" class="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition mt-1 border border-emerald-200 dark:border-emerald-800/60">
+          <div class="flex items-center space-x-2.5">
+            <i data-lucide="globe" class="w-4 h-4"></i>
+            <span>Public Vacancies Site</span>
+          </div>
+          <i data-lucide="external-link" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"></i>
+        </a>
       </nav>
 
       <!-- Mobile Theme Switcher inside Drawer -->
@@ -563,6 +571,10 @@
               <p class="text-xs text-slate-500">Manage tenant profiles, KYC documents, contact info, and active lease terms</p>
             </div>
             <div class="flex items-center space-x-2">
+              <button onclick="app.openTenantVettingModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>AI Tenant Vetting &amp; CRB</span>
+              </button>
               <button onclick="app.openAddTenantModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
                 <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
                 <span>Register Tenant</span>
@@ -789,10 +801,43 @@
               <p class="text-xs text-slate-500">Record previous and current meter readings (m³ or units) with automatic cost calculation and invoice integration</p>
             </div>
             <div class="flex items-center space-x-2">
+              <button onclick="app.toggleIotPanel()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="radio" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>Smart IoT Telemetry</span>
+              </button>
               <button onclick="app.openWaterReadingModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 <span>Record New Meter Reading</span>
               </button>
+            </div>
+          </div>
+
+          <!-- Smart IoT Telemetry & Leak Alert Panel -->
+          <div id="iot-telemetry-panel" class="bg-slate-900 text-white rounded-2xl p-5 border border-slate-800 shadow-md space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+              <div class="flex items-center space-x-2.5">
+                <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                  <i data-lucide="activity" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-sm text-white">LoRaWAN &amp; Ultrasonic Smart Meter Fleet</h3>
+                  <p class="text-[11px] text-slate-400">Real-time pulse telemetry with automated midnight burst &amp; leak anomaly detection</p>
+                </div>
+              </div>
+              <button onclick="app.refreshIotTelemetry()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium flex items-center space-x-1 self-start sm:self-auto">
+                <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                <span>Poll Gateways</span>
+              </button>
+            </div>
+
+            <!-- Active Leak Alert Box -->
+            <div id="iot-leak-alert-container">
+              <!-- dynamic leak alert -->
+            </div>
+
+            <!-- Live Devices Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs" id="iot-devices-grid">
+              <!-- dynamic IoT device cards -->
             </div>
           </div>
 
@@ -845,6 +890,10 @@
               <p class="text-xs text-slate-500">Track tenant repair requests, dispatch contractors/fundis, and control property maintenance expenses</p>
             </div>
             <div class="flex items-center space-x-2">
+              <button onclick="app.openArtisanMarketplaceModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
+                <i data-lucide="wrench" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>Artisan Escrow Marketplace</span>
+              </button>
               <button onclick="app.openNewTicketModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1.5">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 <span>Create Work Order</span>
@@ -957,6 +1006,62 @@
               <button onclick="app.useTemplate('arrears')" class="px-2 py-1 bg-rose-50 text-rose-700 rounded border border-rose-200 hover:bg-rose-100">Overdue Arrears Notice</button>
               <button onclick="app.useTemplate('water')" class="px-2 py-1 bg-blue-50 text-blue-700 rounded border border-blue-200 hover:bg-blue-100">Water Tank Maintenance</button>
               <button onclick="app.useTemplate('inspection')" class="px-2 py-1 bg-amber-50 text-amber-700 rounded border border-amber-200 hover:bg-amber-100">Annual Routine Inspection</button>
+            </div>
+          </div>
+
+          <!-- FEATURE 1: 2-Way Interactive WhatsApp Bot Console -->
+          <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-emerald-50/50">
+              <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold">
+                  <i data-lucide="message-circle" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-800 text-sm">Interactive WhatsApp Business Bot (2-Way Gateway)</h3>
+                  <p class="text-[11px] text-slate-500">Live webhook responding to BALANCE, RECEIPT, PAY, and TICKET requests</p>
+                </div>
+              </div>
+              <span class="text-[11px] font-mono bg-emerald-100 text-emerald-800 font-semibold px-2.5 py-0.5 rounded-full">WEBHOOK ACTIVE</span>
+            </div>
+
+            <div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-5">
+              <!-- Quick test prompts -->
+              <div class="space-y-3 text-xs">
+                <span class="font-bold text-slate-700 block">Click a Prompt to Test Bot:</span>
+                <button onclick="app.sendTestWhatsapp('BALANCE')" class="w-full text-left p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition flex items-center justify-between">
+                  <span>1. Check Current Balance</span>
+                  <code class="text-[10px] text-slate-400">BALANCE</code>
+                </button>
+                <button onclick="app.sendTestWhatsapp('RECEIPT')" class="w-full text-left p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition flex items-center justify-between">
+                  <span>2. Retrieve Latest Receipt</span>
+                  <code class="text-[10px] text-slate-400">RECEIPT</code>
+                </button>
+                <button onclick="app.sendTestWhatsapp('PAY')" class="w-full text-left p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition flex items-center justify-between">
+                  <span>3. Request M-Pesa STK Push</span>
+                  <code class="text-[10px] text-slate-400">PAY</code>
+                </button>
+                <button onclick="app.sendTestWhatsapp('TICKET Bathroom pipe leaking')" class="w-full text-left p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition flex items-center justify-between">
+                  <span>4. Report Maintenance Ticket</span>
+                  <code class="text-[10px] text-slate-400">TICKET ...</code>
+                </button>
+              </div>
+
+              <!-- Chat window stream -->
+              <div class="md:col-span-2 bg-slate-900 rounded-xl p-4 flex flex-col justify-between text-xs min-h-[260px] border border-slate-800">
+                <div class="space-y-3 overflow-y-auto max-h-[220px] pr-2" id="whatsapp-chat-stream">
+                  <div class="flex items-start space-x-2">
+                    <div class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">W</div>
+                    <div class="bg-slate-800 text-slate-100 p-2.5 rounded-2xl rounded-tl-xs max-w-sm text-[11px] leading-relaxed">
+                      Jambo! Welcome to BomaSphere WhatsApp Business Bot. Reply <strong>BALANCE</strong>, <strong>RECEIPT</strong>, <strong>PAY</strong>, or <strong>TICKET &lt;issue&gt;</strong>.
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex space-x-2 pt-3 border-t border-slate-800 mt-3">
+                  <input type="text" id="whatsapp-input-text" placeholder="Type a message (e.g. BALANCE or PAY)..." class="flex-1 bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                  <button onclick="app.sendCustomWhatsapp()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs transition">Send</button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1989,6 +2094,161 @@
         </div>
       </details>
 
+    </div>
+  </div>
+
+  <!-- MODAL: AI Tenant Vetting & Financial Risk Scoring (Feature 2) -->
+  <div id="modal-tenant-vetting" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative max-h-[90vh] overflow-y-auto">
+      <button onclick="app.closeModal('modal-tenant-vetting')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center space-x-3 pb-4 border-b border-slate-100 dark:border-zinc-800">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-base text-slate-900 dark:text-white">AI Tenant Vetting &amp; CRB Financial Risk Scoring</h3>
+          <p class="text-xs text-slate-500">Automated income-to-rent analysis, Metropol/TransUnion CRB simulation, and default risk tiering</p>
+        </div>
+      </div>
+
+      <!-- Applicant Screening Form -->
+      <form id="form-vetting" onsubmit="app.submitTenantVetting(event)" class="mt-4 p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/60 space-y-3 text-xs">
+        <div class="font-bold text-slate-800 dark:text-zinc-200 flex items-center justify-between">
+          <span>Run New Applicant Vetting</span>
+          <span class="text-[11px] font-mono text-indigo-600 dark:text-indigo-400">OCR &bull; Credit Check</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div>
+            <label class="block font-semibold text-slate-600 dark:text-zinc-400 mb-1">Applicant Name</label>
+            <input type="text" id="vet-name" placeholder="e.g. Samuel K. Mutua" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 dark:text-zinc-400 mb-1">National ID / Passport</label>
+            <input type="text" id="vet-id" placeholder="32456789" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 font-mono text-xs">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 dark:text-zinc-400 mb-1">Monthly Income (KES)</label>
+            <input type="number" id="vet-income" placeholder="250000" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 font-bold text-xs">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-semibold text-slate-600 dark:text-zinc-400 mb-1">Target Rental Unit</label>
+            <select id="vet-unit-select" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs">
+              <!-- dynamic units -->
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 dark:text-zinc-400 mb-1">Applicant Phone (M-Pesa Verified)</label>
+            <input type="tel" id="vet-phone" placeholder="+2547XXXXXXXX" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 font-mono text-xs">
+          </div>
+        </div>
+
+        <button type="submit" id="btn-submit-vetting" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-xs shadow-xs transition flex items-center justify-center space-x-1.5">
+          <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+          <span>Execute Instant AI Risk Assessment</span>
+        </button>
+      </form>
+
+      <!-- Vetting Records History Table -->
+      <div class="mt-5 space-y-2">
+        <h4 class="font-bold text-xs uppercase tracking-wider text-slate-500">Applicant Risk Ledger &amp; Clearances</h4>
+        <div class="overflow-x-auto border border-slate-200 dark:border-zinc-800 rounded-xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 font-semibold text-[11px] border-b border-slate-200 dark:border-zinc-700">
+              <tr>
+                <th class="py-2.5 px-3">Applicant</th>
+                <th class="py-2.5 px-3">Target Unit</th>
+                <th class="py-2.5 px-3">Income &amp; Ratio</th>
+                <th class="py-2.5 px-3">CRB Score</th>
+                <th class="py-2.5 px-3">Risk Tier</th>
+                <th class="py-2.5 px-3">Recommendation</th>
+              </tr>
+            </thead>
+            <tbody id="vetting-table-body" class="divide-y divide-slate-100 dark:divide-zinc-800 font-medium">
+              <!-- dynamic -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Artisan Escrow Marketplace (Feature 5) -->
+  <div id="modal-artisan-marketplace" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative max-h-[90vh] overflow-y-auto">
+      <button onclick="app.closeModal('modal-artisan-marketplace')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center space-x-3 pb-4 border-b border-slate-100 dark:border-zinc-800">
+        <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold">
+          <i data-lucide="wrench" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-base text-slate-900 dark:text-white">Artisan &amp; Fundi Escrow Marketplace</h3>
+          <p class="text-xs text-slate-500">Vetted local Kenyan technicians with milestone escrow locks and automated M-Pesa B2C payouts</p>
+        </div>
+      </div>
+
+      <!-- Fundis Directory Grid -->
+      <div class="mt-4 space-y-2">
+        <h4 class="font-bold text-xs uppercase tracking-wider text-slate-500">Vetted Fundi Directory</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="fundis-directory-grid">
+          <!-- dynamic fundis -->
+        </div>
+      </div>
+
+      <!-- Active Escrows Ledger -->
+      <div class="mt-6 space-y-2">
+        <div class="flex items-center justify-between">
+          <h4 class="font-bold text-xs uppercase tracking-wider text-slate-500">Active Maintenance Escrow Locks</h4>
+          <span class="text-[11px] font-mono text-emerald-600 dark:text-emerald-400">Funds Held in Safaricom Trust</span>
+        </div>
+        <div class="overflow-x-auto border border-slate-200 dark:border-zinc-800 rounded-xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 font-semibold text-[11px] border-b border-slate-200 dark:border-zinc-700">
+              <tr>
+                <th class="py-2.5 px-3">Ticket</th>
+                <th class="py-2.5 px-3">Assigned Fundi</th>
+                <th class="py-2.5 px-3">Amount (KES)</th>
+                <th class="py-2.5 px-3">Milestone</th>
+                <th class="py-2.5 px-3">Escrow Status</th>
+                <th class="py-2.5 px-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="escrows-table-body" class="divide-y divide-slate-100 dark:divide-zinc-800 font-medium">
+              <!-- dynamic escrows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KRA eTIMS & 7.5% MRI Tax Viewer (Feature 4) -->
+  <div id="modal-etims-cert" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative">
+      <button onclick="app.closeModal('modal-etims-cert')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center pb-4 border-b border-slate-100 dark:border-zinc-800">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-slate-900 text-white mb-2 shadow-sm">
+          <i data-lucide="qr-code" class="w-6 h-6 text-emerald-400"></i>
+        </div>
+        <h3 class="font-bold text-base text-slate-900 dark:text-white">KRA eTIMS Compliance &amp; MRI Tax Certificate</h3>
+        <p class="text-xs text-slate-500">Republic of Kenya &bull; Electronic Tax Invoice Management System</p>
+      </div>
+
+      <div class="py-4 space-y-3 text-xs" id="etims-cert-content">
+        <!-- dynamic eTIMS QR & details -->
+      </div>
     </div>
   </div>
 

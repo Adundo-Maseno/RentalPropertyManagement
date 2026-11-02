@@ -84,6 +84,36 @@ const DB = {
     { id: 3, name: "John Otieno (Site Caretaker)", email: "otieno.caretaker@kilimaniheights.ke", phone: "+254722556677", role: "caretaker", property_id: 1, tenant_id: null, status: "active" },
     { id: 4, name: "Dr. Esther Wambui Ndung'u (Landlord / Investor)", email: "esther.ndungu@gmail.com", phone: "+254733555777", role: "landlord", property_id: 3, tenant_id: null, status: "active" },
     { id: 5, name: "Kariuki James Mwangi (Resident Tenant)", email: "james.kariuki@techke.com", phone: "+254722889900", role: "tenant", property_id: 1, tenant_id: 1, status: "active" }
+  ],
+
+  iotDevices: [
+    { id: 1, meter_number: "IOT-KRH-A101", property_id: 1, unit_id: 1, unit_number: "A101", property_name: "Kilimani Royal Heights", device_type: "Ultrasonic LoRaWAN Meter", battery_pct: 96, signal_rssi: -72, flow_rate_lph: 0.0, total_cubic_meters: 154.2, valve_status: "open" },
+    { id: 2, meter_number: "IOT-KRH-A102", property_id: 1, unit_id: 2, unit_number: "A102", property_name: "Kilimani Royal Heights", device_type: "Ultrasonic LoRaWAN Meter", battery_pct: 98, signal_rssi: -69, flow_rate_lph: 1.2, total_cubic_meters: 89.6, valve_status: "open" },
+    { id: 3, meter_number: "IOT-KRH-A202", property_id: 1, unit_id: 4, unit_number: "A202", property_name: "Kilimani Royal Heights", device_type: "Ultrasonic LoRaWAN Meter", battery_pct: 94, signal_rssi: -75, flow_rate_lph: 14.8, total_cubic_meters: 12.4, valve_status: "open" },
+    { id: 4, meter_number: "IOT-WES-101", property_id: 2, unit_id: 6, unit_number: "Suite 101", property_name: "Westlands Executive Suites", device_type: "NB-IoT Smart Sub-meter", battery_pct: 91, signal_rssi: -81, flow_rate_lph: 0.0, total_cubic_meters: 310.5, valve_status: "open" }
+  ],
+  leakAlerts: [
+    { id: 1, device_id: 3, unit_id: 4, meter_number: "IOT-KRH-A202", unit_number: "A202", property_name: "Kilimani Royal Heights", severity: "critical", title: "Midnight Continuous Flow in Vacant Unit A202", message: "Ultrasonic sensor detected continuous 14.8 L/hr flow between 01:00 AM and 04:30 AM in vacant unit. Probable toilet cistern bypass or pipe joint weeping.", flow_detected_lph: 14.8, status: "active", detected_at: "2026-11-02 03:14:00" }
+  ],
+  fundis: [
+    { id: 1, name: "Kamau Mwangi", trade: "Plumbing & Drainage", phone: "+254711223344", rating: 4.9, jobs_completed: 42, id_verified: 1, daily_rate: 2500, availability: "available", location: "Kilimani, Nairobi" },
+    { id: 2, name: "Ouma Electrical Solutions", trade: "Certified Electrical & Solar", phone: "+254722334455", rating: 4.8, jobs_completed: 38, id_verified: 1, daily_rate: 3000, availability: "available", location: "Westlands, Nairobi" },
+    { id: 3, name: "ChillTech HVAC Engineers", trade: "AC & Cold Room Repair", phone: "+254733445566", rating: 4.7, jobs_completed: 19, id_verified: 1, daily_rate: 3500, availability: "busy", location: "Nairobi" },
+    { id: 4, name: "Juma Coastal Carpentry", trade: "Carpentry & Cabinetry", phone: "+254720556677", rating: 4.9, jobs_completed: 29, id_verified: 1, daily_rate: 2200, availability: "available", location: "Nyali, Mombasa" }
+  ],
+  escrows: [
+    { id: 1, ticket_id: 1, fundi_id: 1, ticket_title: "Master Bathroom Shower Mixer Leaking", ticket_number: "TKT-3941", fundi_name: "Kamau Mwangi", fundi_trade: "Plumbing & Drainage", fundi_phone: "+254711223344", amount: 3500, status: "held", b2c_disbursement_ref: null, milestone_desc: "Milestone 1: Replace corroded shower mixer and seal pipe joints.", created_at: "2026-11-01 11:00:00" }
+  ],
+  vettings: [
+    { id: 1, applicant_name: "Faith Njeri Karanja", phone: "+254721990011", email: "faith.karanja@equity.co.ke", id_number: "32114590", requested_unit_id: 4, unit_number: "A202", base_rent: 85000, property_name: "Kilimani Royal Heights", monthly_income: 280000, crb_score: 785, risk_category: "Low Risk", rent_to_income_pct: 30.4, recommendation: "Approved: Clean CRB credit report and healthy rent-to-income ratio.", created_at: "2026-11-01" },
+    { id: 2, applicant_name: "Dennis Kiprono Rotich", phone: "+254715887766", email: "dennis.rotich@agriltd.ke", id_number: "29871032", requested_unit_id: 7, unit_number: "Suite 102", base_rent: 75000, property_name: "Westlands Executive Suites", monthly_income: 190000, crb_score: 620, risk_category: "Medium Risk", rent_to_income_pct: 39.5, recommendation: "Conditional Approval: Require 2 months security deposit due to debt service ratio.", created_at: "2026-11-02" }
+  ],
+  etimsRecords: [
+    { id: 1, invoice_id: 1, control_code: "KRA-ETIMS-1-98AF23", qr_code_url: "https://itax.kra.go.ke/KRA-Portal/invoiceVerification.htm?controlCode=KRA-ETIMS-1-98AF23", tax_type: "MRI_7.5_PCT", taxable_amount: 65000, tax_payable: 4875, kra_status: "transmitted", invoice_number: "INV-202611-001", month: "2026-11", unit_number: "A101", property_name: "Kilimani Royal Heights", tenant_name: "Kariuki James Mwangi" },
+    { id: 2, invoice_id: 2, control_code: "KRA-ETIMS-2-B72D19", qr_code_url: "https://itax.kra.go.ke/KRA-Portal/invoiceVerification.htm?controlCode=KRA-ETIMS-2-B72D19", tax_type: "MRI_7.5_PCT", taxable_amount: 65000, tax_payable: 4875, kra_status: "transmitted", invoice_number: "INV-202611-002", month: "2026-11", unit_number: "A102", property_name: "Kilimani Royal Heights", tenant_name: "Amina Hassan Mohamed" }
+  ],
+  viewingLeads: [
+    { id: 1, unit_id: 4, prospect_name: "Caroline Achieng", phone: "+254712445566", email: "carol.achieng@gmail.com", preferred_date: "2026-11-05", time_slot: "10:00 AM", status: "confirmed", notes: "Interested in 3BR Kilimani unit." }
   ]
 };
 
@@ -354,6 +384,141 @@ export async function onRequest(context) {
 
   if (pathname === '/api/reset-seed' && method === 'POST') {
     return json({ success: true, message: 'Sample data refreshed successfully' });
+  }
+
+  // 13. Public Vacancies & Viewing Bookings
+  if (pathname === '/api/public/vacancies' && method === 'GET') {
+    const vacancies = DB.units.filter(u => u.status === 'vacant').map(v => {
+      const prop = DB.properties.find(p => p.id === v.property_id) || {};
+      let bedrooms = 2;
+      let bathrooms = 2;
+      let sqft = 1100;
+      let photo = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80';
+      if (v.unit_type.includes('Commercial') || v.unit_type.includes('Office')) {
+        bedrooms = 0; bathrooms = 1; sqft = 650;
+        photo = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80';
+      } else if (v.unit_type.includes('3-Bedroom') || v.unit_type.includes('DSQ')) {
+        bedrooms = 3; bathrooms = 3; sqft = 1650;
+        photo = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80';
+      } else if (v.unit_type.includes('Townhouse') || v.unit_type.includes('Villa')) {
+        bedrooms = 4; bathrooms = 4.5; sqft = 3200;
+        photo = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80';
+      }
+      return {
+        ...v,
+        property_name: prop.name || 'Kilimani Royal Heights',
+        property_type: prop.property_type || 'Residential',
+        address: prop.address || 'Nairobi',
+        city: prop.city || 'Nairobi',
+        bedrooms, bathrooms, sqft, photo,
+        deposit: v.base_rent * 2,
+        total_monthly: v.base_rent + (v.service_charge || 0) + (v.garbage_fee || 0),
+        amenities: ['High-Speed Fiber', 'Borehole Water', '24/7 Manned Security', 'Backup Generator', 'Reserved Parking', 'Solar Water Heating']
+      };
+    });
+    return json({ success: true, count: vacancies.length, vacancies });
+  }
+
+  if (pathname === '/api/public/book-viewing' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const ref = 'VIEW-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    return json({ success: true, reference: ref, message: 'Viewing booked successfully. SMS dispatched.' }, 201);
+  }
+
+  // 14. WhatsApp Business Bot
+  if (pathname === '/api/whatsapp/webhook' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const incoming = (b.message || b.Body || '1').trim();
+    const cmd = incoming.toUpperCase();
+    let reply = `Jambo Kariuki James! Your current BomaSphere balance is KES 0.00. All invoices settled. Reply 'PAY' to trigger M-Pesa prompt.`;
+    if (cmd.includes('RECEIPT') || cmd === '2') {
+      reply = `Official BomaSphere Receipt: REC-20261101-4912. Paid KES 71,310 via M-Pesa (QG982KLA83). Status: Reconciled.`;
+    } else if (cmd.includes('PAY') || cmd === '3') {
+      reply = `Daraja M-Pesa STK push initiated for KES 65,000 to handset. Enter your M-Pesa PIN on prompt.`;
+    } else if (cmd.startsWith('TICKET') || cmd === '4') {
+      reply = `Maintenance ticket TKT-4890 logged successfully! Our site caretaker has been notified.`;
+    }
+    return json({ success: true, incoming, reply, action: 'whatsapp_response' });
+  }
+
+  if (pathname === '/api/whatsapp/history' && method === 'GET') {
+    return json({ success: true, messages: DB.communications.filter(c => c.type === 'whatsapp') });
+  }
+
+  // 15. AI Tenant Vetting & CRB
+  if (pathname === '/api/tenant-vetting' && method === 'GET') {
+    return json({ success: true, vettings: DB.vettings });
+  }
+
+  if (pathname === '/api/tenant-vetting/analyze' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const income = Number(b.monthly_income || 250000);
+    const rent = 65000;
+    const ratio = Number(((rent / income) * 100).toFixed(1));
+    return json({
+      success: true,
+      applicant_name: b.applicant_name || 'Applicant',
+      crb_score: ratio > 40 ? 590 : 765,
+      risk_category: ratio > 40 ? 'High Risk' : 'Low Risk',
+      rent_to_income_pct: ratio,
+      recommendation: ratio > 40 ? 'Declined: Rent exceeds 40% threshold' : 'Approved: Clean credit history'
+    }, 201);
+  }
+
+  // 16. IoT Telemetry & Leak Alerts
+  if (pathname === '/api/iot/devices' && method === 'GET') {
+    return json({ success: true, count: DB.iotDevices.length, devices: DB.iotDevices });
+  }
+
+  if (pathname === '/api/iot/leak-alerts' && method === 'GET') {
+    return json({ success: true, count: DB.leakAlerts.length, alerts: DB.leakAlerts });
+  }
+
+  if (pathname === '/api/iot/valve-toggle' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    const dev = DB.iotDevices.find(d => d.id === Number(b.device_id)) || DB.iotDevices[0];
+    dev.valve_status = b.valve_status || 'open';
+    return json({ success: true, message: `Smart valve status updated to ${dev.valve_status}`, device: dev });
+  }
+
+  // 17. KRA eTIMS & 7.5% MRI Tax
+  if (pathname === '/api/tax/etims-summary' && method === 'GET') {
+    const totalTaxable = DB.invoices.reduce((sum, i) => sum + i.rent_amount, 0);
+    const totalMri = Math.round(totalTaxable * 0.075);
+    return json({
+      success: true,
+      stats: { total_transmitted: DB.etimsRecords.length, total_taxable_rent: totalTaxable, total_mri_tax: totalMri, mri_rate: '7.5%' },
+      records: DB.etimsRecords
+    });
+  }
+
+  if (pathname === '/api/tax/etims/generate' && method === 'POST') {
+    const code = 'KRA-ETIMS-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    return json({ success: true, record: { control_code: code, qr_code_url: `https://itax.kra.go.ke/verify?code=${code}`, tax_payable: 4875 } }, 201);
+  }
+
+  // 18. Artisan Escrow Marketplace
+  if (pathname === '/api/marketplace/fundis' && method === 'GET') {
+    return json({ success: true, count: DB.fundis.length, fundis: DB.fundis });
+  }
+
+  if (pathname === '/api/marketplace/escrows' && method === 'GET') {
+    return json({ success: true, count: DB.escrows.length, escrows: DB.escrows });
+  }
+
+  if (pathname === '/api/marketplace/escrow/allocate' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch(e) {}
+    return json({ success: true, escrow_id: 99, status: 'held', message: `KES ${Number(b.amount || 3500).toLocaleString()} locked in escrow` }, 201);
+  }
+
+  if (pathname === '/api/marketplace/escrow/release' && method === 'POST') {
+    const ref = 'B2C-MPESA-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+    return json({ success: true, status: 'disbursed', b2c_disbursement_ref: ref, message: `Escrow released and disbursed via M-Pesa B2C (${ref}).` });
   }
 
   // Catch-all 404 for unmatched API routes
