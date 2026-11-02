@@ -125,3 +125,4 @@ export async function onRequest(context) {
   // Default catchall for other endpoints
   return json({ success: true, message: "Cloudflare Edge Handler active" });
 }
+

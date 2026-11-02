@@ -11,3 +11,4 @@ if (!fs.existsSync(distDir)) {
 
 fs.cpSync(srcDir, distDir, { recursive: true });
 console.log('✅ BomaSphere PMS build complete: synced public/ assets to dist/');
+
