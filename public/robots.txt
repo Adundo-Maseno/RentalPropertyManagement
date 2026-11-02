@@ -1,0 +1,15 @@
+# BomaSphere Property Management System (PMS)
+# Production Robots Exclusion Standard
+
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /styles.css
+Allow: /app.js
+Allow: /manifest.json
+Allow: /favicon.ico
+Allow: /favicon.svg
+Allow: /icons/
+
+# Disallow indexing of private operational API routes
+Disallow: /api/

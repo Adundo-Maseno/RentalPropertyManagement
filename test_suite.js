@@ -345,6 +345,14 @@ async function runTests() {
     console.log('      PWA Assets verified: favicon.svg, favicon.ico, icon-192.png, icon-512.png all 200 OK');
   });
 
+  // 27. Production Hygiene: robots.txt
+  await test('Production Hygiene: /robots.txt serves valid rules disallowing private API routes', async () => {
+    const res = await invokeHandler('/robots.txt');
+    if (res.statusCode !== 200) throw new Error(`robots.txt returned ${res.statusCode}`);
+    if (!res.body.includes('Disallow: /api/')) throw new Error('robots.txt missing API disallow rule');
+    console.log('      Verified robots.txt: Disallow /api/ and allows public assets');
+  });
+
   console.log(`\n=======================================================`);
   console.log(` TESTS COMPLETED: ${passed} PASSED, ${failed} FAILED `);
   console.log(`=======================================================`);
