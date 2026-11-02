@@ -342,7 +342,8 @@ class BomaSphereApp {
 
     this.animateCounter('dash-total-collected', s.total_collected, 'KES ');
     document.getElementById('dash-total-billed').textContent = `KES ${s.total_billed.toLocaleString()}`;
-    document.getElementById('dash-collection-rate').textContent = `${s.collection_rate}%`;
+    const collRate = s.collection_rate !== undefined ? s.collection_rate : (s.total_billed ? ((s.total_collected / s.total_billed) * 100).toFixed(1) : 0);
+    document.getElementById('dash-collection-rate').textContent = `${collRate}%`;
 
     this.animateCounter('dash-total-arrears', s.total_arrears, 'KES ');
     const invList = Array.isArray(this.state.invoices) ? this.state.invoices : [];

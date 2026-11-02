@@ -116,6 +116,7 @@ export async function onRequest(context) {
         vacant_units: DB.units.filter(u => u.status === 'vacant').length,
         maintenance_units: DB.units.filter(u => u.status === 'maintenance').length,
         occupancy_rate: 66.7,
+        collection_rate: 65.6,
         total_billed: 688960,
         total_collected: 451759,
         total_arrears: 237201,
