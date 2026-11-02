@@ -308,7 +308,11 @@ class BomaSphereApp {
       const role = this.state.authUser ? this.state.authUser.role : 'property_manager';
 
       // Always fetch base operational entities
-      const [statsData, properties, units, tenants, waterReadings, maintenance, comms, leaseAgreements, inspections, visitorPasses, amenities, amenityBookings] = await Promise.all([
+      const [
+        statsData, properties, units, tenants, waterReadings,
+        maintenance, comms, leaseAgreements, inspections,
+        visitorPasses, amenities, amenityBookings, viewingLeads
+      ] = await Promise.all([
         this.fetchAPI('/api/stats', { silent: true }).catch(() => ({ stats: null, recentPayments: [], recentTickets: [] })),
         this.fetchAPI('/api/properties', { silent: true }).catch(() => []),
         this.fetchAPI('/api/units', { silent: true }).catch(() => []),
@@ -360,11 +364,7 @@ class BomaSphereApp {
       this.state.visitorPasses = Array.isArray(visitorPasses?.passes) ? visitorPasses.passes : (Array.isArray(visitorPasses) ? visitorPasses : []);
       this.state.amenities = Array.isArray(amenities?.amenities) ? amenities.amenities : (Array.isArray(amenities) ? amenities : []);
       this.state.amenityBookings = Array.isArray(amenityBookings?.bookings) ? amenityBookings.bookings : (Array.isArray(amenityBookings) ? amenityBookings : []);
-      const vlData = arguments[0] || [];
-      // Map viewing leads from parallel results
-      if (Array.isArray(results) && results[8]) {
-        this.state.viewingLeads = Array.isArray(results[8]?.leads) ? results[8].leads : (Array.isArray(results[8]) ? results[8] : []);
-      }
+      this.state.viewingLeads = Array.isArray(viewingLeads?.leads) ? viewingLeads.leads : (Array.isArray(viewingLeads) ? viewingLeads : []);
 
       this.updateSidebarSummary();
       this.renderCurrentView();
