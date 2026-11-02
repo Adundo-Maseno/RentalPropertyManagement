@@ -254,7 +254,7 @@ export async function onRequest(context) {
 
   if (pathname === '/api/properties' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const newProp = {
       id: DB.properties.length + 1,
       name: b.name || 'New Property',
@@ -280,7 +280,7 @@ export async function onRequest(context) {
 
   if (pathname === '/api/units' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const prop = DB.properties.find(p => p.id === Number(b.property_id)) || DB.properties[0];
     const newUnit = {
       id: DB.units.length + 1,
@@ -302,7 +302,7 @@ export async function onRequest(context) {
   if (pathname.startsWith('/api/units/') && method === 'PUT') {
     const id = Number(pathname.split('/')[3]);
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const unit = DB.units.find(u => u.id === id);
     if (!unit) return json({ error: 'Unit not found' }, 404);
     if (b.status) unit.status = b.status;
@@ -317,7 +317,7 @@ export async function onRequest(context) {
 
   if (pathname === '/api/tenants' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const unitId = Number(b.unit_id || 0);
     const unit = DB.units.find(u => u.id === unitId);
     if (unit) unit.status = 'occupied';
@@ -354,7 +354,7 @@ export async function onRequest(context) {
       return json({ error: '403 Forbidden: Authorizing lease agreements requires Property Manager or Admin privileges.' }, 403);
     }
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const unitId = Number(b.unit_id || 1);
     const tenantId = Number(b.tenant_id || 1);
     const unit = DB.units.find(u => u.id === unitId);
@@ -405,7 +405,7 @@ export async function onRequest(context) {
     }
     const id = Number(pathname.split('/')[3]);
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const lease = DB.leaseAgreements.find(l => l.id === id);
     if (!lease) return json({ error: 'Lease not found' }, 404);
     if (b.status) lease.status = b.status;
@@ -416,7 +416,7 @@ export async function onRequest(context) {
   if (pathname === '/api/invoices' && method === 'GET') {
     const user = resolveRequestUser(request);
     if (user && user.role === 'caretaker') {
-      return json({ 
+      return json({
         error: '403 Forbidden: Caretakers are restricted from accessing financial ledgers and billing records.',
         role: user.role
       }, 403);
@@ -438,13 +438,13 @@ export async function onRequest(context) {
       return json({ error: '403 Forbidden: Invoicing authority is restricted to Property Managers and Super Admins.' }, 403);
     }
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const newInv = {
       id: DB.invoices.length + 1,
       invoice_number: `INV-202611-${Math.floor(100 + Math.random() * 900)}`,
       month: b.month || '2026-11',
       issue_date: new Date().toISOString().slice(0, 10),
-      due_date: new Date(Date.now() + 5*86400000).toISOString().slice(0, 10),
+      due_date: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
       total_amount: Number(b.rent_amount || 0) + Number(b.water_amount || 0) + Number(b.service_charge || 0),
       amount_paid: 0,
       balance: Number(b.rent_amount || 0) + Number(b.water_amount || 0) + Number(b.service_charge || 0),
@@ -461,10 +461,10 @@ export async function onRequest(context) {
       return json({ error: '403 Forbidden: Batch monthly invoicing requires Property Manager privileges.' }, 403);
     }
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const month = b.month || '2026-12';
     let generated = 0;
-    
+
     for (const u of DB.units.filter(u => u.status === 'occupied')) {
       const tenant = DB.tenants.find(t => t.unit_id === u.id) || DB.tenants[0];
       const invNum = `INV-${month.replace('-', '')}-${String(u.id).padStart(3, '0')}`;
@@ -501,7 +501,7 @@ export async function onRequest(context) {
   if (pathname === '/api/payments' && method === 'GET') {
     const user = resolveRequestUser(request);
     if (user && user.role === 'caretaker') {
-      return json({ 
+      return json({
         error: '403 Forbidden: Caretakers are restricted from accessing financial ledgers and payment receipts.',
         role: user.role
       }, 403);
@@ -522,7 +522,7 @@ export async function onRequest(context) {
       return json({ error: '403 Forbidden: Caretakers cannot process payment receipts.' }, 403);
     }
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     if (user && user.role === 'tenant' && b.tenant_id && b.tenant_id !== user.tenant_id) {
       return json({ error: '403 Forbidden: Tenants can only make payments on their own accounts.' }, 403);
     }
@@ -547,7 +547,7 @@ export async function onRequest(context) {
 
   if (pathname === '/api/water-readings' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const consumed = Math.max(0, Number(b.current_reading) - Number(b.previous_reading || 0));
     const newWater = {
       id: DB.waterReadings.length + 1,
@@ -572,7 +572,7 @@ export async function onRequest(context) {
 
   if (pathname === '/api/maintenance' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const newMaint = {
       id: DB.maintenance.length + 1,
       ticket_number: `TKT-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -590,7 +590,7 @@ export async function onRequest(context) {
   if (pathname.startsWith('/api/maintenance/') && method === 'PUT') {
     const id = Number(pathname.split('/')[3]);
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const ticket = DB.maintenance.find(m => m.id === id);
     if (!ticket) return json({ error: 'Maintenance ticket not found' }, 404);
     if (b.status) ticket.status = b.status;
@@ -611,7 +611,7 @@ export async function onRequest(context) {
 
   if (pathname === '/api/communications/send' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const tenant = DB.tenants.find(t => t.id === Number(b.tenant_id)) || DB.tenants[0];
     const newComm = {
       id: DB.communications.length + 1,
@@ -647,7 +647,7 @@ export async function onRequest(context) {
       return json({ error: '403 Forbidden: Only Property Managers and Landlords can log operating expense vouchers.' }, 403);
     }
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     if (user && user.role === 'landlord' && b.property_id && Number(b.property_id) !== user.property_id) {
       return json({ error: `403 Forbidden: Landlord '${user.name}' is only authorized to log expenses for Property ID ${user.property_id}.` }, 403);
     }
@@ -710,7 +710,7 @@ export async function onRequest(context) {
       return json({ error: '403 Forbidden: Provisioning SaaS users requires Administrative privileges.' }, 403);
     }
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const newUser = {
       id: DB.users.length + 1,
       name: b.name || 'New SaaS User',
@@ -733,7 +733,7 @@ export async function onRequest(context) {
     }
     const id = Number(pathname.split('/')[3]);
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const targetUser = DB.users.find(u => u.id === id);
     if (!targetUser) return json({ error: 'User not found' }, 404);
     if (b.name) targetUser.name = b.name;
@@ -764,7 +764,7 @@ export async function onRequest(context) {
 
   if (pathname === '/api/auth/login' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const { email, password } = b;
     if (!email || !password) {
       return json({ error: 'Email and password are required' }, 400);
@@ -791,7 +791,7 @@ export async function onRequest(context) {
 
   if (pathname === '/api/auth/switch-account' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const role = b.role || 'property_manager';
     const user = DB.users.find(u => u.role === role) || DB.users[0];
     return json({ success: true, token: `token_${user.role}`, user });
@@ -874,7 +874,7 @@ export async function onRequest(context) {
 
   if (pathname === '/api/public/book-viewing' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const ref = 'VIEW-' + Math.random().toString(36).substring(2, 8).toUpperCase();
     const newLead = {
       id: DB.viewingLeads.length + 1,
@@ -917,7 +917,7 @@ export async function onRequest(context) {
   if (pathname.startsWith('/api/viewing-leads/') && method === 'PUT') {
     const id = Number(pathname.split('/')[3]);
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const lead = DB.viewingLeads.find(v => v.id === id);
     if (!lead) return json({ error: 'Viewing lead not found' }, 404);
     if (b.status) lead.status = b.status;
@@ -930,7 +930,7 @@ export async function onRequest(context) {
   // 14. WhatsApp Business Bot
   if (pathname === '/api/whatsapp/webhook' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const incoming = (b.message || b.Body || '1').trim();
     const cmd = incoming.toUpperCase();
     let reply = `Jambo Kariuki James! Your current BomaSphere balance is KES 0.00. All invoices settled. Reply 'PAY' to trigger M-Pesa prompt.`;
@@ -955,7 +955,7 @@ export async function onRequest(context) {
 
   if (pathname === '/api/tenant-vetting/analyze' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const income = Number(b.monthly_income || 250000);
     const rent = 65000;
     const ratio = Number(((rent / income) * 100).toFixed(1));
@@ -988,7 +988,7 @@ export async function onRequest(context) {
 
   if (pathname === '/api/iot/valve-toggle' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const dev = DB.iotDevices.find(d => d.id === Number(b.device_id)) || DB.iotDevices[0];
     dev.valve_status = b.valve_status || 'open';
     return json({ success: true, message: `Smart valve status updated to ${dev.valve_status}`, device: dev });
@@ -1021,13 +1021,13 @@ export async function onRequest(context) {
 
   if (pathname === '/api/marketplace/escrow/allocate' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     return json({ success: true, escrow_id: 99, status: 'held', message: `KES ${Number(b.amount || 3500).toLocaleString()} locked in escrow` }, 201);
   }
 
   if (((pathname === '/api/marketplace/escrow/release') ||
-      (pathname.startsWith('/api/artisan-marketplace/fundi-escrow/') && pathname.endsWith('/release')) ||
-      (pathname.startsWith('/api/marketplace/escrows/') && pathname.endsWith('/release'))) && method === 'POST') {
+    (pathname.startsWith('/api/artisan-marketplace/fundi-escrow/') && pathname.endsWith('/release')) ||
+    (pathname.startsWith('/api/marketplace/escrows/') && pathname.endsWith('/release'))) && method === 'POST') {
     const ref = 'B2C-MPESA-' + Math.random().toString(36).substring(2, 9).toUpperCase();
     return json({
       success: true,
@@ -1046,7 +1046,7 @@ export async function onRequest(context) {
   if (pathname.startsWith('/api/leases/agreements/') && pathname.endsWith('/sign') && method === 'POST') {
     const id = Number(pathname.split('/')[4]);
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const agr = DB.leaseAgreements.find(a => a.id === id) || DB.leaseAgreements[0];
     agr.status = 'executed';
     agr.tenant_signature = b.signature || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="50"><path d="M10 35 Q50 10 90 35 T170 30" stroke="%23059669" stroke-width="2" fill="none"/></svg>';
@@ -1061,7 +1061,7 @@ export async function onRequest(context) {
 
   if (pathname === '/api/inspections' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const items = b.checklist || [];
     const damages = items.reduce((s, it) => s + (Number(it.repair_cost) || 0), 0);
     const held = Number(b.deposit_held || 130000);
@@ -1090,7 +1090,7 @@ export async function onRequest(context) {
 
   if (pathname.startsWith('/api/inspections/') && pathname.endsWith('/settle-deposit') && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const held = Number(b.deposit_held || 130000);
     const deductions = Number(b.deductions_damages || 0) + Number(b.deductions_arrears || 0);
     const net = Math.max(0, held - deductions);
@@ -1113,7 +1113,7 @@ export async function onRequest(context) {
 
   if (pathname === '/api/visitor-passes' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const code = 'PASS-' + Math.floor(1000 + Math.random() * 9000);
     const newPass = {
       id: DB.visitorPasses.length + 1,
@@ -1137,7 +1137,7 @@ export async function onRequest(context) {
 
   if (pathname === '/api/visitor-passes/validate' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const pass = DB.visitorPasses.find(p => p.pass_code === b.pass_code) || DB.visitorPasses[0];
     pass.status = b.action === 'check_out' ? 'completed' : 'checked_in';
     return json({ success: true, action: b.action || 'check_in', status: pass.status, pass, message: `Pass validated for ${pass.visitor_name}.` });
@@ -1180,7 +1180,7 @@ export async function onRequest(context) {
 
   if (pathname === '/api/amenity-bookings' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const ref = 'BK-' + Math.floor(1000 + Math.random() * 9000);
     const amenity = DB.amenities.find(a => a.id === Number(b.amenity_id)) || DB.amenities[0];
     const durationHours = Number(b.duration_hours || b.hours || 2);
@@ -1295,7 +1295,7 @@ export async function onRequest(context) {
 
   if (pathname === '/api/public/book-viewing' && method === 'POST') {
     let b = {};
-    try { b = await request.json(); } catch(e) {}
+    try { b = await request.json(); } catch (e) { }
     const ref = 'VIEW-' + Math.random().toString(36).substring(2, 8).toUpperCase();
     return json({
       success: true,
