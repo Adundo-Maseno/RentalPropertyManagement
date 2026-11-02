@@ -2689,6 +2689,15 @@ class BomaSphereApp {
 
 // Global instance
 let app;
-document.addEventListener('DOMContentLoaded', () => {
-  app = new BomaSphereApp();
-});
+function initApp() {
+  if (!window.app) {
+    app = new BomaSphereApp();
+    window.app = app;
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
