@@ -18,6 +18,8 @@ window.escapeHtml = escapeHtml;
 class BomaSphereApp {
   constructor() {
     this.escapeHtml = escapeHtml;
+    // Method alias bindings
+    this.openMaintenanceModal = this.openNewTicketModal.bind(this);
     this.state = {
       currentView: 'dashboard',
       authToken: localStorage.getItem('bomasphere_token') || null,
@@ -4393,12 +4395,23 @@ class BomaSphereApp {
   }
 }
 
+// Prototype and window fallbacks
+BomaSphereApp.prototype.openMaintenanceModal = function() {
+  return this.openNewTicketModal();
+};
+
 // Global instance
 let app;
 function initApp() {
   if (!window.app) {
     app = new BomaSphereApp();
     window.app = app;
+  }
+  // Ensure alias is always accessible on window and instance
+  if (window.app && !window.app.openMaintenanceModal) {
+    window.app.openMaintenanceModal = function() {
+      return window.app.openNewTicketModal();
+    };
   }
 }
 

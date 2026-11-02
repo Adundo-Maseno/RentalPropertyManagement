@@ -51,6 +51,25 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Custom Styles -->
   <link rel="stylesheet" href="styles.css">
+  <script>
+    // Global backwards-compatibility shim for cached browser sessions
+    (function initMaintenancePolyfill() {
+      function patchApp() {
+        if (window.app && !window.app.openMaintenanceModal) {
+          window.app.openMaintenanceModal = function() {
+            if (typeof this.openNewTicketModal === 'function') {
+              this.openNewTicketModal();
+            } else if (typeof this.openModal === 'function') {
+              this.openModal('modal-maintenance-ticket');
+            }
+          };
+        }
+      }
+      patchApp();
+      window.addEventListener('DOMContentLoaded', patchApp);
+      window.addEventListener('load', patchApp);
+    })();
+  </script>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
@@ -398,7 +417,7 @@
               <i data-lucide="droplets" class="w-4 h-4"></i>
               <span>Log Water</span>
             </button>
-            <button onclick="app.openMaintenanceModal()" class="flex items-center justify-center space-x-2 py-2.5 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 hover:bg-slate-50 text-xs font-semibold shadow-xs transition min-h-[44px]">
+            <button onclick="(typeof app.openNewTicketModal === 'function' ? app.openNewTicketModal() : (app.openMaintenanceModal ? app.openMaintenanceModal() : app.openModal('modal-maintenance-ticket')))" class="flex items-center justify-center space-x-2 py-2.5 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 hover:bg-slate-50 text-xs font-semibold shadow-xs transition min-h-[44px]">
               <i data-lucide="wrench" class="w-4 h-4 text-amber-600"></i>
               <span>New Ticket</span>
             </button>
@@ -3129,7 +3148,7 @@
   <div id="toast-container"></div>
 
   <!-- Core Frontend Application Logic -->
-  <script src="app.js?v=2.4"></script>
+  <script src="app.js?v=2.5"></script>
 </body>
 </html>
 
