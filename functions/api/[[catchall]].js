@@ -1082,24 +1082,39 @@ export async function onRequest(context) {
     try { b = await request.json(); } catch(e) {}
     const ref = 'BK-' + Math.floor(1000 + Math.random() * 9000);
     const amenity = DB.amenities.find(a => a.id === Number(b.amenity_id)) || DB.amenities[0];
-    const totalFee = (amenity.hourly_fee || 0) * Number(b.hours || 3);
+    const durationHours = Number(b.duration_hours || b.hours || 2);
+    const totalFee = (amenity.hourly_fee || 0) * durationHours;
+    const user = resolveRequestUser(request);
+    const tenantId = Number(b.tenant_id || user?.tenant_id || 1);
+    const tenant = DB.tenants.find(t => t.id === tenantId) || DB.tenants[0];
     const newBk = {
       id: DB.amenityBookings.length + 1,
       booking_reference: ref,
+      booking_ref: ref,
       amenity_id: amenity.id,
-      tenant_id: b.tenant_id || 1,
-      unit_id: b.unit_id || 1,
+      tenant_id: tenantId,
+      unit_id: b.unit_id || tenant?.unit_id || 1,
       booking_date: b.booking_date || new Date().toISOString().slice(0, 10),
       start_time: b.start_time || '03:00 PM',
       end_time: b.end_time || '06:00 PM',
+      duration_hours: durationHours,
       total_fee: totalFee,
       status: 'confirmed',
       amenity_name: amenity.name,
-      unit_number: 'A101',
-      tenant_name: 'Kariuki James Mwangi'
+      unit_number: tenant?.unit_number || 'A101',
+      tenant_name: tenant?.name || 'Kariuki James Mwangi'
     };
     DB.amenityBookings.unshift(newBk);
-    return json({ success: true, id: newBk.id, booking_reference: ref, total_fee: totalFee, amenity_name: amenity.name, message: `Booking ${ref} confirmed for ${amenity.name}.` }, 201);
+    return json({
+      success: true,
+      id: newBk.id,
+      booking_reference: ref,
+      booking_ref: ref,
+      booking: newBk,
+      total_fee: totalFee,
+      amenity_name: amenity.name,
+      message: `Booking ${ref} confirmed for ${amenity.name}.`
+    }, 201);
   }
 
   // Catch-all 404 for unmatched API routes

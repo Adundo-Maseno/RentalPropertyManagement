@@ -1921,7 +1921,7 @@ async function handleRequest(req, res) {
 
     if (pathname === '/api/amenity-bookings' && method === 'POST') {
       const b = await parseBody(req);
-      const { amenity_id, unit_id, tenant_id, booking_date, start_time, end_time, hours } = b;
+      const { amenity_id, booking_date, start_time } = b;
       if (!amenity_id || !booking_date || !start_time) {
         return sendJSON(res, 400, { error: 'Amenity ID, booking date, and start time are required.' });
       }
@@ -1929,9 +1929,14 @@ async function handleRequest(req, res) {
       const amenity = db.prepare('SELECT * FROM estate_amenities WHERE id = ?').get(amenity_id);
       if (!amenity) return sendJSON(res, 404, { error: 'Amenity not found.' });
 
-      const durationHours = Number(hours || 3);
-      const totalFee = amenity.hourly_fee * durationHours;
+      const durationHours = Number(b.duration_hours || b.hours || 2);
+      const totalFee = (amenity.hourly_fee || 0) * durationHours;
       const ref = 'BK-' + Math.floor(1000 + Math.random() * 9000);
+
+      const user = resolveRequestUser(req);
+      const tenantId = Number(b.tenant_id || user?.tenant_id || 1);
+      const unitId = Number(b.unit_id || 1);
+      const endTime = b.end_time || '07:00 PM';
 
       const stmt = db.prepare(`
         INSERT INTO amenity_bookings (
@@ -1940,14 +1945,32 @@ async function handleRequest(req, res) {
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'confirmed')
       `);
       const info = stmt.run(
-        ref, amenity_id, tenant_id || 1, unit_id || 1,
-        booking_date, start_time, end_time || '06:00 PM', totalFee
+        ref, amenity_id, tenantId, unitId,
+        booking_date, start_time, endTime, totalFee
       );
+
+      const bookingRecord = {
+        id: info.lastInsertRowid,
+        booking_reference: ref,
+        booking_ref: ref,
+        amenity_id: Number(amenity_id),
+        amenity_name: amenity.name,
+        tenant_id: tenantId,
+        unit_id: unitId,
+        booking_date,
+        start_time,
+        end_time: endTime,
+        duration_hours: durationHours,
+        total_fee: totalFee,
+        status: 'confirmed'
+      };
 
       return sendJSON(res, 201, {
         success: true,
         id: info.lastInsertRowid,
         booking_reference: ref,
+        booking_ref: ref,
+        booking: bookingRecord,
         total_fee: totalFee,
         amenity_name: amenity.name,
         message: `Booking ${ref} confirmed for ${amenity.name} on ${booking_date}. Total fee: KES ${totalFee.toLocaleString()}.`

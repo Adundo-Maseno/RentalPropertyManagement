@@ -4286,15 +4286,19 @@ class BomaSphereApp {
       if (!amenities.length) {
         grid.innerHTML = `<div class="col-span-4 text-center py-8 text-slate-400">No amenities registered for this portfolio.</div>`;
       } else {
-        grid.innerHTML = amenities.map(a => `
+        grid.innerHTML = amenities.map(a => {
+          const capacity = a.capacity || a.capacity_persons || 20;
+          const hourlyRate = a.hourly_fee !== undefined ? Number(a.hourly_fee) : (a.hourly_rate !== undefined ? Number(a.hourly_rate) : 0);
+          const icon = a.icon || (a.category?.toLowerCase().includes('lounge') || a.category?.toLowerCase().includes('bbq') ? 'flame' : (a.category?.toLowerCase().includes('pool') ? 'waves' : (a.category?.toLowerCase().includes('business') || a.category?.toLowerCase().includes('meeting') ? 'briefcase' : 'palmtree')));
+          return `
           <div class="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/90 dark:border-zinc-800 p-4 shadow-xs flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between mb-3">
                 <div class="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                  <i data-lucide="${this.escapeHtml(a.icon || 'palmtree')}" class="w-5 h-5"></i>
+                  <i data-lucide="${this.escapeHtml(icon)}" class="w-5 h-5"></i>
                 </div>
                 <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300">
-                  Max ${a.capacity_persons} Pax
+                  Max ${capacity} Pax
                 </span>
               </div>
               <h3 class="font-bold text-sm text-slate-900 dark:text-white">${this.escapeHtml(a.name)}</h3>
@@ -4303,7 +4307,7 @@ class BomaSphereApp {
             <div class="pt-4 mt-3 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between">
               <div>
                 <span class="text-[10px] uppercase text-slate-400 block font-semibold">Rate</span>
-                <span class="font-bold font-mono text-xs text-slate-900 dark:text-white">${this.formatMoney(a.hourly_rate)}/hr</span>
+                <span class="font-bold font-mono text-xs text-slate-900 dark:text-white">${hourlyRate > 0 ? `${this.formatMoney(hourlyRate)}/hr` : '<span class="text-emerald-600 font-bold">Complimentary</span>'}</span>
               </div>
               <button onclick="app.openNewAmenityBookingModal(${a.id})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center space-x-1">
                 <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
@@ -4311,7 +4315,8 @@ class BomaSphereApp {
               </button>
             </div>
           </div>
-        `).join('');
+        `;
+        }).join('');
       }
     }
 
@@ -4319,21 +4324,27 @@ class BomaSphereApp {
       if (!bookings.length) {
         tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">No reservations scheduled.</td></tr>`;
       } else {
-        tbody.innerHTML = bookings.map(b => `
+        tbody.innerHTML = bookings.map(b => {
+          const bookingRef = b.booking_reference || b.booking_ref || `BK-${b.id || 'RES'}`;
+          const resident = b.tenant_name || b.resident_name || 'Resident';
+          const unit = b.unit_number || 'A101';
+          const duration = b.duration_hours ? `${b.duration_hours} hrs` : (b.end_time && b.start_time ? `${b.start_time} - ${b.end_time}` : b.start_time);
+          return `
           <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition">
-            <td class="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">${this.escapeHtml(b.booking_ref)}</td>
+            <td class="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">${this.escapeHtml(bookingRef)}</td>
             <td class="py-3 px-4 font-bold text-slate-800 dark:text-zinc-200">${this.escapeHtml(b.amenity_name || 'Amenity')}</td>
-            <td class="py-3 px-4 text-slate-700 dark:text-zinc-300">${this.escapeHtml(b.resident_name || 'Resident')} (Unit ${this.escapeHtml(b.unit_number || 'A101')})</td>
+            <td class="py-3 px-4 text-slate-700 dark:text-zinc-300">${this.escapeHtml(resident)} (Unit ${this.escapeHtml(unit)})</td>
             <td class="py-3 px-4 text-[11px] text-slate-600 dark:text-zinc-400">
-              <div>${this.escapeHtml(b.booking_date)}</div>
-              <div class="text-slate-400">${this.escapeHtml(b.start_time)} (${b.duration_hours} hrs)</div>
+              <div>${this.escapeHtml(b.booking_date || '')}</div>
+              <div class="text-slate-400">${this.escapeHtml(duration)}</div>
             </td>
-            <td class="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">${this.formatMoney(b.total_fee)}</td>
+            <td class="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">${this.formatMoney(b.total_fee || 0)}</td>
             <td class="py-3 px-4">
-              <span class="px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px]">Confirmed</span>
+              <span class="px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] capitalize">${this.escapeHtml(b.status || 'confirmed')}</span>
             </td>
           </tr>
-        `).join('');
+        `;
+        }).join('');
       }
     }
 
@@ -4343,13 +4354,17 @@ class BomaSphereApp {
   openNewAmenityBookingModal(amenityId) {
     const sel = document.getElementById('book-amenity-id');
     if (sel) {
-      sel.innerHTML = (this.state.amenities || []).map(a => 
-        `<option value="${a.id}" ${a.id == amenityId ? 'selected' : ''}>${this.escapeHtml(a.name)} (KES ${Number(a.hourly_rate).toLocaleString()}/hr)</option>`
-      ).join('');
+      sel.innerHTML = (this.state.amenities || []).map(a => {
+        const rate = a.hourly_fee !== undefined ? Number(a.hourly_fee) : (a.hourly_rate !== undefined ? Number(a.hourly_rate) : 0);
+        return `<option value="${a.id}" ${a.id == amenityId ? 'selected' : ''}>${this.escapeHtml(a.name)} (${rate > 0 ? 'KES ' + rate.toLocaleString() + '/hr' : 'Free / Included'})</option>`;
+      }).join('');
     }
     const today = new Date().toISOString().substring(0, 10);
     const dateInput = document.getElementById('book-amenity-date');
-    if (dateInput) dateInput.value = today;
+    if (dateInput) {
+      dateInput.value = today;
+      dateInput.min = today;
+    }
     this.updateAmenityFee();
     this.openModal('modal-new-amenity-booking');
   }
@@ -4358,18 +4373,27 @@ class BomaSphereApp {
     const amenityId = document.getElementById('book-amenity-id')?.value;
     const hours = Number(document.getElementById('book-amenity-hours')?.value) || 2;
     const amenity = (this.state.amenities || []).find(a => a.id == amenityId) || (this.state.amenities || [])[0];
-    const rate = amenity ? Number(amenity.hourly_rate) : 1500;
+    const rate = amenity ? (amenity.hourly_fee !== undefined ? Number(amenity.hourly_fee) : Number(amenity.hourly_rate || 0)) : 1500;
     const total = rate * hours;
     const feeEl = document.getElementById('book-amenity-total-fee');
-    if (feeEl) feeEl.textContent = this.formatMoney(total);
+    if (feeEl) feeEl.textContent = total > 0 ? this.formatMoney(total) : 'KES 0 (Complimentary)';
   }
 
   async submitAmenityBooking(e) {
     if (e) e.preventDefault();
     const amenityId = document.getElementById('book-amenity-id')?.value;
     const bookingDate = document.getElementById('book-amenity-date')?.value;
-    const startTime = document.getElementById('book-amenity-time')?.value;
+    const startTime = document.getElementById('book-amenity-time')?.value || '05:00 PM';
     const durationHours = Number(document.getElementById('book-amenity-hours')?.value) || 2;
+
+    if (!amenityId || !bookingDate) {
+      this.showToast('Please select an amenity facility and reservation date.', 'error');
+      return;
+    }
+
+    const tenantId = this.state.authUser?.tenant_id || this.state.currentResidentId || 1;
+    const tenant = (this.state.tenants || []).find(t => t.id == tenantId) || (this.state.tenants || [])[0];
+    const unitId = tenant?.unit_id || 1;
 
     try {
       const res = await this.fetchAPI('/api/amenity-bookings', {
@@ -4377,14 +4401,17 @@ class BomaSphereApp {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amenity_id: Number(amenityId),
-          tenant_id: 1,
+          tenant_id: Number(tenantId),
+          unit_id: Number(unitId),
           booking_date: bookingDate,
           start_time: startTime,
-          duration_hours: durationHours
+          duration_hours: durationHours,
+          hours: durationHours
         })
       });
       this.closeModal('modal-new-amenity-booking');
-      this.showToast(`Amenity Reserved! Ref: ${res.booking.booking_ref}`, 'success');
+      const ref = res.booking_reference || res.booking_ref || res.booking?.booking_reference || res.booking?.booking_ref || 'BK-CONFIRMED';
+      this.showToast(`Amenity Reserved! Ref: ${ref}`, 'success');
       await this.refreshAllData();
       this.renderAmenities();
     } catch (err) {
