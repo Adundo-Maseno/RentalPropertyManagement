@@ -470,6 +470,9 @@ async function handleRequest(req, res) {
         const unit = db.prepare('SELECT u.*, p.name as property_name FROM units u JOIN properties p ON u.property_id = p.id WHERE u.id = ?').get(unitId);
         if (unit && unit.status === 'vacant') {
           const monthlyRent = Number(b.monthly_rent || unit.base_rent);
+          const depositPaid = Number(b.deposit_paid || monthlyRent);
+          const waterDeposit = Number(b.water_deposit || 5000);
+
           const insertLease = db.prepare(`
             INSERT INTO leases (unit_id, tenant_id, start_date, end_date, monthly_rent, deposit_paid, water_deposit, status, terms)
             VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?)
@@ -479,8 +482,8 @@ async function handleRequest(req, res) {
             b.start_date || new Date().toISOString().slice(0, 10),
             b.end_date || new Date(Date.now() + 365*86400000).toISOString().slice(0, 10),
             monthlyRent,
-            Number(b.deposit_paid || monthlyRent),
-            Number(b.water_deposit || 5000),
+            depositPaid,
+            waterDeposit,
             b.terms || 'Standard residential lease agreement'
           );
           const leaseId = leaseRes.lastInsertRowid;
@@ -491,19 +494,60 @@ async function handleRequest(req, res) {
           const agreementCode = `BS-LEASE-2026-${cleanUnit}-${randomSuffix}`;
           const contractHash = `SHA256-${crypto.randomBytes(12).toString('hex').toUpperCase()}`;
 
-          db.prepare(`
+          const agrInfo = db.prepare(`
             INSERT INTO lease_agreements (lease_id, unit_id, tenant_id, agreement_code, rent_amount, deposit_amount, start_date, end_date, terms_clauses, status, contract_hash)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_tenant', ?)
           `).run(
             leaseId, unitId, tenantId, agreementCode, monthlyRent,
-            Number(b.deposit_paid || monthlyRent),
+            depositPaid,
             b.start_date || new Date().toISOString().slice(0, 10),
             b.end_date || new Date(Date.now() + 365*86400000).toISOString().slice(0, 10),
             '1. Rent payable in advance on 1st of month.\n2. Security deposit refundable within 14 days of inspection.',
             contractHash
           );
+          const agreementId = agrInfo.lastInsertRowid;
 
-          leaseInfo = { lease_id: leaseId, agreement_code: agreementCode };
+          // Auto-generate inaugural Move-In Invoice (1st Month Rent + Deposits)
+          const invNum = generateInvoiceNumber((b.start_date || new Date().toISOString()).slice(0, 7));
+          const totalDue = monthlyRent + depositPaid + waterDeposit;
+
+          const insertInv = db.prepare(`
+            INSERT INTO invoices (
+              invoice_number, lease_id, tenant_id, unit_id, month, issue_date, due_date,
+              rent_amount, water_amount, garbage_amount, service_charge, late_fee, other_charges,
+              total_amount, amount_paid, balance, status, notes
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, 0, ?, 'unpaid', ?)
+          `);
+          const invInfo = insertInv.run(
+            invNum, leaseId, tenantId, unitId,
+            (b.start_date || new Date().toISOString()).slice(0, 7),
+            b.start_date || new Date().toISOString().slice(0, 10),
+            new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
+            monthlyRent,
+            waterDeposit,
+            depositPaid,
+            totalDue,
+            totalDue,
+            'Initial Move-In Settlement: 1st Month Rent + Security Deposit + Utility Water Deposit'
+          );
+          const invoiceId = invInfo.lastInsertRowid;
+
+          leaseInfo = {
+            lease_id: leaseId,
+            agreement_id: agreementId,
+            agreement_code: agreementCode,
+            contract_hash: contractHash,
+            invoice_id: invoiceId,
+            invoice_number: invNum,
+            total_due: totalDue,
+            monthly_rent: monthlyRent,
+            deposit_amount: depositPaid,
+            water_deposit: waterDeposit,
+            unit_number: unit.unit_number,
+            property_name: unit.property_name,
+            tenant_name: b.name || 'New Tenant',
+            tenant_phone: b.phone || ''
+          };
         }
       }
 
@@ -585,30 +629,75 @@ async function handleRequest(req, res) {
       const agreementCode = `BS-LEASE-2026-${unit.unit_number.replace(/\s+/g, '')}-${suffix}`;
       const contractHash = 'SHA256-' + crypto.randomBytes(12).toString('hex').toUpperCase();
 
-      db.prepare(`
+      const agrStmt = db.prepare(`
         INSERT INTO lease_agreements (
           lease_id, unit_id, tenant_id, agreement_code, rent_amount, deposit_amount,
           start_date, end_date, terms_clauses, status, contract_hash
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_tenant', ?)
-      `).run(
+      `);
+      const agrInfo = agrStmt.run(
         leaseId,
         unitId,
         tenantId,
         agreementCode,
         monthlyRent,
-        Number(b.deposit_paid || monthlyRent * 2),
+        Number(b.deposit_paid || monthlyRent),
         b.start_date || new Date().toISOString().slice(0, 10),
         b.end_date || new Date(Date.now() + 365*86400000).toISOString().slice(0, 10),
         b.terms || 'Residential Tenancy Agreement governed by the Laws of Kenya (Landlord and Tenant Act). Rent due on or before 5th. No unauthorized subletting.',
         contractHash
       );
+      const agreementId = agrInfo.lastInsertRowid;
+
+      // Auto-generate inaugural Move-In Invoice (1st Month Rent + Deposits)
+      const invNum = generateInvoiceNumber((b.start_date || new Date().toISOString()).slice(0, 7));
+      const depositAmount = Number(b.deposit_paid || monthlyRent);
+      const waterDeposit = Number(b.water_deposit || 5000);
+      const totalDue = monthlyRent + depositAmount + waterDeposit;
+
+      const insertInv = db.prepare(`
+        INSERT INTO invoices (
+          invoice_number, lease_id, tenant_id, unit_id, month, issue_date, due_date,
+          rent_amount, water_amount, garbage_amount, service_charge, late_fee, other_charges,
+          total_amount, amount_paid, balance, status, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, 0, ?, 'unpaid', ?)
+      `);
+      const invInfo = insertInv.run(
+        invNum, leaseId, tenantId, unitId,
+        (b.start_date || new Date().toISOString()).slice(0, 7),
+        b.start_date || new Date().toISOString().slice(0, 10),
+        new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
+        monthlyRent,
+        waterDeposit,
+        depositAmount,
+        totalDue,
+        totalDue,
+        'Initial Move-In Settlement: 1st Month Rent + Security Deposit + Utility Water Deposit'
+      );
+      const invoiceId = invInfo.lastInsertRowid;
+
+      const tenantRecord = db.prepare('SELECT name, phone FROM tenants WHERE id = ?').get(tenantId) || {};
 
       return sendJSON(res, 201, {
         success: true,
         id: leaseId,
+        lease_id: leaseId,
+        tenant_id: tenantId,
+        tenant_name: tenantRecord.name || 'Resident Tenant',
+        tenant_phone: tenantRecord.phone || '',
+        unit_id: unitId,
+        unit_number: unit.unit_number,
+        property_name: unit.property_name,
+        agreement_id: agreementId,
         agreement_code: agreementCode,
         contract_hash: contractHash,
-        message: 'Lease activated and automatically added to Digital Leases & E-sign.'
+        invoice_id: invoiceId,
+        invoice_number: invNum,
+        total_due: totalDue,
+        monthly_rent: monthlyRent,
+        deposit_amount: depositAmount,
+        water_deposit: waterDeposit,
+        message: 'Lease activated, Digital Agreement created in E-Sign, and Move-In Invoice issued.'
       });
     }
 

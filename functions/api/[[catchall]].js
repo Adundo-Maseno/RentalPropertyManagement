@@ -324,8 +324,13 @@ export async function onRequest(context) {
       unit.status = 'occupied';
     }
 
+    const tenantId = DB.tenants.length + 1;
+    const monthlyRent = Number(b.monthly_rent || (unit ? unit.base_rent : 65000));
+    const depositPaid = Number(b.deposit_paid || monthlyRent);
+    const waterDeposit = Number(b.water_deposit || 5000);
+
     const newTenant = {
-      id: DB.tenants.length + 1,
+      id: tenantId,
       name: b.name || 'New Tenant',
       phone: b.phone || '',
       email: b.email || '',
@@ -337,12 +342,84 @@ export async function onRequest(context) {
       unit_number: unit ? unit.unit_number : null,
       property_name: unit ? unit.property_name : null,
       balance: 0,
-      monthly_rent: unit ? unit.base_rent : null,
+      monthly_rent: unit ? monthlyRent : null,
       lease_start: unit ? (b.lease_start_date || new Date().toISOString().slice(0, 10)) : null,
       lease_end: unit ? (b.lease_end_date || new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10)) : null
     };
     DB.tenants.unshift(newTenant);
-    return json({ success: true, id: newTenant.id, name: newTenant.name, tenant: newTenant }, 201);
+
+    let leaseInfo = {};
+    if (unit) {
+      const suffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+      const code = `BS-LEASE-2026-${unit.unit_number.replace(/\s+/g, '')}-${suffix}`;
+      const hash = 'SHA256-' + Math.random().toString(36).substring(2, 14).toUpperCase();
+      const agreementId = DB.leaseAgreements.length + 1;
+      const newLease = {
+        id: agreementId,
+        lease_id: agreementId,
+        unit_id: unit.id,
+        tenant_id: tenantId,
+        start_date: b.lease_start_date || new Date().toISOString().slice(0, 10),
+        end_date: b.lease_end_date || new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10),
+        monthly_rent: monthlyRent,
+        rent_amount: monthlyRent,
+        deposit_amount: depositPaid,
+        status: 'pending_tenant',
+        agreement_code: code,
+        contract_hash: hash,
+        tenant_name: newTenant.name,
+        unit_number: unit.unit_number,
+        property_name: unit.property_name,
+        terms_clauses: b.terms || 'Residential Tenancy Agreement governed by the Laws of Kenya.'
+      };
+      DB.leaseAgreements.unshift(newLease);
+
+      // Auto-generate inaugural Move-In Invoice
+      const invNum = `INV-202611-${Math.floor(100 + Math.random() * 900)}`;
+      const totalDue = monthlyRent + depositPaid + waterDeposit;
+      const invoiceId = DB.invoices.length + 1;
+      const newInv = {
+        id: invoiceId,
+        invoice_number: invNum,
+        month: '2026-11',
+        issue_date: new Date().toISOString().slice(0, 10),
+        due_date: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
+        rent_amount: monthlyRent,
+        water_amount: waterDeposit,
+        other_charges: depositPaid,
+        total_amount: totalDue,
+        amount_paid: 0,
+        balance: totalDue,
+        status: 'unpaid',
+        tenant_id: tenantId,
+        tenant_name: newTenant.name,
+        tenant_phone: newTenant.phone,
+        unit_id: unit.id,
+        unit_number: unit.unit_number,
+        property_name: unit.property_name,
+        notes: 'Initial Move-In Settlement: 1st Month Rent + Security Deposit + Utility Water Deposit'
+      };
+      DB.invoices.unshift(newInv);
+
+      leaseInfo = {
+        lease_id: agreementId,
+        agreement_id: agreementId,
+        agreement_code: code,
+        contract_hash: hash,
+        invoice_id: invoiceId,
+        invoice_number: invNum,
+        total_due: totalDue,
+        monthly_rent: monthlyRent,
+        deposit_amount: depositPaid,
+        water_deposit: waterDeposit,
+        unit_number: unit.unit_number,
+        property_name: unit.property_name,
+        tenant_name: newTenant.name,
+        tenant_phone: newTenant.phone
+      };
+    }
+
+    return json({ success: true, id: newTenant.id, name: newTenant.name, tenant: newTenant, ...leaseInfo }, 201);
   }
 
   // Leases
@@ -360,12 +437,13 @@ export async function onRequest(context) {
     const unitId = Number(b.unit_id || 1);
     const tenantId = Number(b.tenant_id || 1);
     const unit = DB.units.find(u => u.id === unitId);
+    const tenant = DB.tenants.find(t => t.id === tenantId);
 
     // Enforce: Occupied units CANNOT be leased again
     const activeLease = DB.leaseAgreements.find(l => l.unit_id === unitId && (l.status === 'active' || l.status === 'executed' || l.status === 'pending_tenant'));
     if (activeLease || (unit && unit.status === 'occupied')) {
-      const tenant = DB.tenants.find(t => t.id === (activeLease ? activeLease.tenant_id : unit.tenant_id));
-      const tenantName = tenant ? tenant.name : 'an existing resident';
+      const activeTenant = DB.tenants.find(t => t.id === (activeLease ? activeLease.tenant_id : unit.tenant_id));
+      const tenantName = activeTenant ? activeTenant.name : 'an existing resident';
       return json({
         error: `Unit ${unit ? unit.unit_number : unitId} is already occupied by ${tenantName}. An occupied unit cannot be leased again. Please terminate or expire the existing lease before assigning a new tenant.`
       }, 400);
@@ -373,30 +451,78 @@ export async function onRequest(context) {
 
     if (unit) unit.status = 'occupied';
 
+    const monthlyRent = Number(b.monthly_rent || (unit ? unit.base_rent : 65000));
+    const depositPaid = Number(b.deposit_paid || monthlyRent);
+    const waterDeposit = Number(b.water_deposit || 5000);
+    const totalDue = monthlyRent + depositPaid + waterDeposit;
+
     const suffix = Math.random().toString(36).substring(2, 6).toUpperCase();
     const code = `BS-LEASE-2026-${unit ? unit.unit_number.replace(/\s+/g, '') : Math.floor(1000 + Math.random() * 9000)}-${suffix}`;
     const hash = 'SHA256-' + Math.random().toString(36).substring(2, 14).toUpperCase();
+    const agreementId = DB.leaseAgreements.length + 1;
     const newLease = {
-      id: DB.leaseAgreements.length + 1,
-      lease_id: DB.leaseAgreements.length + 1,
+      id: agreementId,
+      lease_id: agreementId,
       unit_id: unitId,
       tenant_id: tenantId,
       start_date: b.start_date || new Date().toISOString().slice(0, 10),
       end_date: b.end_date || '2027-12-31',
-      monthly_rent: Number(b.monthly_rent || 65000),
-      rent_amount: Number(b.monthly_rent || 65000),
-      deposit_amount: Number(b.deposit_paid || b.deposit_amount || 130000),
+      monthly_rent: monthlyRent,
+      rent_amount: monthlyRent,
+      deposit_amount: depositPaid,
       status: 'pending_tenant',
       agreement_code: code,
       contract_hash: hash,
+      tenant_name: tenant ? tenant.name : 'Resident Tenant',
+      unit_number: unit ? unit.unit_number : 'Unit',
+      property_name: unit ? unit.property_name : 'BomaSphere Residence',
       terms_clauses: b.terms || 'Residential Tenancy Agreement governed by the Laws of Kenya (Landlord and Tenant Act). Rent due on or before 5th. No unauthorized subletting.'
     };
     DB.leaseAgreements.unshift(newLease);
+
+    // Auto-generate inaugural Move-In Invoice
+    const invNum = `INV-202611-${Math.floor(100 + Math.random() * 900)}`;
+    const invoiceId = DB.invoices.length + 1;
+    const newInv = {
+      id: invoiceId,
+      invoice_number: invNum,
+      month: '2026-11',
+      issue_date: new Date().toISOString().slice(0, 10),
+      due_date: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
+      rent_amount: monthlyRent,
+      water_amount: waterDeposit,
+      other_charges: depositPaid,
+      total_amount: totalDue,
+      amount_paid: 0,
+      balance: totalDue,
+      status: 'unpaid',
+      tenant_id: tenantId,
+      tenant_name: tenant ? tenant.name : 'Resident Tenant',
+      tenant_phone: tenant ? tenant.phone : '+254700000000',
+      unit_id: unitId,
+      unit_number: unit ? unit.unit_number : 'Unit',
+      property_name: unit ? unit.property_name : 'BomaSphere Residence',
+      notes: 'Initial Move-In Settlement: 1st Month Rent + Security Deposit + Utility Water Deposit'
+    };
+    DB.invoices.unshift(newInv);
+
     return json({
       success: true,
       id: newLease.id,
+      lease_id: newLease.id,
+      agreement_id: newLease.id,
       agreement_code: code,
       contract_hash: hash,
+      invoice_id: invoiceId,
+      invoice_number: invNum,
+      total_due: totalDue,
+      monthly_rent: monthlyRent,
+      deposit_amount: depositPaid,
+      water_deposit: waterDeposit,
+      unit_number: unit ? unit.unit_number : 'Unit',
+      property_name: unit ? unit.property_name : 'Property',
+      tenant_name: tenant ? tenant.name : 'Resident Tenant',
+      tenant_phone: tenant ? tenant.phone : '',
       message: 'Lease activated and automatically added to Digital Leases & E-sign.'
     }, 201);
   }
