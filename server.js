@@ -12,7 +12,7 @@ const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'SAMEORIGIN',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cdn.jsdelivr.net https://unpkg.com",
+  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://cdn.tailwindcss.com",
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
 };
 
@@ -335,6 +335,9 @@ async function handleRequest(req, res) {
 
     if (pathname === '/api/properties' && method === 'POST') {
       const b = await parseBody(req);
+      if (!b.name) {
+        return sendJSON(res, 400, { error: 'Property name is required.' });
+      }
       const stmt = db.prepare(`
         INSERT INTO properties (name, property_type, address, city, landlord_name, landlord_phone, landlord_email, management_fee_pct, paybill_number, bank_name, bank_account)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -371,6 +374,9 @@ async function handleRequest(req, res) {
 
     if (pathname === '/api/units' && method === 'POST') {
       const b = await parseBody(req);
+      if (!b.property_id || !b.unit_number || b.base_rent === undefined) {
+        return sendJSON(res, 400, { error: 'Property ID, unit number, and base rent are required.' });
+      }
       const stmt = db.prepare(`
         INSERT INTO units (property_id, unit_number, floor, unit_type, base_rent, service_charge, garbage_fee, status, meter_number, notes)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -975,31 +981,38 @@ async function handleRequest(req, res) {
       const refCode = b.reference_code || (b.payment_method === 'M-Pesa' ? generateMpesaCode() : `BNK-${Math.floor(100000 + Math.random()*900000)}`);
       const paymentDate = b.payment_date || new Date().toISOString().replace('T', ' ').slice(0, 19);
 
-      // Insert payment record
-      const insertPayment = db.prepare(`
-        INSERT INTO payments (receipt_number, invoice_id, tenant_id, amount, payment_date, payment_method, reference_code, payer_phone, payer_name, status, notes)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed', ?)
-      `);
-      const payInfo = insertPayment.run(
-        receiptNum, b.invoice_id || null, b.tenant_id, amount, paymentDate,
-        b.payment_method || 'M-Pesa', refCode, b.payer_phone || '', b.payer_name || '', b.notes || 'Payment processed'
-      );
+      let invoiceId = b.invoice_id ? Number(b.invoice_id) : null;
+      let linkedInv = invoiceId ? db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId) : null;
+      let tenantId = b.tenant_id ? Number(b.tenant_id) : (linkedInv ? linkedInv.tenant_id : null);
 
-      // Reconcile Invoice if linked
       let updatedInvoice = null;
-      if (b.invoice_id) {
-        const inv = db.prepare('SELECT * FROM invoices WHERE id = ?').get(b.invoice_id);
-        if (inv) {
-          const newPaid = Number(inv.amount_paid) + amount;
-          const newBalance = Math.max(0, Number(inv.total_amount) - newPaid);
+      db.exec('BEGIN TRANSACTION');
+      let payInfo;
+      try {
+        const insertPayment = db.prepare(`
+          INSERT INTO payments (receipt_number, invoice_id, tenant_id, amount, payment_date, payment_method, reference_code, payer_phone, payer_name, status, notes)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed', ?)
+        `);
+        payInfo = insertPayment.run(
+          receiptNum, invoiceId ?? null, tenantId ?? null, amount, paymentDate,
+          b.payment_method || 'M-Pesa', refCode, b.payer_phone || '', b.payer_name || '', b.notes || 'Payment processed'
+        );
+
+        if (linkedInv) {
+          const newPaid = Number(linkedInv.amount_paid) + amount;
+          const newBalance = Math.max(0, Number(linkedInv.total_amount) - newPaid);
           const newStatus = newBalance === 0 ? 'paid' : (newPaid > 0 ? 'partially_paid' : 'unpaid');
 
           db.prepare(`
             UPDATE invoices SET amount_paid = ?, balance = ?, status = ? WHERE id = ?
-          `).run(newPaid, newBalance, newStatus, inv.id);
+          `).run(newPaid, newBalance, newStatus, linkedInv.id);
 
-          updatedInvoice = { id: inv.id, balance: newBalance, status: newStatus };
+          updatedInvoice = { id: linkedInv.id, balance: newBalance, status: newStatus };
         }
+        db.exec('COMMIT');
+      } catch (err) {
+        db.exec('ROLLBACK');
+        throw err;
       }
 
       // Fetch tenant details for SMS receipt dispatch
@@ -1389,6 +1402,9 @@ async function handleRequest(req, res) {
         return sendJSON(res, 403, { error: '403 Forbidden: Provisioning SaaS users requires Administrative privileges.' });
       }
       const b = await parseBody(req);
+      if (!b.name || !b.email) {
+        return sendJSON(res, 400, { error: 'Name and email are required to provision a user.' });
+      }
       const passwordHash = hashPassword(b.password || 'password123');
       const stmt = db.prepare(`
         INSERT INTO users (name, email, password_hash, phone, role, property_id, tenant_id, status)
@@ -1939,14 +1955,7 @@ async function handleRequest(req, res) {
 
       let escrow = escrowId ? db.prepare('SELECT * FROM maintenance_escrows WHERE id = ?').get(escrowId) : null;
       if (!escrow) {
-        escrow = db.prepare('SELECT * FROM maintenance_escrows ORDER BY id DESC LIMIT 1').get();
-      }
-      if (!escrow) {
-        const dummy = db.prepare(`
-          INSERT INTO maintenance_escrows (ticket_id, fundi_id, amount, status, milestone_desc)
-          VALUES (1, 1, 4500, 'held', 'Artisan milestone deposit')
-        `).run();
-        escrow = db.prepare('SELECT * FROM maintenance_escrows WHERE id = ?').get(dummy.lastInsertRowid);
+        return sendJSON(res, 404, { error: 'Escrow record not found.' });
       }
 
       const b2cRef = 'B2C-MPESA-' + Math.random().toString(36).substring(2, 9).toUpperCase();
@@ -2149,6 +2158,12 @@ async function handleRequest(req, res) {
         SET status = 'settled', damages_total = ?, unpaid_utility_arrears = ?, net_deposit_refund = ? 
         WHERE id = ?
       `).run(deductionsDamages, deductionsArrears, netRefund, inspection.id);
+
+      if (inspection.inspection_type === 'move_out' && inspection.unit_id) {
+        db.prepare("UPDATE units SET status = 'vacant' WHERE id = ?").run(inspection.unit_id);
+        db.prepare("UPDATE leases SET status = 'completed' WHERE unit_id = ? AND status = 'active'").run(inspection.unit_id);
+        db.prepare("UPDATE lease_agreements SET status = 'completed' WHERE unit_id = ? AND status = 'executed'").run(inspection.unit_id);
+      }
 
       return sendJSON(res, 200, {
         success: true,

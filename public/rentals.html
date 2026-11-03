@@ -682,7 +682,7 @@
             </div>
 
             <div class="grid grid-cols-2 gap-2">
-              <button onclick="openViewingModal(${v.id}, '${v.unit_number}', '${v.property_name}', '${v.unit_type}')" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-zinc-100 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1">
+              <button onclick="openViewingModal(${v.id})" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-zinc-100 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1">
                 <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
                 <span>View Space</span>
               </button>
@@ -883,16 +883,24 @@
     document.getElementById('filter-budget')?.addEventListener('change', applyFilters);
 
     function openViewingModal(unitId, unitNum, propName, unitType) {
+      const v = (allVacancies || []).find(x => x.id === Number(unitId));
+      const uNum = unitNum || (v ? v.unit_number : '');
+      const pName = propName || (v ? v.property_name : '');
+      const uType = unitType || (v ? v.unit_type : 'Apartment');
+
       document.getElementById('viewing-unit-id').value = unitId;
-      document.getElementById('modal-viewing-title').textContent = `Schedule Viewing: Unit ${unitNum}`;
-      document.getElementById('modal-viewing-sub').textContent = `${unitType} &bull; ${propName}`;
+      document.getElementById('modal-viewing-title').textContent = `Schedule Viewing: Unit ${uNum}`;
+      document.getElementById('modal-viewing-sub').textContent = `${uType} • ${pName}`;
       document.getElementById('viewing-success-box').classList.add('hidden');
       document.getElementById('form-viewing').classList.remove('hidden');
 
-      // Default date to tomorrow
+      // Default date to tomorrow in local timezone
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
-      document.getElementById('viewing-date').value = tomorrow.toISOString().split('T')[0];
+      const yyyy = tomorrow.getFullYear();
+      const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+      const dd = String(tomorrow.getDate()).padStart(2, '0');
+      document.getElementById('viewing-date').value = `${yyyy}-${mm}-${dd}`;
 
       document.getElementById('modal-viewing').classList.remove('hidden');
       if (window.lucide) lucide.createIcons();

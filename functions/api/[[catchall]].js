@@ -208,7 +208,11 @@ export async function onRequest(context) {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Auth-Token, X-Role'
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Auth-Token, X-Role',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'SAMEORIGIN',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://cdn.tailwindcss.com;"
   };
 
   if (method === 'OPTIONS') {
@@ -751,7 +755,44 @@ export async function onRequest(context) {
   }
 
   if (pathname === '/api/communications/broadcast' && method === 'POST') {
-    return json({ success: true, count: 8, recipients_reached: 8, recipient_count: 8 });
+    const user = resolveRequestUser(request);
+    if (!user) {
+      return json({ error: '401 Unauthorized: Valid authentication token required.' }, 401);
+    }
+    if (user.role === 'caretaker' || user.role === 'tenant' || user.role === 'landlord') {
+      return json({ error: '403 Forbidden: Mass communications can only be broadcast by Property Managers and Super Admins.' }, 403);
+    }
+    let b = {};
+    try { b = await request.json(); } catch (e) { }
+    const { channel, message, property_id, purpose } = b;
+    if (!message) {
+      return json({ error: 'Broadcast message content cannot be empty.' }, 400);
+    }
+    const recipients = property_id 
+      ? DB.tenants.filter(t => t.property_id === Number(property_id))
+      : DB.tenants;
+    
+    recipients.forEach(t => {
+      DB.communications.unshift({
+        id: DB.communications.length + 1,
+        tenant_id: t.id,
+        recipient_name: t.name,
+        recipient_phone: t.phone,
+        type: channel || 'sms',
+        message: message,
+        purpose: purpose || 'announcement',
+        status: 'delivered',
+        sent_at: new Date().toISOString().replace('T', ' ').slice(0, 19)
+      });
+    });
+
+    return json({
+      success: true,
+      channel: channel || 'sms',
+      recipient_count: recipients.length,
+      recipients_reached: recipients.length,
+      message: `Broadcast successfully dispatched to ${recipients.length} tenants.`
+    });
   }
 
   if (pathname === '/api/communications/send' && method === 'POST') {
@@ -819,7 +860,8 @@ export async function onRequest(context) {
     if (user && user.role === 'landlord' && user.property_id && propId !== user.property_id) {
       return json({ error: `403 Forbidden: Landlord '${user.name}' is only authorized to view statements for Property ID ${user.property_id}.` }, 403);
     }
-    const prop = DB.properties.find(p => p.id === propId) || DB.properties[0];
+    const prop = DB.properties.find(p => p.id === propId);
+    if (!prop) return json({ error: 'Property not found' }, 404);
     return json({
       statement: {
         property: prop,
@@ -1134,7 +1176,8 @@ export async function onRequest(context) {
   if (pathname === '/api/iot/valve-toggle' && method === 'POST') {
     let b = {};
     try { b = await request.json(); } catch (e) { }
-    const dev = DB.iotDevices.find(d => d.id === Number(b.device_id)) || DB.iotDevices[0];
+    const dev = DB.iotDevices.find(d => d.id === Number(b.device_id));
+    if (!dev) return json({ error: 'IoT device not found' }, 404);
     dev.valve_status = b.valve_status || 'open';
     return json({ success: true, message: `Smart valve status updated to ${dev.valve_status}`, device: dev });
   }
@@ -1192,11 +1235,51 @@ export async function onRequest(context) {
     const id = Number(pathname.split('/')[4]);
     let b = {};
     try { b = await request.json(); } catch (e) { }
-    const agr = DB.leaseAgreements.find(a => a.id === id) || DB.leaseAgreements[0];
+    const agr = DB.leaseAgreements.find(a => a.id === id);
+    if (!agr) {
+      return json({ error: 'Lease agreement record not found.' }, 404);
+    }
     agr.status = 'executed';
     agr.tenant_signature = b.signature || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="50"><path d="M10 35 Q50 10 90 35 T170 30" stroke="%23059669" stroke-width="2" fill="none"/></svg>';
     agr.tenant_signed_at = new Date().toISOString().replace('T', ' ').slice(0, 19);
     return json({ success: true, agreement: agr, is_executed: true, message: `Lease ${agr.agreement_code} signed and legally executed!` });
+  }
+
+  if (pathname === '/api/leases/agreements' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch (e) { }
+    const { lease_id, unit_id, tenant_id, rent_amount, deposit_amount, start_date, end_date, terms_clauses } = b;
+    if (!unit_id || !tenant_id || !rent_amount) {
+      return json({ error: 'Unit ID, Tenant ID, and Rent Amount are required.' }, 400);
+    }
+
+    const unit = DB.units.find(u => u.id === Number(unit_id));
+    const tenant = DB.tenants.find(t => t.id === Number(tenant_id));
+    const prop = unit ? DB.properties.find(p => p.id === unit.property_id) : null;
+    const code = `BS-LEASE-2026-${(unit?.unit_number || Math.floor(100+Math.random()*900)).toString().replace(/[^a-zA-Z0-9]/g, '')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    const hash = 'SHA256-' + Math.random().toString(36).substring(2, 14).toUpperCase();
+
+    const newAgr = {
+      id: DB.leaseAgreements.length ? Math.max(...DB.leaseAgreements.map(a => a.id)) + 1 : 1,
+      lease_id: lease_id || 1,
+      unit_id: Number(unit_id),
+      tenant_id: Number(tenant_id),
+      agreement_code: code,
+      unit_number: unit?.unit_number || 'A101',
+      property_name: prop?.name || 'BomaSphere Property',
+      tenant_name: tenant?.name || 'Resident',
+      tenant_phone: tenant?.phone || '',
+      rent_amount: Number(rent_amount),
+      deposit_amount: deposit_amount ? Number(deposit_amount) : Number(rent_amount),
+      start_date: start_date || '2026-11-01',
+      end_date: end_date || '2027-10-31',
+      terms_clauses: terms_clauses || 'Standard 1-year tenancy agreement',
+      status: 'pending_tenant',
+      contract_hash: hash,
+      created_at: new Date().toISOString().replace('T', ' ').slice(0, 19)
+    };
+    DB.leaseAgreements.unshift(newAgr);
+    return json({ success: true, id: newAgr.id, agreement_code: code }, 201);
   }
 
   // 20. Move-In / Move-Out Inspections & Deposit Settlement
@@ -1283,7 +1366,8 @@ export async function onRequest(context) {
   if (pathname === '/api/visitor-passes/validate' && method === 'POST') {
     let b = {};
     try { b = await request.json(); } catch (e) { }
-    const pass = DB.visitorPasses.find(p => p.pass_code === b.pass_code) || DB.visitorPasses[0];
+    const pass = DB.visitorPasses.find(p => p.pass_code === b.pass_code);
+    if (!pass) return json({ error: 'Visitor pass not found or invalid' }, 404);
     pass.status = b.action === 'check_out' ? 'completed' : 'checked_in';
     return json({ success: true, action: b.action || 'check_in', status: pass.status, pass, message: `Pass validated for ${pass.visitor_name}.` });
   }
@@ -1363,92 +1447,7 @@ export async function onRequest(context) {
     }, 201);
   }
 
-  // 24. Public Vacancies & Viewing Bookings
-  if (pathname === '/api/public/vacancies' && method === 'GET') {
-    const vacantUnits = DB.units.filter(u => u.status === 'vacant');
-    const enriched = vacantUnits.map(v => {
-      const prop = DB.properties.find(p => p.id === v.property_id) || {};
-      let bedrooms = 2;
-      let bathrooms = 2;
-      let sqft = 1100;
-      let photo = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80';
-      let higgsfield = {
-        mode: 'dolly',
-        rig: 'Interior Tracking Glide (35mm Cine)',
-        fps: 24,
-        lighting: 'Golden hour ambient diffusion (3200K)',
-        prompt: 'Dolly forward through sunlit living room with teak finishes, open balcony overlooking gardens, natural light, 35mm lens, steadycam 24fps glide, photorealistic.'
-      };
 
-      if ((v.unit_type || '').includes('Commercial') || (v.unit_type || '').includes('Office')) {
-        bedrooms = 0;
-        bathrooms = 1;
-        sqft = 650;
-        photo = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80';
-        higgsfield = {
-          mode: 'pan',
-          rig: 'Pedestal Horizontal Pan (24mm Cine)',
-          fps: 24,
-          lighting: 'Cool executive daylight & recessed LED ceiling glow',
-          prompt: 'Slow horizontal pedestal pan across open-plan executive commercial office suite, glass partition reflections, panoramic city view, 24fps smooth pan.'
-        };
-      } else if ((v.unit_type || '').includes('3-Bedroom') || (v.unit_type || '').includes('DSQ')) {
-        bedrooms = 3;
-        bathrooms = 3;
-        sqft = 1650;
-        photo = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80';
-        higgsfield = {
-          mode: 'dolly',
-          rig: 'Steadicam Dolly In (35mm Anamorphic)',
-          fps: 24,
-          lighting: 'Warm afternoon golden hour ambient diffusion',
-          prompt: 'Dolly forward through sunlit living room with teak dining finishes, open balcony overlooking lush gardens, natural volumetric light, 35mm lens, photorealistic.'
-        };
-      } else if ((v.unit_type || '').includes('Townhouse') || (v.unit_type || '').includes('Villa')) {
-        bedrooms = 4;
-        bathrooms = 4.5;
-        sqft = 3200;
-        photo = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80';
-        higgsfield = {
-          mode: 'aerial',
-          rig: 'Cinema Drone 3D Arc Pullback',
-          fps: 24,
-          lighting: 'Sunset golden hour with warm interior window glow',
-          prompt: 'Cinematic drone aerial pullback, 4k ultra-high definition, slow smooth arc revealing modern luxury villa at golden hour, private manicured lawn, warm ambient interior lighting visible through floor-to-ceiling glass.'
-        };
-      }
-
-      return {
-        ...v,
-        property_name: prop.name || v.property_name,
-        property_type: prop.property_type,
-        address: prop.address,
-        city: prop.city,
-        bedrooms,
-        bathrooms,
-        sqft,
-        photo,
-        deposit: (v.base_rent || 0) * 2,
-        total_monthly: (v.base_rent || 0) + (v.service_charge || 0) + (v.garbage_fee || 0),
-        higgsfield,
-        amenities: ['High-Speed Fiber', 'Borehole Water', '24/7 Manned Security', 'Backup Generator', 'Reserved Parking', 'Solar Water Heating']
-      };
-    });
-
-    return json({ success: true, count: enriched.length, vacancies: enriched });
-  }
-
-  if (pathname === '/api/public/book-viewing' && method === 'POST') {
-    let b = {};
-    try { b = await request.json(); } catch (e) { }
-    const ref = 'VIEW-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-    return json({
-      success: true,
-      booking_reference: ref,
-      reference: ref,
-      message: `Physical viewing appointment confirmed under reference ${ref}. An estate agent will meet you at the property on ${b.preferred_date || 'the requested date'}.`
-    }, 201);
-  }
 
   // Catch-all 404 for unmatched API routes
   return json({ error: "404 Not Found: API route does not exist", path: pathname }, 404);

@@ -107,3 +107,4 @@ const modalHtml = `  <!-- MODAL: Move-In Payment & Digital Lease Prompt -->
 html = html.replace(target, modalHtml + target);
 fs.writeFileSync('public/index.html', html, 'utf8');
 console.log('Successfully inserted modal-movein-payment-prompt into public/index.html');
+

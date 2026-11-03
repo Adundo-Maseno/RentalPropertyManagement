@@ -245,3 +245,4 @@ appJs = appJs.replace(targetManual, newMethods + '\n' + targetManual);
 
 fs.writeFileSync('public/app.js', appJs, 'utf8');
 console.log('Successfully updated public/app.js');
+

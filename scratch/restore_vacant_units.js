@@ -10,3 +10,4 @@ db.prepare("UPDATE units SET status = 'vacant' WHERE id IN (4, 7, 11)").run();
 console.log('Vacant units restored:');
 const vacant = db.prepare("SELECT u.id, u.unit_number, u.status, p.name FROM units u JOIN properties p ON u.property_id = p.id WHERE u.status = 'vacant'").all();
 console.log(vacant);
+
