@@ -27,3 +27,6 @@ yarn-error.log*
 Thumbs.db
 desktop.ini
 
+
+# Scratch and temporary audit scripts
+scratch/
