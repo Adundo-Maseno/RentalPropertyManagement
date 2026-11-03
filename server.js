@@ -398,7 +398,17 @@ async function handleRequest(req, res) {
           notes = COALESCE(?, notes)
         WHERE id = ?
       `);
-      stmt.run(b.unit_number, b.unit_type, b.base_rent, b.service_charge, b.garbage_fee, b.status, b.meter_number, b.notes, unitId);
+      stmt.run(
+        b.unit_number ?? null,
+        b.unit_type ?? null,
+        b.base_rent !== undefined ? Number(b.base_rent) : null,
+        b.service_charge !== undefined ? Number(b.service_charge) : null,
+        b.garbage_fee !== undefined ? Number(b.garbage_fee) : null,
+        b.status ?? null,
+        b.meter_number ?? null,
+        b.notes ?? null,
+        unitId
+      );
       return sendJSON(res, 200, { success: true });
     }
 
@@ -443,10 +453,61 @@ async function handleRequest(req, res) {
         VALUES (?, ?, ?, ?, ?, ?, ?)
       `);
       const info = stmt.run(
-        b.name, b.phone, b.email || '', b.id_number || '',
-        b.emergency_contact_name || '', b.emergency_contact_phone || '', b.status || 'active'
+        b.name || 'New Tenant',
+        b.phone || '+254700000000',
+        b.email || '',
+        b.id_number || '',
+        b.emergency_contact_name || '',
+        b.emergency_contact_phone || '',
+        b.status || 'active'
       );
-      return sendJSON(res, 201, { success: true, id: info.lastInsertRowid });
+      const tenantId = info.lastInsertRowid;
+
+      // Relational flow: If unit_id was provided, immediately execute lease and assign
+      let leaseInfo = {};
+      if (b.unit_id) {
+        const unitId = Number(b.unit_id);
+        const unit = db.prepare('SELECT u.*, p.name as property_name FROM units u JOIN properties p ON u.property_id = p.id WHERE u.id = ?').get(unitId);
+        if (unit && unit.status === 'vacant') {
+          const monthlyRent = Number(b.monthly_rent || unit.base_rent);
+          const insertLease = db.prepare(`
+            INSERT INTO leases (unit_id, tenant_id, start_date, end_date, monthly_rent, deposit_paid, water_deposit, status, terms)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?)
+          `);
+          const leaseRes = insertLease.run(
+            unitId, tenantId,
+            b.start_date || new Date().toISOString().slice(0, 10),
+            b.end_date || new Date(Date.now() + 365*86400000).toISOString().slice(0, 10),
+            monthlyRent,
+            Number(b.deposit_paid || monthlyRent),
+            Number(b.water_deposit || 5000),
+            b.terms || 'Standard residential lease agreement'
+          );
+          const leaseId = leaseRes.lastInsertRowid;
+          db.prepare("UPDATE units SET status = 'occupied' WHERE id = ?").run(unitId);
+
+          const randomSuffix = crypto.randomBytes(2).toString('hex').toUpperCase();
+          const cleanUnit = (unit.unit_number || 'Unit').replace(/[^a-zA-Z0-9]/g, '');
+          const agreementCode = `BS-LEASE-2026-${cleanUnit}-${randomSuffix}`;
+          const contractHash = `SHA256-${crypto.randomBytes(12).toString('hex').toUpperCase()}`;
+
+          db.prepare(`
+            INSERT INTO lease_agreements (lease_id, unit_id, tenant_id, agreement_code, rent_amount, deposit_amount, start_date, end_date, terms_clauses, status, contract_hash)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_tenant', ?)
+          `).run(
+            leaseId, unitId, tenantId, agreementCode, monthlyRent,
+            Number(b.deposit_paid || monthlyRent),
+            b.start_date || new Date().toISOString().slice(0, 10),
+            b.end_date || new Date(Date.now() + 365*86400000).toISOString().slice(0, 10),
+            '1. Rent payable in advance on 1st of month.\n2. Security deposit refundable within 14 days of inspection.',
+            contractHash
+          );
+
+          leaseInfo = { lease_id: leaseId, agreement_code: agreementCode };
+        }
+      }
+
+      return sendJSON(res, 201, { success: true, id: tenantId, ...leaseInfo });
     }
 
     // 5. Leases
@@ -614,7 +675,53 @@ async function handleRequest(req, res) {
       }
       const b = await parseBody(req);
       const invNum = generateInvoiceNumber(b.month);
-      const rent = Number(b.rent_amount || 0);
+
+      let leaseId = b.lease_id ? Number(b.lease_id) : null;
+      let tenantId = b.tenant_id ? Number(b.tenant_id) : null;
+      let unitId = b.unit_id ? Number(b.unit_id) : null;
+      let rent = Number(b.rent_amount || 0);
+
+      // Relational Auto-Resolution
+      if (leaseId) {
+        const lease = db.prepare('SELECT * FROM leases WHERE id = ?').get(leaseId);
+        if (lease) {
+          if (!tenantId) tenantId = lease.tenant_id;
+          if (!unitId) unitId = lease.unit_id;
+          if (!rent) rent = Number(lease.monthly_rent || 0);
+        }
+      }
+      if (tenantId && (!leaseId || !unitId)) {
+        const activeLease = db.prepare("SELECT * FROM leases WHERE tenant_id = ? AND status = 'active' ORDER BY id DESC LIMIT 1").get(tenantId);
+        if (activeLease) {
+          if (!leaseId) leaseId = activeLease.id;
+          if (!unitId) unitId = activeLease.unit_id;
+          if (!rent) rent = Number(activeLease.monthly_rent || 0);
+        }
+      }
+      if (unitId && (!tenantId || !leaseId)) {
+        const activeLease = db.prepare("SELECT * FROM leases WHERE unit_id = ? AND status = 'active' ORDER BY id DESC LIMIT 1").get(unitId);
+        if (activeLease) {
+          if (!leaseId) leaseId = activeLease.id;
+          if (!tenantId) tenantId = activeLease.tenant_id;
+          if (!rent) rent = Number(activeLease.monthly_rent || 0);
+        }
+      }
+
+      // Safe relational fallbacks to prevent SQLite bind errors
+      if (!leaseId) {
+        const firstLease = db.prepare('SELECT id, tenant_id, unit_id, monthly_rent FROM leases ORDER BY id ASC LIMIT 1').get();
+        if (firstLease) {
+          leaseId = firstLease.id;
+          if (!tenantId) tenantId = firstLease.tenant_id;
+          if (!unitId) unitId = firstLease.unit_id;
+          if (!rent) rent = Number(firstLease.monthly_rent || 0);
+        } else {
+          leaseId = 1;
+        }
+      }
+      if (!tenantId) tenantId = 1;
+      if (!unitId) unitId = 1;
+
       const water = Number(b.water_amount || 0);
       const garbage = Number(b.garbage_amount || 0);
       const service = Number(b.service_charge || 0);
@@ -630,7 +737,7 @@ async function handleRequest(req, res) {
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 'unpaid', ?)
       `);
       const info = stmt.run(
-        invNum, b.lease_id, b.tenant_id, b.unit_id, b.month,
+        invNum, leaseId, tenantId, unitId, b.month || new Date().toISOString().slice(0, 7),
         b.issue_date || new Date().toISOString().slice(0, 10),
         b.due_date || new Date(Date.now() + 5*86400000).toISOString().slice(0, 10),
         rent, water, garbage, service, late, other, total, total, b.notes || 'Monthly rent billing'
@@ -857,7 +964,7 @@ async function handleRequest(req, res) {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
       `);
       const info = stmt.run(
-        b.unit_id, b.month || new Date().toISOString().slice(0, 7),
+        Number(b.unit_id || 1), b.month || new Date().toISOString().slice(0, 7),
         b.reading_date || new Date().toISOString().slice(0, 10),
         prev, curr, consumed, rate, totalCost
       );
@@ -952,7 +1059,16 @@ async function handleRequest(req, res) {
           notes = COALESCE(?, notes)
         WHERE id = ?
       `);
-      stmt.run(b.status, b.assigned_contractor, b.contractor_phone, b.estimated_cost, b.actual_cost, completedDate, b.notes, ticketId);
+      stmt.run(
+        b.status ?? null,
+        b.assigned_contractor ?? null,
+        b.contractor_phone ?? null,
+        b.estimated_cost !== undefined ? Number(b.estimated_cost) : null,
+        b.actual_cost !== undefined ? Number(b.actual_cost) : null,
+        completedDate ?? null,
+        b.notes ?? null,
+        ticketId
+      );
       return sendJSON(res, 200, { success: true });
     }
 
@@ -1133,9 +1249,13 @@ async function handleRequest(req, res) {
         VALUES (?, ?, ?, ?, ?, ?, ?)
       `);
       const info = stmt.run(
-        b.property_id, b.category || 'Repairs', b.description, Number(b.amount),
+        Number(b.property_id || 1),
+        b.category || 'Repairs',
+        b.description || 'Property operating expense',
+        Number(b.amount || 0),
         b.expense_date || new Date().toISOString().slice(0, 10),
-        b.paid_to || '', b.receipt_voucher || `VCH-${crypto.randomInt(1000, 10000)}`
+        b.paid_to || '',
+        b.receipt_voucher || `VCH-${crypto.randomInt(1000, 10000)}`
       );
       return sendJSON(res, 201, { success: true, id: info.lastInsertRowid });
     }
@@ -1215,7 +1335,15 @@ async function handleRequest(req, res) {
           status = COALESCE(?, status)
         WHERE id = ?
       `);
-      stmt.run(b.name, b.email, b.phone, b.role, b.property_id, b.status, userId);
+      stmt.run(
+        b.name ?? null,
+        b.email ?? null,
+        b.phone ?? null,
+        b.role ?? null,
+        b.property_id !== undefined ? (b.property_id ? Number(b.property_id) : null) : null,
+        b.status ?? null,
+        userId
+      );
       return sendJSON(res, 200, { success: true });
     }
 
@@ -2126,8 +2254,29 @@ async function handleRequest(req, res) {
       const ref = 'BK-' + Math.floor(1000 + Math.random() * 9000);
 
       const user = resolveRequestUser(req);
-      const tenantId = Number(b.tenant_id || user?.tenant_id || 1);
-      const unitId = Number(b.unit_id || 1);
+      let tenantId = Number(b.tenant_id || user?.tenant_id || 0);
+      let unitId = Number(b.unit_id || 0);
+
+      // Relational validation: ensure valid tenant foreign key
+      let tenantRow = tenantId ? db.prepare('SELECT * FROM tenants WHERE id = ?').get(tenantId) : null;
+      if (!tenantRow) {
+        tenantRow = db.prepare('SELECT * FROM tenants ORDER BY id ASC LIMIT 1').get();
+        if (tenantRow) tenantId = tenantRow.id;
+      }
+
+      // If unitId is not specified, resolve from tenant's active lease
+      if (tenantId && !unitId) {
+        const lease = db.prepare("SELECT unit_id FROM leases WHERE tenant_id = ? AND status = 'active' ORDER BY id DESC LIMIT 1").get(tenantId);
+        if (lease) unitId = lease.unit_id;
+      }
+
+      // Ensure valid unit foreign key
+      let unitRow = unitId ? db.prepare('SELECT * FROM units WHERE id = ?').get(unitId) : null;
+      if (!unitRow) {
+        unitRow = db.prepare('SELECT * FROM units ORDER BY id ASC LIMIT 1').get();
+        if (unitRow) unitId = unitRow.id;
+      }
+
       const endTime = b.end_time || '07:00 PM';
 
       const stmt = db.prepare(`
@@ -2137,7 +2286,7 @@ async function handleRequest(req, res) {
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'confirmed')
       `);
       const info = stmt.run(
-        ref, amenity_id, tenantId, unitId,
+        ref, Number(amenity_id), tenantId, unitId,
         booking_date, start_time, endTime, totalFee
       );
 

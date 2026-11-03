@@ -2224,6 +2224,24 @@
           </div>
         </div>
 
+        <div class="pt-2 border-t border-slate-100">
+          <label class="block font-semibold text-slate-700 mb-1">Assign Vacant Unit &amp; Execute Lease (Optional)</label>
+          <select id="tenant-unit-select" onchange="app.onTenantModalUnitChange()" class="w-full border border-slate-300 rounded-lg p-2.5 font-medium">
+            <option value="">-- Register Without Lease (Assign Unit Later) --</option>
+          </select>
+        </div>
+
+        <div id="tenant-lease-fields" class="hidden grid grid-cols-2 gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Monthly Rent (KES)</label>
+            <input type="number" id="tenant-rent-input" placeholder="65000" class="w-full border border-slate-300 bg-white rounded-lg p-2 font-mono text-xs">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Security Deposit (KES)</label>
+            <input type="number" id="tenant-deposit-input" placeholder="65000" class="w-full border border-slate-300 bg-white rounded-lg p-2 font-mono text-xs">
+          </div>
+        </div>
+
         <div class="flex items-center justify-end space-x-2 pt-3">
           <button type="button" onclick="app.closeModal('modal-add-tenant')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
           <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md transition">Register Tenant</button>
@@ -2828,6 +2846,12 @@
       </div>
 
       <form onsubmit="app.submitAmenityBooking(event)" class="mt-4 space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Resident / Tenant</label>
+          <select id="book-amenity-tenant-id" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs">
+            <!-- dynamic tenants -->
+          </select>
+        </div>
         <div>
           <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Select Facility</label>
           <select id="book-amenity-id" onchange="app.updateAmenityFee()" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs">

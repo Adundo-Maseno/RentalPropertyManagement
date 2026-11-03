@@ -319,8 +319,10 @@ export async function onRequest(context) {
     let b = {};
     try { b = await request.json(); } catch (e) { }
     const unitId = Number(b.unit_id || 0);
-    const unit = DB.units.find(u => u.id === unitId);
-    if (unit) unit.status = 'occupied';
+    const unit = unitId ? DB.units.find(u => u.id === unitId) : null;
+    if (unit && unit.status === 'vacant') {
+      unit.status = 'occupied';
+    }
 
     const newTenant = {
       id: DB.tenants.length + 1,
@@ -331,13 +333,13 @@ export async function onRequest(context) {
       emergency_contact_name: b.emergency_contact_name || '',
       emergency_contact_phone: b.emergency_contact_phone || '',
       status: 'active',
-      unit_id: unitId || 1,
-      unit_number: unit ? unit.unit_number : 'A101',
-      property_name: unit ? unit.property_name : 'Kilimani Royal Heights',
+      unit_id: unit ? unit.id : null,
+      unit_number: unit ? unit.unit_number : null,
+      property_name: unit ? unit.property_name : null,
       balance: 0,
-      monthly_rent: unit ? unit.base_rent : 65000,
-      lease_start: b.lease_start_date || new Date().toISOString().slice(0, 10),
-      lease_end: b.lease_end_date || new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10)
+      monthly_rent: unit ? unit.base_rent : null,
+      lease_start: unit ? (b.lease_start_date || new Date().toISOString().slice(0, 10)) : null,
+      lease_end: unit ? (b.lease_end_date || new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10)) : null
     };
     DB.tenants.unshift(newTenant);
     return json({ success: true, id: newTenant.id, name: newTenant.name, tenant: newTenant }, 201);
@@ -440,17 +442,33 @@ export async function onRequest(context) {
     }
     let b = {};
     try { b = await request.json(); } catch (e) { }
+
+    const tenant = DB.tenants.find(t => t.id === Number(b.tenant_id)) || DB.tenants[0] || {};
+    const unit = DB.units.find(u => u.id === Number(b.unit_id || tenant.unit_id)) || {};
+    const rent = Number(b.rent_amount || unit.base_rent || 50000);
+    const water = Number(b.water_amount || 0);
+    const service = Number(b.service_charge || 0);
+    const total = rent + water + service;
+
     const newInv = {
       id: DB.invoices.length + 1,
       invoice_number: `INV-202611-${Math.floor(100 + Math.random() * 900)}`,
       month: b.month || '2026-11',
       issue_date: new Date().toISOString().slice(0, 10),
       due_date: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
-      total_amount: Number(b.rent_amount || 0) + Number(b.water_amount || 0) + Number(b.service_charge || 0),
+      rent_amount: rent,
+      water_amount: water,
+      service_charge: service,
+      total_amount: total,
       amount_paid: 0,
-      balance: Number(b.rent_amount || 0) + Number(b.water_amount || 0) + Number(b.service_charge || 0),
+      balance: total,
       status: 'unpaid',
-      tenant_name: 'Resident Tenant'
+      tenant_id: tenant.id || 1,
+      tenant_name: tenant.name || 'Resident Tenant',
+      tenant_phone: tenant.phone || '+254700000000',
+      unit_id: unit.id || tenant.unit_id || 1,
+      unit_number: unit.unit_number || tenant.unit_number || 'A101',
+      property_name: unit.property_name || tenant.property_name || 'BomaSphere Residences'
     };
     DB.invoices.unshift(newInv);
     return json({ success: true, id: newInv.id, invoice_number: newInv.invoice_number }, 201);

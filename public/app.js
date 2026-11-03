@@ -752,7 +752,12 @@ class BomaSphereApp {
             ${t.unit_number ? `
               <div class="font-bold text-slate-800">${t.unit_number}</div>
               <div class="text-[10px] text-slate-400">${t.property_name}</div>
-            ` : '<span class="text-slate-400 italic">No assigned unit</span>'}
+            ` : `
+              <button onclick="app.openAddLeaseModal(null, ${t.id})" class="px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition inline-flex items-center space-x-1" title="Assign a vacant unit and execute digital lease">
+                <i data-lucide="key" class="w-3 h-3"></i>
+                <span>+ Assign Unit</span>
+              </button>
+            `}
           </td>
           <td class="py-3 px-4 text-[11px] text-slate-600">
             ${t.lease_start ? `${t.lease_start} to ${t.lease_end}` : '<span class="text-slate-400">No active lease</span>'}
@@ -1922,8 +1927,39 @@ class BomaSphereApp {
   // ==========================================
   // TENANT & LEASE MODALS
   // ==========================================
-  openAddTenantModal() {
+  openAddTenantModal(preselectedUnitId = null) {
+    const unitSelect = document.getElementById('tenant-unit-select');
+    if (unitSelect) {
+      const vacantUnits = (this.state.units || []).filter(u => u.status === 'vacant');
+      unitSelect.innerHTML = `
+        <option value="">-- Register Without Lease (Assign Unit Later) --</option>
+        ${vacantUnits.map(u => `
+          <option value="${u.id}" ${preselectedUnitId && Number(preselectedUnitId) === u.id ? 'selected' : ''}>
+            ${u.property_name} - Unit ${u.unit_number} (${this.formatMoney(u.base_rent)}/mo) [Vacant]
+          </option>
+        `).join('')}
+      `;
+    }
+    this.onTenantModalUnitChange();
     this.openModal('modal-add-tenant');
+  }
+
+  onTenantModalUnitChange() {
+    const unitSelect = document.getElementById('tenant-unit-select');
+    const leaseFields = document.getElementById('tenant-lease-fields');
+    const rentInput = document.getElementById('tenant-rent-input');
+    const depositInput = document.getElementById('tenant-deposit-input');
+    const unitId = unitSelect ? unitSelect.value : '';
+
+    if (!unitId) {
+      if (leaseFields) leaseFields.classList.add('hidden');
+      return;
+    }
+
+    const unit = (this.state.units || []).find(u => u.id === Number(unitId));
+    if (leaseFields) leaseFields.classList.remove('hidden');
+    if (unit && rentInput) rentInput.value = unit.base_rent;
+    if (unit && depositInput) depositInput.value = unit.base_rent;
   }
 
   async handleAddTenantSubmit(e) {
@@ -1938,28 +1974,48 @@ class BomaSphereApp {
     const email = document.getElementById('tenant-email-input').value || '';
     const emgName = document.getElementById('tenant-emg-name').value || '';
     const emgPhone = document.getElementById('tenant-emg-phone').value || '';
+    const unitSelect = document.getElementById('tenant-unit-select');
+    const unitId = unitSelect ? unitSelect.value : '';
+    const rentInput = document.getElementById('tenant-rent-input');
+    const depositInput = document.getElementById('tenant-deposit-input');
+
+    const payload = {
+      name, phone, id_number: idNumber, email,
+      emergency_contact_name: emgName, emergency_contact_phone: emgPhone,
+      status: 'active'
+    };
+
+    if (unitId) {
+      payload.unit_id = Number(unitId);
+      payload.monthly_rent = rentInput ? Number(rentInput.value) : undefined;
+      payload.deposit_paid = depositInput ? Number(depositInput.value) : undefined;
+    }
 
     try {
       await this.fetchAPI('/api/tenants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name, phone, id_number: idNumber, email,
-          emergency_contact_name: emgName, emergency_contact_phone: emgPhone,
-          status: 'active'
-        })
+        body: JSON.stringify(payload)
       });
 
       this.closeModal('modal-add-tenant');
-      this.showToast(`Tenant "${name}" registered successfully!`, 'success');
+      if (payload.unit_id) {
+        this.showToast(`Tenant "${name}" registered and lease activated successfully!`, 'success');
+      } else {
+        this.showToast(`Tenant "${name}" registered successfully!`, 'success');
+      }
       await this.refreshAllData();
+      this.renderProperties();
+      this.renderUnits();
       this.renderTenants();
+      this.renderDashboard();
+      if (this.state.currentView === 'leases') this.renderLeaseAgreementsInit();
     } catch (err) {
       console.error(err);
     }
   }
 
-  openAddLeaseModal(preselectedUnitId = null) {
+  openAddLeaseModal(preselectedUnitId = null, preselectedTenantId = null) {
     const unitSelect = document.getElementById('lease-unit-select');
     const tenantSelect = document.getElementById('lease-tenant-select');
     if (!unitSelect || !tenantSelect) return;
@@ -1987,7 +2043,9 @@ class BomaSphereApp {
     `).join('');
 
     tenantSelect.innerHTML = this.state.tenants.map(t => `
-      <option value="${t.id}">${t.name} (${t.phone || 'No phone'})</option>
+      <option value="${t.id}" ${preselectedTenantId && Number(preselectedTenantId) === t.id ? 'selected' : ''}>
+        ${t.name} (${t.phone || 'No phone'}) ${t.unit_number ? '• Leased: ' + t.unit_number : '• Unassigned'}
+      </option>
     `).join('');
 
     const initialUnitId = unitSelect.value;
@@ -2048,8 +2106,10 @@ class BomaSphereApp {
       this.closeModal('modal-create-lease');
       this.showToast('New digital lease executed successfully! Unit marked occupied.', 'success');
       await this.refreshAllData();
+      this.renderProperties();
       this.renderUnits();
       this.renderTenants();
+      this.renderDashboard();
       if (this.state.currentView === 'leases') this.renderLeaseAgreementsInit();
     } catch (err) {
       console.error(err);
@@ -3170,9 +3230,9 @@ class BomaSphereApp {
 
     // Caretaker financial masking on dashboard
     if (isCaretaker) {
-      const collectionsEl = document.getElementById('dash-total-collections');
-      const billedEl = document.getElementById('dash-gross-billed');
-      const arrearsEl = document.getElementById('dash-aging-arrears');
+      const collectionsEl = document.getElementById('dash-total-collected');
+      const billedEl = document.getElementById('dash-total-billed');
+      const arrearsEl = document.getElementById('dash-total-arrears');
       if (collectionsEl) collectionsEl.textContent = '🔒 Restricted';
       if (billedEl) billedEl.textContent = '🔒 Restricted';
       if (arrearsEl) arrearsEl.textContent = '🔒 Restricted';
@@ -4422,6 +4482,15 @@ class BomaSphereApp {
         return `<option value="${a.id}" ${a.id == amenityId ? 'selected' : ''}>${this.escapeHtml(a.name)} (${rate > 0 ? 'KES ' + rate.toLocaleString() + '/hr' : 'Free / Included'})</option>`;
       }).join('');
     }
+    const tenantSel = document.getElementById('book-amenity-tenant-id');
+    if (tenantSel) {
+      tenantSel.innerHTML = (this.state.tenants || []).map(t => `
+        <option value="${t.id}">${this.escapeHtml(t.name)} (${t.unit_number ? t.unit_number + ' - ' + t.property_name : 'No unit assigned'})</option>
+      `).join('');
+      if (this.state.authUser?.tenant_id) {
+        tenantSel.value = this.state.authUser.tenant_id;
+      }
+    }
     const today = new Date().toISOString().substring(0, 10);
     const dateInput = document.getElementById('book-amenity-date');
     if (dateInput) {
@@ -4454,9 +4523,10 @@ class BomaSphereApp {
       return;
     }
 
-    const tenantId = this.state.authUser?.tenant_id || this.state.currentResidentId || 1;
+    const tenantSel = document.getElementById('book-amenity-tenant-id');
+    const tenantId = Number(tenantSel?.value || this.state.authUser?.tenant_id || this.state.currentResidentId || 1);
     const tenant = (this.state.tenants || []).find(t => t.id == tenantId) || (this.state.tenants || [])[0];
-    const unitId = tenant?.unit_id || 1;
+    const unitId = Number(tenant?.unit_id || 1);
 
     try {
       const res = await this.fetchAPI('/api/amenity-bookings', {
@@ -4464,8 +4534,8 @@ class BomaSphereApp {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amenity_id: Number(amenityId),
-          tenant_id: Number(tenantId),
-          unit_id: Number(unitId),
+          tenant_id: tenantId,
+          unit_id: unitId,
           booking_date: bookingDate,
           start_time: startTime,
           duration_hours: durationHours,
@@ -4582,13 +4652,11 @@ class BomaSphereApp {
     if (!lead) return;
     this.openTenantVettingModal();
     setTimeout(() => {
-      const nameInput = document.getElementById('vet-applicant-name');
+      const nameInput = document.getElementById('vet-name');
       const phoneInput = document.getElementById('vet-phone');
-      const emailInput = document.getElementById('vet-email');
       const unitSelect = document.getElementById('vet-unit-select');
       if (nameInput) nameInput.value = lead.prospect_name || '';
       if (phoneInput) phoneInput.value = lead.phone || '';
-      if (emailInput && lead.email) emailInput.value = lead.email;
       if (unitSelect && lead.unit_id) unitSelect.value = lead.unit_id;
     }, 100);
   }
@@ -4596,14 +4664,19 @@ class BomaSphereApp {
   convertLeadToTenant(leadId) {
     const lead = (this.state.viewingLeads || []).find(l => l.id === Number(leadId));
     if (!lead) return;
-    this.openAddTenantModal();
+    this.openAddTenantModal(lead.unit_id);
     setTimeout(() => {
       const nameInput = document.getElementById('tenant-name-input');
       const phoneInput = document.getElementById('tenant-phone-input');
       const emailInput = document.getElementById('tenant-email-input');
+      const unitSelect = document.getElementById('tenant-unit-select');
       if (nameInput) nameInput.value = lead.prospect_name || '';
       if (phoneInput) phoneInput.value = lead.phone || '';
       if (emailInput && lead.email) emailInput.value = lead.email;
+      if (unitSelect && lead.unit_id) {
+        unitSelect.value = lead.unit_id;
+        this.onTenantModalUnitChange();
+      }
     }, 100);
   }
 
