@@ -581,9 +581,9 @@ function seedUsersIfEmpty() {
 
   insertUser.run('Sarah Cherono (Platform Super Admin)', 'admin@bomasphere.co.ke', adminHash, '+254700112233', 'super_admin', null, null, 'token_super_admin', 'active');
   insertUser.run('Patrick Ndegwa (Property Manager)', 'ndegwa@crownpeak.co.ke', mgrHash, '+254711333444', 'property_manager', null, null, 'token_property_manager', 'active');
-  insertUser.run('John Otieno (Site Caretaker)', 'otieno.caretaker@kilimaniheights.ke', ctHash, '+254722556677', 'caretaker', 1, null, 'token_caretaker', 'active');
-  insertUser.run('Dr. Esther Wambui Ndung\'u (Landlord / Investor)', 'esther.ndungu@gmail.com', llHash, '+254733555777', 'landlord', 3, null, 'token_landlord', 'active');
-  insertUser.run('Kariuki James Mwangi (Resident Tenant)', 'james.kariuki@techke.com', tnHash, '+254722889900', 'tenant', 1, 1, 'token_tenant', 'active');
+  insertUser.run('John Otieno (Site Caretaker)', 'otieno.caretaker@kilimaniheights.ke', ctHash, '+254722556677', 'caretaker', null, null, 'token_caretaker', 'active');
+  insertUser.run('Dr. Esther Wambui Ndung\'u (Landlord / Investor)', 'esther.ndungu@gmail.com', llHash, '+254733555777', 'landlord', null, null, 'token_landlord', 'active');
+  insertUser.run('Kariuki James Mwangi (Resident Tenant)', 'james.kariuki@techke.com', tnHash, '+254722889900', 'tenant', null, null, 'token_tenant', 'active');
 
   // Update hashes and tokens to ensure hardened salted credentials
   const updateTokens = db.prepare("UPDATE users SET session_token = ?, password_hash = ? WHERE email = ?");
@@ -790,17 +790,55 @@ function seedNextGenFeatures() {
   }
 }
 
-// Call initSchema and seedDatabase
+function purgeOperationalData() {
+  db.exec(`
+    DELETE FROM amenity_bookings;
+    DELETE FROM estate_amenities;
+    DELETE FROM visitor_passes;
+    DELETE FROM property_inspections;
+    DELETE FROM lease_agreements;
+    DELETE FROM etims_records;
+    DELETE FROM viewing_leads;
+    DELETE FROM tenant_vettings;
+    DELETE FROM maintenance_escrows;
+    DELETE FROM artisan_marketplace;
+    DELETE FROM leak_alerts;
+    DELETE FROM iot_devices;
+    DELETE FROM payments;
+    DELETE FROM invoices;
+    DELETE FROM water_readings;
+    DELETE FROM maintenance_requests;
+    DELETE FROM communications;
+    DELETE FROM expenses;
+    DELETE FROM leases;
+    DELETE FROM units;
+    DELETE FROM tenants;
+    DELETE FROM properties;
+    UPDATE users SET property_id = NULL, tenant_id = NULL;
+    DELETE FROM sqlite_sequence WHERE name NOT IN ('users');
+  `);
+}
+
+// Initialize database schema and ensure RBAC user authentication accounts exist
 initSchema();
-seedDatabase();
 seedUsersIfEmpty();
-seedNextGenFeatures();
+
+if (process.argv.includes('--purge')) {
+  purgeOperationalData();
+  console.log('✅ Operational data purged successfully. All RBAC users preserved.');
+} else if (process.argv.includes('--seed')) {
+  seedDatabase();
+  seedNextGenFeatures();
+  console.log('✅ Database seeded with demo properties, units, tenants, and next-gen records.');
+}
 
 module.exports = {
   db,
   initSchema,
   seedDatabase,
+  seedNextGenFeatures,
   seedUsersIfEmpty,
+  purgeOperationalData,
   hashPassword,
   verifyPassword
 };
