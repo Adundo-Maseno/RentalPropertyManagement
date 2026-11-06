@@ -474,8 +474,13 @@ async function handleRequest(req, res) {
       if (b.unit_id) {
         const unitId = Number(b.unit_id);
         const unit = db.prepare('SELECT u.*, p.name as property_name FROM units u JOIN properties p ON u.property_id = p.id WHERE u.id = ?').get(unitId);
-        if (unit && unit.status === 'vacant') {
-          const monthlyRent = Number(b.monthly_rent || unit.base_rent);
+        if (!unit) {
+          return sendJSON(res, 404, { error: 'Specified unit was not found.' });
+        }
+        if (unit.status !== 'vacant') {
+          return sendJSON(res, 400, { error: `Unit ${unit.unit_number} (${unit.property_name}) is currently marked as ${unit.status}. Only vacant units can be assigned.` });
+        }
+        const monthlyRent = Number(b.monthly_rent || unit.base_rent);
           const depositPaid = Number(b.deposit_paid || monthlyRent);
           const waterDeposit = Number(b.water_deposit || 5000);
 
@@ -555,9 +560,8 @@ async function handleRequest(req, res) {
             tenant_phone: b.phone || ''
           };
         }
-      }
 
-      return sendJSON(res, 201, { success: true, id: tenantId, ...leaseInfo });
+      return sendJSON(res, 201, { success: true, id: tenantId, tenant_id: tenantId, ...leaseInfo });
     }
 
     // 5. Leases

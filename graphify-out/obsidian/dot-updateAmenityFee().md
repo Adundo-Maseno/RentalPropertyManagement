@@ -1,0 +1,19 @@
+---
+source_file: "public/app.js"
+type: "code"
+community: "UI Modal Launchers & Navigation"
+location: "L4631"
+tags:
+  - graphify/code
+  - graphify/EXTRACTED
+  - community/UI_Modal_Launchers__Navigation
+---
+
+# .updateAmenityFee()
+
+## Connections
+- [[dot-formatMoney()]] - `calls` [EXTRACTED]
+- [[dot-openNewAmenityBookingModal()]] - `calls` [EXTRACTED]
+- [[BomaSphereApp]] - `method` [EXTRACTED]
+
+#graphify/code #graphify/EXTRACTED #community/UI_Modal_Launchers__Navigation

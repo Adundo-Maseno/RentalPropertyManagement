@@ -1389,12 +1389,12 @@ class BomaSphereApp {
   }
 
   openMpesaForInvoice(invoiceId) {
-    const inv = this.state.invoices.find(i => i.id === invoiceId);
+    const inv = this.state.invoices.find(i => i.id === Number(invoiceId));
     if (!inv) return;
     this.openMpesaForTenant(inv.tenant_id);
     const invSelect = document.getElementById('mpesa-invoice-select');
     if (invSelect) {
-      invSelect.value = invoiceId;
+      invSelect.value = String(invoiceId);
       document.getElementById('mpesa-amount-input').value = inv.balance;
     }
   }
@@ -2015,6 +2015,7 @@ class BomaSphereApp {
       if (payload.unit_id && res && (res.agreement_id || res.invoice_id)) {
         this.promptMoveInSettlement({
           ...res,
+          tenant_id: res.id || res.tenant_id,
           tenant_name: name,
           tenant_phone: phone,
           unit_id: payload.unit_id
@@ -2058,6 +2059,13 @@ class BomaSphereApp {
         ${t.name} (${t.phone || 'No phone'}) ${t.unit_number ? '• Leased: ' + t.unit_number : '• Unassigned'}
       </option>
     `).join('');
+
+    if (preselectedUnitId) {
+      unitSelect.value = String(preselectedUnitId);
+    }
+    if (preselectedTenantId) {
+      tenantSelect.value = String(preselectedTenantId);
+    }
 
     const initialUnitId = unitSelect.value;
     this.onLeaseUnitSelected(initialUnitId);
@@ -2288,7 +2296,7 @@ class BomaSphereApp {
   promptMoveInSettlement(details) {
     this.currentMoveInDetails = details;
 
-    const tenant = this.state.tenants.find(t => t.id === Number(details.tenant_id)) || {};
+    const tenant = this.state.tenants.find(t => t.id === Number(details.tenant_id || details.id)) || {};
     const unit = this.state.units.find(u => u.id === Number(details.unit_id)) || {};
     const prop = this.state.properties.find(p => p.id === unit.property_id) || {};
 

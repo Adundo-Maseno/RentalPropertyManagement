@@ -4,13 +4,13 @@
  * Cache Version: bomasphere-v2.0.0
  */
 
-const CACHE_NAME = 'bomasphere-cache-v3.1';
+const CACHE_NAME = 'bomasphere-cache-v3.2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/rentals.html',
   '/styles.css',
-  '/app.js?v=3.1',
+  '/app.js?v=3.2',
   '/manifest.json',
   '/favicon.ico',
   '/favicon.svg',

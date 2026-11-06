@@ -1,0 +1,17 @@
+---
+source_file: "server.js"
+type: "code"
+community: "Backend & Database Infrastructure"
+location: "L2"
+tags:
+  - graphify/code
+  - graphify/EXTRACTED
+  - community/Backend__Database_Infrastructure
+---
+
+# fs
+
+## Connections
+- [[server.js]] - `contains` [EXTRACTED]
+
+#graphify/code #graphify/EXTRACTED #community/Backend__Database_Infrastructure

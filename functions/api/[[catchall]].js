@@ -324,6 +324,12 @@ export async function onRequest(context) {
     try { b = await request.json(); } catch (e) { }
     const unitId = Number(b.unit_id || 0);
     const unit = unitId ? DB.units.find(u => u.id === unitId) : null;
+    if (unitId && !unit) {
+      return json({ error: 'Specified unit was not found.' }, 404);
+    }
+    if (unit && unit.status !== 'vacant') {
+      return json({ error: `Unit ${unit.unit_number} (${unit.property_name}) is currently marked as ${unit.status}. Only vacant units can be assigned.` }, 400);
+    }
     if (unit && unit.status === 'vacant') {
       unit.status = 'occupied';
     }
@@ -423,7 +429,7 @@ export async function onRequest(context) {
       };
     }
 
-    return json({ success: true, id: newTenant.id, name: newTenant.name, tenant: newTenant, ...leaseInfo }, 201);
+    return json({ success: true, id: newTenant.id, tenant_id: newTenant.id, name: newTenant.name, tenant: newTenant, ...leaseInfo }, 201);
   }
 
   // Leases

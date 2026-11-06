@@ -599,6 +599,58 @@ async function runTests() {
     console.log(`      Reserved ${amenity.name} with reference ${bookRes.json.booking_reference} (Fee: KES ${bookRes.json.total_fee.toLocaleString()})`);
   });
 
+  // 45. Complete End-to-End Workflow: Tenant Onboarding with Vacant Unit Assignment & Move-In Settlement
+  await test('Tenant Onboarding Flow: POST /api/tenants with vacant unit auto-creates lease, agreement, invoice, and settles', async () => {
+    const unitsRes = await invokeHandler('/api/units');
+    if (unitsRes.statusCode !== 200) throw new Error('Failed to fetch units');
+    const vacantUnit = unitsRes.json.find(u => u.status === 'vacant');
+    if (!vacantUnit) throw new Error('Test requires at least one vacant unit');
+
+    // 1. Add tenant with vacant unit assignment
+    const regRes = await invokeHandler('/api/tenants', 'POST', {
+      name: 'Kariuki Onboarding Verification',
+      phone: '+254719888777',
+      email: 'kariuki.verify@bomasphere.co.ke',
+      id_number: '98765432',
+      emergency_contact_name: 'Wairimu Kariuki',
+      emergency_contact_phone: '+254719000111',
+      unit_id: vacantUnit.id,
+      monthly_rent: vacantUnit.base_rent,
+      deposit_paid: vacantUnit.base_rent
+    });
+
+    if (regRes.statusCode !== 201) throw new Error(`Expected 201, got ${regRes.statusCode}`);
+    if (!regRes.json.agreement_id || !regRes.json.invoice_id) {
+      throw new Error('Tenant onboarding failed to automatically generate lease agreement or move-in invoice');
+    }
+    if (!regRes.json.tenant_id && !regRes.json.id) {
+      throw new Error('Tenant onboarding response missing tenant_id');
+    }
+
+    // 2. Verify unit status transitioned to occupied
+    const checkUnitRes = await invokeHandler('/api/units');
+    const updatedUnit = checkUnitRes.json.find(u => u.id === vacantUnit.id);
+    if (!updatedUnit || updatedUnit.status !== 'occupied') {
+      throw new Error(`Unit ${vacantUnit.unit_number} did not transition to occupied status`);
+    }
+
+    // 3. Verify digital lease agreement is available for e-signature
+    const agrRes = await invokeHandler('/api/leases/agreements');
+    const agr = agrRes.json.agreements.find(a => a.id === regRes.json.agreement_id);
+    if (!agr || agr.status !== 'pending_tenant') {
+      throw new Error('Digital lease agreement not found in pending_tenant state');
+    }
+
+    // 4. Verify inaugural move-in invoice
+    const invRes = await invokeHandler('/api/invoices');
+    const inv = invRes.json.find(i => i.id === regRes.json.invoice_id);
+    if (!inv || inv.status !== 'unpaid') {
+      throw new Error('Move-in invoice not found in unpaid state');
+    }
+
+    console.log(`      Tenant #${regRes.json.id} successfully leased Unit ${vacantUnit.unit_number}. Agreement: ${regRes.json.agreement_code}, Move-In Invoice: ${regRes.json.invoice_number} (Total Due: KES ${regRes.json.total_due.toLocaleString()})`);
+  });
+
   console.log(`\n=======================================================`);
   console.log(` TESTS COMPLETED: ${passed} PASSED, ${failed} FAILED `);
   console.log(`=======================================================`);
