@@ -146,17 +146,37 @@ class BomaSphereApp {
     }
   }
 
+  getRolePermissions(role) {
+    const permissions = {
+      super_admin: [
+        'dashboard', 'properties', 'tenants', 'leases', 'inspections',
+        'visitor-passes', 'amenities', 'invoices', 'payments', 'water',
+        'landlord', 'expenses', 'maintenance', 'communications', 'higgsfield', 'users'
+      ],
+      property_manager: [
+        'dashboard', 'properties', 'tenants', 'leases', 'inspections',
+        'visitor-passes', 'amenities', 'invoices', 'payments', 'water',
+        'landlord', 'expenses', 'maintenance', 'communications', 'higgsfield'
+      ],
+      caretaker: [
+        'dashboard', 'properties', 'water', 'maintenance', 'communications',
+        'inspections', 'visitor-passes'
+      ],
+      landlord: [
+        'dashboard', 'properties', 'landlord', 'maintenance', 'expenses',
+        'higgsfield'
+      ],
+      tenant: [
+        'tenant-portal', 'visitor-passes', 'amenities'
+      ]
+    };
+    return permissions[role] || permissions.property_manager;
+  }
+
   switchView(viewName) {
     const userRole = this.state.authUser?.role || 'property_manager';
-    const permissions = {
-      super_admin: ['dashboard', 'properties', 'tenants', 'invoices', 'payments', 'water', 'maintenance', 'communications', 'landlord', 'expenses', 'higgsfield', 'users', 'tenant-portal', 'leases', 'inspections', 'visitor-passes', 'amenities'],
-      property_manager: ['dashboard', 'properties', 'tenants', 'invoices', 'payments', 'water', 'maintenance', 'communications', 'landlord', 'expenses', 'higgsfield', 'users', 'tenant-portal', 'leases', 'inspections', 'visitor-passes', 'amenities'],
-      caretaker: ['dashboard', 'properties', 'water', 'maintenance', 'communications', 'inspections', 'visitor-passes'],
-      landlord: ['dashboard', 'properties', 'landlord', 'maintenance', 'expenses', 'higgsfield'],
-      tenant: ['tenant-portal', 'visitor-passes', 'amenities']
-    };
+    const allowed = this.getRolePermissions(userRole);
 
-    const allowed = permissions[userRole] || permissions.property_manager;
     if (!allowed.includes(viewName)) {
       const banner = document.getElementById('rbac-restriction-banner');
       const msgEl = document.getElementById('rbac-restriction-message');
@@ -1190,46 +1210,113 @@ class BomaSphereApp {
 
   // 11. Tenant Self-Service Portal View
   renderTenantPortal() {
-    const isTenantRole = this.state.authUser?.role === 'tenant';
+    const authUser = this.state.authUser;
+    const isTenantRole = authUser?.role === 'tenant';
     const switchContainer = document.getElementById('resident-switch-container');
     const verifiedBadge = document.getElementById('resident-verified-badge');
 
+    let currentTenant = null;
     if (isTenantRole) {
       if (switchContainer) switchContainer.classList.add('hidden');
       if (verifiedBadge) verifiedBadge.classList.remove('hidden');
-      if (this.state.authUser.tenant_id) {
-        this.state.currentResidentId = this.state.authUser.tenant_id;
+
+      // Identify active tenant by tenant_id, email, or phone
+      if (authUser?.tenant_id) {
+        currentTenant = (this.state.tenants || []).find(t => t.id === Number(authUser.tenant_id));
+      }
+      if (!currentTenant && authUser?.email) {
+        currentTenant = (this.state.tenants || []).find(t => t.email && t.email.toLowerCase() === authUser.email.toLowerCase());
+      }
+      if (!currentTenant && authUser?.phone) {
+        const cleanUserPhone = String(authUser.phone).replace(/[^0-9]/g, '');
+        currentTenant = (this.state.tenants || []).find(t => t.phone && String(t.phone).replace(/[^0-9]/g, '') === cleanUserPhone);
+      }
+      if (currentTenant) {
+        this.state.currentResidentId = currentTenant.id;
       }
     } else {
       if (switchContainer) switchContainer.classList.remove('hidden');
       if (verifiedBadge) verifiedBadge.classList.add('hidden');
+
+      const tenantSelect = document.getElementById('resident-switch-select');
+      if (tenantSelect) {
+        const optionsHtml = (this.state.tenants || []).map(t => `
+          <option value="${t.id}">${this.escapeHtml(t.name)} (Unit ${this.escapeHtml(t.unit_number || 'N/A')})</option>
+        `).join('');
+        tenantSelect.innerHTML = optionsHtml || '<option value="">No tenants registered</option>';
+        if (this.state.currentResidentId) {
+          tenantSelect.value = String(this.state.currentResidentId);
+        }
+      }
+
+      currentTenant = (this.state.tenants || []).find(t => t.id === Number(this.state.currentResidentId)) || (this.state.tenants || [])[0];
     }
 
-    const tenantSelect = document.getElementById('resident-switch-select');
-    if (tenantSelect && tenantSelect.children.length === 0) {
-      this.state.tenants.forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t.id;
-        opt.textContent = `${t.name} (Unit ${t.unit_number || 'A101'})`;
-        tenantSelect.appendChild(opt);
-      });
-      tenantSelect.value = this.state.currentResidentId;
-    }
-
-    const currentTenant = this.state.tenants.find(t => t.id === Number(this.state.currentResidentId)) || this.state.tenants[0];
-    if (!currentTenant) return;
-
-    document.getElementById('resident-portal-name').textContent = `Welcome back, ${currentTenant.name}!`;
-    const balance = Number(currentTenant.total_balance || 0);
+    const nameEl = document.getElementById('resident-portal-name');
+    const unitEl = document.getElementById('resident-portal-unit');
     const balanceEl = document.getElementById('resident-portal-balance');
-    balanceEl.textContent = this.formatMoney(balance);
-    balanceEl.className = balance > 0 ? 'text-2xl font-extrabold text-rose-600 mt-1' : 'text-2xl font-extrabold text-emerald-600 mt-1';
-
-    document.getElementById('resident-portal-rent').textContent = this.formatMoney(currentTenant.monthly_rent || 65000);
-
-    // Resident Invoices
-    const tenantInvoices = this.state.invoices.filter(i => i.tenant_id === currentTenant.id);
+    const balanceStatusEl = document.getElementById('resident-portal-balance-status');
+    const rentEl = document.getElementById('resident-portal-rent');
     const invList = document.getElementById('resident-invoices-list');
+    const payList = document.getElementById('resident-payments-list');
+
+    // Fresh / unlinked state handling (e.g. fresh database or tenant without assigned unit)
+    if (!currentTenant) {
+      const displayName = authUser?.name ? authUser.name.split(' (')[0] : 'Resident';
+      if (nameEl) nameEl.textContent = `Welcome, ${displayName}!`;
+      if (unitEl) unitEl.textContent = 'No Active Tenancy Linked • Contact Property Management';
+      if (balanceEl) {
+        balanceEl.textContent = this.formatMoney(0);
+        balanceEl.className = 'text-2xl font-extrabold text-emerald-600 mt-1';
+      }
+      if (balanceStatusEl) {
+        balanceStatusEl.innerHTML = '<span class="inline-flex items-center text-xs font-semibold text-slate-500"><i data-lucide="info" class="w-3.5 h-3.5 mr-1 text-slate-400"></i> No billing record on file</span>';
+      }
+      if (rentEl) rentEl.textContent = this.formatMoney(0);
+      if (invList) invList.innerHTML = '<p class="text-xs text-slate-400 py-3">No invoices on record.</p>';
+      if (payList) payList.innerHTML = '<p class="text-xs text-slate-400 py-3">No payments on record yet.</p>';
+      if (window.lucide) lucide.createIcons();
+      return;
+    }
+
+    // Dynamic Binding to Live Tenant Data
+    if (nameEl) nameEl.textContent = `Welcome back, ${currentTenant.name}!`;
+
+    // Active Lease and Unit details
+    const activeLease = (this.state.leaseAgreements || []).find(l => l.tenant_id === currentTenant.id && l.status === 'active')
+      || (this.state.leases || []).find(l => l.tenant_id === currentTenant.id && l.status === 'active');
+    const unitId = currentTenant.unit_id || (activeLease ? activeLease.unit_id : null);
+    const unit = (this.state.units || []).find(u => u.id === unitId);
+    const prop = unit ? (this.state.properties || []).find(p => p.id === unit.property_id) : ((this.state.properties || []).find(p => p.id === currentTenant.property_id) || null);
+
+    const unitNumber = currentTenant.unit_number || (unit ? unit.unit_number : (activeLease ? activeLease.unit_number : 'Assigned Unit'));
+    const propName = prop ? prop.name : (currentTenant.property_name || 'BomaSphere Managed Estate');
+    if (unitEl) unitEl.textContent = `Unit ${unitNumber} • ${propName}`;
+
+    // Tenant Invoices & Unpaid Balance
+    const tenantInvoices = (this.state.invoices || []).filter(i => i.tenant_id === currentTenant.id);
+    const calculatedArrears = tenantInvoices
+      .filter(i => i.status === 'pending' || i.status === 'overdue' || i.status === 'partial')
+      .reduce((sum, i) => sum + Math.max(0, Number(i.balance !== undefined ? i.balance : (Number(i.total_amount || 0) - Number(i.amount_paid || 0)))), 0);
+    const balance = currentTenant.total_balance !== undefined ? Number(currentTenant.total_balance) : calculatedArrears;
+
+    if (balanceEl) {
+      balanceEl.textContent = this.formatMoney(balance);
+      balanceEl.className = balance > 0 ? 'text-2xl font-extrabold text-rose-600 mt-1' : 'text-2xl font-extrabold text-emerald-600 mt-1';
+    }
+
+    if (balanceStatusEl) {
+      if (balance > 0) {
+        balanceStatusEl.innerHTML = `<span class="inline-flex items-center text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full"><i data-lucide="alert-circle" class="w-3.5 h-3.5 mr-1"></i> Outstanding Balance Due</span>`;
+      } else {
+        balanceStatusEl.innerHTML = `<span class="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full"><i data-lucide="check-circle-2" class="w-3.5 h-3.5 mr-1"></i> Account in Good Standing</span>`;
+      }
+    }
+
+    const rentAmount = Number(currentTenant.monthly_rent || (activeLease ? activeLease.monthly_rent : (unit ? unit.rent_amount : 0)));
+    if (rentEl) rentEl.textContent = this.formatMoney(rentAmount);
+
+    // Resident Invoices List
     if (invList) {
       if (tenantInvoices.length === 0) {
         invList.innerHTML = '<p class="text-xs text-slate-400 py-3">No invoices on record.</p>';
@@ -1237,8 +1324,8 @@ class BomaSphereApp {
         invList.innerHTML = tenantInvoices.map(i => `
           <div class="py-3 flex items-center justify-between text-xs">
             <div>
-              <p class="font-bold text-slate-800">${i.month} Rent & Utility Invoice</p>
-              <p class="text-[11px] text-slate-400 font-mono">${i.invoice_number} &bull; Due: ${i.due_date}</p>
+              <p class="font-bold text-slate-800">${this.escapeHtml(i.month || '')} Rent &amp; Utility Invoice</p>
+              <p class="text-[11px] text-slate-400 font-mono">${this.escapeHtml(i.invoice_number || '')} &bull; Due: ${this.escapeHtml(i.due_date || '')}</p>
             </div>
             <div class="text-right">
               <p class="font-bold text-slate-800">${this.formatMoney(i.total_amount)}</p>
@@ -1249,9 +1336,8 @@ class BomaSphereApp {
       }
     }
 
-    // Resident Payments
-    const tenantPayments = this.state.payments.filter(p => p.tenant_id === currentTenant.id);
-    const payList = document.getElementById('resident-payments-list');
+    // Resident Payments List
+    const tenantPayments = (this.state.payments || []).filter(p => p.tenant_id === currentTenant.id);
     if (payList) {
       if (tenantPayments.length === 0) {
         payList.innerHTML = '<p class="text-xs text-slate-400 py-3">No payments on record yet.</p>';
@@ -1259,8 +1345,8 @@ class BomaSphereApp {
         payList.innerHTML = tenantPayments.map(p => `
           <div class="py-3 flex items-center justify-between text-xs">
             <div>
-              <p class="font-bold text-slate-800">${p.payment_method} &bull; <span class="font-mono text-emerald-600">${p.reference_code}</span></p>
-              <p class="text-[11px] text-slate-400">${p.payment_date}</p>
+              <p class="font-bold text-slate-800">${this.escapeHtml(p.payment_method || 'M-Pesa')} &bull; <span class="font-mono text-emerald-600">${this.escapeHtml(p.reference_code || '')}</span></p>
+              <p class="text-[11px] text-slate-400">${this.escapeHtml(p.payment_date || '')}</p>
             </div>
             <div class="text-right">
               <p class="font-extrabold text-emerald-600">+${this.formatMoney(p.amount)}</p>
@@ -1270,6 +1356,8 @@ class BomaSphereApp {
         `).join('');
       }
     }
+
+    if (window.lucide) lucide.createIcons();
   }
 
   switchResident(tenantId) {
@@ -1419,12 +1507,32 @@ class BomaSphereApp {
 
   // Open M-Pesa STK Push Modal
   openMpesaModal() {
+    const isTenantRole = this.state.authUser?.role === 'tenant';
     const select = document.getElementById('mpesa-tenant-select');
-    select.innerHTML = '<option value="">-- Choose Tenant --</option>' + this.state.tenants.map(t => `
-      <option value="${t.id}" data-phone="${t.phone}">${t.name} (Unit ${t.unit_number || 'A101'})</option>
-    `).join('');
+    if (select) {
+      select.innerHTML = '<option value="">-- Choose Tenant --</option>' + (this.state.tenants || []).map(t => `
+        <option value="${t.id}" data-phone="${t.phone}">${this.escapeHtml(t.name)} (Unit ${this.escapeHtml(t.unit_number || 'N/A')})</option>
+      `).join('');
+    }
 
     this.openModal('modal-mpesa');
+
+    if (isTenantRole) {
+      let residentTenant = null;
+      if (this.state.authUser.tenant_id) {
+        residentTenant = (this.state.tenants || []).find(t => t.id === Number(this.state.authUser.tenant_id));
+      }
+      if (!residentTenant && this.state.authUser.email) {
+        residentTenant = (this.state.tenants || []).find(t => t.email && t.email.toLowerCase() === this.state.authUser.email.toLowerCase());
+      }
+      if (!residentTenant && this.state.currentResidentId) {
+        residentTenant = (this.state.tenants || []).find(t => t.id === Number(this.state.currentResidentId));
+      }
+      if (residentTenant && select) {
+        select.value = String(residentTenant.id);
+        this.onMpesaTenantChange(residentTenant.id);
+      }
+    }
   }
 
   openMpesaForTenant(tenantId) {
@@ -1457,7 +1565,7 @@ class BomaSphereApp {
 
     if (invs.length === 0) {
       invSelect.innerHTML = '<option value="">No outstanding balance (General credit)</option>';
-      document.getElementById('mpesa-amount-input').value = tenant.monthly_rent || 65000;
+      document.getElementById('mpesa-amount-input').value = tenant.monthly_rent || 0;
     } else {
       invSelect.innerHTML = invs.map(i => `
         <option value="${i.id}" data-bal="${i.balance}">${i.invoice_number} (${i.month}) - Balance: KES ${Number(i.balance).toLocaleString()}</option>
@@ -2430,7 +2538,7 @@ class BomaSphereApp {
     const invSelect = document.getElementById('pay-manual-invoice');
     if (invs.length === 0) {
       invSelect.innerHTML = '<option value="">No pending invoice (General account credit)</option>';
-      document.getElementById('pay-manual-amount').value = tenant.monthly_rent || 65000;
+      document.getElementById('pay-manual-amount').value = tenant.monthly_rent || 0;
     } else {
       invSelect.innerHTML = invs.map(i => `
         <option value="${i.id}" data-bal="${i.balance}">${i.invoice_number} - Balance: KES ${Number(i.balance).toLocaleString()}</option>
@@ -3334,15 +3442,7 @@ class BomaSphereApp {
     if (mobileRole) mobileRole.textContent = formattedRole;
 
     // Role-based Navigation Enforcement
-    const permissions = {
-      super_admin: ['dashboard', 'properties', 'tenants', 'invoices', 'payments', 'water', 'maintenance', 'communications', 'landlord', 'expenses', 'higgsfield', 'users', 'tenant-portal', 'leases', 'inspections', 'visitor-passes', 'amenities'],
-      property_manager: ['dashboard', 'properties', 'tenants', 'invoices', 'payments', 'water', 'maintenance', 'communications', 'landlord', 'expenses', 'higgsfield', 'users', 'tenant-portal', 'leases', 'inspections', 'visitor-passes', 'amenities'],
-      caretaker: ['dashboard', 'properties', 'water', 'maintenance', 'communications', 'inspections', 'visitor-passes'],
-      landlord: ['dashboard', 'properties', 'landlord', 'maintenance', 'expenses', 'higgsfield'],
-      tenant: ['tenant-portal', 'visitor-passes', 'amenities']
-    };
-
-    const allowed = permissions[user.role] || permissions.property_manager;
+    const allowed = this.getRolePermissions(user.role);
 
     document.querySelectorAll('.nav-link').forEach(link => {
       const view = link.dataset.view;
@@ -3352,6 +3452,26 @@ class BomaSphereApp {
         link.style.display = 'none';
       }
     });
+
+    // Hide sidebar section headers if all their contained links are hidden
+    const nav = document.querySelector('nav.overflow-y-auto');
+    if (nav) {
+      const sectionTitles = nav.querySelectorAll('.nav-section-title');
+      sectionTitles.forEach(title => {
+        let sibling = title.nextElementSibling;
+        let hasVisibleLink = false;
+        while (sibling && !sibling.classList.contains('nav-section-title')) {
+          if (sibling.classList.contains('nav-link')) {
+            if (sibling.style.display !== 'none') {
+              hasVisibleLink = true;
+              break;
+            }
+          }
+          sibling = sibling.nextElementSibling;
+        }
+        title.style.display = hasVisibleLink ? '' : 'none';
+      });
+    }
 
     // Enforce mobile bottom navigation tabs
     document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
@@ -3377,6 +3497,8 @@ class BomaSphereApp {
     const isCaretaker = role === 'caretaker';
     const isTenant = role === 'tenant';
     const isLandlord = role === 'landlord';
+    const isPropertyManager = role === 'property_manager';
+    const isSuperAdmin = role === 'super_admin';
 
     document.querySelectorAll('[data-rbac]').forEach(el => {
       const rbacType = el.getAttribute('data-rbac');
@@ -3384,7 +3506,7 @@ class BomaSphereApp {
         el.style.display = 'none';
       } else if (rbacType === 'invoicing' && (isCaretaker || isTenant || isLandlord)) {
         el.style.display = 'none';
-      } else if (rbacType === 'admin' && (isCaretaker || isTenant || isLandlord)) {
+      } else if (rbacType === 'admin' && !isSuperAdmin) {
         el.style.display = 'none';
       } else if (rbacType === 'expense' && (isCaretaker || isTenant)) {
         el.style.display = 'none';
@@ -4256,7 +4378,7 @@ class BomaSphereApp {
     const unit = (this.state.units || []).find(u => u.id === selectedUnitId);
     const lease = (this.state.leaseAgreements || []).find(l => l.unit_id === selectedUnitId && l.status !== 'terminated') 
       || (this.state.leases || []).find(l => l.unit_id === selectedUnitId && l.status === 'active');
-    const depositHeld = lease ? (lease.deposit_amount || lease.deposit_paid || lease.rent_amount || (unit ? unit.base_rent : 65000)) : (unit ? unit.base_rent : 65000);
+    const depositHeld = lease ? (lease.deposit_amount || lease.deposit_paid || lease.rent_amount || (unit ? (unit.base_rent || unit.rent_amount || 0) : 0)) : (unit ? (unit.base_rent || unit.rent_amount || 0) : 0);
     const unpaidInvoices = (this.state.invoices || []).filter(i => (i.unit_id === selectedUnitId || (lease && i.tenant_id === lease.tenant_id)) && Number(i.balance) > 0);
     const unpaidArrears = unpaidInvoices.reduce((sum, inv) => sum + Number(inv.balance || 0), 0);
     const netRefund = Math.max(0, depositHeld - totalDamages - unpaidArrears);
@@ -4289,7 +4411,7 @@ class BomaSphereApp {
     const lease = (this.state.leaseAgreements || []).find(l => l.unit_id === selectedUnitId && l.status !== 'terminated') 
       || (this.state.leases || []).find(l => l.unit_id === selectedUnitId && l.status === 'active');
     const tenantId = lease ? lease.tenant_id : ((this.state.tenants || []).find(t => t.unit_id === selectedUnitId)?.id || 1);
-    const depositHeld = lease ? (lease.deposit_amount || lease.deposit_paid || lease.rent_amount || (unit ? unit.base_rent : 65000)) : (unit ? unit.base_rent : 65000);
+    const depositHeld = lease ? (lease.deposit_amount || lease.deposit_paid || lease.rent_amount || (unit ? (unit.base_rent || unit.rent_amount || 0) : 0)) : (unit ? (unit.base_rent || unit.rent_amount || 0) : 0);
     const unpaidInvoices = (this.state.invoices || []).filter(i => (i.unit_id === selectedUnitId || (lease && i.tenant_id === lease.tenant_id)) && Number(i.balance) > 0);
     const arrears = unpaidInvoices.reduce((sum, inv) => sum + Number(inv.balance || 0), 0);
 
