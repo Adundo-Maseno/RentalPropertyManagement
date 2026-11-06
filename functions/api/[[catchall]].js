@@ -3,175 +3,36 @@
  * Implements full RESTful API for BomaSphere Property Management System at the Global Edge
  */
 
-// Edge In-Memory Database
+// Edge In-Memory Database (Fallback when Cloudflare D1 is not bound)
 const DB = {
-  properties: [
-    { id: 1, name: "Kilimani Royal Heights", property_type: "Residential Apartments", address: "Argwings Kodhek Rd, Kilimani", city: "Nairobi", landlord_name: "Maziwa Investment Group", landlord_phone: "+254722100200", landlord_email: "finance@maziwa.co.ke", management_fee_pct: 8.5, paybill_number: "522522 / Acc: KRH-01", bank_name: "KCB Bank", bank_account: "1189452300" },
-    { id: 2, name: "Westlands Executive Suites", property_type: "Mixed Commercial & Residential", address: "Mpaka Road, Westlands", city: "Nairobi", landlord_name: "Crown Peak Holdings Ltd", landlord_phone: "+254711333444", landlord_email: "properties@crownpeak.co.ke", management_fee_pct: 10.0, paybill_number: "600100 / Acc: WES-99", bank_name: "Equity Bank", bank_account: "0450293847291" },
-    { id: 3, name: "Riverside Green Court", property_type: "Residential Townhouses", address: "Riverside Drive", city: "Nairobi", landlord_name: "Dr. Esther Wambui Ndung'u", landlord_phone: "+254733555777", landlord_email: "esther.ndungu@gmail.com", management_fee_pct: 7.5, paybill_number: "247247 / Acc: RGC-12", bank_name: "Co-operative Bank", bank_account: "01129384756200" },
-    { id: 4, name: "Nyali Ocean Breeze Villas", property_type: "Luxury Holiday & Long-let Villas", address: "Links Road, Nyali", city: "Mombasa", landlord_name: "Sheikh Omar Al-Harthy", landlord_phone: "+254720999888", landlord_email: "omar.alharthy@coastinvest.com", management_fee_pct: 10.0, paybill_number: "522522 / Acc: NOB-04", bank_name: "NCBA Bank", bank_account: "1004829103" }
-  ],
-
-  units: [
-    { id: 1, property_id: 1, unit_number: "A101", floor: "1st Floor", unit_type: "2-Bedroom Master Ensuite", base_rent: 65000, service_charge: 3500, garbage_fee: 500, status: "occupied", meter_number: "WM-KIL-101", property_name: "Kilimani Royal Heights" },
-    { id: 2, property_id: 1, unit_number: "A102", floor: "1st Floor", unit_type: "2-Bedroom Master Ensuite", base_rent: 65000, service_charge: 3500, garbage_fee: 500, status: "occupied", meter_number: "WM-KIL-102", property_name: "Kilimani Royal Heights" },
-    { id: 3, property_id: 1, unit_number: "A201", floor: "2nd Floor", unit_type: "3-Bedroom with DSQ", base_rent: 85000, service_charge: 4500, garbage_fee: 500, status: "occupied", meter_number: "WM-KIL-201", property_name: "Kilimani Royal Heights" },
-    { id: 4, property_id: 1, unit_number: "A202", floor: "2nd Floor", unit_type: "3-Bedroom with DSQ", base_rent: 85000, service_charge: 4500, garbage_fee: 500, status: "vacant", meter_number: "WM-KIL-202", property_name: "Kilimani Royal Heights" },
-    { id: 5, property_id: 1, unit_number: "Penthouse 1", floor: "Top Floor", unit_type: "4-Bedroom Luxury Penthouse", base_rent: 140000, service_charge: 6000, garbage_fee: 750, status: "occupied", meter_number: "WM-KIL-PH1", property_name: "Kilimani Royal Heights" },
-    { id: 6, property_id: 2, unit_number: "Suite 101", floor: "1st Floor", unit_type: "Commercial Office Space (850 sqft)", base_rent: 95000, service_charge: 12000, garbage_fee: 1000, status: "occupied", meter_number: "WM-WES-101", property_name: "Westlands Executive Suites" },
-    { id: 7, property_id: 2, unit_number: "Suite 102", floor: "1st Floor", unit_type: "Commercial Office Space (650 sqft)", base_rent: 75000, service_charge: 8500, garbage_fee: 1000, status: "vacant", meter_number: "WM-WES-102", property_name: "Westlands Executive Suites" },
-    { id: 8, property_id: 2, unit_number: "Res B3", floor: "3rd Floor", unit_type: "1-Bedroom Executive Serviced", base_rent: 55000, service_charge: 4000, garbage_fee: 500, status: "occupied", meter_number: "WM-WES-B3", property_name: "Westlands Executive Suites" },
-    { id: 9, property_id: 2, unit_number: "Res B4", floor: "3rd Floor", unit_type: "Studio Loft Apartment", base_rent: 42000, service_charge: 3000, garbage_fee: 500, status: "maintenance", meter_number: "WM-WES-B4", property_name: "Westlands Executive Suites" },
-    { id: 10, property_id: 3, unit_number: "Villa 4", floor: "Ground + 1", unit_type: "4-Bedroom Townhouse with Garden", base_rent: 180000, service_charge: 7500, garbage_fee: 1000, status: "occupied", meter_number: "WM-RIV-04", property_name: "Riverside Green Court" },
-    { id: 11, property_id: 3, unit_number: "Villa 7", floor: "Ground + 1", unit_type: "4-Bedroom Townhouse with Garden", base_rent: 180000, service_charge: 7500, garbage_fee: 1000, status: "vacant", meter_number: "WM-RIV-07", property_name: "Riverside Green Court" },
-    { id: 12, property_id: 4, unit_number: "Villa Palms", floor: "Ground + 1", unit_type: "3-Bedroom Beachfront Villa", base_rent: 120000, service_charge: 5000, garbage_fee: 800, status: "occupied", meter_number: "WM-NYA-01", property_name: "Nyali Ocean Breeze Villas" }
-  ],
-
-  tenants: [
-    { id: 1, name: "Kariuki James Mwangi", phone: "+254722889900", email: "james.kariuki@techke.com", id_number: "28945612", emergency_contact_name: "Grace Mwangi (Wife)", emergency_contact_phone: "+254721445566", status: "active", unit_id: 1, unit_number: "A101", property_name: "Kilimani Royal Heights", balance: 0 },
-    { id: 2, name: "Amina Hassan Mohamed", phone: "+254710123456", email: "amina.hassan@innovate.co.ke", id_number: "31098452", emergency_contact_name: "Farah Mohamed (Brother)", emergency_contact_phone: "+254734998877", status: "active", unit_id: 2, unit_number: "A102", property_name: "Kilimani Royal Heights", balance: 31012.5 },
-    { id: 3, name: "Brian Omondi Otieno", phone: "+254798654321", email: "brian.omondi@consultancy.org", id_number: "26781290", emergency_contact_name: "Brenda Otieno (Sister)", emergency_contact_phone: "+254712334455", status: "active", unit_id: 3, unit_number: "A201", property_name: "Kilimani Royal Heights", balance: 96087.5 },
-    { id: 4, name: "Nexus Law Advocates LLP", phone: "+254700554433", email: "admin@nexuslaw.co.ke", id_number: "CPR/2019/94832", emergency_contact_name: "Senior Partner K. Mutua", emergency_contact_phone: "+254722998811", status: "active", unit_id: 6, unit_number: "Suite 101", property_name: "Westlands Executive Suites", balance: 110100 },
-    { id: 5, name: "David Kimani Ngugi", phone: "+254725332211", email: "david.kimani@safari.com", id_number: "25890143", emergency_contact_name: "Beatrice Ngugi (Mother)", emergency_contact_phone: "+254722114477", status: "active", unit_id: 8, unit_number: "Res B3", property_name: "Westlands Executive Suites", balance: 0 },
-    { id: 6, name: "Sophie Van Der Beek", phone: "+254746112233", email: "sophie.vdb@unep.org", id_number: "PASSPORT-NL983214", emergency_contact_name: "Dirk Van Der Beek", emergency_contact_phone: "+31612345678", status: "active", unit_id: 5, unit_number: "Penthouse 1", property_name: "Kilimani Royal Heights", balance: 0 },
-    { id: 7, name: "Capt. Salim Bwanaheri", phone: "+254720448833", email: "salim.bwanaheri@kpa.co.ke", id_number: "24119830", emergency_contact_name: "Asha Salim (Wife)", emergency_contact_phone: "+254733221100", status: "active", unit_id: 12, unit_number: "Villa Palms", property_name: "Nyali Ocean Breeze Villas", balance: 0 }
-  ],
-
-  invoices: [
-    { id: 1, invoice_number: "INV-202611-001", lease_id: 1, tenant_id: 1, unit_id: 1, month: "2026-11", issue_date: "2026-11-01", due_date: "2026-11-05", rent_amount: 65000, water_amount: 2310, garbage_amount: 500, service_charge: 3500, late_fee: 0, other_charges: 0, total_amount: 71310, amount_paid: 71310, balance: 0, status: "paid", notes: "Automated monthly billing for Nov 2026", tenant_name: "Kariuki James Mwangi", tenant_phone: "+254722889900", unit_number: "A101", property_name: "Kilimani Royal Heights" },
-    { id: 2, invoice_number: "INV-202611-002", lease_id: 2, tenant_id: 2, unit_id: 2, month: "2026-11", issue_date: "2026-11-01", due_date: "2026-11-05", rent_amount: 65000, water_amount: 2012.5, garbage_amount: 500, service_charge: 3500, late_fee: 0, other_charges: 0, total_amount: 71012.5, amount_paid: 40000, balance: 31012.5, status: "partially_paid", notes: "Partial payment received", tenant_name: "Amina Hassan Mohamed", tenant_phone: "+254710123456", unit_number: "A102", property_name: "Kilimani Royal Heights" },
-    { id: 3, invoice_number: "INV-202611-003", lease_id: 3, tenant_id: 3, unit_id: 3, month: "2026-11", issue_date: "2026-11-01", due_date: "2026-11-05", rent_amount: 85000, water_amount: 3587.5, garbage_amount: 500, service_charge: 4500, late_fee: 2500, other_charges: 0, total_amount: 96087.5, amount_paid: 0, balance: 96087.5, status: "overdue", notes: "Late fee applied", tenant_name: "Brian Omondi Otieno", tenant_phone: "+254798654321", unit_number: "A201", property_name: "Kilimani Royal Heights" },
-    { id: 4, invoice_number: "INV-202611-004", lease_id: 4, tenant_id: 6, unit_id: 5, month: "2026-11", issue_date: "2026-11-01", due_date: "2026-11-05", rent_amount: 140000, water_amount: 3937.5, garbage_amount: 750, service_charge: 6000, late_fee: 0, other_charges: 0, total_amount: 150687.5, amount_paid: 150687.5, balance: 0, status: "paid", notes: "NCBA Wire Transfer", tenant_name: "Sophie Van Der Beek", tenant_phone: "+254746112233", unit_number: "Penthouse 1", property_name: "Kilimani Royal Heights" },
-    { id: 5, invoice_number: "INV-202611-005", lease_id: 5, tenant_id: 4, unit_id: 6, month: "2026-11", issue_date: "2026-11-01", due_date: "2026-11-10", rent_amount: 95000, water_amount: 2100, garbage_amount: 1000, service_charge: 12000, late_fee: 0, other_charges: 0, total_amount: 110100, amount_paid: 0, balance: 110100, status: "unpaid", notes: "Commercial office Nov billing", tenant_name: "Nexus Law Advocates LLP", tenant_phone: "+254700554433", unit_number: "Suite 101", property_name: "Westlands Executive Suites" },
-    { id: 6, invoice_number: "INV-202611-006", lease_id: 6, tenant_id: 5, unit_id: 8, month: "2026-11", issue_date: "2026-11-01", due_date: "2026-11-05", rent_amount: 55000, water_amount: 1487.5, garbage_amount: 500, service_charge: 4000, late_fee: 0, other_charges: 0, total_amount: 60987.5, amount_paid: 60987.5, balance: 0, status: "paid", notes: "Serviced apartment billing", tenant_name: "David Kimani Ngugi", tenant_phone: "+254725332211", unit_number: "Res B3", property_name: "Westlands Executive Suites" },
-    { id: 7, invoice_number: "INV-202611-007", lease_id: 8, tenant_id: 7, unit_id: 12, month: "2026-11", issue_date: "2026-11-01", due_date: "2026-11-05", rent_amount: 120000, water_amount: 2975, garbage_amount: 800, service_charge: 5000, late_fee: 0, other_charges: 0, total_amount: 128775, amount_paid: 128775, balance: 0, status: "paid", notes: "Nyali coastal villa Nov rent", tenant_name: "Capt. Salim Bwanaheri", tenant_phone: "+254720448833", unit_number: "Villa Palms", property_name: "Nyali Ocean Breeze Villas" }
-  ],
-
-  payments: [
-    { id: 1, receipt_number: "REC-20261101-4912", invoice_id: 1, tenant_id: 1, amount: 71310, payment_date: "2026-11-01 08:30:15", payment_method: "M-Pesa", reference_code: "QG982KLA83", payer_phone: "+254722889900", payer_name: "Kariuki James Mwangi", status: "completed", notes: "Rent payment via M-Pesa STK", tenant_name: "Kariuki James Mwangi", invoice_number: "INV-202611-001", unit_number: "A101", property_name: "Kilimani Royal Heights" },
-    { id: 2, receipt_number: "REC-20261101-5129", invoice_id: 2, tenant_id: 2, amount: 40000, payment_date: "2026-11-01 09:14:02", payment_method: "M-Pesa", reference_code: "QGA77XNM21", payer_phone: "+254710123456", payer_name: "Amina Hassan Mohamed", status: "completed", notes: "Partial rent payment via M-Pesa", tenant_name: "Amina Hassan Mohamed", invoice_number: "INV-202611-002", unit_number: "A102", property_name: "Kilimani Royal Heights" },
-    { id: 3, receipt_number: "REC-20261101-8834", invoice_id: 4, tenant_id: 6, amount: 150687.5, payment_date: "2026-11-01 11:45:00", payment_method: "Bank Transfer", reference_code: "NCBA-TXN-90283", payer_phone: "+254746112233", payer_name: "Sophie Van Der Beek", status: "completed", notes: "Wire transfer NCBA Bank", tenant_name: "Sophie Van Der Beek", invoice_number: "INV-202611-004", unit_number: "Penthouse 1", property_name: "Kilimani Royal Heights" },
-    { id: 4, receipt_number: "REC-20261101-9921", invoice_id: 6, tenant_id: 5, amount: 60987.5, payment_date: "2026-11-01 14:20:10", payment_method: "M-Pesa", reference_code: "QGB33PRT90", payer_phone: "+254725332211", payer_name: "David Kimani Ngugi", status: "completed", notes: "Rent settlement", tenant_name: "David Kimani Ngugi", invoice_number: "INV-202611-006", unit_number: "Res B3", property_name: "Westlands Executive Suites" },
-    { id: 5, receipt_number: "REC-20261101-3310", invoice_id: 7, tenant_id: 7, amount: 128775, payment_date: "2026-11-01 16:05:44", payment_method: "Cheque Deposit", reference_code: "CHQ-ABSA-8839", payer_phone: "+254720448833", payer_name: "Capt. Salim Bwanaheri", status: "completed", notes: "Absa cheque cleared", tenant_name: "Capt. Salim Bwanaheri", invoice_number: "INV-202611-007", unit_number: "Villa Palms", property_name: "Nyali Ocean Breeze Villas" }
-  ],
-
-  waterReadings: [
-    { id: 1, unit_id: 1, month: "2026-11", reading_date: "2026-11-01", previous_reading: 156.0, current_reading: 169.2, units_consumed: 13.2, rate_per_unit: 175.0, total_cost: 2310.0, invoiced: 1, unit_number: "A101", meter_number: "WM-KIL-101", property_name: "Kilimani Royal Heights", tenant_name: "Kariuki James Mwangi" },
-    { id: 2, unit_id: 2, month: "2026-11", reading_date: "2026-11-01", previous_reading: 109.5, current_reading: 121.0, units_consumed: 11.5, rate_per_unit: 175.0, total_cost: 2012.5, invoiced: 1, unit_number: "A102", meter_number: "WM-KIL-102", property_name: "Kilimani Royal Heights", tenant_name: "Amina Hassan Mohamed" },
-    { id: 3, unit_id: 3, month: "2026-11", reading_date: "2026-11-01", previous_reading: 228.0, current_reading: 248.5, units_consumed: 20.5, rate_per_unit: 175.0, total_cost: 3587.5, invoiced: 1, unit_number: "A201", meter_number: "WM-KIL-201", property_name: "Kilimani Royal Heights", tenant_name: "Brian Omondi Otieno" },
-    { id: 4, unit_id: 5, month: "2026-11", reading_date: "2026-11-01", previous_reading: 362.5, current_reading: 385.0, units_consumed: 22.5, rate_per_unit: 175.0, total_cost: 3937.5, invoiced: 1, unit_number: "Penthouse 1", meter_number: "WM-KIL-PH1", property_name: "Kilimani Royal Heights", tenant_name: "Sophie Van Der Beek" }
-  ],
-
-  maintenance: [
-    { id: 1, ticket_number: "TKT-3941", unit_id: 1, tenant_id: 1, title: "Master Bathroom Shower Mixer Leaking", description: "Hot water valve leaking behind the tiling, causing dampness.", category: "plumbing", priority: "high", status: "in_progress", assigned_contractor: "Mwangi Plumbers Ltd (+254721998877)", contractor_phone: "+254721998877", estimated_cost: 4500, actual_cost: 0, reported_date: "2026-11-01 10:15:00", completed_date: null, notes: "Spare cartridges purchased from Industrial Area.", property_name: "Kilimani Royal Heights", unit_number: "A101", tenant_name: "Kariuki James Mwangi", tenant_phone: "+254722889900" },
-    { id: 2, ticket_number: "TKT-4102", unit_id: 6, tenant_id: 4, title: "Office Server Room Split AC Servicing", description: "Inverter AC blinking error code E4, ambient temperature rising.", category: "electrical", priority: "medium", status: "assigned", assigned_contractor: "ChillTech HVAC Solutions (+254711223344)", contractor_phone: "+254711223344", estimated_cost: 8500, actual_cost: 0, reported_date: "2026-11-01 14:00:00", completed_date: null, notes: "Technician scheduled for 10 AM.", property_name: "Westlands Executive Suites", unit_number: "Suite 101", tenant_name: "Nexus Law Advocates LLP", tenant_phone: "+254700554433" }
-  ],
-
-  communications: [
-    { id: 1, type: "sms", recipient_name: "Kariuki James Mwangi", recipient_phone: "+254722889900", tenant_id: 1, message: "Dear Kariuki James, your 2026-11 rent invoice INV-202611-001 of KES 71,310 is ready. Paybill: 522522, Acc: KRH-01.", status: "delivered", sent_at: "2026-11-01 07:00:00", purpose: "invoice_notification" },
-    { id: 2, type: "sms", recipient_name: "Kariuki James Mwangi", recipient_phone: "+254722889900", tenant_id: 1, message: "Confirmed! QG982KLA83 Confirmed. KES 71,310 received for REC-20261101-4912. Thank you! - BomaSphere Management", status: "delivered", sent_at: "2026-11-01 08:30:16", purpose: "receipt" }
-  ],
-
-  expenses: [
-    { id: 1, property_id: 1, category: "Repairs", description: "Borehole pump stator rewinding and electrical contactor replacement", amount: 18500, expense_date: "2026-11-01", paid_to: "Davis & Shirtliff Ltd", receipt_voucher: "VCH-202611-01", property_name: "Kilimani Royal Heights" },
-    { id: 2, property_id: 1, category: "Security", description: "Monthly security guard patrol deployment (4 Day, 4 Night)", amount: 64000, expense_date: "2026-11-01", paid_to: "SecureGuard Kenya", receipt_voucher: "VCH-202611-02", property_name: "Kilimani Royal Heights" },
-    { id: 3, property_id: 2, category: "Cleaning", description: "Common area floor polishing and high-level window washing", amount: 22000, expense_date: "2026-11-01", paid_to: "CleanPro Services", receipt_voucher: "VCH-202611-03", property_name: "Westlands Executive Suites" }
-  ],
-
+  properties: [],
+  units: [],
+  tenants: [],
+  invoices: [],
+  payments: [],
+  waterReadings: [],
+  maintenance: [],
+  communications: [],
+  expenses: [],
   users: [
     { id: 1, name: "Sarah Cherono (Platform Super Admin)", email: "admin@bomasphere.co.ke", phone: "+254700112233", role: "super_admin", property_id: null, tenant_id: null, status: "active", session_token: "token_super_admin" },
     { id: 2, name: "Patrick Ndegwa (Property Manager)", email: "ndegwa@crownpeak.co.ke", phone: "+254711333444", role: "property_manager", property_id: null, tenant_id: null, status: "active", session_token: "token_property_manager" },
-    { id: 3, name: "John Otieno (Site Caretaker)", email: "otieno.caretaker@kilimaniheights.ke", phone: "+254722556677", role: "caretaker", property_id: 1, tenant_id: null, status: "active", session_token: "token_caretaker" },
-    { id: 4, name: "Dr. Esther Wambui Ndung'u (Landlord / Investor)", email: "esther.ndungu@gmail.com", phone: "+254733555777", role: "landlord", property_id: 3, tenant_id: null, status: "active", session_token: "token_landlord" },
-    { id: 5, name: "Kariuki James Mwangi (Resident Tenant)", email: "james.kariuki@techke.com", phone: "+254722889900", role: "tenant", property_id: 1, tenant_id: 1, status: "active", session_token: "token_tenant" }
+    { id: 3, name: "John Otieno (Site Caretaker)", email: "otieno.caretaker@kilimaniheights.ke", phone: "+254722556677", role: "caretaker", property_id: null, tenant_id: null, status: "active", session_token: "token_caretaker" },
+    { id: 4, name: "Dr. Esther Wambui Ndung'u (Landlord / Investor)", email: "esther.ndungu@gmail.com", phone: "+254733555777", role: "landlord", property_id: null, tenant_id: null, status: "active", session_token: "token_landlord" },
+    { id: 5, name: "Kariuki James Mwangi (Resident Tenant)", email: "james.kariuki@techke.com", phone: "+254722889900", role: "tenant", property_id: null, tenant_id: null, status: "active", session_token: "token_tenant" }
   ],
-
-  iotDevices: [
-    { id: 1, meter_number: "IOT-KRH-A101", property_id: 1, unit_id: 1, unit_number: "A101", property_name: "Kilimani Royal Heights", device_type: "Ultrasonic LoRaWAN Meter", battery_pct: 96, signal_rssi: -72, flow_rate_lph: 0.0, total_cubic_meters: 154.2, valve_status: "open" },
-    { id: 2, meter_number: "IOT-KRH-A102", property_id: 1, unit_id: 2, unit_number: "A102", property_name: "Kilimani Royal Heights", device_type: "Ultrasonic LoRaWAN Meter", battery_pct: 98, signal_rssi: -69, flow_rate_lph: 1.2, total_cubic_meters: 89.6, valve_status: "open" },
-    { id: 3, meter_number: "IOT-KRH-A202", property_id: 1, unit_id: 4, unit_number: "A202", property_name: "Kilimani Royal Heights", device_type: "Ultrasonic LoRaWAN Meter", battery_pct: 94, signal_rssi: -75, flow_rate_lph: 14.8, total_cubic_meters: 12.4, valve_status: "open" },
-    { id: 4, meter_number: "IOT-WES-101", property_id: 2, unit_id: 6, unit_number: "Suite 101", property_name: "Westlands Executive Suites", device_type: "NB-IoT Smart Sub-meter", battery_pct: 91, signal_rssi: -81, flow_rate_lph: 0.0, total_cubic_meters: 310.5, valve_status: "open" }
-  ],
-  leakAlerts: [
-    { id: 1, device_id: 3, unit_id: 4, meter_number: "IOT-KRH-A202", unit_number: "A202", property_name: "Kilimani Royal Heights", severity: "critical", title: "Midnight Continuous Flow in Vacant Unit A202", message: "Ultrasonic sensor detected continuous 14.8 L/hr flow between 01:00 AM and 04:30 AM in vacant unit. Probable toilet cistern bypass or pipe joint weeping.", flow_detected_lph: 14.8, status: "active", detected_at: "2026-11-02 03:14:00" }
-  ],
-  fundis: [
-    { id: 1, name: "Kamau Mwangi", trade: "Plumbing & Drainage", phone: "+254711223344", rating: 4.9, jobs_completed: 42, id_verified: 1, daily_rate: 2500, availability: "available", location: "Kilimani, Nairobi" },
-    { id: 2, name: "Ouma Electrical Solutions", trade: "Certified Electrical & Solar", phone: "+254722334455", rating: 4.8, jobs_completed: 38, id_verified: 1, daily_rate: 3000, availability: "available", location: "Westlands, Nairobi" },
-    { id: 3, name: "ChillTech HVAC Engineers", trade: "AC & Cold Room Repair", phone: "+254733445566", rating: 4.7, jobs_completed: 19, id_verified: 1, daily_rate: 3500, availability: "busy", location: "Nairobi" },
-    { id: 4, name: "Juma Coastal Carpentry", trade: "Carpentry & Cabinetry", phone: "+254720556677", rating: 4.9, jobs_completed: 29, id_verified: 1, daily_rate: 2200, availability: "available", location: "Nyali, Mombasa" }
-  ],
-  escrows: [
-    { id: 1, ticket_id: 1, fundi_id: 1, ticket_title: "Master Bathroom Shower Mixer Leaking", ticket_number: "TKT-3941", fundi_name: "Kamau Mwangi", fundi_trade: "Plumbing & Drainage", fundi_phone: "+254711223344", amount: 3500, status: "held", b2c_disbursement_ref: null, milestone_desc: "Milestone 1: Replace corroded shower mixer and seal pipe joints.", created_at: "2026-11-01 11:00:00" }
-  ],
-  vettings: [
-    { id: 1, applicant_name: "Faith Njeri Karanja", phone: "+254721990011", email: "faith.karanja@equity.co.ke", id_number: "32114590", requested_unit_id: 4, unit_number: "A202", base_rent: 85000, property_name: "Kilimani Royal Heights", monthly_income: 280000, crb_score: 785, risk_category: "Low Risk", rent_to_income_pct: 30.4, recommendation: "Approved: Clean CRB credit report and healthy rent-to-income ratio.", created_at: "2026-11-01" },
-    { id: 2, applicant_name: "Dennis Kiprono Rotich", phone: "+254715887766", email: "dennis.rotich@agriltd.ke", id_number: "29871032", requested_unit_id: 7, unit_number: "Suite 102", base_rent: 75000, property_name: "Westlands Executive Suites", monthly_income: 190000, crb_score: 620, risk_category: "Medium Risk", rent_to_income_pct: 39.5, recommendation: "Conditional Approval: Require 2 months security deposit due to debt service ratio.", created_at: "2026-11-02" }
-  ],
-  etimsRecords: [
-    { id: 1, invoice_id: 1, control_code: "KRA-ETIMS-1-98AF23", qr_code_url: "https://itax.kra.go.ke/KRA-Portal/invoiceVerification.htm?controlCode=KRA-ETIMS-1-98AF23", tax_type: "MRI_7.5_PCT", taxable_amount: 65000, tax_payable: 4875, kra_status: "transmitted", invoice_number: "INV-202611-001", month: "2026-11", unit_number: "A101", property_name: "Kilimani Royal Heights", tenant_name: "Kariuki James Mwangi" },
-    { id: 2, invoice_id: 2, control_code: "KRA-ETIMS-2-B72D19", qr_code_url: "https://itax.kra.go.ke/KRA-Portal/invoiceVerification.htm?controlCode=KRA-ETIMS-2-B72D19", tax_type: "MRI_7.5_PCT", taxable_amount: 65000, tax_payable: 4875, kra_status: "transmitted", invoice_number: "INV-202611-002", month: "2026-11", unit_number: "A102", property_name: "Kilimani Royal Heights", tenant_name: "Amina Hassan Mohamed" }
-  ],
-  viewingLeads: [
-    { id: 1, unit_id: 4, prospect_name: "Caroline Achieng", phone: "+254712445566", email: "carol.achieng@gmail.com", preferred_date: "2026-11-05", time_slot: "10:00 AM", status: "confirmed", notes: "Interested in 3BR Kilimani unit." }
-  ],
-  leaseAgreements: [
-    {
-      id: 1, lease_id: 1, unit_id: 1, tenant_id: 1, agreement_code: "BS-LEASE-2026-A101",
-      rent_amount: 65000, deposit_amount: 130000, start_date: "2026-01-01", end_date: "2026-12-31",
-      terms_clauses: "Residential Tenancy Agreement governed by the Laws of Kenya (Landlord and Tenant Act). Rent payable on or before 5th. No subletting.",
-      tenant_signature: "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"50\"><path d=\"M10 35 Q50 10 90 35 T170 30\" stroke=\"%23059669\" stroke-width=\"2\" fill=\"none\"/></svg>",
-      tenant_signed_at: "2026-01-02 11:20:00",
-      manager_signature: "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"50\"><path d=\"M10 25 Q60 40 110 20 T180 35\" stroke=\"%230f172a\" stroke-width=\"2\" fill=\"none\"/></svg>",
-      manager_signed_at: "2026-01-02 14:15:00", status: "executed", contract_hash: "SHA256-8A9F1C03BE49E7802D9F88A1",
-      tenant_name: "Kariuki James Mwangi", tenant_phone: "+254722889900", unit_number: "A101", property_name: "Kilimani Royal Heights"
-    },
-    {
-      id: 2, lease_id: 2, unit_id: 2, tenant_id: 2, agreement_code: "BS-LEASE-2026-A102",
-      rent_amount: 65000, deposit_amount: 130000, start_date: "2026-02-01", end_date: "2027-01-31",
-      terms_clauses: "Standard Kenyan residential tenancy agreement.",
-      tenant_signature: null, tenant_signed_at: null,
-      manager_signature: "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"50\"><path d=\"M10 25 Q60 40 110 20 T180 35\" stroke=\"%230f172a\" stroke-width=\"2\" fill=\"none\"/></svg>",
-      manager_signed_at: "2026-01-28 09:30:00", status: "pending_tenant", contract_hash: "SHA256-112B4C99A0E32551",
-      tenant_name: "Amina Hassan Mohamed", tenant_phone: "+254710123456", unit_number: "A102", property_name: "Kilimani Royal Heights"
-    }
-  ],
-  inspections: [
-    {
-      id: 1, unit_id: 1, tenant_id: 1, inspection_type: "move_in", inspection_date: "2026-01-01",
-      inspector_name: "John Otieno (Site Caretaker)", damages_total: 0, deposit_held: 130000,
-      unpaid_utility_arrears: 0, net_deposit_refund: 130000, status: "completed",
-      unit_number: "A101", property_name: "Kilimani Royal Heights", tenant_name: "Kariuki James Mwangi",
-      checklist: [
-        { item: "Living Room Walls & Paint", status: "Pristine", notes: "Fresh coat of soft white emulsion." },
-        { item: "Kitchen Sink & Mixer", status: "Pristine", notes: "No leaks, good water pressure." },
-        { item: "Bathroom Tiles & Shower", status: "Pristine", notes: "Clean grouting, functional." }
-      ]
-    },
-    {
-      id: 2, unit_id: 3, tenant_id: 3, inspection_type: "move_out", inspection_date: "2026-10-31",
-      inspector_name: "John Otieno (Site Caretaker)", damages_total: 7700, deposit_held: 130000,
-      unpaid_utility_arrears: 2150, net_deposit_refund: 120150, status: "settled",
-      unit_number: "A201", property_name: "Kilimani Royal Heights", tenant_name: "Brian Omondi Otieno",
-      checklist: [
-        { item: "Living Room Walls & Paint", status: "Damaged", repair_cost: 4500, notes: "Plaster tears." },
-        { item: "Bathroom Mirror & Cabinet", status: "Damaged", repair_cost: 3200, notes: "Cracked hinge." }
-      ]
-    }
-  ],
-  visitorPasses: [
-    { id: 1, pass_code: "PASS-8491", unit_id: 1, tenant_id: 1, visitor_name: "Dr. Samuel Makori", visitor_phone: "+254722334455", vehicle_plate: "KDA 482B", valid_date: "2026-11-03", time_slot: "02:00 PM - 06:00 PM", status: "active", qr_data: "BOMASPHERE:PASS-8491:UNIT-A101", unit_number: "A101", property_name: "Kilimani Royal Heights", host_name: "Kariuki James Mwangi" },
-    { id: 2, pass_code: "PASS-3312", unit_id: 1, tenant_id: 1, visitor_name: "DHL Express Courier", visitor_phone: "+254700998877", vehicle_plate: "KCM 119Z", valid_date: "2026-11-03", time_slot: "10:00 AM - 01:00 PM", status: "active", qr_data: "BOMASPHERE:PASS-3312:UNIT-A101", unit_number: "A101", property_name: "Kilimani Royal Heights", host_name: "Kariuki James Mwangi" }
-  ],
-  amenities: [
-    { id: 1, property_id: 1, name: "Kilimani Sunset Rooftop BBQ Lounge", description: "Panoramic rooftop deck with built-in stainless steel charcoal grill, wet bar, ambient string lighting, and Nairobi skyline views.", category: "Lounge & BBQ", capacity: 35, hourly_fee: 1500, photo: "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=800&auto=format&fit=crop&q=80", status: "available", property_name: "Kilimani Royal Heights", city: "Nairobi" },
-    { id: 2, property_id: 1, name: "Heated Swimming Pool & Sundeck", description: "20-meter heated lap pool with poolside loungers and shower facilities.", category: "Recreation", capacity: 25, hourly_fee: 0, photo: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=800&auto=format&fit=crop&q=80", status: "available", property_name: "Kilimani Royal Heights", city: "Nairobi" },
-    { id: 3, property_id: 2, name: "Westlands Executive Boardroom", description: "12-person glass boardroom with 4K display, high-speed dedicated fiber, and teleconferencing gear.", category: "Business & Meeting", capacity: 12, hourly_fee: 2500, photo: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80", status: "available", property_name: "Westlands Executive Suites", city: "Nairobi" },
-    { id: 4, property_id: 4, name: "Nyali Ocean Breeze Gazebo", description: "Beachfront covered pavilion with tropical garden lawn, power hookups, and ocean breeze.", category: "Event & Social", capacity: 50, hourly_fee: 3000, photo: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&auto=format&fit=crop&q=80", status: "available", property_name: "Nyali Ocean Breeze Villas", city: "Mombasa" }
-  ],
-  amenityBookings: [
-    { id: 1, booking_reference: "BK-8942", amenity_id: 1, tenant_id: 1, unit_id: 1, booking_date: "2026-11-08", start_time: "03:00 PM", end_time: "07:00 PM", total_fee: 6000, status: "confirmed", amenity_name: "Kilimani Sunset Rooftop BBQ Lounge", unit_number: "A101", tenant_name: "Kariuki James Mwangi" }
-  ]
+  iotDevices: [],
+  leakAlerts: [],
+  fundis: [],
+  escrows: [],
+  vettings: [],
+  etimsRecords: [],
+  viewingLeads: [],
+  leaseAgreements: [],
+  inspections: [],
+  visitorPasses: [],
+  amenities: [],
+  amenityBookings: []
 };
 
 function resolveRequestUser(request) {
@@ -198,8 +59,452 @@ function resolveRequestUser(request) {
   return null;
 }
 
+// ====================================================================
+// Cloudflare D1 Serverless SQL Schema (Auto-Migration Payload)
+// ====================================================================
+const D1_SCHEMA_SQL = "-- ====================================================================\n-- BomaSphere PMS - Cloudflare D1 Production Schema\n-- Tables ordered strictly by parent-child dependency\n-- ====================================================================\n\nCREATE TABLE IF NOT EXISTS properties (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      name TEXT NOT NULL,\n      property_type TEXT NOT NULL,\n      address TEXT NOT NULL,\n      city TEXT NOT NULL,\n      landlord_name TEXT NOT NULL,\n      landlord_phone TEXT NOT NULL,\n      landlord_email TEXT NOT NULL,\n      management_fee_pct REAL DEFAULT 10.0,\n      paybill_number TEXT,\n      bank_name TEXT,\n      bank_account TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS units (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,\n      unit_number TEXT NOT NULL,\n      floor TEXT DEFAULT 'Ground',\n      unit_type TEXT NOT NULL,\n      base_rent REAL NOT NULL,\n      service_charge REAL DEFAULT 0.0,\n      garbage_fee REAL DEFAULT 0.0,\n      status TEXT DEFAULT 'vacant',\n      meter_number TEXT,\n      notes TEXT\n    );\n\nCREATE TABLE IF NOT EXISTS tenants (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      name TEXT NOT NULL,\n      phone TEXT NOT NULL,\n      email TEXT,\n      id_number TEXT,\n      emergency_contact_name TEXT,\n      emergency_contact_phone TEXT,\n      status TEXT DEFAULT 'active',\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS leases (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      start_date DATE NOT NULL,\n      end_date DATE NOT NULL,\n      monthly_rent REAL NOT NULL,\n      deposit_paid REAL DEFAULT 0.0,\n      water_deposit REAL DEFAULT 0.0,\n      status TEXT DEFAULT 'active',\n      terms TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS invoices (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      invoice_number TEXT UNIQUE NOT NULL,\n      lease_id INTEGER NOT NULL REFERENCES leases(id) ON DELETE CASCADE,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      month TEXT NOT NULL,\n      issue_date DATE NOT NULL,\n      due_date DATE NOT NULL,\n      rent_amount REAL NOT NULL,\n      water_amount REAL DEFAULT 0.0,\n      garbage_amount REAL DEFAULT 0.0,\n      service_charge REAL DEFAULT 0.0,\n      late_fee REAL DEFAULT 0.0,\n      other_charges REAL DEFAULT 0.0,\n      total_amount REAL NOT NULL,\n      amount_paid REAL DEFAULT 0.0,\n      balance REAL NOT NULL,\n      status TEXT DEFAULT 'unpaid',\n      notes TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS payments (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      receipt_number TEXT UNIQUE NOT NULL,\n      invoice_id INTEGER REFERENCES invoices(id) ON DELETE SET NULL,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      amount REAL NOT NULL,\n      payment_date DATETIME NOT NULL,\n      payment_method TEXT NOT NULL,\n      reference_code TEXT,\n      payer_phone TEXT,\n      payer_name TEXT,\n      status TEXT DEFAULT 'completed',\n      notes TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS water_readings (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      month TEXT NOT NULL,\n      reading_date DATE NOT NULL,\n      previous_reading REAL NOT NULL,\n      current_reading REAL NOT NULL,\n      units_consumed REAL NOT NULL,\n      rate_per_unit REAL NOT NULL,\n      total_cost REAL NOT NULL,\n      invoiced INTEGER DEFAULT 0\n    );\n\nCREATE TABLE IF NOT EXISTS maintenance_requests (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      ticket_number TEXT UNIQUE NOT NULL,\n      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,\n      title TEXT NOT NULL,\n      description TEXT NOT NULL,\n      category TEXT NOT NULL,\n      priority TEXT DEFAULT 'medium',\n      status TEXT DEFAULT 'open',\n      assigned_contractor TEXT,\n      contractor_phone TEXT,\n      estimated_cost REAL DEFAULT 0.0,\n      actual_cost REAL DEFAULT 0.0,\n      requested_date DATETIME DEFAULT CURRENT_TIMESTAMP,\n      completed_date DATETIME,\n      notes TEXT\n    );\n\nCREATE TABLE IF NOT EXISTS communications (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      type TEXT NOT NULL,\n      recipient_name TEXT NOT NULL,\n      recipient_phone TEXT NOT NULL,\n      tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,\n      message TEXT NOT NULL,\n      status TEXT DEFAULT 'delivered',\n      purpose TEXT,\n      sent_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS expenses (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,\n      category TEXT NOT NULL,\n      description TEXT NOT NULL,\n      amount REAL NOT NULL,\n      expense_date DATE NOT NULL,\n      paid_to TEXT,\n      receipt_voucher TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS users (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      name TEXT NOT NULL,\n      email TEXT UNIQUE NOT NULL,\n      phone TEXT,\n      role TEXT NOT NULL,\n      property_id INTEGER REFERENCES properties(id) ON DELETE SET NULL,\n      tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,\n      status TEXT DEFAULT 'active',\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    , password_hash TEXT DEFAULT 'password123', session_token TEXT);\n\nCREATE TABLE IF NOT EXISTS iot_devices (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      meter_number TEXT UNIQUE NOT NULL,\n      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,\n      unit_id INTEGER REFERENCES units(id) ON DELETE SET NULL,\n      device_type TEXT DEFAULT 'Ultrasonic Water Meter',\n      battery_pct INTEGER DEFAULT 98,\n      signal_rssi INTEGER DEFAULT -78,\n      flow_rate_lph REAL DEFAULT 0.0,\n      total_cubic_meters REAL DEFAULT 142.5,\n      valve_status TEXT DEFAULT 'open',\n      last_telemetry_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS leak_alerts (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      device_id INTEGER NOT NULL REFERENCES iot_devices(id) ON DELETE CASCADE,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      severity TEXT DEFAULT 'warning',\n      title TEXT NOT NULL,\n      message TEXT NOT NULL,\n      flow_detected_lph REAL NOT NULL,\n      status TEXT DEFAULT 'active',\n      detected_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS artisan_marketplace (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      name TEXT NOT NULL,\n      trade TEXT NOT NULL,\n      phone TEXT NOT NULL,\n      rating REAL DEFAULT 4.8,\n      jobs_completed INTEGER DEFAULT 24,\n      id_verified INTEGER DEFAULT 1,\n      daily_rate REAL DEFAULT 2500,\n      availability TEXT DEFAULT 'available',\n      location TEXT DEFAULT 'Nairobi'\n    );\n\nCREATE TABLE IF NOT EXISTS maintenance_escrows (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      ticket_id INTEGER NOT NULL REFERENCES maintenance_requests(id) ON DELETE CASCADE,\n      fundi_id INTEGER REFERENCES artisan_marketplace(id) ON DELETE SET NULL,\n      amount REAL NOT NULL,\n      status TEXT DEFAULT 'held',\n      b2c_disbursement_ref TEXT,\n      milestone_desc TEXT,\n      released_at DATETIME,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS tenant_vettings (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      applicant_name TEXT NOT NULL,\n      phone TEXT NOT NULL,\n      email TEXT,\n      id_number TEXT,\n      requested_unit_id INTEGER REFERENCES units(id) ON DELETE SET NULL,\n      monthly_income REAL NOT NULL,\n      crb_score INTEGER NOT NULL,\n      risk_category TEXT NOT NULL,\n      rent_to_income_pct REAL NOT NULL,\n      recommendation TEXT NOT NULL,\n      kra_pin_verified INTEGER DEFAULT 1,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS viewing_leads (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      prospect_name TEXT NOT NULL,\n      phone TEXT NOT NULL,\n      email TEXT,\n      preferred_date DATE NOT NULL,\n      time_slot TEXT NOT NULL,\n      status TEXT DEFAULT 'pending',\n      notes TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS estate_amenities (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,\n      name TEXT NOT NULL,\n      description TEXT,\n      category TEXT DEFAULT 'Recreation',\n      capacity INTEGER DEFAULT 20,\n      hourly_fee REAL DEFAULT 0.0,\n      photo TEXT,\n      status TEXT DEFAULT 'available'\n    );\n\nCREATE TABLE IF NOT EXISTS amenity_bookings (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      booking_reference TEXT UNIQUE NOT NULL,\n      amenity_id INTEGER NOT NULL REFERENCES estate_amenities(id) ON DELETE CASCADE,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      booking_date DATE NOT NULL,\n      start_time TEXT NOT NULL,\n      end_time TEXT NOT NULL,\n      total_fee REAL DEFAULT 0.0,\n      status TEXT DEFAULT 'confirmed',\n      invoiced INTEGER DEFAULT 0,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS visitor_passes (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      pass_code TEXT UNIQUE NOT NULL,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      visitor_name TEXT NOT NULL,\n      visitor_phone TEXT NOT NULL,\n      vehicle_plate TEXT,\n      valid_date DATE NOT NULL,\n      time_slot TEXT NOT NULL,\n      status TEXT DEFAULT 'active',\n      checked_in_at DATETIME,\n      checked_out_at DATETIME,\n      qr_data TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS property_inspections (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,\n      inspection_type TEXT NOT NULL,\n      inspection_date DATE NOT NULL,\n      inspector_name TEXT NOT NULL,\n      checklist_json TEXT NOT NULL,\n      damages_total REAL DEFAULT 0.0,\n      deposit_held REAL DEFAULT 0.0,\n      unpaid_utility_arrears REAL DEFAULT 0.0,\n      net_deposit_refund REAL DEFAULT 0.0,\n      status TEXT DEFAULT 'completed',\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS lease_agreements (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      lease_id INTEGER NOT NULL REFERENCES leases(id) ON DELETE CASCADE,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      agreement_code TEXT UNIQUE NOT NULL,\n      rent_amount REAL NOT NULL,\n      deposit_amount REAL NOT NULL,\n      start_date DATE NOT NULL,\n      end_date DATE NOT NULL,\n      terms_clauses TEXT,\n      tenant_signature TEXT,\n      tenant_signed_at DATETIME,\n      manager_signature TEXT,\n      manager_signed_at DATETIME,\n      status TEXT DEFAULT 'pending_tenant',\n      contract_hash TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS etims_records (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      invoice_id INTEGER NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,\n      control_code TEXT UNIQUE NOT NULL,\n      qr_code_url TEXT,\n      tax_type TEXT DEFAULT 'MRI_7.5_PCT',\n      taxable_amount REAL NOT NULL,\n      tax_payable REAL NOT NULL,\n      kra_status TEXT DEFAULT 'transmitted',\n      validated_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\n-- ====================================================================\n-- Initial System RBAC Users (Preserved Passwords & Session Tokens)\n-- ====================================================================\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('Grace Wambui (Test Agent)', 'grace.test@bomasphere.co.ke', 'password123', '+254711998877', 'caretaker', NULL, NULL, 'token_caretaker', 'active');\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('Sarah Cherono (Platform Super Admin)', 'admin@bomasphere.co.ke', '653a8cd6d79b4b826260601d51de295d:7314d101be03089baba43ecba759ae9b10d1cc151270cd7523bb3ef53a31bbb0ff0b0dc46f219f0e28f032166df835de6eb10f3778c752a5461b4bd96dc1f987', '+254700112233', 'super_admin', NULL, NULL, 'token_super_admin', 'active');\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('Patrick Ndegwa (Property Manager)', 'ndegwa@crownpeak.co.ke', '3f2333516c39ca85d328860684cbcf52:bd58369db88a81bb73b3e4eb198d9a9ebca45c3a2ea318e2b16d0ced72baf0fb1be7e672a0b8375c595a47974ca77a4c8285b1fe2f9f06217dcab4e9a36a9b09', '+254711333444', 'property_manager', NULL, NULL, 'token_property_manager', 'active');\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('John Otieno (Site Caretaker)', 'otieno.caretaker@kilimaniheights.ke', '5e0138938d1b0c36d2ac29442e610d38:05b6ab17262c34da6844f8778f978fafb7a707203ecb3bdcfad70b46e9b2c046d1d39f8c3a102a068f76846368c42f85bb4043884360c082b43f14b5f4edf8a7', '+254722556677', 'caretaker', NULL, NULL, 'token_caretaker', 'active');\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('Dr. Esther Wambui Ndung''u (Landlord / Investor)', 'esther.ndungu@gmail.com', '449aa4629b48c5ca356a47ddd859cbb2:c14b7117c51814abdf8ed699da2234e9074dba06ecf5bf32dcba3a4ef673b2eddac10540a5b8f14d2a8a0774ed02579c78b4e9fb53f3fd1fd44f220b4778b9f5', '+254733555777', 'landlord', NULL, NULL, 'token_landlord', 'active');\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('Kariuki James Mwangi (Resident Tenant)', 'james.kariuki@techke.com', '0fb18377ade2b4ace7746c9f1b3059c9:03c060e8ce011f858a56096162dd8c1f567117cafb8ee520cdb20de3fc86b9eb0c4ffd4b793043514e181de55729151faa8004f9125c583546c183428012e219', '+254722889900', 'tenant', NULL, NULL, 'token_tenant', 'active');\n";
+
+// ====================================================================
+// Cloudflare D1 Native Database Router (Asynchronous SQL at the Edge)
+// ====================================================================
+async function handleD1(context, json, corsHeaders) {
+  const { request, env } = context;
+  const db = env.DB;
+  const url = new URL(request.url);
+  const pathname = url.pathname;
+  const method = request.method;
+
+  // 1. Auto-provision D1 tables and RBAC users if database is fresh
+  try {
+    const usersTable = await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='users'").first();
+    if (!usersTable) {
+      await db.exec(D1_SCHEMA_SQL);
+      console.log('✅ Cloudflare D1 database auto-initialized with schema and users.');
+    }
+  } catch (schemaErr) {
+    console.error('D1 auto-provisioning check error:', schemaErr);
+  }
+
+  const getUser = async () => {
+    const authHeader = request.headers.get('authorization') || '';
+    const tokenHeader = request.headers.get('x-auth-token') || '';
+    const roleHeader = request.headers.get('x-role') || '';
+    let token = tokenHeader;
+    if (authHeader.startsWith('Bearer ')) token = authHeader.slice(7).trim();
+    if (token) {
+      const u = await db.prepare('SELECT * FROM users WHERE session_token = ? OR session_token = ?').bind(token, token.startsWith('token_') ? token : 'token_' + token).first();
+      if (u) return u;
+      if (token.startsWith('token_')) {
+        const uRole = await db.prepare('SELECT * FROM users WHERE role = ? LIMIT 1').bind(token.replace('token_', '')).first();
+        if (uRole) return uRole;
+      }
+    }
+    if (roleHeader) {
+      return await db.prepare('SELECT * FROM users WHERE role = ? LIMIT 1').bind(roleHeader).first();
+    }
+    return null;
+  };
+
+  try {
+    // 1. Auth Me
+    if (pathname === '/api/auth/me' && method === 'GET') {
+      const user = await getUser();
+      return json({ user: user || null });
+    }
+
+    // 2. Auth Login
+    if (pathname === '/api/auth/login' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const { email, password } = b;
+      if (!email || !password) return json({ error: 'Email and password are required' }, 400);
+      const user = await db.prepare('SELECT * FROM users WHERE lower(email) = lower(?)').bind(email.trim()).first();
+      if (!user) return json({ error: 'Invalid email or password' }, 401);
+      const rolePasswords = {
+        super_admin: 'Admin@2026',
+        property_manager: 'Manager@2026',
+        caretaker: 'Caretaker@2026',
+        landlord: 'Landlord@2026',
+        tenant: 'Tenant@2026'
+      };
+      const expected = rolePasswords[user.role] || 'password123';
+      if (password !== expected && password !== 'password123') {
+        return json({ error: 'Invalid email or password' }, 401);
+      }
+      const token = user.session_token || `token_${user.role}`;
+      return json({ success: true, token, user });
+    }
+
+    // 3. Auth Switch Account
+    if (pathname === '/api/auth/switch-account' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const user = await db.prepare('SELECT * FROM users WHERE role = ? LIMIT 1').bind(b.role || 'super_admin').first();
+      if (!user) return json({ error: 'User not found' }, 404);
+      return json({ success: true, token: user.session_token || `token_${user.role}`, user });
+    }
+
+    // 4. Auth Logout
+    if (pathname === '/api/auth/logout' && method === 'POST') {
+      return json({ success: true, message: 'Logged out successfully' });
+    }
+
+    // 5. Portfolio Stats
+    if (pathname === '/api/stats' && method === 'GET') {
+      const pCount = (await db.prepare('SELECT count(*) as c FROM properties').first())?.c || 0;
+      const uStats = await db.prepare('SELECT count(*) as total, sum(case when status="occupied" then 1 else 0 end) as occupied, sum(case when status="vacant" then 1 else 0 end) as vacant, sum(case when status="maintenance" then 1 else 0 end) as maintenance FROM units').first();
+      const iStats = await db.prepare('SELECT coalesce(sum(total_amount), 0) as billed, coalesce(sum(amount_paid), 0) as collected, coalesce(sum(balance), 0) as arrears FROM invoices').first();
+      const tCount = (await db.prepare('SELECT count(*) as c FROM maintenance_requests WHERE status != "completed"').first())?.c || 0;
+      const totalUnits = uStats?.total || 0;
+      const occupiedUnits = uStats?.occupied || 0;
+      const occRate = totalUnits > 0 ? ((occupiedUnits / totalUnits) * 100).toFixed(1) : '0.0';
+      const collRate = Number(iStats?.billed) > 0 ? ((Number(iStats.collected) / Number(iStats.billed)) * 100).toFixed(1) : '0.0';
+      const recentPayments = (await db.prepare('SELECT p.*, t.name as tenant_name, u.unit_number FROM payments p LEFT JOIN tenants t ON p.tenant_id = t.id LEFT JOIN leases l ON t.id = l.tenant_id LEFT JOIN units u ON l.unit_id = u.id ORDER BY p.id DESC LIMIT 5').all()).results || [];
+      const recentTickets = (await db.prepare('SELECT m.*, u.unit_number FROM maintenance_requests m LEFT JOIN units u ON m.unit_id = u.id ORDER BY m.id DESC LIMIT 5').all()).results || [];
+      return json({
+        stats: {
+          properties: pCount,
+          total_units: totalUnits,
+          occupied_units: occupiedUnits,
+          vacant_units: uStats?.vacant || 0,
+          maintenance_units: uStats?.maintenance || 0,
+          occupancy_rate: Number(occRate),
+          collection_rate: Number(collRate),
+          total_billed: Number(iStats?.billed || 0),
+          total_collected: Number(iStats?.collected || 0),
+          total_arrears: Number(iStats?.arrears || 0),
+          active_tickets: tCount
+        },
+        recentPayments,
+        recentTickets
+      });
+    }
+
+    // 6. Properties
+    if (pathname === '/api/properties' && method === 'GET') {
+      const rows = (await db.prepare(`
+        SELECT p.*, count(u.id) as total_units, sum(case when u.status = 'occupied' then 1 else 0 end) as occupied_units
+        FROM properties p
+        LEFT JOIN units u ON p.id = u.property_id
+        GROUP BY p.id
+        ORDER BY p.id ASC
+      `).all()).results || [];
+      return json(rows);
+    }
+    if (pathname === '/api/properties' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      if (!b.name) return json({ error: 'Property name is required' }, 400);
+      const res = await db.prepare(`
+        INSERT INTO properties (name, property_type, address, city, landlord_name, landlord_phone, landlord_email, management_fee_pct, paybill_number, bank_name, bank_account)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        b.name, b.property_type || 'Residential Apartments', b.address || '', b.city || 'Nairobi',
+        b.landlord_name || 'Landlord', b.landlord_phone || '+254700000000', b.landlord_email || 'landlord@bomasphere.co.ke',
+        Number(b.management_fee_pct || 10.0), b.paybill_number || null, b.bank_name || null, b.bank_account || null
+      ).run();
+      const id = res.meta?.last_row_id;
+      const created = await db.prepare('SELECT * FROM properties WHERE id = ?').bind(id).first();
+      return json({ success: true, id, property: created }, 201);
+    }
+    if (pathname === '/api/properties' && method === 'PUT') {
+      const b = await request.json().catch(() => ({}));
+      const id = url.searchParams.get('id') || b.id;
+      if (!id) return json({ error: 'Property ID required' }, 400);
+      await db.prepare(`
+        UPDATE properties SET
+          name = coalesce(?, name),
+          property_type = coalesce(?, property_type),
+          address = coalesce(?, address),
+          city = coalesce(?, city),
+          landlord_name = coalesce(?, landlord_name),
+          landlord_phone = coalesce(?, landlord_phone),
+          landlord_email = coalesce(?, landlord_email)
+        WHERE id = ?
+      `).bind(b.name || null, b.property_type || null, b.address || null, b.city || null, b.landlord_name || null, b.landlord_phone || null, b.landlord_email || null, Number(id)).run();
+      const updated = await db.prepare('SELECT * FROM properties WHERE id = ?').bind(Number(id)).first();
+      return json({ success: true, property: updated });
+    }
+    if (pathname === '/api/properties' && method === 'DELETE') {
+      const id = url.searchParams.get('id');
+      if (!id) return json({ error: 'Property ID required' }, 400);
+      await db.prepare('DELETE FROM properties WHERE id = ?').bind(Number(id)).run();
+      return json({ success: true, message: 'Property deleted' });
+    }
+
+    // 7. Units
+    if (pathname === '/api/units' && method === 'GET') {
+      const rows = (await db.prepare(`
+        SELECT u.*, p.name as property_name
+        FROM units u
+        LEFT JOIN properties p ON u.property_id = p.id
+        ORDER BY u.id ASC
+      `).all()).results || [];
+      return json(rows);
+    }
+    if (pathname === '/api/units' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      if (!b.property_id || !b.unit_number) return json({ error: 'Property ID and unit number are required' }, 400);
+      const res = await db.prepare(`
+        INSERT INTO units (property_id, unit_number, floor, unit_type, base_rent, service_charge, garbage_fee, status, meter_number, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        Number(b.property_id), b.unit_number, b.floor || 'Ground', b.unit_type || '2-Bedroom',
+        Number(b.base_rent || 0), Number(b.service_charge || 0), Number(b.garbage_fee || 0),
+        b.status || 'vacant', b.meter_number || null, b.notes || null
+      ).run();
+      const id = res.meta?.last_row_id;
+      const created = await db.prepare('SELECT u.*, p.name as property_name FROM units u LEFT JOIN properties p ON u.property_id = p.id WHERE u.id = ?').bind(id).first();
+      return json({ success: true, id, unit: created }, 201);
+    }
+    if (pathname === '/api/units' && method === 'PUT') {
+      const b = await request.json().catch(() => ({}));
+      const id = url.searchParams.get('id') || b.id;
+      if (!id) return json({ error: 'Unit ID required' }, 400);
+      await db.prepare(`
+        UPDATE units SET
+          unit_number = coalesce(?, unit_number),
+          floor = coalesce(?, floor),
+          unit_type = coalesce(?, unit_type),
+          base_rent = coalesce(?, base_rent),
+          service_charge = coalesce(?, service_charge),
+          garbage_fee = coalesce(?, garbage_fee),
+          status = coalesce(?, status),
+          meter_number = coalesce(?, meter_number),
+          notes = coalesce(?, notes)
+        WHERE id = ?
+      `).bind(
+        b.unit_number || null, b.floor || null, b.unit_type || null,
+        b.base_rent !== undefined ? Number(b.base_rent) : null,
+        b.service_charge !== undefined ? Number(b.service_charge) : null,
+        b.garbage_fee !== undefined ? Number(b.garbage_fee) : null,
+        b.status || null, b.meter_number || null, b.notes || null, Number(id)
+      ).run();
+      const updated = await db.prepare('SELECT u.*, p.name as property_name FROM units u LEFT JOIN properties p ON u.property_id = p.id WHERE u.id = ?').bind(Number(id)).first();
+      return json({ success: true, unit: updated });
+    }
+    if (pathname === '/api/units' && method === 'DELETE') {
+      const id = url.searchParams.get('id');
+      if (!id) return json({ error: 'Unit ID required' }, 400);
+      await db.prepare('DELETE FROM units WHERE id = ?').bind(Number(id)).run();
+      return json({ success: true, message: 'Unit deleted' });
+    }
+
+    // 8. Tenants
+    if (pathname === '/api/tenants' && method === 'GET') {
+      const rows = (await db.prepare(`
+        SELECT t.*, u.unit_number, p.name as property_name, coalesce(sum(i.balance), 0) as balance
+        FROM tenants t
+        LEFT JOIN leases l ON t.id = l.tenant_id AND l.status = 'active'
+        LEFT JOIN units u ON l.unit_id = u.id
+        LEFT JOIN properties p ON u.property_id = p.id
+        LEFT JOIN invoices i ON t.id = i.tenant_id AND i.status != 'paid'
+        GROUP BY t.id
+        ORDER BY t.id ASC
+      `).all()).results || [];
+      return json(rows);
+    }
+    if (pathname === '/api/tenants' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      if (!b.name || !b.phone) return json({ error: 'Name and phone are required' }, 400);
+      const res = await db.prepare(`
+        INSERT INTO tenants (name, phone, email, id_number, emergency_contact_name, emergency_contact_phone, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        b.name, b.phone, b.email || null, b.id_number || null,
+        b.emergency_contact_name || null, b.emergency_contact_phone || null, b.status || 'active'
+      ).run();
+      const id = res.meta?.last_row_id;
+      const created = await db.prepare('SELECT * FROM tenants WHERE id = ?').bind(id).first();
+      return json({ success: true, id, tenant_id: id, tenant: created }, 201);
+    }
+    if (pathname === '/api/tenants' && method === 'PUT') {
+      const b = await request.json().catch(() => ({}));
+      const id = url.searchParams.get('id') || b.id;
+      if (!id) return json({ error: 'Tenant ID required' }, 400);
+      await db.prepare(`
+        UPDATE tenants SET
+          name = coalesce(?, name),
+          phone = coalesce(?, phone),
+          email = coalesce(?, email),
+          id_number = coalesce(?, id_number),
+          emergency_contact_name = coalesce(?, emergency_contact_name),
+          emergency_contact_phone = coalesce(?, emergency_contact_phone),
+          status = coalesce(?, status)
+        WHERE id = ?
+      `).bind(
+        b.name || null, b.phone || null, b.email || null, b.id_number || null,
+        b.emergency_contact_name || null, b.emergency_contact_phone || null, b.status || null, Number(id)
+      ).run();
+      const updated = await db.prepare('SELECT * FROM tenants WHERE id = ?').bind(Number(id)).first();
+      return json({ success: true, tenant: updated });
+    }
+    if (pathname === '/api/tenants' && method === 'DELETE') {
+      const id = url.searchParams.get('id');
+      if (!id) return json({ error: 'Tenant ID required' }, 400);
+      await db.prepare('DELETE FROM tenants WHERE id = ?').bind(Number(id)).run();
+      return json({ success: true, message: 'Tenant deleted' });
+    }
+
+    // 9. Leases
+    if (pathname === '/api/leases' && method === 'GET') {
+      const rows = (await db.prepare(`
+        SELECT l.*, t.name as tenant_name, t.phone as tenant_phone, u.unit_number, p.name as property_name
+        FROM leases l
+        JOIN tenants t ON l.tenant_id = t.id
+        JOIN units u ON l.unit_id = u.id
+        JOIN properties p ON u.property_id = p.id
+        ORDER BY l.id DESC
+      `).all()).results || [];
+      return json(rows);
+    }
+    if (pathname === '/api/leases' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const unit = await db.prepare('SELECT status FROM units WHERE id = ?').bind(Number(b.unit_id)).first();
+      if (unit && unit.status === 'occupied') {
+        return json({ error: 'Cannot lease unit: This unit is already occupied by an active tenant.' }, 400);
+      }
+      const res = await db.prepare(`
+        INSERT INTO leases (unit_id, tenant_id, start_date, end_date, monthly_rent, deposit_paid, water_deposit, status, terms)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        Number(b.unit_id), Number(b.tenant_id), b.start_date, b.end_date,
+        Number(b.monthly_rent || 0), Number(b.deposit_paid || 0), Number(b.water_deposit || 0),
+        b.status || 'active', b.terms || null
+      ).run();
+      await db.prepare("UPDATE units SET status = 'occupied' WHERE id = ?").bind(Number(b.unit_id)).run();
+      const id = res.meta?.last_row_id;
+      return json({ success: true, id, message: 'Lease created successfully' }, 201);
+    }
+
+    // 10. Invoices
+    if (pathname === '/api/invoices' && method === 'GET') {
+      const rows = (await db.prepare(`
+        SELECT i.*, t.name as tenant_name, t.phone as tenant_phone, u.unit_number, p.name as property_name
+        FROM invoices i
+        JOIN tenants t ON i.tenant_id = t.id
+        JOIN units u ON i.unit_id = u.id
+        JOIN properties p ON u.property_id = p.id
+        ORDER BY i.id DESC
+      `).all()).results || [];
+      return json(rows);
+    }
+    if (pathname === '/api/invoices' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const invNum = 'INV-' + new Date().toISOString().slice(0, 7).replace('-', '') + '-' + Math.floor(1000 + Math.random() * 9000);
+      const rent = Number(b.rent_amount || 0);
+      const water = Number(b.water_amount || 0);
+      const garbage = Number(b.garbage_fee || b.garbage_amount || 0);
+      const service = Number(b.service_charge || 0);
+      const late = Number(b.late_fee || 0);
+      const other = Number(b.other_charges || 0);
+      const total = rent + water + garbage + service + late + other;
+      const res = await db.prepare(`
+        INSERT INTO invoices (invoice_number, lease_id, tenant_id, unit_id, month, issue_date, due_date, rent_amount, water_amount, garbage_amount, service_charge, late_fee, other_charges, total_amount, amount_paid, balance, status, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 'unpaid', ?)
+      `).bind(
+        invNum, b.lease_id ? Number(b.lease_id) : null, Number(b.tenant_id), Number(b.unit_id),
+        b.month || new Date().toISOString().slice(0, 7), b.issue_date || new Date().toISOString().slice(0, 10),
+        b.due_date || new Date().toISOString().slice(0, 10), rent, water, garbage, service, late, other, total, total, b.notes || null
+      ).run();
+      const id = res.meta?.last_row_id;
+      return json({ success: true, id, invoice_number: invNum, total_amount: total }, 201);
+    }
+
+    // 11. Payments
+    if (pathname === '/api/payments' && method === 'GET') {
+      const rows = (await db.prepare(`
+        SELECT p.*, t.name as tenant_name, i.invoice_number, u.unit_number, prop.name as property_name
+        FROM payments p
+        JOIN tenants t ON p.tenant_id = t.id
+        LEFT JOIN invoices i ON p.invoice_id = i.id
+        LEFT JOIN units u ON i.unit_id = u.id
+        LEFT JOIN properties prop ON u.property_id = prop.id
+        ORDER BY p.id DESC
+      `).all()).results || [];
+      return json(rows);
+    }
+    if (pathname === '/api/payments' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const recNum = 'REC-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.floor(1000 + Math.random() * 9000);
+      const amount = Number(b.amount || 0);
+      const res = await db.prepare(`
+        INSERT INTO payments (receipt_number, invoice_id, tenant_id, amount, payment_date, payment_method, reference_code, payer_phone, payer_name, status, notes)
+        VALUES (?, ?, ?, ?, datetime('now'), ?, ?, ?, ?, 'completed', ?)
+      `).bind(
+        recNum, b.invoice_id ? Number(b.invoice_id) : null, Number(b.tenant_id), amount,
+        b.payment_method || 'M-Pesa', b.reference_code || ('MPESA' + Math.floor(100000 + Math.random() * 900000)),
+        b.payer_phone || null, b.payer_name || null, b.notes || null
+      ).run();
+      if (b.invoice_id) {
+        const inv = await db.prepare('SELECT total_amount, amount_paid FROM invoices WHERE id = ?').bind(Number(b.invoice_id)).first();
+        if (inv) {
+          const newPaid = Number(inv.amount_paid) + amount;
+          const newBal = Math.max(0, Number(inv.total_amount) - newPaid);
+          const newStatus = newBal <= 0 ? 'paid' : 'partially_paid';
+          await db.prepare('UPDATE invoices SET amount_paid = ?, balance = ?, status = ? WHERE id = ?').bind(newPaid, newBal, newStatus, Number(b.invoice_id)).run();
+        }
+      }
+      return json({ success: true, receipt_number: recNum, amount, status: 'completed' }, 201);
+    }
+
+    // 12. Water Readings
+    if (pathname === '/api/water-readings' && method === 'GET') {
+      const rows = (await db.prepare(`
+        SELECT w.*, u.unit_number, u.meter_number, p.name as property_name, t.name as tenant_name
+        FROM water_readings w
+        JOIN units u ON w.unit_id = u.id
+        JOIN properties p ON u.property_id = p.id
+        LEFT JOIN leases l ON u.id = l.unit_id AND l.status = 'active'
+        LEFT JOIN tenants t ON l.tenant_id = t.id
+        ORDER BY w.id DESC
+      `).all()).results || [];
+      return json(rows);
+    }
+
+    // 13. Maintenance
+    if (pathname === '/api/maintenance' && method === 'GET') {
+      const rows = (await db.prepare(`
+        SELECT m.*, p.name as property_name, u.unit_number, t.name as tenant_name, t.phone as tenant_phone
+        FROM maintenance_requests m
+        JOIN properties p ON m.property_id = p.id
+        JOIN units u ON m.unit_id = u.id
+        LEFT JOIN tenants t ON m.tenant_id = t.id
+        ORDER BY m.id DESC
+      `).all()).results || [];
+      return json(rows);
+    }
+
+    // 14. Expenses
+    if (pathname === '/api/expenses' && method === 'GET') {
+      const rows = (await db.prepare(`
+        SELECT e.*, p.name as property_name
+        FROM expenses e
+        JOIN properties p ON e.property_id = p.id
+        ORDER BY e.expense_date DESC, e.id DESC
+      `).all()).results || [];
+      return json(rows);
+    }
+
+    // 15. Public Vacancies
+    if (pathname === '/api/public/vacancies' && method === 'GET') {
+      const rows = (await db.prepare(`
+        SELECT u.id, u.unit_number, u.floor, u.unit_type, u.base_rent, u.service_charge, u.garbage_fee, u.status, u.notes,
+               p.id as property_id, p.name as property_name, p.property_type, p.address, p.city
+        FROM units u
+        JOIN properties p ON u.property_id = p.id
+        WHERE u.status = 'vacant'
+        ORDER BY u.base_rent ASC
+      `).all()).results || [];
+      return json(rows);
+    }
+  } catch (err) {
+    console.error('D1 execution error:', err);
+    return json({ error: err.message || 'Database error occurred' }, 500);
+  }
+
+  return null;
+}
+
 export async function onRequest(context) {
-  const { request } = context;
+  const { request, env } = context;
   const url = new URL(request.url);
   const pathname = url.pathname;
   const method = request.method;
@@ -223,6 +528,12 @@ export async function onRequest(context) {
   }
 
   const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: corsHeaders });
+
+  // If Cloudflare D1 database binding 'DB' is present, route to D1
+  if (env && env.DB) {
+    const d1Res = await handleD1(context, json, corsHeaders);
+    if (d1Res !== null) return d1Res;
+  }
 
   // 1. Portfolio Stats
   if (pathname === '/api/stats' && method === 'GET') {
