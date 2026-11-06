@@ -4,13 +4,13 @@
  * Cache Version: bomasphere-v2.0.0
  */
 
-const CACHE_NAME = 'bomasphere-cache-v3.2';
+const CACHE_NAME = 'bomasphere-cache-v3.3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/rentals.html',
   '/styles.css',
-  '/app.js?v=3.2',
+  '/app.js?v=3.3',
   '/manifest.json',
   '/favicon.ico',
   '/favicon.svg',
@@ -51,6 +51,26 @@ self.addEventListener('activate', event => {
       );
     }).then(() => self.clients.claim())
   );
+});
+
+// Listen for Cache Purge Messages from BomaSphere client
+self.addEventListener('message', async event => {
+  if (event.data && event.data.action === 'PURGE_API_CACHE') {
+    try {
+      const cache = await caches.open(CACHE_NAME);
+      const keys = await cache.keys();
+      await Promise.all(
+        keys
+          .filter(k => new URL(k.url).pathname.startsWith('/api/'))
+          .map(k => cache.delete(k))
+      );
+      if (event.ports && event.ports[0]) {
+        event.ports[0].postMessage({ success: true, purged: true });
+      }
+    } catch (e) {
+      console.warn('[SW] Error purging API cache:', e);
+    }
+  }
 });
 
 // Fetch Event Strategy: Stale-While-Revalidate for Same-Origin Assets, Network-First for APIs

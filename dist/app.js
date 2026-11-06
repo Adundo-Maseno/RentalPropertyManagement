@@ -268,12 +268,50 @@ class BomaSphereApp {
   // ==========================================
   // DATA FETCHING & SYNC (WITH RBAC HEADERS)
   // ==========================================
+  async purgeApiCache() {
+    if ('caches' in window) {
+      try {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(async name => {
+            const cache = await caches.open(name);
+            const keys = await cache.keys();
+            await Promise.all(
+              keys
+                .filter(k => new URL(k.url).pathname.startsWith('/api/'))
+                .map(k => cache.delete(k))
+            );
+          })
+        );
+      } catch (err) {
+        console.warn('[Cache] Could not purge client API cache:', err);
+      }
+    }
+    // Also notify active Service Worker
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      try {
+        navigator.serviceWorker.controller.postMessage({ action: 'PURGE_API_CACHE' });
+      } catch (e) { }
+    }
+  }
+
   async fetchAPI(endpoint, options = {}) {
     try {
+      const method = (options.method || 'GET').toUpperCase();
+      const isWriteOp = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method);
+
       options.headers = options.headers || {};
       if (this.state.authToken) {
         options.headers['Authorization'] = `Bearer ${this.state.authToken}`;
       }
+
+      // Fresh cache-busted reads for GET requests to guarantee real-time data
+      if (method === 'GET' && !endpoint.includes('_t=')) {
+        const sep = endpoint.includes('?') ? '&' : '?';
+        endpoint = `${endpoint}${sep}_t=${Date.now()}`;
+      }
+      options.cache = 'no-store';
+
       const res = await fetch(endpoint, options);
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
@@ -290,7 +328,15 @@ class BomaSphereApp {
         }
         throw new Error(errorData.error || `HTTP error ${res.status}`);
       }
-      return await res.json();
+      const data = await res.json();
+
+      // Successful write operation: automatically purge cached records and refresh the system to get latest data
+      if (isWriteOp && !options.skipAutoRefresh) {
+        await this.purgeApiCache();
+        await this.refreshAllData();
+      }
+
+      return data;
     } catch (err) {
       console.error(`API Fetch Error (${endpoint}):`, err);
       if (!options.silent && !err.message.includes('403 Forbidden') && !err.message.includes('401 Unauthorized')) {
