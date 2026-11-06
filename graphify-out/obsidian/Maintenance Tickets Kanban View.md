@@ -1,16 +1,18 @@
 ---
 source_file: "public/index.html"
 type: "document"
-community: "Maintenance Work Orders & Dispatch"
+community: "Community 21"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Maintenance_Work_Orders__Dispatch
+  - community/Community_21
 ---
 
 # Maintenance Tickets Kanban View
 
 ## Connections
+- [[dot-renderMaintenance()]] - `renders` [EXTRACTED]
+- [[dot-switchView()]] - `activates` [EXTRACTED]
 - [[Maintenance & Contractor Dispatch System]] - `implements` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/Maintenance_Work_Orders__Dispatch
+#graphify/document #graphify/EXTRACTED #community/Community_21

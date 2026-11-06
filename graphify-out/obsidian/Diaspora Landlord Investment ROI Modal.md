@@ -1,16 +1,17 @@
 ---
 source_file: "public/index.html"
 type: "document"
-community: "Diaspora Landlord Investment ROI"
+community: "Community 25"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Diaspora_Landlord_Investment_ROI
+  - community/Community_25
 ---
 
 # Diaspora Landlord Investment ROI Modal
 
 ## Connections
+- [[dot-openDiasporaRoiModal()]] - `opens` [EXTRACTED]
 - [[Diaspora Landlord Multi-Currency Hub & Investment ROI]] - `implements` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/Diaspora_Landlord_Investment_ROI
+#graphify/document #graphify/EXTRACTED #community/Community_25

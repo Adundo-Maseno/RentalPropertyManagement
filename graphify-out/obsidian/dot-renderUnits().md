@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "Financial & Ledger Utilities"
+community: "Community 2"
 location: "L643"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Financial__Ledger_Utilities
+  - community/Community_2
 ---
 
 # .renderUnits()
@@ -21,5 +21,6 @@ tags:
 - [[dot-renderCurrentView()]] - `calls` [EXTRACTED]
 - [[dot-renderUnits()]] - `calls` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
+- [[Portfolio Properties & Units View]] - `renders` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Financial__Ledger_Utilities
+#graphify/code #graphify/EXTRACTED #community/Community_2

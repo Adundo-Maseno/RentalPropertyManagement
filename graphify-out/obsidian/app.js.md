@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "Frontend Application Bootstrap"
+community: "Community 16"
 location: "L1"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Frontend_Application_Bootstrap
+  - community/Community_16
 ---
 
 # app.js
@@ -16,4 +16,4 @@ tags:
 - [[escapeHtml()]] - `contains` [EXTRACTED]
 - [[initApp()]] - `indirect_call` [INFERRED]
 
-#graphify/code #graphify/EXTRACTED #community/Frontend_Application_Bootstrap
+#graphify/code #graphify/EXTRACTED #community/Community_16

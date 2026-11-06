@@ -1,16 +1,18 @@
 ---
 source_file: "public/index.html"
 type: "document"
-community: "Landlord Remittance & Expense Statements"
+community: "Community 23"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Landlord_Remittance__Expense_Statements
+  - community/Community_23
 ---
 
 # Landlord Remittance Statements View
 
 ## Connections
+- [[dot-renderLandlordStatementsInit()]] - `renders` [EXTRACTED]
+- [[dot-switchView()]] - `activates` [EXTRACTED]
 - [[Landlord Remittance & Owner Statement System]] - `implements` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/Landlord_Remittance__Expense_Statements
+#graphify/document #graphify/EXTRACTED #community/Community_23

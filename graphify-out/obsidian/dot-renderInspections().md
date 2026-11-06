@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "Financial & Ledger Utilities"
+community: "Community 2"
 location: "L4125"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Financial__Ledger_Utilities
+  - community/Community_2
 ---
 
 # .renderInspections()
@@ -18,5 +18,6 @@ tags:
 - [[dot-settleDepositRefund()]] - `calls` [EXTRACTED]
 - [[dot-submitInspectionReport()]] - `calls` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
+- [[Move-In  Exit Audits View]] - `renders` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Financial__Ledger_Utilities
+#graphify/code #graphify/EXTRACTED #community/Community_2

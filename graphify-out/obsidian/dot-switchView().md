@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "Property Management Event Handlers"
+community: "Community 1"
 location: "L149"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Property_Management_Event_Handlers
+  - community/Community_1
 ---
 
 # .switchView()
@@ -28,5 +28,19 @@ tags:
 - [[dot-updateUserSessionDisplay()]] - `calls` [EXTRACTED]
 - [[dot-viewPropertyStatement()]] - `calls` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
+- [[Digital Leases & E-Signatures View]] - `activates` [EXTRACTED]
+- [[Landlord Remittance Statements View]] - `activates` [EXTRACTED]
+- [[Maintenance Tickets Kanban View]] - `activates` [EXTRACTED]
+- [[Move-In  Exit Audits View]] - `activates` [EXTRACTED]
+- [[Operating Expenses Management View]] - `activates` [EXTRACTED]
+- [[Payments & M-Pesa Hub View]] - `activates` [EXTRACTED]
+- [[Portfolio Properties & Units View]] - `activates` [EXTRACTED]
+- [[RBAC Users & Roles Management View]] - `activates` [EXTRACTED]
+- [[Rent Roll Invoicing & Ledger View]] - `activates` [EXTRACTED]
+- [[SMS & Communications Hub View]] - `activates` [EXTRACTED]
+- [[Shared Estate Amenities View]] - `activates` [EXTRACTED]
+- [[Tenants & Leases Directory View]] - `activates` [EXTRACTED]
+- [[Visitor Gate Passes Ledger View]] - `activates` [EXTRACTED]
+- [[Water Sub-Metering Management View]] - `activates` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Property_Management_Event_Handlers
+#graphify/code #graphify/EXTRACTED #community/Community_1

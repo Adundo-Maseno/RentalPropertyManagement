@@ -3,7 +3,7 @@
     {
       "id": "g0",
       "type": "group",
-      "label": "Backend & Database Infrastructure",
+      "label": "Community 0",
       "x": 0,
       "y": 0,
       "width": 1540,
@@ -319,7 +319,7 @@
     {
       "id": "n_server_resolverequestuser",
       "type": "file",
-      "file": "resolveRequestUser()_1.md",
+      "file": "resolveRequestUser().md",
       "x": 1220,
       "y": 400,
       "width": 180,
@@ -445,7 +445,7 @@
     {
       "id": "g1",
       "type": "group",
-      "label": "Property Management Event Handlers",
+      "label": "Community 1",
       "x": 1620,
       "y": 0,
       "width": 1540,
@@ -833,7 +833,7 @@
     {
       "id": "g2",
       "type": "group",
-      "label": "Financial & Ledger Utilities",
+      "label": "Community 2",
       "x": 3240,
       "y": 0,
       "width": 1320,
@@ -1167,7 +1167,7 @@
     {
       "id": "g3",
       "type": "group",
-      "label": "Core App State & RBAC Controller",
+      "label": "Community 3",
       "x": 4640,
       "y": 0,
       "width": 1320,
@@ -1429,7 +1429,7 @@
     {
       "id": "g4",
       "type": "group",
-      "label": "UI Modal Launchers & Navigation",
+      "label": "Community 4",
       "x": 6040,
       "y": 0,
       "width": 1100,
@@ -1619,7 +1619,7 @@
     {
       "id": "g5",
       "type": "group",
-      "label": "PWA Web App Manifest",
+      "label": "Community 5",
       "x": 7220,
       "y": 0,
       "width": 1100,
@@ -1647,7 +1647,7 @@
     {
       "id": "n_public_manifest_description",
       "type": "file",
-      "file": "description_1.md",
+      "file": "description.md",
       "x": 7640,
       "y": 80,
       "width": 180,
@@ -1719,7 +1719,7 @@
     {
       "id": "n_public_manifest_name",
       "type": "file",
-      "file": "name_1.md",
+      "file": "name.md",
       "x": 7240,
       "y": 240,
       "width": 180,
@@ -1791,7 +1791,7 @@
     {
       "id": "g6",
       "type": "group",
-      "label": "System Diagnostic & Portal Views",
+      "label": "Community 6",
       "x": 8400,
       "y": 0,
       "width": 1100,
@@ -1954,7 +1954,7 @@
     {
       "id": "g7",
       "type": "group",
-      "label": "App Initialization & Auth Lifecycle",
+      "label": "Community 7",
       "x": 0,
       "y": 900,
       "width": 880,
@@ -2090,7 +2090,7 @@
     {
       "id": "g8",
       "type": "group",
-      "label": "Project Metadata & Node Modules",
+      "label": "Community 8",
       "x": 1620,
       "y": 900,
       "width": 880,
@@ -2118,7 +2118,7 @@
     {
       "id": "n_package_description",
       "type": "file",
-      "file": "description.md",
+      "file": "description_1.md",
       "x": 2040,
       "y": 980,
       "width": 180,
@@ -2154,7 +2154,7 @@
     {
       "id": "n_package_name",
       "type": "file",
-      "file": "name.md",
+      "file": "name_1.md",
       "x": 2040,
       "y": 1060,
       "width": 180,
@@ -2217,7 +2217,7 @@
     {
       "id": "g9",
       "type": "group",
-      "label": "Digital Leases & Payment Interactions",
+      "label": "Community 9",
       "x": 3240,
       "y": 900,
       "width": 880,
@@ -2317,7 +2317,7 @@
     {
       "id": "g10",
       "type": "group",
-      "label": "Tenancy Lease & E-Sign Workflows",
+      "label": "Community 10",
       "x": 4640,
       "y": 900,
       "width": 660,
@@ -2408,7 +2408,7 @@
     {
       "id": "g11",
       "type": "group",
-      "label": "SMS & WhatsApp Messaging Hub",
+      "label": "Community 11",
       "x": 6040,
       "y": 900,
       "width": 660,
@@ -2463,7 +2463,7 @@
     {
       "id": "g12",
       "type": "group",
-      "label": "Cloudflare Edge Serverless Functions",
+      "label": "Community 12",
       "x": 7220,
       "y": 900,
       "width": 600,
@@ -2500,7 +2500,7 @@
     {
       "id": "n_functions_api_catchall_resolverequestuser",
       "type": "file",
-      "file": "resolveRequestUser().md",
+      "file": "resolveRequestUser()_1.md",
       "x": 7440,
       "y": 1060,
       "width": 180,
@@ -2509,7 +2509,7 @@
     {
       "id": "g13",
       "type": "group",
-      "label": "Water Sub-Metering Calculations",
+      "label": "Community 13",
       "x": 8400,
       "y": 900,
       "width": 600,
@@ -2555,7 +2555,7 @@
     {
       "id": "g14",
       "type": "group",
-      "label": "Gated Security & Visitor Passes",
+      "label": "Community 14",
       "x": 0,
       "y": 1500,
       "width": 600,
@@ -2601,7 +2601,7 @@
     {
       "id": "g15",
       "type": "group",
-      "label": "Smart IoT & Utility Telemetry",
+      "label": "Community 15",
       "x": 1620,
       "y": 1500,
       "width": 600,
@@ -2647,7 +2647,7 @@
     {
       "id": "g16",
       "type": "group",
-      "label": "Frontend Application Bootstrap",
+      "label": "Community 16",
       "x": 3240,
       "y": 1500,
       "width": 600,
@@ -2684,7 +2684,7 @@
     {
       "id": "g17",
       "type": "group",
-      "label": "Tenant Onboarding & Lead Conversion",
+      "label": "Community 17",
       "x": 4640,
       "y": 1500,
       "width": 600,
@@ -2721,7 +2721,7 @@
     {
       "id": "g18",
       "type": "group",
-      "label": "Unit Assignment & Vacancy Allocation",
+      "label": "Community 18",
       "x": 6040,
       "y": 1500,
       "width": 600,
@@ -2758,7 +2758,7 @@
     {
       "id": "g19",
       "type": "group",
-      "label": "Estate Amenities & Clubhouse Bookings",
+      "label": "Community 19",
       "x": 7220,
       "y": 1500,
       "width": 600,
@@ -2795,7 +2795,7 @@
     {
       "id": "g20",
       "type": "group",
-      "label": "Rent Ledger & Batch Invoicing",
+      "label": "Community 20",
       "x": 8400,
       "y": 1500,
       "width": 600,
@@ -2832,7 +2832,7 @@
     {
       "id": "g21",
       "type": "group",
-      "label": "Maintenance Work Orders & Dispatch",
+      "label": "Community 21",
       "x": 0,
       "y": 1980,
       "width": 600,
@@ -2869,7 +2869,7 @@
     {
       "id": "g22",
       "type": "group",
-      "label": "Move-In Condition Audits & Settlement",
+      "label": "Community 22",
       "x": 1620,
       "y": 1980,
       "width": 600,
@@ -2906,7 +2906,7 @@
     {
       "id": "g23",
       "type": "group",
-      "label": "Landlord Remittance & Expense Statements",
+      "label": "Community 23",
       "x": 3240,
       "y": 1980,
       "width": 600,
@@ -2943,7 +2943,7 @@
     {
       "id": "g24",
       "type": "group",
-      "label": "Artisan Marketplace & Fundi Escrow",
+      "label": "Community 24",
       "x": 4640,
       "y": 1980,
       "width": 600,
@@ -2971,7 +2971,7 @@
     {
       "id": "g25",
       "type": "group",
-      "label": "Diaspora Landlord Investment ROI",
+      "label": "Community 25",
       "x": 6040,
       "y": 1980,
       "width": 600,
@@ -2999,7 +2999,7 @@
     {
       "id": "g26",
       "type": "group",
-      "label": "KRA eTIMS Tax Compliance",
+      "label": "Community 26",
       "x": 7220,
       "y": 1980,
       "width": 600,
@@ -3027,7 +3027,7 @@
     {
       "id": "g27",
       "type": "group",
-      "label": "AI Tenant Vetting & CRB Scoring",
+      "label": "Community 27",
       "x": 8400,
       "y": 1980,
       "width": 600,
@@ -3055,7 +3055,7 @@
     {
       "id": "g28",
       "type": "group",
-      "label": "Public Viewing Leads & Prospect Tours",
+      "label": "Community 28",
       "x": 0,
       "y": 2460,
       "width": 600,
@@ -3083,7 +3083,7 @@
     {
       "id": "g29",
       "type": "group",
-      "label": "PWA Service Worker & Offline Cache",
+      "label": "Community 29",
       "x": 1620,
       "y": 2460,
       "width": 600,
@@ -3111,7 +3111,7 @@
     {
       "id": "g30",
       "type": "group",
-      "label": "Operating Expense Entry Modal",
+      "label": "Community 30",
       "x": 3240,
       "y": 2460,
       "width": 600,
@@ -3130,7 +3130,7 @@
     {
       "id": "g31",
       "type": "group",
-      "label": "Property Asset Registration",
+      "label": "Community 31",
       "x": 4640,
       "y": 2460,
       "width": 600,
@@ -3149,7 +3149,7 @@
     {
       "id": "g32",
       "type": "group",
-      "label": "Resident Registration Form",
+      "label": "Community 32",
       "x": 6040,
       "y": 2460,
       "width": 600,
@@ -3168,7 +3168,7 @@
     {
       "id": "g33",
       "type": "group",
-      "label": "Unit Specifications Modal",
+      "label": "Community 33",
       "x": 7220,
       "y": 2460,
       "width": 600,
@@ -3187,7 +3187,7 @@
     {
       "id": "g34",
       "type": "group",
-      "label": "SaaS User Management",
+      "label": "Community 34",
       "x": 8400,
       "y": 2460,
       "width": 600,
@@ -3206,7 +3206,7 @@
     {
       "id": "g35",
       "type": "group",
-      "label": "Portfolio & Units Showcase",
+      "label": "Community 35",
       "x": 0,
       "y": 2940,
       "width": 600,
@@ -3225,7 +3225,7 @@
     {
       "id": "g36",
       "type": "group",
-      "label": "Global Edge Runtime",
+      "label": "Community 36",
       "x": 1620,
       "y": 2940,
       "width": 600,
@@ -3244,7 +3244,7 @@
     {
       "id": "g37",
       "type": "group",
-      "label": "Native HTTP Server",
+      "label": "Community 37",
       "x": 3240,
       "y": 2940,
       "width": 600,
@@ -3263,7 +3263,7 @@
     {
       "id": "g38",
       "type": "group",
-      "label": "SQLite Database Storage",
+      "label": "Community 38",
       "x": 4640,
       "y": 2940,
       "width": 600,
@@ -3282,280 +3282,10 @@
   ],
   "edges": [
     {
-      "id": "e_build_build_distdir",
-      "fromNode": "n_build",
-      "toNode": "n_build_distdir",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_build_build_fs",
-      "fromNode": "n_build",
-      "toNode": "n_build_fs",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_build_build_path",
-      "fromNode": "n_build",
-      "toNode": "n_build_path",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_build_build_srcdir",
-      "fromNode": "n_build",
-      "toNode": "n_build_srcdir",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_build_ref_node_fs",
-      "fromNode": "n_build",
-      "toNode": "n_ref_node_fs",
-      "label": "imports_from [EXTRACTED]"
-    },
-    {
-      "id": "e_build_ref_node_path",
-      "fromNode": "n_build",
-      "toNode": "n_ref_node_path",
-      "label": "imports_from [EXTRACTED]"
-    },
-    {
-      "id": "e_db_db_crypto",
-      "fromNode": "n_db",
-      "toNode": "n_db_crypto",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_db_db_databasesync",
-      "fromNode": "n_db",
-      "toNode": "n_db_databasesync",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_db_db_db",
-      "fromNode": "n_db",
-      "toNode": "n_db_db",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_db_db_db_path",
-      "fromNode": "n_db",
-      "toNode": "n_db_db_path",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_db_db_hashpassword",
-      "fromNode": "n_db",
-      "toNode": "n_db_hashpassword",
-      "label": "indirect_call [INFERRED]"
-    },
-    {
-      "id": "e_db_db_initschema",
-      "fromNode": "n_db",
-      "toNode": "n_db_initschema",
-      "label": "indirect_call [INFERRED]"
-    },
-    {
-      "id": "e_db_db_path",
-      "fromNode": "n_db",
-      "toNode": "n_db_path",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_db_db_seeddatabase",
-      "fromNode": "n_db",
-      "toNode": "n_db_seeddatabase",
-      "label": "indirect_call [INFERRED]"
-    },
-    {
-      "id": "e_db_db_seednextgenfeatures",
-      "fromNode": "n_db",
-      "toNode": "n_db_seednextgenfeatures",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_db_db_seedusersifempty",
-      "fromNode": "n_db",
-      "toNode": "n_db_seedusersifempty",
-      "label": "indirect_call [INFERRED]"
-    },
-    {
-      "id": "e_db_db_verifypassword",
-      "fromNode": "n_db",
-      "toNode": "n_db_verifypassword",
-      "label": "indirect_call [INFERRED]"
-    },
-    {
-      "id": "e_db_ref_node_crypto",
-      "fromNode": "n_db",
-      "toNode": "n_ref_node_crypto",
-      "label": "imports_from [EXTRACTED]"
-    },
-    {
-      "id": "e_db_ref_node_path",
-      "fromNode": "n_db",
-      "toNode": "n_ref_node_path",
-      "label": "imports_from [EXTRACTED]"
-    },
-    {
-      "id": "e_db_ref_node_sqlite",
-      "fromNode": "n_db",
-      "toNode": "n_ref_node_sqlite",
-      "label": "imports_from [EXTRACTED]"
-    },
-    {
-      "id": "e_server_db",
-      "fromNode": "n_server",
-      "toNode": "n_db",
-      "label": "imports_from [EXTRACTED]"
-    },
-    {
-      "id": "e_server_db_db",
-      "fromNode": "n_server",
-      "toNode": "n_db_db",
-      "label": "imports [EXTRACTED]"
-    },
-    {
-      "id": "e_db_seedusersifempty_db_hashpassword",
-      "fromNode": "n_db_seedusersifempty",
-      "toNode": "n_db_hashpassword",
+      "id": "e_public_app_initapp_public_app_bomasphereapp",
+      "fromNode": "n_public_app_initapp",
+      "toNode": "n_public_app_bomasphereapp",
       "label": "calls [EXTRACTED]"
-    },
-    {
-      "id": "e_server_db_hashpassword",
-      "fromNode": "n_server",
-      "toNode": "n_db_hashpassword",
-      "label": "imports [EXTRACTED]"
-    },
-    {
-      "id": "e_server_handlerequest_db_hashpassword",
-      "fromNode": "n_server_handlerequest",
-      "toNode": "n_db_hashpassword",
-      "label": "calls [EXTRACTED]"
-    },
-    {
-      "id": "e_server_db_verifypassword",
-      "fromNode": "n_server",
-      "toNode": "n_db_verifypassword",
-      "label": "imports [EXTRACTED]"
-    },
-    {
-      "id": "e_server_handlerequest_db_verifypassword",
-      "fromNode": "n_server_handlerequest",
-      "toNode": "n_db_verifypassword",
-      "label": "calls [EXTRACTED]"
-    },
-    {
-      "id": "e_server_db_initschema",
-      "fromNode": "n_server",
-      "toNode": "n_db_initschema",
-      "label": "imports [EXTRACTED]"
-    },
-    {
-      "id": "e_server_db_seeddatabase",
-      "fromNode": "n_server",
-      "toNode": "n_db_seeddatabase",
-      "label": "imports [EXTRACTED]"
-    },
-    {
-      "id": "e_server_handlerequest_db_seeddatabase",
-      "fromNode": "n_server_handlerequest",
-      "toNode": "n_db_seeddatabase",
-      "label": "calls [EXTRACTED]"
-    },
-    {
-      "id": "e_functions_api_catchall_functions_api_catchall_db",
-      "fromNode": "n_functions_api_catchall",
-      "toNode": "n_functions_api_catchall_db",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_functions_api_catchall_functions_api_catchall_onrequest",
-      "fromNode": "n_functions_api_catchall",
-      "toNode": "n_functions_api_catchall_onrequest",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_functions_api_catchall_functions_api_catchall_resolverequestuser",
-      "fromNode": "n_functions_api_catchall",
-      "toNode": "n_functions_api_catchall_resolverequestuser",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_functions_api_catchall_onrequest_functions_api_catchall_resolverequestuser",
-      "fromNode": "n_functions_api_catchall_onrequest",
-      "toNode": "n_functions_api_catchall_resolverequestuser",
-      "label": "calls [EXTRACTED]"
-    },
-    {
-      "id": "e_package_package_author",
-      "fromNode": "n_package",
-      "toNode": "n_package_author",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_package_package_description",
-      "fromNode": "n_package",
-      "toNode": "n_package_description",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_package_package_keywords",
-      "fromNode": "n_package",
-      "toNode": "n_package_keywords",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_package_package_license",
-      "fromNode": "n_package",
-      "toNode": "n_package_license",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_package_package_main",
-      "fromNode": "n_package",
-      "toNode": "n_package_main",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_package_package_name",
-      "fromNode": "n_package",
-      "toNode": "n_package_name",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_package_package_scripts",
-      "fromNode": "n_package",
-      "toNode": "n_package_scripts",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_package_package_type",
-      "fromNode": "n_package",
-      "toNode": "n_package_type",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_package_package_version",
-      "fromNode": "n_package",
-      "toNode": "n_package_version",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_package_scripts_package_scripts_build",
-      "fromNode": "n_package_scripts",
-      "toNode": "n_package_scripts_build",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_package_scripts_package_scripts_start",
-      "fromNode": "n_package_scripts",
-      "toNode": "n_package_scripts_start",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_package_scripts_package_scripts_test",
-      "fromNode": "n_package_scripts",
-      "toNode": "n_package_scripts_test",
-      "label": "contains [EXTRACTED]"
     },
     {
       "id": "e_public_app_public_app_bomasphereapp",
@@ -3564,123 +3294,9 @@
       "label": "contains [EXTRACTED]"
     },
     {
-      "id": "e_public_app_public_app_escapehtml",
-      "fromNode": "n_public_app",
-      "toNode": "n_public_app_escapehtml",
-      "label": "contains [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_public_app_initapp",
-      "fromNode": "n_public_app",
-      "toNode": "n_public_app_initapp",
-      "label": "indirect_call [INFERRED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_animatecounter",
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderlandlordstatementsinit",
       "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_animatecounter",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_calculateinvoicetotal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_calculateinvoicetotal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_calcwatercost",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_calcwatercost",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_clearleasesignature",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_clearleasesignature",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_closemodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_closemodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_constructor",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_constructor",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_convertcurrency",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_convertcurrency",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_convertleadtotenant",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_convertleadtotenant",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_copyuseremail",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_copyuseremail",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_createlease",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_createlease",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_deleteuser",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_deleteuser",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_dispatchbulk5threminders",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_dispatchbulk5threminders",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_enforceactionrbac",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_enforceactionrbac",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_escapehtml",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_escapehtml",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_executebulk5thsmsdispatch",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_executebulk5thsmsdispatch",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_fetchapi",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_fetchapi",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_formatmoney",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_formatmoney",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_generatehiggsfieldvideo",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_generatehiggsfieldvideo",
+      "toNode": "n_public_app_bomasphereapp_renderlandlordstatementsinit",
       "label": "method [EXTRACTED]"
     },
     {
@@ -3690,9 +3306,453 @@
       "label": "method [EXTRACTED]"
     },
     {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_getcurrencysymbol",
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderexpenses",
       "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_getcurrencysymbol",
+      "toNode": "n_public_app_bomasphereapp_renderexpenses",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_rendertenantportal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_rendertenantportal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_togglemobiledrawer",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_togglemobiledrawer",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_switchresident",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_switchresident",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_initcharts",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_initcharts",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_updatecharts",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_updatecharts",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openmodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openmodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_closemodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_closemodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openmpesamodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openmpesamodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openmpesafortenant",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openmpesafortenant",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openmpesaforinvoice",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openmpesaforinvoice",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_onmpesatenantchange",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_onmpesatenantchange",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_onmpesainvoicechange",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_onmpesainvoicechange",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handlempesasubmit",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_handlempesasubmit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_runbatchbilling",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_runbatchbilling",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_switchview",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_switchview",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openwaterreadingmodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openwaterreadingmodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openwaterreadingforunit",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openwaterreadingforunit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_calcwatercost",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_calcwatercost",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handlewatersubmit",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_handlewatersubmit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openmaintenancemodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openmaintenancemodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_opennewticketmodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_opennewticketmodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handleticketsubmit",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_handleticketsubmit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_updateticketstatus",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_updateticketstatus",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_viewprintablereceipt",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_viewprintablereceipt",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_viewprintableinvoice",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_viewprintableinvoice",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_usetemplate",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_usetemplate",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_sendquickcomm",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_sendquickcomm",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_showarrearssms",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_showarrearssms",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openaddpropertymodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openaddpropertymodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handleaddpropertysubmit",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_handleaddpropertysubmit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openaddunitmodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openaddunitmodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handleaddunitsubmit",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_handleaddunitsubmit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_escapehtml",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_escapehtml",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openaddtenantmodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openaddtenantmodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_ontenantmodalunitchange",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_ontenantmodalunitchange",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handleaddtenantsubmit",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_handleaddtenantsubmit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_constructor",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_constructor",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openaddleasemodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openaddleasemodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openassigntenantmodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openassigntenantmodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_onleaseunitselected",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_onleaseunitselected",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handlecreateleasesubmit",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_handlecreateleasesubmit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_createlease",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_createlease",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_opencreateinvoicemodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_opencreateinvoicemodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_oninvoicetenantselected",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_oninvoicetenantselected",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_calculateinvoicetotal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_calculateinvoicetotal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handlecustominvoicesubmit",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_handlecustominvoicesubmit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openmanualpaymentforinvoice",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openmanualpaymentforinvoice",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_promptmoveinsettlement",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_promptmoveinsettlement",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_onmoveinpromptaction",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_onmoveinpromptaction",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openmanualpaymentmodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openmanualpaymentmodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_onmanualtenantchange",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_onmanualtenantchange",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handlemanualpaymentsubmit",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_handlemanualpaymentsubmit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_onwaterunitchange",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_onwaterunitchange",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openbroadcastmodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openbroadcastmodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handlebroadcastsubmit",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_handlebroadcastsubmit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openaddexpensemodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openaddexpensemodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handleaddexpensesubmit",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_handleaddexpensesubmit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_viewpropertystatement",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_viewpropertystatement",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_setupeventlisteners",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_setupeventlisteners",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderhiggsfield",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_renderhiggsfield",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_setupdatedisplay",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_setupdatedisplay",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_onhiggsfieldunitchange",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_onhiggsfieldunitchange",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_sethiggsfieldmode",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_sethiggsfieldmode",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_updatehiggsfieldprompt",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_updatehiggsfieldprompt",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_sethiggsfieldratio",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_sethiggsfieldratio",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_generatehiggsfieldvideo",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_generatehiggsfieldvideo",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_fetchapi",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_fetchapi",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_loadsampletour",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_loadsampletour",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_dispatchbulk5threminders",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_dispatchbulk5threminders",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openbulk5thsmsmodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openbulk5thsmsmodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_toggleallsmsrecipients",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_toggleallsmsrecipients",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_executebulk5thsmsdispatch",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_executebulk5thsmsdispatch",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_viewtenantledger",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_viewtenantledger",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_getunitbadgeclass",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_getunitbadgeclass",
       "label": "method [EXTRACTED]"
     },
     {
@@ -3714,693 +3774,9 @@
       "label": "method [EXTRACTED]"
     },
     {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_getunitbadgeclass",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_getunitbadgeclass",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handleaddexpensesubmit",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_handleaddexpensesubmit",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handleaddpropertysubmit",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_handleaddpropertysubmit",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handleaddtenantsubmit",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_handleaddtenantsubmit",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handleaddunitsubmit",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_handleaddunitsubmit",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handleaddusersubmit",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_handleaddusersubmit",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handlebroadcastsubmit",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_handlebroadcastsubmit",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handlecreateleasesubmit",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_handlecreateleasesubmit",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handlecustominvoicesubmit",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_handlecustominvoicesubmit",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handlemanualpaymentsubmit",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_handlemanualpaymentsubmit",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handlempesasubmit",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_handlempesasubmit",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handlepasswordlogin",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_handlepasswordlogin",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handleticketsubmit",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_handleticketsubmit",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handlewatersubmit",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_handlewatersubmit",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_init",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_init",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_initauthsession",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_initauthsession",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_initcharts",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_initcharts",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_initleasesignaturepad",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_initleasesignaturepad",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_initserviceworkerandpwa",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_initserviceworkerandpwa",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_loadmarketplace",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_loadmarketplace",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_loadsampletour",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_loadsampletour",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_loadtenantvettings",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_loadtenantvettings",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_logout",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_logout",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_markviewingstatus",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_markviewingstatus",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_onhiggsfieldunitchange",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_onhiggsfieldunitchange",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_oninvoicetenantselected",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_oninvoicetenantselected",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_onleaseunitselected",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_onleaseunitselected",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_onmanualtenantchange",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_onmanualtenantchange",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_onmoveinpromptaction",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_onmoveinpromptaction",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_onmpesainvoicechange",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_onmpesainvoicechange",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_onmpesatenantchange",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_onmpesatenantchange",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_ontenantmodalunitchange",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_ontenantmodalunitchange",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_onwaterunitchange",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_onwaterunitchange",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openaddexpensemodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openaddexpensemodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openaddleasemodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openaddleasemodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openaddpropertymodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openaddpropertymodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openaddtenantmodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openaddtenantmodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openaddunitmodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openaddunitmodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openaddusermodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openaddusermodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openartisanmarketplacemodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openartisanmarketplacemodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openassigntenantmodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openassigntenantmodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openauthmodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openauthmodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openbroadcastmodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openbroadcastmodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openbulk5thsmsmodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openbulk5thsmsmodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_opencreateinvoicemodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_opencreateinvoicemodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_opendiasporaroimodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_opendiasporaroimodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openetimsmodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openetimsmodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_opengatesecurityscannermodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_opengatesecurityscannermodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openleasesignmodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openleasesignmodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openmaintenancemodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openmaintenancemodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openmanualpaymentforinvoice",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openmanualpaymentforinvoice",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openmanualpaymentmodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openmanualpaymentmodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openmodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openmodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openmpesaforinvoice",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openmpesaforinvoice",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openmpesafortenant",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openmpesafortenant",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openmpesamodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openmpesamodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_opennewamenitybookingmodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_opennewamenitybookingmodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_opennewinspectionmodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_opennewinspectionmodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_opennewticketmodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_opennewticketmodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_opennewvisitorpassmodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_opennewvisitorpassmodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_opentenantvettingmodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_opentenantvettingmodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openwaterreadingforunit",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openwaterreadingforunit",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openwaterreadingmodal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_openwaterreadingmodal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_promptmoveinsettlement",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_promptmoveinsettlement",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_promptpwainstall",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_promptpwainstall",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_quickgatecheck",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_quickgatecheck",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_refreshalldata",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_refreshalldata",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_refreshiottelemetry",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_refreshiottelemetry",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_releaseescrow",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_releaseescrow",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderamenities",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_renderamenities",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_rendercommunications",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_rendercommunications",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_rendercurrentview",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_rendercurrentview",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderdashboard",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_renderdashboard",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderexpenses",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_renderexpenses",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderhiggsfield",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_renderhiggsfield",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderinspections",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_renderinspections",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderinvoices",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_renderinvoices",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderlandlordstatementsinit",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_renderlandlordstatementsinit",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderleases",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_renderleases",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_rendermaintenance",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_rendermaintenance",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderpayments",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_renderpayments",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderproperties",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_renderproperties",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_rendertenantportal",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_rendertenantportal",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_rendertenants",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_rendertenants",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderunits",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_renderunits",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderusers",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_renderusers",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderviewingleads",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_renderviewingleads",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_rendervisitorpasses",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_rendervisitorpasses",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderwaterreadings",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_renderwaterreadings",
-      "label": "method [EXTRACTED]"
-    },
-    {
       "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_restorethemeandmode",
       "fromNode": "n_public_app_bomasphereapp",
       "toNode": "n_public_app_bomasphereapp_restorethemeandmode",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_runbatchbilling",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_runbatchbilling",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_sendcustomwhatsapp",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_sendcustomwhatsapp",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_sendquickcomm",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_sendquickcomm",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_sendtestwhatsapp",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_sendtestwhatsapp",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_setcurrency",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_setcurrency",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_sethiggsfieldmode",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_sethiggsfieldmode",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_sethiggsfieldratio",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_sethiggsfieldratio",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_settheme",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_settheme",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_settledepositrefund",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_settledepositrefund",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_setupdatedisplay",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_setupdatedisplay",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_setupeventlisteners",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_setupeventlisteners",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_setupnavigation",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_setupnavigation",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_showarrearssms",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_showarrearssms",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_showtoast",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_showtoast",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_submitamenitybooking",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_submitamenitybooking",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_submitinspectionreport",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_submitinspectionreport",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_submitleasesignature",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_submitleasesignature",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_submitnewvisitorpass",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_submitnewvisitorpass",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_submittenantvetting",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_submittenantvetting",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_switchauthaccount",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_switchauthaccount",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_switchresident",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_switchresident",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_switchuserrole",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_switchuserrole",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_switchview",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_switchview",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_synccurrencyselector",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_synccurrencyselector",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_toggleallsmsrecipients",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_toggleallsmsrecipients",
       "label": "method [EXTRACTED]"
     },
     {
@@ -4410,9 +3786,45 @@
       "label": "method [EXTRACTED]"
     },
     {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_toggleiotpanel",
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_settheme",
       "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_toggleiotpanel",
+      "toNode": "n_public_app_bomasphereapp_settheme",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_refreshalldata",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_refreshalldata",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_initserviceworkerandpwa",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_initserviceworkerandpwa",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_promptpwainstall",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_promptpwainstall",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_initauthsession",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_initauthsession",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handlepasswordlogin",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_handlepasswordlogin",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_logout",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_logout",
       "label": "method [EXTRACTED]"
     },
     {
@@ -4422,9 +3834,105 @@
       "label": "method [EXTRACTED]"
     },
     {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_togglemobiledrawer",
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_copyuseremail",
       "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_togglemobiledrawer",
+      "toNode": "n_public_app_bomasphereapp_copyuseremail",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openauthmodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openauthmodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_updateusersessiondisplay",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_updateusersessiondisplay",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_enforceactionrbac",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_enforceactionrbac",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_switchauthaccount",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_switchauthaccount",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_switchuserrole",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_switchuserrole",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderusers",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_renderusers",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openaddusermodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openaddusermodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_handleaddusersubmit",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_handleaddusersubmit",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_deleteuser",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_deleteuser",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_sendtestwhatsapp",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_sendtestwhatsapp",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_sendcustomwhatsapp",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_sendcustomwhatsapp",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_opentenantvettingmodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_opentenantvettingmodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_loadtenantvettings",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_loadtenantvettings",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_submittenantvetting",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_submittenantvetting",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_toggleiotpanel",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_toggleiotpanel",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_refreshiottelemetry",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_refreshiottelemetry",
       "label": "method [EXTRACTED]"
     },
     {
@@ -4434,33 +3942,9 @@
       "label": "method [EXTRACTED]"
     },
     {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_updateamenityfee",
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openetimsmodal",
       "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_updateamenityfee",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_updatecharts",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_updatecharts",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_updatedashboardkpis",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_updatedashboardkpis",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_updatehiggsfieldprompt",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_updatehiggsfieldprompt",
-      "label": "method [EXTRACTED]"
-    },
-    {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_updateinspectionmath",
-      "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_updateinspectionmath",
+      "toNode": "n_public_app_bomasphereapp_openetimsmodal",
       "label": "method [EXTRACTED]"
     },
     {
@@ -4470,16 +3954,532 @@
       "label": "method [EXTRACTED]"
     },
     {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_updateticketstatus",
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openartisanmarketplacemodal",
       "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_updateticketstatus",
+      "toNode": "n_public_app_bomasphereapp_openartisanmarketplacemodal",
       "label": "method [EXTRACTED]"
     },
     {
-      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_updateusersessiondisplay",
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_loadmarketplace",
       "fromNode": "n_public_app_bomasphereapp",
-      "toNode": "n_public_app_bomasphereapp_updateusersessiondisplay",
+      "toNode": "n_public_app_bomasphereapp_loadmarketplace",
       "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_releaseescrow",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_releaseescrow",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_setcurrency",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_setcurrency",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_formatmoney",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_formatmoney",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderleases",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_renderleases",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_openleasesignmodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_openleasesignmodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_viewleasedetails",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_viewleasedetails",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_initleasesignaturepad",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_initleasesignaturepad",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_clearleasesignature",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_clearleasesignature",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_submitleasesignature",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_submitleasesignature",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_rendercurrentview",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_rendercurrentview",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderinspections",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_renderinspections",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_opennewinspectionmodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_opennewinspectionmodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_updateinspectionmath",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_updateinspectionmath",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_submitinspectionreport",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_submitinspectionreport",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_settledepositrefund",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_settledepositrefund",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_rendervisitorpasses",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_rendervisitorpasses",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_opennewvisitorpassmodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_opennewvisitorpassmodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_submitnewvisitorpass",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_submitnewvisitorpass",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_opengatesecurityscannermodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_opengatesecurityscannermodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_validategatepass",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_validategatepass",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_quickgatecheck",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_quickgatecheck",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_opendiasporaroimodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_opendiasporaroimodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderamenities",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_renderamenities",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_opennewamenitybookingmodal",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_opennewamenitybookingmodal",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_updateamenityfee",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_updateamenityfee",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_submitamenitybooking",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_submitamenitybooking",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_animatecounter",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_animatecounter",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_showtoast",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_showtoast",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderviewingleads",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_renderviewingleads",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_vetviewinglead",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_vetviewinglead",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_convertleadtotenant",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_convertleadtotenant",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_markviewingstatus",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_markviewingstatus",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_getcurrencysymbol",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_getcurrencysymbol",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_convertcurrency",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_convertcurrency",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_updatedashboardkpis",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_updatedashboardkpis",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderdashboard",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_renderdashboard",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderproperties",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_renderproperties",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderunits",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_renderunits",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_init",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_init",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_rendertenants",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_rendertenants",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderinvoices",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_renderinvoices",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_synccurrencyselector",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_synccurrencyselector",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderpayments",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_renderpayments",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_renderwaterreadings",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_renderwaterreadings",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_rendermaintenance",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_rendermaintenance",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_setupnavigation",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_setupnavigation",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_public_app_bomasphereapp_public_app_bomasphereapp_rendercommunications",
+      "fromNode": "n_public_app_bomasphereapp",
+      "toNode": "n_public_app_bomasphereapp_rendercommunications",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_readme_bomasphere_pms_public_app_bomasphereapp",
+      "fromNode": "n_readme_bomasphere_pms",
+      "toNode": "n_public_app_bomasphereapp",
+      "label": "documents [EXTRACTED]"
+    },
+    {
+      "id": "e_db_seedusersifempty_db_hashpassword",
+      "fromNode": "n_db_seedusersifempty",
+      "toNode": "n_db_hashpassword",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_server_handlerequest_db_hashpassword",
+      "fromNode": "n_server_handlerequest",
+      "toNode": "n_db_hashpassword",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_server_db_hashpassword",
+      "fromNode": "n_server",
+      "toNode": "n_db_hashpassword",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_db_db_hashpassword",
+      "fromNode": "n_db",
+      "toNode": "n_db_hashpassword",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_server_db_initschema",
+      "fromNode": "n_server",
+      "toNode": "n_db_initschema",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_db_db_initschema",
+      "fromNode": "n_db",
+      "toNode": "n_db_initschema",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_readme_sqlite_database_db_initschema",
+      "fromNode": "n_readme_sqlite_database",
+      "toNode": "n_db_initschema",
+      "label": "documents [EXTRACTED]"
+    },
+    {
+      "id": "e_server_handlerequest_db_seeddatabase",
+      "fromNode": "n_server_handlerequest",
+      "toNode": "n_db_seeddatabase",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_server_db_seeddatabase",
+      "fromNode": "n_server",
+      "toNode": "n_db_seeddatabase",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_db_db_seeddatabase",
+      "fromNode": "n_db",
+      "toNode": "n_db_seeddatabase",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_db_db_seednextgenfeatures",
+      "fromNode": "n_db",
+      "toNode": "n_db_seednextgenfeatures",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_db_db_seedusersifempty",
+      "fromNode": "n_db",
+      "toNode": "n_db_seedusersifempty",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_server_handlerequest_db_verifypassword",
+      "fromNode": "n_server_handlerequest",
+      "toNode": "n_db_verifypassword",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_server_db_verifypassword",
+      "fromNode": "n_server",
+      "toNode": "n_db_verifypassword",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_db_db_verifypassword",
+      "fromNode": "n_db",
+      "toNode": "n_db_verifypassword",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_server_handlerequest_server_generateinvoicenumber",
+      "fromNode": "n_server_handlerequest",
+      "toNode": "n_server_generateinvoicenumber",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_server_server_generateinvoicenumber",
+      "fromNode": "n_server",
+      "toNode": "n_server_generateinvoicenumber",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_server_handlerequest_server_generatempesacode",
+      "fromNode": "n_server_handlerequest",
+      "toNode": "n_server_generatempesacode",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_server_server_generatempesacode",
+      "fromNode": "n_server",
+      "toNode": "n_server_generatempesacode",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_server_handlerequest_server_generatereceiptnumber",
+      "fromNode": "n_server_handlerequest",
+      "toNode": "n_server_generatereceiptnumber",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_server_server_generatereceiptnumber",
+      "fromNode": "n_server",
+      "toNode": "n_server_generatereceiptnumber",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_server_handlerequest_server_generatesecuretoken",
+      "fromNode": "n_server_handlerequest",
+      "toNode": "n_server_generatesecuretoken",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_server_server_generatesecuretoken",
+      "fromNode": "n_server",
+      "toNode": "n_server_generatesecuretoken",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_server_handlerequest_server_getauthuser",
+      "fromNode": "n_server_handlerequest",
+      "toNode": "n_server_getauthuser",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_server_resolverequestuser_server_getauthuser",
+      "fromNode": "n_server_resolverequestuser",
+      "toNode": "n_server_getauthuser",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_server_server_getauthuser",
+      "fromNode": "n_server",
+      "toNode": "n_server_getauthuser",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_server_handlerequest_server_isloginratelimited",
+      "fromNode": "n_server_handlerequest",
+      "toNode": "n_server_isloginratelimited",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_server_handlerequest_server_sendjson",
+      "fromNode": "n_server_handlerequest",
+      "toNode": "n_server_sendjson",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_server_handlerequest_server_parsebody",
+      "fromNode": "n_server_handlerequest",
+      "toNode": "n_server_parsebody",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_server_handlerequest_server_resolverequestuser",
+      "fromNode": "n_server_handlerequest",
+      "toNode": "n_server_resolverequestuser",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_test_suite_invokehandler_server_handlerequest",
+      "fromNode": "n_test_suite_invokehandler",
+      "toNode": "n_server_handlerequest",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_test_suite_server_handlerequest",
+      "fromNode": "n_test_suite",
+      "toNode": "n_server_handlerequest",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_server_server_handlerequest",
+      "fromNode": "n_server",
+      "toNode": "n_server_handlerequest",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_readme_nodejs_server_server_handlerequest",
+      "fromNode": "n_readme_nodejs_server",
+      "toNode": "n_server_handlerequest",
+      "label": "documents [EXTRACTED]"
+    },
+    {
+      "id": "e_public_robots_crawl_policy_server_handlerequest",
+      "fromNode": "n_public_robots_crawl_policy",
+      "toNode": "n_server_handlerequest",
+      "label": "policed_by [EXTRACTED]"
+    },
+    {
+      "id": "e_server_server_isloginratelimited",
+      "fromNode": "n_server",
+      "toNode": "n_server_isloginratelimited",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_server_server_parsebody",
+      "fromNode": "n_server",
+      "toNode": "n_server_parsebody",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_server_server_resolverequestuser",
+      "fromNode": "n_server",
+      "toNode": "n_server_resolverequestuser",
+      "label": "contains [EXTRACTED]"
     }
   ]
 }

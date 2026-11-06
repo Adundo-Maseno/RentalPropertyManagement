@@ -1,11 +1,11 @@
 ---
 source_file: "README.md"
 type: "document"
-community: "Artisan Marketplace & Fundi Escrow"
+community: "Community 24"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Artisan_Marketplace__Fundi_Escrow
+  - community/Community_24
 ---
 
 # Artisan Escrow Marketplace & Milestone Payouts
@@ -13,4 +13,4 @@ tags:
 ## Connections
 - [[Artisan & Fundi Escrow Modal]] - `implements` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/Artisan_Marketplace__Fundi_Escrow
+#graphify/document #graphify/EXTRACTED #community/Community_24

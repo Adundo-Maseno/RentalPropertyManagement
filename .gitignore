@@ -4,6 +4,8 @@ package-lock.json
 
 # Local SQLite Database Files (auto-seeded on server startup)
 *.db
+*.db-wal
+*.db-shm
 *.sqlite
 *.sqlite3
 bomasphere.db

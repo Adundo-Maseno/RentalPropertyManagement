@@ -1,12 +1,12 @@
 ---
 source_file: "server.js"
 type: "code"
-community: "Backend & Database Infrastructure"
+community: "Community 0"
 location: "L1"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Backend__Database_Infrastructure
+  - community/Community_0
 ---
 
 # server.js
@@ -15,6 +15,7 @@ tags:
 - [[MIME_TYPES]] - `contains` [EXTRACTED]
 - [[PUBLIC_DIR]] - `contains` [EXTRACTED]
 - [[SECURITY_HEADERS]] - `contains` [EXTRACTED]
+- [[Zero-Dependency Node.js Server]] - `documents` [EXTRACTED]
 - [[crypto_1]] - `contains` [EXTRACTED]
 - [[db]] - `imports` [EXTRACTED]
 - [[db.js]] - `imports_from` [EXTRACTED]
@@ -36,11 +37,11 @@ tags:
 - [[ref_node_fs]] - `imports_from` [EXTRACTED]
 - [[ref_node_http]] - `imports_from` [EXTRACTED]
 - [[ref_node_path]] - `imports_from` [EXTRACTED]
-- [[resolveRequestUser()_1]] - `contains` [EXTRACTED]
+- [[resolveRequestUser()]] - `contains` [EXTRACTED]
 - [[seedDatabase()]] - `imports` [EXTRACTED]
 - [[sendJSON()]] - `contains` [EXTRACTED]
 - [[server]] - `contains` [EXTRACTED]
 - [[test_suite.js]] - `imports_from` [EXTRACTED]
 - [[verifyPassword()]] - `imports` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Backend__Database_Infrastructure
+#graphify/code #graphify/EXTRACTED #community/Community_0

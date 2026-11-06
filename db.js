@@ -37,6 +37,8 @@ function verifyPassword(password, stored) {
 function initSchema() {
   db.exec(`
     PRAGMA foreign_keys = ON;
+    PRAGMA journal_mode = WAL;
+    PRAGMA synchronous = NORMAL;
 
     CREATE TABLE IF NOT EXISTS properties (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

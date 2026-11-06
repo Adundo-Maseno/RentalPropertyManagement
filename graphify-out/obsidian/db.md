@@ -1,12 +1,12 @@
 ---
 source_file: "db.js"
 type: "code"
-community: "Backend & Database Infrastructure"
+community: "Community 0"
 location: "L6"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Backend__Database_Infrastructure
+  - community/Community_0
 ---
 
 # db
@@ -15,4 +15,4 @@ tags:
 - [[db.js]] - `contains` [EXTRACTED]
 - [[server.js]] - `imports` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Backend__Database_Infrastructure
+#graphify/code #graphify/EXTRACTED #community/Community_0

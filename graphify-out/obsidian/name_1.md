@@ -1,17 +1,17 @@
 ---
-source_file: "public/manifest.json"
+source_file: "package.json"
 type: "code"
-community: "PWA Web App Manifest"
-location: "L3"
+community: "Community 8"
+location: "L2"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/PWA_Web_App_Manifest
+  - community/Community_8
 ---
 
 # name
 
 ## Connections
-- [[manifest.json]] - `contains` [EXTRACTED]
+- [[package.json]] - `contains` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/PWA_Web_App_Manifest
+#graphify/code #graphify/EXTRACTED #community/Community_8

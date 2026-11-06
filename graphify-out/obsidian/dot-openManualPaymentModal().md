@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "Digital Leases & Payment Interactions"
+community: "Community 9"
 location: "L2362"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Digital_Leases__Payment_Interactions
+  - community/Community_9
 ---
 
 # .openManualPaymentModal()
@@ -16,5 +16,6 @@ tags:
 - [[dot-openManualPaymentForInvoice()]] - `calls` [EXTRACTED]
 - [[dot-openModal()]] - `calls` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
+- [[Record Bank & Cash Payment Modal]] - `opens` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Digital_Leases__Payment_Interactions
+#graphify/code #graphify/EXTRACTED #community/Community_9

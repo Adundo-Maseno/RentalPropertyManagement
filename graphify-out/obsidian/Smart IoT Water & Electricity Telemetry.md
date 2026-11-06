@@ -1,11 +1,11 @@
 ---
 source_file: "README.md"
 type: "document"
-community: "Smart IoT & Utility Telemetry"
+community: "Community 15"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Smart_IoT__Utility_Telemetry
+  - community/Community_15
 ---
 
 # Smart IoT Water & Electricity Telemetry
@@ -13,4 +13,4 @@ tags:
 ## Connections
 - [[Water Sub-Metering Management View]] - `references` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/Smart_IoT__Utility_Telemetry
+#graphify/document #graphify/EXTRACTED #community/Community_15

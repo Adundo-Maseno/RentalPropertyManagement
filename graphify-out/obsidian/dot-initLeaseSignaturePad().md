@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "Digital Leases & Payment Interactions"
+community: "Community 9"
 location: "L4025"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Digital_Leases__Payment_Interactions
+  - community/Community_9
 ---
 
 # .initLeaseSignaturePad()
@@ -15,4 +15,4 @@ tags:
 - [[dot-openLeaseSignModal()]] - `calls` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Digital_Leases__Payment_Interactions
+#graphify/code #graphify/EXTRACTED #community/Community_9

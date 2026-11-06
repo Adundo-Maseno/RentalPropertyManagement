@@ -1,16 +1,18 @@
 ---
 source_file: "public/index.html"
 type: "document"
-community: "AI Tenant Vetting & CRB Scoring"
+community: "Community 27"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/AI_Tenant_Vetting__CRB_Scoring
+  - community/Community_27
 ---
 
 # AI Tenant Vetting & CRB Modal
 
 ## Connections
+- [[dot-openTenantVettingModal()]] - `opens` [EXTRACTED]
+- [[dot-submitTenantVetting()]] - `submits_form` [EXTRACTED]
 - [[AI Tenant Vetting & Financial Risk Scoring]] - `implements` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/AI_Tenant_Vetting__CRB_Scoring
+#graphify/document #graphify/EXTRACTED #community/Community_27

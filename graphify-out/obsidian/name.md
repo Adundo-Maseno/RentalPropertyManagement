@@ -1,17 +1,17 @@
 ---
-source_file: "package.json"
+source_file: "public/manifest.json"
 type: "code"
-community: "Project Metadata & Node Modules"
-location: "L2"
+community: "Community 5"
+location: "L3"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Project_Metadata__Node_Modules
+  - community/Community_5
 ---
 
 # name
 
 ## Connections
-- [[package.json]] - `contains` [EXTRACTED]
+- [[manifest.json]] - `contains` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Project_Metadata__Node_Modules
+#graphify/code #graphify/EXTRACTED #community/Community_5

@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "Core App State & RBAC Controller"
+community: "Community 3"
 location: "L18"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Core_App_State__RBAC_Controller
+  - community/Community_3
 ---
 
 # BomaSphereApp
@@ -171,7 +171,8 @@ tags:
 - [[dot-viewPrintableReceipt()]] - `method` [EXTRACTED]
 - [[dot-viewPropertyStatement()]] - `method` [EXTRACTED]
 - [[dot-viewTenantLedger()]] - `method` [EXTRACTED]
+- [[BomaSphere Property Management System]] - `documents` [EXTRACTED]
 - [[app.js]] - `contains` [EXTRACTED]
 - [[initApp()]] - `calls` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Core_App_State__RBAC_Controller
+#graphify/code #graphify/EXTRACTED #community/Community_3

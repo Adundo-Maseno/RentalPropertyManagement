@@ -1,11 +1,11 @@
 ---
 source_file: "README.md"
 type: "document"
-community: "SMS & WhatsApp Messaging Hub"
+community: "Community 11"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/SMS__WhatsApp_Messaging_Hub
+  - community/Community_11
 ---
 
 # WhatsApp Business API Interactive Gateway
@@ -13,4 +13,4 @@ tags:
 ## Connections
 - [[SMS & Communications Hub View]] - `references` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/SMS__WhatsApp_Messaging_Hub
+#graphify/document #graphify/EXTRACTED #community/Community_11

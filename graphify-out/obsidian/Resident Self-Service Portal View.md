@@ -1,11 +1,11 @@
 ---
 source_file: "public/index.html"
 type: "document"
-community: "System Diagnostic & Portal Views"
+community: "Community 6"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/System_Diagnostic__Portal_Views
+  - community/Community_6
 ---
 
 # Resident Self-Service Portal View
@@ -15,4 +15,4 @@ tags:
 - [[Public Vacancy Showcase]] - `references` [EXTRACTED]
 - [[Resident Tenant Role (Kariuki James Mwangi)]] - `implements` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/System_Diagnostic__Portal_Views
+#graphify/document #graphify/EXTRACTED #community/Community_6

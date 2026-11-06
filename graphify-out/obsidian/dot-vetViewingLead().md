@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "UI Modal Launchers & Navigation"
+community: "Community 4"
 location: "L4777"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/UI_Modal_Launchers__Navigation
+  - community/Community_4
 ---
 
 # .vetViewingLead()
@@ -15,4 +15,4 @@ tags:
 - [[dot-openTenantVettingModal()]] - `calls` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/UI_Modal_Launchers__Navigation
+#graphify/code #graphify/EXTRACTED #community/Community_4

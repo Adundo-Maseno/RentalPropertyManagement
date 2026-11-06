@@ -1,11 +1,11 @@
 ---
 source_file: "README.md"
 type: "document"
-community: "Tenancy Lease & E-Sign Workflows"
+community: "Community 10"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Tenancy_Lease__E-Sign_Workflows
+  - community/Community_10
 ---
 
 # Lipa Na M-Pesa STK Push Gateway
@@ -14,4 +14,4 @@ tags:
 - [[Lipa Na M-Pesa STK Push Modal]] - `implements` [EXTRACTED]
 - [[Payments & M-Pesa Hub View]] - `implements` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/Tenancy_Lease__E-Sign_Workflows
+#graphify/document #graphify/EXTRACTED #community/Community_10

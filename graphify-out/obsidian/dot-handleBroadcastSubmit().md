@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "Property Management Event Handlers"
+community: "Community 1"
 location: "L2449"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Property_Management_Event_Handlers
+  - community/Community_1
 ---
 
 # .handleBroadcastSubmit()
@@ -18,5 +18,6 @@ tags:
 - [[dot-showToast()]] - `calls` [EXTRACTED]
 - [[dot-switchView()]] - `calls` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
+- [[Broadcast Tenant Notice Modal]] - `submits_form` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Property_Management_Event_Handlers
+#graphify/code #graphify/EXTRACTED #community/Community_1

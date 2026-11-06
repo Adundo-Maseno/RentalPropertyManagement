@@ -1,16 +1,18 @@
 ---
 source_file: "public/index.html"
 type: "document"
-community: "Rent Ledger & Batch Invoicing"
+community: "Community 20"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Rent_Ledger__Batch_Invoicing
+  - community/Community_20
 ---
 
 # Rent Roll Invoicing & Ledger View
 
 ## Connections
+- [[dot-renderInvoices()]] - `renders` [EXTRACTED]
+- [[dot-switchView()]] - `activates` [EXTRACTED]
 - [[Double-Entry Batch Invoicing Engine]] - `implements` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/Rent_Ledger__Batch_Invoicing
+#graphify/document #graphify/EXTRACTED #community/Community_20

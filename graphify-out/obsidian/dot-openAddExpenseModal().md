@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "UI Modal Launchers & Navigation"
+community: "Community 4"
 location: "L2493"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/UI_Modal_Launchers__Navigation
+  - community/Community_4
 ---
 
 # .openAddExpenseModal()
@@ -14,5 +14,6 @@ tags:
 ## Connections
 - [[dot-openModal()]] - `calls` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
+- [[Record Property Operating Expense Modal]] - `opens` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/UI_Modal_Launchers__Navigation
+#graphify/code #graphify/EXTRACTED #community/Community_4

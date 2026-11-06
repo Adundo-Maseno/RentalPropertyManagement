@@ -1,12 +1,12 @@
 ---
 source_file: "public/sw.js"
 type: "code"
-community: "PWA Service Worker & Offline Cache"
+community: "Community 29"
 location: "L8"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/PWA_Service_Worker__Offline_Cache
+  - community/Community_29
 ---
 
 # STATIC_ASSETS
@@ -14,4 +14,4 @@ tags:
 ## Connections
 - [[sw.js]] - `contains` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/PWA_Service_Worker__Offline_Cache
+#graphify/code #graphify/EXTRACTED #community/Community_29

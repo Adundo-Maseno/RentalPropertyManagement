@@ -1,11 +1,11 @@
 ---
 source_file: "README.md"
 type: "document"
-community: "Diaspora Landlord Investment ROI"
+community: "Community 25"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Diaspora_Landlord_Investment_ROI
+  - community/Community_25
 ---
 
 # Diaspora Landlord Multi-Currency Hub & Investment ROI
@@ -13,4 +13,4 @@ tags:
 ## Connections
 - [[Diaspora Landlord Investment ROI Modal]] - `implements` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/Diaspora_Landlord_Investment_ROI
+#graphify/document #graphify/EXTRACTED #community/Community_25

@@ -1,12 +1,12 @@
 ---
 source_file: "build.js"
 type: "code"
-community: "Backend & Database Infrastructure"
+community: "Community 0"
 location: "L1"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Backend__Database_Infrastructure
+  - community/Community_0
 ---
 
 # build.js
@@ -19,4 +19,4 @@ tags:
 - [[ref_node_path]] - `imports_from` [EXTRACTED]
 - [[srcDir]] - `contains` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Backend__Database_Infrastructure
+#graphify/code #graphify/EXTRACTED #community/Community_0

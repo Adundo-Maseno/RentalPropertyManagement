@@ -1,13 +1,17 @@
 ---
 source_file: "public/index.html"
 type: "document"
-community: "Resident Registration Form"
+community: "Community 32"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Resident_Registration_Form
+  - community/Community_32
 ---
 
 # Register Resident Tenant Modal
 
-#graphify/document #graphify/EXTRACTED #community/Resident_Registration_Form
+## Connections
+- [[dot-handleAddTenantSubmit()]] - `submits_form` [EXTRACTED]
+- [[dot-openAddTenantModal()]] - `opens` [EXTRACTED]
+
+#graphify/document #graphify/EXTRACTED #community/Community_32

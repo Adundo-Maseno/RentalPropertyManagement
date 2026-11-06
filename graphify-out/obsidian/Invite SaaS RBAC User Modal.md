@@ -1,13 +1,17 @@
 ---
 source_file: "public/index.html"
 type: "document"
-community: "SaaS User Management"
+community: "Community 34"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/SaaS_User_Management
+  - community/Community_34
 ---
 
 # Invite SaaS RBAC User Modal
 
-#graphify/document #graphify/EXTRACTED #community/SaaS_User_Management
+## Connections
+- [[dot-handleAddUserSubmit()]] - `submits_form` [EXTRACTED]
+- [[dot-openAddUserModal()]] - `opens` [EXTRACTED]
+
+#graphify/document #graphify/EXTRACTED #community/Community_34

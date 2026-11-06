@@ -1,11 +1,11 @@
 ---
 source_file: "public/index.html"
 type: "document"
-community: "Rent Ledger & Batch Invoicing"
+community: "Community 20"
 tags:
   - graphify/document
   - graphify/INFERRED
-  - community/Rent_Ledger__Batch_Invoicing
+  - community/Community_20
 ---
 
 # Generate Custom Billing Invoice Modal
@@ -13,4 +13,4 @@ tags:
 ## Connections
 - [[Double-Entry Batch Invoicing Engine]] - `conceptually_related_to` [INFERRED]
 
-#graphify/document #graphify/INFERRED #community/Rent_Ledger__Batch_Invoicing
+#graphify/document #graphify/INFERRED #community/Community_20

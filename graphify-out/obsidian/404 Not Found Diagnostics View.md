@@ -1,11 +1,11 @@
 ---
 source_file: "public/404.html"
 type: "document"
-community: "System Diagnostic & Portal Views"
+community: "Community 6"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/System_Diagnostic__Portal_Views
+  - community/Community_6
 ---
 
 # 404 Not Found Diagnostics View
@@ -15,4 +15,4 @@ tags:
 - [[Executive KPI Dashboard View]] - `references` [EXTRACTED]
 - [[Resident Self-Service Portal View]] - `references` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/System_Diagnostic__Portal_Views
+#graphify/document #graphify/EXTRACTED #community/Community_6

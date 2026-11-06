@@ -1,13 +1,18 @@
 ---
 source_file: "public/index.html"
 type: "document"
-community: "Portfolio & Units Showcase"
+community: "Community 35"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Portfolio__Units_Showcase
+  - community/Community_35
 ---
 
 # Portfolio Properties & Units View
 
-#graphify/document #graphify/EXTRACTED #community/Portfolio__Units_Showcase
+## Connections
+- [[dot-renderProperties()]] - `renders` [EXTRACTED]
+- [[dot-renderUnits()]] - `renders` [EXTRACTED]
+- [[dot-switchView()]] - `activates` [EXTRACTED]
+
+#graphify/document #graphify/EXTRACTED #community/Community_35

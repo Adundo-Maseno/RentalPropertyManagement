@@ -1,13 +1,17 @@
 ---
 source_file: "public/index.html"
 type: "document"
-community: "Operating Expense Entry Modal"
+community: "Community 30"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Operating_Expense_Entry_Modal
+  - community/Community_30
 ---
 
 # Record Property Operating Expense Modal
 
-#graphify/document #graphify/EXTRACTED #community/Operating_Expense_Entry_Modal
+## Connections
+- [[dot-handleAddExpenseSubmit()]] - `submits_form` [EXTRACTED]
+- [[dot-openAddExpenseModal()]] - `opens` [EXTRACTED]
+
+#graphify/document #graphify/EXTRACTED #community/Community_30

@@ -1,17 +1,18 @@
 ---
 source_file: "public/index.html"
 type: "document"
-community: "Tenancy Lease & E-Sign Workflows"
+community: "Community 10"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Tenancy_Lease__E-Sign_Workflows
+  - community/Community_10
 ---
 
 # Digital Lease Agreement E-Sign Modal
 
 ## Connections
+- [[dot-clearLeaseSignature()]] - `triggers_event` [EXTRACTED]
 - [[Digital Lease Agreements & In-Browser E-Signatures]] - `implements` [EXTRACTED]
 - [[Move-In Payment & Digital Lease Prompt Modal]] - `calls` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/Tenancy_Lease__E-Sign_Workflows
+#graphify/document #graphify/EXTRACTED #community/Community_10

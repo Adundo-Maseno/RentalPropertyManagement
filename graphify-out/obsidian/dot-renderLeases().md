@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "Financial & Ledger Utilities"
+community: "Community 2"
 location: "L3931"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Financial__Ledger_Utilities
+  - community/Community_2
 ---
 
 # .renderLeases()
@@ -19,5 +19,6 @@ tags:
 - [[dot-renderCurrentView()]] - `calls` [EXTRACTED]
 - [[dot-submitLeaseSignature()]] - `calls` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
+- [[Digital Leases & E-Signatures View]] - `renders` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Financial__Ledger_Utilities
+#graphify/code #graphify/EXTRACTED #community/Community_2

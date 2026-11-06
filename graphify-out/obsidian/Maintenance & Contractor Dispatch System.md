@@ -1,11 +1,11 @@
 ---
 source_file: "README.md"
 type: "document"
-community: "Maintenance Work Orders & Dispatch"
+community: "Community 21"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Maintenance_Work_Orders__Dispatch
+  - community/Community_21
 ---
 
 # Maintenance & Contractor Dispatch System
@@ -14,4 +14,4 @@ tags:
 - [[Create Maintenance Ticket Modal]] - `implements` [EXTRACTED]
 - [[Maintenance Tickets Kanban View]] - `implements` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/Maintenance_Work_Orders__Dispatch
+#graphify/document #graphify/EXTRACTED #community/Community_21

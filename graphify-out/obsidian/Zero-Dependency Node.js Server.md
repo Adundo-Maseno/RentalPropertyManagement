@@ -1,13 +1,17 @@
 ---
 source_file: "README.md"
 type: "document"
-community: "Native HTTP Server"
+community: "Community 37"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Native_HTTP_Server
+  - community/Community_37
 ---
 
 # Zero-Dependency Node.js Server
 
-#graphify/document #graphify/EXTRACTED #community/Native_HTTP_Server
+## Connections
+- [[handleRequest()]] - `documents` [EXTRACTED]
+- [[server.js]] - `documents` [EXTRACTED]
+
+#graphify/document #graphify/EXTRACTED #community/Community_37

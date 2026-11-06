@@ -1,11 +1,11 @@
 ---
 source_file: "README.md"
 type: "document"
-community: "Gated Security & Visitor Passes"
+community: "Community 14"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Gated_Security__Visitor_Passes
+  - community/Community_14
 ---
 
 # Gated Estate Visitor Passes & QR Barrier Security
@@ -15,4 +15,4 @@ tags:
 - [[Issue Visitor Gate Pass Modal]] - `implements` [EXTRACTED]
 - [[Visitor Gate Passes Ledger View]] - `implements` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/Gated_Security__Visitor_Passes
+#graphify/document #graphify/EXTRACTED #community/Community_14

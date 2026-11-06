@@ -2622,7 +2622,7 @@
         </div>
       </div>
 
-      <form onsubmit="app.submitInspectionReport(event)" class="mt-4 space-y-4 text-xs">
+      <form id="form-new-inspection" onsubmit="app.submitInspectionReport(event)" class="mt-4 space-y-4 text-xs">
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Inspection Type</label>
@@ -2725,7 +2725,7 @@
         </div>
       </div>
 
-      <form onsubmit="app.submitNewVisitorPass(event)" class="mt-4 space-y-3.5 text-xs">
+      <form id="form-new-visitor-pass" onsubmit="app.submitNewVisitorPass(event)" class="mt-4 space-y-3.5 text-xs">
         <div>
           <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Visitor Full Name</label>
           <input type="text" id="pass-visitor-name" required placeholder="e.g. Dr. Samuel Makori" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs">
@@ -2845,7 +2845,7 @@
         </div>
       </div>
 
-      <form onsubmit="app.submitAmenityBooking(event)" class="mt-4 space-y-3.5 text-xs">
+      <form id="form-amenity-booking" onsubmit="app.submitAmenityBooking(event)" class="mt-4 space-y-3.5 text-xs">
         <div>
           <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Resident / Tenant</label>
           <select id="book-amenity-tenant-id" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs">

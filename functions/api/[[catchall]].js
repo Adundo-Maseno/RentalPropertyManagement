@@ -385,7 +385,7 @@ export async function onRequest(context) {
       DB.leaseAgreements.unshift(newLease);
 
       // Auto-generate inaugural Move-In Invoice
-      const invNum = `INV-202611-${Math.floor(100 + Math.random() * 900)}`;
+      const invNum = `INV-202611-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
       const totalDue = monthlyRent + depositPaid + waterDeposit;
       const invoiceId = DB.invoices.length + 1;
       const newInv = {
@@ -491,7 +491,7 @@ export async function onRequest(context) {
     DB.leaseAgreements.unshift(newLease);
 
     // Auto-generate inaugural Move-In Invoice
-    const invNum = `INV-202611-${Math.floor(100 + Math.random() * 900)}`;
+    const invNum = `INV-202611-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
     const invoiceId = DB.invoices.length + 1;
     const newInv = {
       id: invoiceId,
@@ -588,7 +588,7 @@ export async function onRequest(context) {
 
     const newInv = {
       id: DB.invoices.length + 1,
-      invoice_number: `INV-202611-${Math.floor(100 + Math.random() * 900)}`,
+      invoice_number: `INV-202611-${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
       month: b.month || '2026-11',
       issue_date: new Date().toISOString().slice(0, 10),
       due_date: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),

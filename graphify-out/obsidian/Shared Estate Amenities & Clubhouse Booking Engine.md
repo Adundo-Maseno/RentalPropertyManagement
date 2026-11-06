@@ -1,11 +1,11 @@
 ---
 source_file: "README.md"
 type: "document"
-community: "Estate Amenities & Clubhouse Bookings"
+community: "Community 19"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Estate_Amenities__Clubhouse_Bookings
+  - community/Community_19
 ---
 
 # Shared Estate Amenities & Clubhouse Booking Engine
@@ -14,4 +14,4 @@ tags:
 - [[Estate Amenity Reservation Modal]] - `implements` [EXTRACTED]
 - [[Shared Estate Amenities View]] - `implements` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/Estate_Amenities__Clubhouse_Bookings
+#graphify/document #graphify/EXTRACTED #community/Community_19

@@ -1,13 +1,17 @@
 ---
 source_file: "README.md"
 type: "document"
-community: "SQLite Database Storage"
+community: "Community 38"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/SQLite_Database_Storage
+  - community/Community_38
 ---
 
 # Native Node SQLite Relational Database
 
-#graphify/document #graphify/EXTRACTED #community/SQLite_Database_Storage
+## Connections
+- [[db.js]] - `documents` [EXTRACTED]
+- [[initSchema()]] - `documents` [EXTRACTED]
+
+#graphify/document #graphify/EXTRACTED #community/Community_38

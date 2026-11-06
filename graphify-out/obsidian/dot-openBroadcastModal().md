@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "UI Modal Launchers & Navigation"
+community: "Community 4"
 location: "L2438"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/UI_Modal_Launchers__Navigation
+  - community/Community_4
 ---
 
 # .openBroadcastModal()
@@ -14,5 +14,6 @@ tags:
 ## Connections
 - [[dot-openModal()]] - `calls` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
+- [[Broadcast Tenant Notice Modal]] - `opens` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/UI_Modal_Launchers__Navigation
+#graphify/code #graphify/EXTRACTED #community/Community_4

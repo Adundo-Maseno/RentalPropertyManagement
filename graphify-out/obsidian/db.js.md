@@ -1,18 +1,19 @@
 ---
 source_file: "db.js"
 type: "code"
-community: "Backend & Database Infrastructure"
+community: "Community 0"
 location: "L1"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Backend__Database_Infrastructure
+  - community/Community_0
 ---
 
 # db.js
 
 ## Connections
 - [[DB_PATH]] - `contains` [EXTRACTED]
+- [[Native Node SQLite Relational Database]] - `documents` [EXTRACTED]
 - [[crypto]] - `contains` [EXTRACTED]
 - [[db]] - `contains` [EXTRACTED]
 - [[hashPassword()]] - `indirect_call` [INFERRED]
@@ -28,4 +29,4 @@ tags:
 - [[verifyPassword()]] - `indirect_call` [INFERRED]
 - [[{ DatabaseSync }]] - `contains` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Backend__Database_Infrastructure
+#graphify/code #graphify/EXTRACTED #community/Community_0

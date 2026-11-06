@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "Tenant Onboarding & Lead Conversion"
+community: "Community 17"
 location: "L1931"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Tenant_Onboarding__Lead_Conversion
+  - community/Community_17
 ---
 
 # .openAddTenantModal()
@@ -17,5 +17,6 @@ tags:
 - [[dot-onTenantModalUnitChange()]] - `calls` [EXTRACTED]
 - [[dot-openModal()]] - `calls` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
+- [[Register Resident Tenant Modal]] - `opens` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Tenant_Onboarding__Lead_Conversion
+#graphify/code #graphify/EXTRACTED #community/Community_17

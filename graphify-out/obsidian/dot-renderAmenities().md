@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "Financial & Ledger Utilities"
+community: "Community 2"
 location: "L4529"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Financial__Ledger_Utilities
+  - community/Community_2
 ---
 
 # .renderAmenities()
@@ -17,5 +17,6 @@ tags:
 - [[dot-renderCurrentView()]] - `calls` [EXTRACTED]
 - [[dot-submitAmenityBooking()]] - `calls` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
+- [[Shared Estate Amenities View]] - `renders` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Financial__Ledger_Utilities
+#graphify/code #graphify/EXTRACTED #community/Community_2

@@ -86,14 +86,23 @@ function isLoginRateLimited(ip) {
 // Cryptographically secure unique identifiers & codes
 function generateReceiptNumber() {
   const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const rand = crypto.randomInt(1000, 10000);
-  return `REC-${dateStr}-${rand}`;
+  const suffix = crypto.randomBytes(3).toString('hex').toUpperCase();
+  return `REC-${dateStr}-${suffix}`;
 }
 
 function generateInvoiceNumber(monthStr) {
   const mClean = (monthStr || new Date().toISOString().slice(0, 7)).replace(/-/g, '');
-  const rand = crypto.randomInt(100, 1000);
-  return `INV-${mClean}-${rand}`;
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const suffix = crypto.randomBytes(3).toString('hex').toUpperCase();
+    const candidate = `INV-${mClean}-${suffix}`;
+    try {
+      const existing = db.prepare('SELECT id FROM invoices WHERE invoice_number = ?').get(candidate);
+      if (!existing) return candidate;
+    } catch {
+      return candidate;
+    }
+  }
+  return `INV-${mClean}-${Date.now().toString(36).toUpperCase()}`;
 }
 
 function generateMpesaCode() {

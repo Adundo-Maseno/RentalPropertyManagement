@@ -1,12 +1,12 @@
 ---
 source_file: "functions/api/[[catchall]].js"
 type: "code"
-community: "Cloudflare Edge Serverless Functions"
+community: "Community 12"
 location: "L7"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Cloudflare_Edge_Serverless_Functions
+  - community/Community_12
 ---
 
 # DB
@@ -14,4 +14,4 @@ tags:
 ## Connections
 - [[catchall.js]] - `contains` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Cloudflare_Edge_Serverless_Functions
+#graphify/code #graphify/EXTRACTED #community/Community_12

@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "UI Modal Launchers & Navigation"
+community: "Community 4"
 location: "L4604"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/UI_Modal_Launchers__Navigation
+  - community/Community_4
 ---
 
 # .openNewAmenityBookingModal()
@@ -16,5 +16,6 @@ tags:
 - [[dot-openModal()]] - `calls` [EXTRACTED]
 - [[dot-updateAmenityFee()]] - `calls` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
+- [[Estate Amenity Reservation Modal]] - `opens` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/UI_Modal_Launchers__Navigation
+#graphify/code #graphify/EXTRACTED #community/Community_4

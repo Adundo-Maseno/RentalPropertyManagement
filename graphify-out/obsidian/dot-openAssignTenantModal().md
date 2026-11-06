@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "Unit Assignment & Vacancy Allocation"
+community: "Community 18"
 location: "L2073"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Unit_Assignment__Vacancy_Allocation
+  - community/Community_18
 ---
 
 # .openAssignTenantModal()
@@ -15,4 +15,4 @@ tags:
 - [[dot-openAddLeaseModal()]] - `calls` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Unit_Assignment__Vacancy_Allocation
+#graphify/code #graphify/EXTRACTED #community/Community_18

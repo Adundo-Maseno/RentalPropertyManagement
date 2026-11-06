@@ -1,12 +1,12 @@
 ---
 source_file: "db.js"
 type: "code"
-community: "Backend & Database Infrastructure"
+community: "Community 0"
 location: "L3"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Backend__Database_Infrastructure
+  - community/Community_0
 ---
 
 # crypto
@@ -14,4 +14,4 @@ tags:
 ## Connections
 - [[db.js]] - `contains` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Backend__Database_Infrastructure
+#graphify/code #graphify/EXTRACTED #community/Community_0

@@ -1,11 +1,11 @@
 ---
 source_file: "README.md"
 type: "document"
-community: "Rent Ledger & Batch Invoicing"
+community: "Community 20"
 tags:
   - graphify/document
-  - graphify/INFERRED
-  - community/Rent_Ledger__Batch_Invoicing
+  - graphify/EXTRACTED
+  - community/Community_20
 ---
 
 # Double-Entry Batch Invoicing Engine
@@ -14,4 +14,4 @@ tags:
 - [[Generate Custom Billing Invoice Modal]] - `conceptually_related_to` [INFERRED]
 - [[Rent Roll Invoicing & Ledger View]] - `implements` [EXTRACTED]
 
-#graphify/document #graphify/INFERRED #community/Rent_Ledger__Batch_Invoicing
+#graphify/document #graphify/EXTRACTED #community/Community_20

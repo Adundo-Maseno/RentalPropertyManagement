@@ -1,11 +1,11 @@
 ---
 source_file: "README.md"
 type: "document"
-community: "AI Tenant Vetting & CRB Scoring"
+community: "Community 27"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/AI_Tenant_Vetting__CRB_Scoring
+  - community/Community_27
 ---
 
 # AI Tenant Vetting & Financial Risk Scoring
@@ -13,4 +13,4 @@ tags:
 ## Connections
 - [[AI Tenant Vetting & CRB Modal]] - `implements` [EXTRACTED]
 
-#graphify/document #graphify/EXTRACTED #community/AI_Tenant_Vetting__CRB_Scoring
+#graphify/document #graphify/EXTRACTED #community/Community_27

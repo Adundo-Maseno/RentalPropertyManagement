@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "Water Sub-Metering Calculations"
+community: "Community 13"
 location: "L2423"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Water_Sub-Metering_Calculations
+  - community/Community_13
 ---
 
 # .onWaterUnitChange()
@@ -15,4 +15,4 @@ tags:
 - [[dot-calcWaterCost()]] - `calls` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Water_Sub-Metering_Calculations
+#graphify/code #graphify/EXTRACTED #community/Community_13

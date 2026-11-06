@@ -1,19 +1,18 @@
 ---
-source_file: "server.js"
+source_file: "functions/api/[[catchall]].js"
 type: "code"
-community: "Backend & Database Infrastructure"
-location: "L140"
+community: "Community 12"
+location: "L177"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Backend__Database_Infrastructure
+  - community/Community_12
 ---
 
 # resolveRequestUser()
 
 ## Connections
-- [[getAuthUser()]] - `calls` [EXTRACTED]
-- [[handleRequest()]] - `calls` [EXTRACTED]
-- [[server.js]] - `contains` [EXTRACTED]
+- [[catchall.js]] - `contains` [EXTRACTED]
+- [[onRequest()]] - `calls` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Backend__Database_Infrastructure
+#graphify/code #graphify/EXTRACTED #community/Community_12

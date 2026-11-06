@@ -1,13 +1,17 @@
 ---
 source_file: "public/index.html"
 type: "document"
-community: "Property Asset Registration"
+community: "Community 31"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Property_Asset_Registration
+  - community/Community_31
 ---
 
 # Add Property Asset Modal
 
-#graphify/document #graphify/EXTRACTED #community/Property_Asset_Registration
+## Connections
+- [[dot-handleAddPropertySubmit()]] - `submits_form` [EXTRACTED]
+- [[dot-openAddPropertyModal()]] - `opens` [EXTRACTED]
+
+#graphify/document #graphify/EXTRACTED #community/Community_31

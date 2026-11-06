@@ -1,18 +1,19 @@
 ---
-source_file: "functions/api/[[catchall]].js"
+source_file: "server.js"
 type: "code"
-community: "Cloudflare Edge Serverless Functions"
-location: "L177"
+community: "Community 0"
+location: "L140"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Cloudflare_Edge_Serverless_Functions
+  - community/Community_0
 ---
 
 # resolveRequestUser()
 
 ## Connections
-- [[catchall.js]] - `contains` [EXTRACTED]
-- [[onRequest()]] - `calls` [EXTRACTED]
+- [[getAuthUser()]] - `calls` [EXTRACTED]
+- [[handleRequest()]] - `calls` [EXTRACTED]
+- [[server.js]] - `contains` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Cloudflare_Edge_Serverless_Functions
+#graphify/code #graphify/EXTRACTED #community/Community_0

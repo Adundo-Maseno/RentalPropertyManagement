@@ -1,11 +1,11 @@
 ---
 source_file: "public/rentals.html"
 type: "document"
-community: "Public Viewing Leads & Prospect Tours"
+community: "Community 28"
 tags:
   - graphify/document
   - graphify/INFERRED
-  - community/Public_Viewing_Leads__Prospect_Tours
+  - community/Community_28
 ---
 
 # Schedule Property Viewing Modal
@@ -13,4 +13,4 @@ tags:
 ## Connections
 - [[Tenants & Leases Directory View]] - `shares_data_with` [INFERRED]
 
-#graphify/document #graphify/INFERRED #community/Public_Viewing_Leads__Prospect_Tours
+#graphify/document #graphify/INFERRED #community/Community_28

@@ -1,13 +1,17 @@
 ---
 source_file: "public/index.html"
 type: "document"
-community: "Unit Specifications Modal"
+community: "Community 33"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Unit_Specifications_Modal
+  - community/Community_33
 ---
 
 # Add Unit Specification Modal
 
-#graphify/document #graphify/EXTRACTED #community/Unit_Specifications_Modal
+## Connections
+- [[dot-handleAddUnitSubmit()]] - `submits_form` [EXTRACTED]
+- [[dot-openAddUnitModal()]] - `opens` [EXTRACTED]
+
+#graphify/document #graphify/EXTRACTED #community/Community_33

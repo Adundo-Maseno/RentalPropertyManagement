@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "Property Management Event Handlers"
+community: "Community 1"
 location: "L1430"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Property_Management_Event_Handlers
+  - community/Community_1
 ---
 
 # .handleMpesaSubmit()
@@ -18,5 +18,6 @@ tags:
 - [[dot-showToast()]] - `calls` [EXTRACTED]
 - [[dot-viewPrintableReceipt()]] - `calls` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
+- [[Lipa Na M-Pesa STK Push Modal]] - `submits_form` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Property_Management_Event_Handlers
+#graphify/code #graphify/EXTRACTED #community/Community_1

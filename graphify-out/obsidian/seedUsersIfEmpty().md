@@ -1,12 +1,12 @@
 ---
 source_file: "db.js"
 type: "code"
-community: "Backend & Database Infrastructure"
+community: "Community 0"
 location: "L568"
 tags:
   - graphify/code
-  - graphify/INFERRED
-  - community/Backend__Database_Infrastructure
+  - graphify/EXTRACTED
+  - community/Community_0
 ---
 
 # seedUsersIfEmpty()
@@ -15,4 +15,4 @@ tags:
 - [[db.js]] - `indirect_call` [INFERRED]
 - [[hashPassword()]] - `calls` [EXTRACTED]
 
-#graphify/code #graphify/INFERRED #community/Backend__Database_Infrastructure
+#graphify/code #graphify/EXTRACTED #community/Community_0

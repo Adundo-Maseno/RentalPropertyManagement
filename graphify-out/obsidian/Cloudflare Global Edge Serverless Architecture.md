@@ -1,13 +1,16 @@
 ---
 source_file: "README.md"
 type: "document"
-community: "Global Edge Runtime"
+community: "Community 36"
 tags:
   - graphify/document
   - graphify/EXTRACTED
-  - community/Global_Edge_Runtime
+  - community/Community_36
 ---
 
 # Cloudflare Global Edge Serverless Architecture
 
-#graphify/document #graphify/EXTRACTED #community/Global_Edge_Runtime
+## Connections
+- [[catchall.js]] - `documents` [EXTRACTED]
+
+#graphify/document #graphify/EXTRACTED #community/Community_36

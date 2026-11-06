@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "Property Management Event Handlers"
+community: "Community 1"
 location: "L3869"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Property_Management_Event_Handlers
+  - community/Community_1
 ---
 
 # .releaseEscrow()
@@ -16,6 +16,7 @@ tags:
 - [[dot-loadMarketplace()]] - `calls` [EXTRACTED]
 - [[dot-refreshAllData()]] - `calls` [EXTRACTED]
 - [[dot-showToast()]] - `calls` [EXTRACTED]
+- [[Artisan & Fundi Escrow Modal]] - `executes` [EXTRACTED]
 - [[BomaSphereApp]] - `method` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Property_Management_Event_Handlers
+#graphify/code #graphify/EXTRACTED #community/Community_1

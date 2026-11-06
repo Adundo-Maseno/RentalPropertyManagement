@@ -1,12 +1,12 @@
 ---
 source_file: "test_suite.js"
 type: "code"
-community: "Backend & Database Infrastructure"
+community: "Community 0"
 location: "L62"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Backend__Database_Infrastructure
+  - community/Community_0
 ---
 
 # test()
@@ -14,4 +14,4 @@ tags:
 ## Connections
 - [[runTests()]] - `contains` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Backend__Database_Infrastructure
+#graphify/code #graphify/EXTRACTED #community/Community_0

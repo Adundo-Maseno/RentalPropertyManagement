@@ -1,11 +1,11 @@
 ---
 source_file: "public/500.html"
 type: "document"
-community: "System Diagnostic & Portal Views"
+community: "Community 6"
 tags:
   - graphify/document
-  - graphify/INFERRED
-  - community/System_Diagnostic__Portal_Views
+  - graphify/EXTRACTED
+  - community/Community_6
 ---
 
 # 500 Server Error Incident View
@@ -14,4 +14,4 @@ tags:
 - [[404 Not Found Diagnostics View]] - `semantically_similar_to` [INFERRED]
 - [[Executive KPI Dashboard View]] - `references` [EXTRACTED]
 
-#graphify/document #graphify/INFERRED #community/System_Diagnostic__Portal_Views
+#graphify/document #graphify/EXTRACTED #community/Community_6

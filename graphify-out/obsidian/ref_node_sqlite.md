@@ -1,11 +1,11 @@
 ---
 source_file: ""
 type: "concept"
-community: "Backend & Database Infrastructure"
+community: "Community 0"
 tags:
   - graphify/concept
   - graphify/EXTRACTED
-  - community/Backend__Database_Infrastructure
+  - community/Community_0
 ---
 
 # ref_node_sqlite
@@ -13,4 +13,4 @@ tags:
 ## Connections
 - [[db.js]] - `imports_from` [EXTRACTED]
 
-#graphify/concept #graphify/EXTRACTED #community/Backend__Database_Infrastructure
+#graphify/concept #graphify/EXTRACTED #community/Community_0

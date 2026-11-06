@@ -1,25 +1,25 @@
 ---
 source_file: "package.json"
 type: "code"
-community: "Project Metadata & Node Modules"
+community: "Community 8"
 location: "L1"
 tags:
   - graphify/code
   - graphify/EXTRACTED
-  - community/Project_Metadata__Node_Modules
+  - community/Community_8
 ---
 
 # package.json
 
 ## Connections
 - [[author]] - `contains` [EXTRACTED]
-- [[description]] - `contains` [EXTRACTED]
+- [[description_1]] - `contains` [EXTRACTED]
 - [[keywords]] - `contains` [EXTRACTED]
 - [[license]] - `contains` [EXTRACTED]
 - [[main]] - `contains` [EXTRACTED]
-- [[name]] - `contains` [EXTRACTED]
+- [[name_1]] - `contains` [EXTRACTED]
 - [[scripts]] - `contains` [EXTRACTED]
 - [[type]] - `contains` [EXTRACTED]
 - [[version]] - `contains` [EXTRACTED]
 
-#graphify/code #graphify/EXTRACTED #community/Project_Metadata__Node_Modules
+#graphify/code #graphify/EXTRACTED #community/Community_8

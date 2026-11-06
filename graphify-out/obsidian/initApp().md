@@ -1,12 +1,12 @@
 ---
 source_file: "public/app.js"
 type: "code"
-community: "Frontend Application Bootstrap"
+community: "Community 16"
 location: "L4828"
 tags:
   - graphify/code
-  - graphify/INFERRED
-  - community/Frontend_Application_Bootstrap
+  - graphify/EXTRACTED
+  - community/Community_16
 ---
 
 # initApp()
@@ -15,4 +15,4 @@ tags:
 - [[BomaSphereApp]] - `calls` [EXTRACTED]
 - [[app.js]] - `indirect_call` [INFERRED]
 
-#graphify/code #graphify/INFERRED #community/Frontend_Application_Bootstrap
+#graphify/code #graphify/EXTRACTED #community/Community_16
