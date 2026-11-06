@@ -239,9 +239,10 @@ async function handleD1(context, json, corsHeaders) {
       const created = await db.prepare('SELECT * FROM properties WHERE id = ?').bind(id).first();
       return json({ success: true, id, property: created }, 201);
     }
-    if (pathname === '/api/properties' && method === 'PUT') {
+    if ((pathname === '/api/properties' || pathname.startsWith('/api/properties/')) && method === 'PUT') {
       const b = await request.json().catch(() => ({}));
-      const id = url.searchParams.get('id') || b.id;
+      const pathId = pathname.startsWith('/api/properties/') ? pathname.split('/')[3] : null;
+      const id = pathId || url.searchParams.get('id') || b.id;
       if (!id) return json({ error: 'Property ID required' }, 400);
       await db.prepare(`
         UPDATE properties SET
@@ -252,14 +253,25 @@ async function handleD1(context, json, corsHeaders) {
           landlord_name = coalesce(?, landlord_name),
           landlord_phone = coalesce(?, landlord_phone),
           landlord_email = coalesce(?, landlord_email),
+          management_fee_pct = coalesce(?, management_fee_pct),
+          paybill_number = coalesce(?, paybill_number),
+          bank_name = coalesce(?, bank_name),
+          bank_account = coalesce(?, bank_account),
           image_url = coalesce(?, image_url)
         WHERE id = ?
-      `).bind(b.name || null, b.property_type || null, b.address || null, b.city || null, b.landlord_name || null, b.landlord_phone || null, b.landlord_email || null, b.image_url || null, Number(id)).run();
+      `).bind(
+        b.name || null, b.property_type || null, b.address || null, b.city || null,
+        b.landlord_name || null, b.landlord_phone || null, b.landlord_email || null,
+        b.management_fee_pct !== undefined ? Number(b.management_fee_pct) : null,
+        b.paybill_number || null, b.bank_name || null, b.bank_account || null,
+        b.image_url || null, Number(id)
+      ).run();
       const updated = await db.prepare('SELECT * FROM properties WHERE id = ?').bind(Number(id)).first();
       return json({ success: true, property: updated });
     }
-    if (pathname === '/api/properties' && method === 'DELETE') {
-      const id = url.searchParams.get('id');
+    if ((pathname === '/api/properties' || pathname.startsWith('/api/properties/')) && method === 'DELETE') {
+      const pathId = pathname.startsWith('/api/properties/') ? pathname.split('/')[3] : null;
+      const id = pathId || url.searchParams.get('id');
       if (!id) return json({ error: 'Property ID required' }, 400);
       await db.prepare('DELETE FROM properties WHERE id = ?').bind(Number(id)).run();
       return json({ success: true, message: 'Property deleted' });
@@ -291,12 +303,14 @@ async function handleD1(context, json, corsHeaders) {
       const created = await db.prepare('SELECT u.*, p.name as property_name FROM units u LEFT JOIN properties p ON u.property_id = p.id WHERE u.id = ?').bind(id).first();
       return json({ success: true, id, unit: created }, 201);
     }
-    if (pathname === '/api/units' && method === 'PUT') {
+    if ((pathname === '/api/units' || pathname.startsWith('/api/units/')) && method === 'PUT') {
       const b = await request.json().catch(() => ({}));
-      const id = url.searchParams.get('id') || b.id;
+      const pathId = pathname.startsWith('/api/units/') ? pathname.split('/')[3] : null;
+      const id = pathId || url.searchParams.get('id') || b.id;
       if (!id) return json({ error: 'Unit ID required' }, 400);
       await db.prepare(`
         UPDATE units SET
+          property_id = coalesce(?, property_id),
           unit_number = coalesce(?, unit_number),
           floor = coalesce(?, floor),
           unit_type = coalesce(?, unit_type),
@@ -309,6 +323,7 @@ async function handleD1(context, json, corsHeaders) {
           image_url = coalesce(?, image_url)
         WHERE id = ?
       `).bind(
+        b.property_id !== undefined ? Number(b.property_id) : null,
         b.unit_number || null, b.floor || null, b.unit_type || null,
         b.base_rent !== undefined ? Number(b.base_rent) : null,
         b.service_charge !== undefined ? Number(b.service_charge) : null,
@@ -320,8 +335,9 @@ async function handleD1(context, json, corsHeaders) {
       const updated = await db.prepare('SELECT u.*, p.name as property_name FROM units u LEFT JOIN properties p ON u.property_id = p.id WHERE u.id = ?').bind(Number(id)).first();
       return json({ success: true, unit: updated });
     }
-    if (pathname === '/api/units' && method === 'DELETE') {
-      const id = url.searchParams.get('id');
+    if ((pathname === '/api/units' || pathname.startsWith('/api/units/')) && method === 'DELETE') {
+      const pathId = pathname.startsWith('/api/units/') ? pathname.split('/')[3] : null;
+      const id = pathId || url.searchParams.get('id');
       if (!id) return json({ error: 'Unit ID required' }, 400);
       await db.prepare('DELETE FROM units WHERE id = ?').bind(Number(id)).run();
       return json({ success: true, message: 'Unit deleted' });
@@ -355,9 +371,10 @@ async function handleD1(context, json, corsHeaders) {
       const created = await db.prepare('SELECT * FROM tenants WHERE id = ?').bind(id).first();
       return json({ success: true, id, tenant_id: id, tenant: created }, 201);
     }
-    if (pathname === '/api/tenants' && method === 'PUT') {
+    if ((pathname === '/api/tenants' || pathname.startsWith('/api/tenants/')) && method === 'PUT') {
       const b = await request.json().catch(() => ({}));
-      const id = url.searchParams.get('id') || b.id;
+      const pathId = pathname.startsWith('/api/tenants/') ? pathname.split('/')[3] : null;
+      const id = pathId || url.searchParams.get('id') || b.id;
       if (!id) return json({ error: 'Tenant ID required' }, 400);
       await db.prepare(`
         UPDATE tenants SET
@@ -376,8 +393,9 @@ async function handleD1(context, json, corsHeaders) {
       const updated = await db.prepare('SELECT * FROM tenants WHERE id = ?').bind(Number(id)).first();
       return json({ success: true, tenant: updated });
     }
-    if (pathname === '/api/tenants' && method === 'DELETE') {
-      const id = url.searchParams.get('id');
+    if ((pathname === '/api/tenants' || pathname.startsWith('/api/tenants/')) && method === 'DELETE') {
+      const pathId = pathname.startsWith('/api/tenants/') ? pathname.split('/')[3] : null;
+      const id = pathId || url.searchParams.get('id');
       if (!id) return json({ error: 'Tenant ID required' }, 400);
       await db.prepare('DELETE FROM tenants WHERE id = ?').bind(Number(id)).run();
       return json({ success: true, message: 'Tenant deleted' });
@@ -789,6 +807,25 @@ export async function onRequest(context) {
     return json({ success: true, id: newProp.id, name: newProp.name, property: newProp }, 201);
   }
 
+  if ((pathname === '/api/properties' || pathname.startsWith('/api/properties/')) && method === 'PUT') {
+    let b = {};
+    try { b = await request.json(); } catch (e) { }
+    const pathId = pathname.startsWith('/api/properties/') ? pathname.split('/')[3] : null;
+    const id = Number(pathId || url.searchParams.get('id') || b.id);
+    const prop = DB.properties.find(p => p.id === id);
+    if (!prop) return json({ error: 'Property not found' }, 404);
+    Object.assign(prop, b);
+    return json({ success: true, property: prop });
+  }
+
+  if ((pathname === '/api/properties' || pathname.startsWith('/api/properties/')) && method === 'DELETE') {
+    const pathId = pathname.startsWith('/api/properties/') ? pathname.split('/')[3] : null;
+    const id = Number(pathId || url.searchParams.get('id'));
+    const idx = DB.properties.findIndex(p => p.id === id);
+    if (idx !== -1) DB.properties.splice(idx, 1);
+    return json({ success: true, message: 'Property deleted' });
+  }
+
   // 3. Units
   if (pathname === '/api/units' && method === 'GET') {
     return json(DB.units);
@@ -816,15 +853,23 @@ export async function onRequest(context) {
     return json({ success: true, id: newUnit.id, unit_number: newUnit.unit_number, unit: newUnit }, 201);
   }
 
-  if (pathname.startsWith('/api/units/') && method === 'PUT') {
-    const id = Number(pathname.split('/')[3]);
+  if ((pathname === '/api/units' || pathname.startsWith('/api/units/')) && method === 'PUT') {
+    const pathId = pathname.startsWith('/api/units/') ? pathname.split('/')[3] : null;
+    const id = Number(pathId || url.searchParams.get('id'));
     let b = {};
     try { b = await request.json(); } catch (e) { }
     const unit = DB.units.find(u => u.id === id);
     if (!unit) return json({ error: 'Unit not found' }, 404);
-    if (b.status) unit.status = b.status;
-    if (b.base_rent) unit.base_rent = Number(b.base_rent);
+    Object.assign(unit, b);
     return json({ success: true, unit });
+  }
+
+  if ((pathname === '/api/units' || pathname.startsWith('/api/units/')) && method === 'DELETE') {
+    const pathId = pathname.startsWith('/api/units/') ? pathname.split('/')[3] : null;
+    const id = Number(pathId || url.searchParams.get('id'));
+    const idx = DB.units.findIndex(u => u.id === id);
+    if (idx !== -1) DB.units.splice(idx, 1);
+    return json({ success: true, message: 'Unit deleted' });
   }
 
   // 4. Tenants
@@ -943,6 +988,25 @@ export async function onRequest(context) {
     }
 
     return json({ success: true, id: newTenant.id, tenant_id: newTenant.id, name: newTenant.name, tenant: newTenant, ...leaseInfo }, 201);
+  }
+
+  if ((pathname === '/api/tenants' || pathname.startsWith('/api/tenants/')) && method === 'PUT') {
+    const pathId = pathname.startsWith('/api/tenants/') ? pathname.split('/')[3] : null;
+    const id = Number(pathId || url.searchParams.get('id'));
+    let b = {};
+    try { b = await request.json(); } catch (e) { }
+    const tenant = DB.tenants.find(t => t.id === id);
+    if (!tenant) return json({ error: 'Tenant not found' }, 404);
+    Object.assign(tenant, b);
+    return json({ success: true, tenant });
+  }
+
+  if ((pathname === '/api/tenants' || pathname.startsWith('/api/tenants/')) && method === 'DELETE') {
+    const pathId = pathname.startsWith('/api/tenants/') ? pathname.split('/')[3] : null;
+    const id = Number(pathId || url.searchParams.get('id'));
+    const idx = DB.tenants.findIndex(t => t.id === id);
+    if (idx !== -1) DB.tenants.splice(idx, 1);
+    return json({ success: true, message: 'Tenant deleted' });
   }
 
   // Leases
@@ -1431,30 +1495,32 @@ export async function onRequest(context) {
     return json({ success: true, user: newUser }, 201);
   }
 
-  if (pathname.startsWith('/api/users/') && method === 'PUT') {
+  if ((pathname === '/api/users' || pathname.startsWith('/api/users/')) && method === 'PUT') {
     const user = resolveRequestUser(request);
     if (!user) return json({ error: '401 Unauthorized: Valid authentication token required.' }, 401);
     if (user.role !== 'super_admin' && user.role !== 'property_manager') {
       return json({ error: '403 Forbidden: Modifying user accounts requires Administrative privileges.' }, 403);
     }
-    const id = Number(pathname.split('/')[3]);
     let b = {};
     try { b = await request.json(); } catch (e) { }
+    const id = Number(url.searchParams.get('id') || b.id || pathname.split('/')[3]);
     const targetUser = DB.users.find(u => u.id === id);
     if (!targetUser) return json({ error: 'User not found' }, 404);
     if (b.name) targetUser.name = b.name;
+    if (b.email) targetUser.email = b.email;
     if (b.phone) targetUser.phone = b.phone;
     if (b.role) targetUser.role = b.role;
+    if (b.status) targetUser.status = b.status;
     return json({ success: true, user: targetUser });
   }
 
-  if (pathname.startsWith('/api/users/') && method === 'DELETE') {
+  if ((pathname === '/api/users' || pathname.startsWith('/api/users/')) && method === 'DELETE') {
     const user = resolveRequestUser(request);
     if (!user) return json({ error: '401 Unauthorized: Valid authentication token required.' }, 401);
     if (user.role !== 'super_admin' && user.role !== 'property_manager') {
       return json({ error: '403 Forbidden: Deleting user accounts requires Administrative privileges.' }, 403);
     }
-    const id = Number(pathname.split('/')[3]);
+    const id = Number(url.searchParams.get('id') || pathname.split('/')[3]);
     const idx = DB.users.findIndex(u => u.id === id);
     if (idx !== -1) DB.users.splice(idx, 1);
     return json({ success: true, message: 'User deactivated and removed' });

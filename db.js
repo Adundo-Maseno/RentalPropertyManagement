@@ -560,7 +560,7 @@ function seedDatabase() {
 
   // 11. SaaS Users (RBAC)
   const insertUser = db.prepare(`
-    INSERT INTO users (name, email, phone, role, property_id, tenant_id, status)
+    INSERT OR IGNORE INTO users (name, email, phone, role, property_id, tenant_id, status)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
 

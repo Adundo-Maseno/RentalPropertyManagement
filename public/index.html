@@ -2343,6 +2343,348 @@
     </div>
   </div>
 
+  <!-- MODAL: Edit Property -->
+  <div id="modal-edit-property" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div>
+          <h3 class="font-bold text-slate-800 text-base">Edit Property Details</h3>
+          <p class="text-xs text-slate-500">Update building information, landlord details, and media</p>
+        </div>
+        <button onclick="app.closeModal('modal-edit-property')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-edit-property" onsubmit="app.handleEditPropertySubmit(event)" class="mt-4 space-y-3 text-xs">
+        <input type="hidden" id="edit-prop-id" value="">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Property Name</label>
+          <input type="text" id="edit-prop-name" required class="w-full border border-slate-300 rounded-lg p-2.5 font-medium">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Property Type</label>
+            <select id="edit-prop-type" class="w-full border border-slate-300 rounded-lg p-2.5">
+              <option value="Residential Multi-Family">Residential Multi-Family</option>
+              <option value="Commercial Complex">Commercial Complex</option>
+              <option value="Single Family Villa">Single Family Villa</option>
+              <option value="Mixed-Use Development">Mixed-Use Development</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">City / Region</label>
+            <input type="text" id="edit-prop-city" required class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Physical Street Address / Estate</label>
+          <input type="text" id="edit-prop-address" required class="w-full border border-slate-300 rounded-lg p-2.5">
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Landlord Name</label>
+            <input type="text" id="edit-prop-landlord-name" required class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Landlord Phone</label>
+            <input type="text" id="edit-prop-landlord-phone" required class="w-full border border-slate-300 rounded-lg p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Agency Fee %</label>
+            <input type="number" id="edit-prop-fee" step="0.5" class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Landlord Email</label>
+          <input type="email" id="edit-prop-landlord-email" class="w-full border border-slate-300 rounded-lg p-2.5">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">M-Pesa Paybill / Till</label>
+            <input type="text" id="edit-prop-paybill" class="w-full border border-slate-300 rounded-lg p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Bank Account</label>
+            <input type="text" id="edit-prop-bank" class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+        </div>
+
+        <!-- Property Cover Image / Photo Upload -->
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Property Cover Image</label>
+          <div class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center bg-slate-50 hover:bg-slate-100 transition relative">
+            <input type="file" id="edit-prop-image-file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="app.handleImageFileSelect(event, 'edit-prop')">
+            <div id="edit-prop-image-upload-prompt" class="space-y-1">
+              <i data-lucide="image-plus" class="w-6 h-6 mx-auto text-slate-400"></i>
+              <p class="text-xs text-slate-600 font-medium"><span class="text-emerald-600 font-bold">Click to replace photo</span> or drag & drop</p>
+              <p class="text-[10px] text-slate-400">PNG, JPG, WebP (auto-optimized)</p>
+            </div>
+            <div id="edit-prop-image-preview-container" class="hidden relative">
+              <img id="edit-prop-image-preview" src="" alt="Property Preview" class="w-full h-28 object-cover rounded-lg border border-slate-200">
+              <button type="button" onclick="app.removeImage('edit-prop')" class="absolute top-1.5 right-1.5 bg-rose-600 hover:bg-rose-700 text-white p-1 rounded-full shadow-md">
+                <i data-lucide="x" class="w-3 h-3"></i>
+              </button>
+            </div>
+          </div>
+          <input type="text" id="edit-prop-image-url" placeholder="Or paste image URL (https://...)" oninput="app.handleImageUrlInput(this.value, 'edit-prop')" class="w-full border border-slate-300 rounded-lg p-2 text-xs mt-1.5">
+          <input type="hidden" id="edit-prop-image-data" value="">
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+          <button type="button" onclick="app.deleteProperty(document.getElementById('edit-prop-id').value)" class="px-3.5 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-lg font-semibold transition flex items-center space-x-1">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <span>Delete Property</span>
+          </button>
+          <div class="flex items-center space-x-2">
+            <button type="button" onclick="app.closeModal('modal-edit-property')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
+            <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md transition">Update Property</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Edit Unit -->
+  <div id="modal-edit-unit" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div>
+          <h3 class="font-bold text-slate-800 text-base">Edit Unit</h3>
+          <p class="text-xs text-slate-500">Update unit specs, rental pricing, status, and photos</p>
+        </div>
+        <button onclick="app.closeModal('modal-edit-unit')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-edit-unit" onsubmit="app.handleEditUnitSubmit(event)" class="mt-4 space-y-3 text-xs">
+        <input type="hidden" id="edit-unit-id" value="">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Property</label>
+          <select id="edit-unit-prop-select" required class="w-full border border-slate-300 rounded-lg p-2.5">
+            <!-- dynamic -->
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Unit Number / Door</label>
+            <input type="text" id="edit-unit-number-input" required class="w-full border border-slate-300 rounded-lg p-2.5 font-bold">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Floor Level</label>
+            <input type="text" id="edit-unit-floor-input" class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Unit Type</label>
+            <select id="edit-unit-type-input" class="w-full border border-slate-300 rounded-lg p-2.5">
+              <option value="Bedsitter / Studio">Bedsitter / Studio</option>
+              <option value="1-Bedroom Modern">1-Bedroom Modern</option>
+              <option value="2-Bedroom Master Ensuite">2-Bedroom Master Ensuite</option>
+              <option value="3-Bedroom with DSQ">3-Bedroom with DSQ</option>
+              <option value="4-Bedroom Penthouse">4-Bedroom Penthouse</option>
+              <option value="Commercial Office Space">Commercial Office Space</option>
+              <option value="Ground Floor Retail Shop">Ground Floor Retail Shop</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Occupancy Status</label>
+            <select id="edit-unit-status-input" class="w-full border border-slate-300 rounded-lg p-2.5 font-bold">
+              <option value="vacant">Vacant (Listed Publicly)</option>
+              <option value="occupied">Occupied (Tenant Assigned)</option>
+              <option value="maintenance">Under Maintenance</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Base Rent (KES)</label>
+            <input type="number" id="edit-unit-rent-input" required class="w-full border border-slate-300 rounded-lg p-2.5 font-bold">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Service (KES)</label>
+            <input type="number" id="edit-unit-service-input" class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Garbage (KES)</label>
+            <input type="number" id="edit-unit-garbage-input" class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Water Meter Number</label>
+          <input type="text" id="edit-unit-meter-input" class="w-full border border-slate-300 rounded-lg p-2.5 font-mono">
+        </div>
+
+        <!-- Unit Photo Upload -->
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Unit Photo / Vacancy Showcase</label>
+          <div class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center bg-slate-50 hover:bg-slate-100 transition relative">
+            <input type="file" id="edit-unit-image-file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="app.handleImageFileSelect(event, 'edit-unit')">
+            <div id="edit-unit-image-upload-prompt" class="space-y-1">
+              <i data-lucide="image-plus" class="w-6 h-6 mx-auto text-slate-400"></i>
+              <p class="text-xs text-slate-600 font-medium"><span class="text-emerald-600 font-bold">Click to replace unit photo</span></p>
+              <p class="text-[10px] text-slate-400">Displayed on Public Vacancies &amp; Virtual Tours</p>
+            </div>
+            <div id="edit-unit-image-preview-container" class="hidden relative">
+              <img id="edit-unit-image-preview" src="" alt="Unit Preview" class="w-full h-28 object-cover rounded-lg border border-slate-200">
+              <button type="button" onclick="app.removeImage('edit-unit')" class="absolute top-1.5 right-1.5 bg-rose-600 hover:bg-rose-700 text-white p-1 rounded-full shadow-md">
+                <i data-lucide="x" class="w-3 h-3"></i>
+              </button>
+            </div>
+          </div>
+          <input type="text" id="edit-unit-image-url" placeholder="Or paste image URL (https://...)" oninput="app.handleImageUrlInput(this.value, 'edit-unit')" class="w-full border border-slate-300 rounded-lg p-2 text-xs mt-1.5">
+          <input type="hidden" id="edit-unit-image-data" value="">
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+          <button type="button" onclick="app.deleteUnit(document.getElementById('edit-unit-id').value)" class="px-3.5 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-lg font-semibold transition flex items-center space-x-1">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <span>Delete Unit</span>
+          </button>
+          <div class="flex items-center space-x-2">
+            <button type="button" onclick="app.closeModal('modal-edit-unit')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
+            <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md transition">Update Unit</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Edit Tenant -->
+  <div id="modal-edit-tenant" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div>
+          <h3 class="font-bold text-slate-800 text-base">Edit Tenant Profile</h3>
+          <p class="text-xs text-slate-500">Update personal, contact, and identity records</p>
+        </div>
+        <button onclick="app.closeModal('modal-edit-tenant')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-edit-tenant" onsubmit="app.handleEditTenantSubmit(event)" class="mt-4 space-y-3 text-xs">
+        <input type="hidden" id="edit-tenant-id" value="">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Full Legal Name</label>
+          <input type="text" id="edit-tenant-name-input" required class="w-full border border-slate-300 rounded-lg p-2.5 font-medium">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Phone Number</label>
+            <input type="text" id="edit-tenant-phone-input" required class="w-full border border-slate-300 rounded-lg p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">National ID / Passport</label>
+            <input type="text" id="edit-tenant-idnum-input" class="w-full border border-slate-300 rounded-lg p-2.5 font-mono">
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Email Address</label>
+          <input type="email" id="edit-tenant-email-input" class="w-full border border-slate-300 rounded-lg p-2.5">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Emergency Contact Name</label>
+            <input type="text" id="edit-tenant-emg-name" class="w-full border border-slate-300 rounded-lg p-2.5">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Emergency Contact Phone</label>
+            <input type="text" id="edit-tenant-emg-phone" class="w-full border border-slate-300 rounded-lg p-2.5 font-mono">
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Tenant Status</label>
+          <select id="edit-tenant-status-input" class="w-full border border-slate-300 rounded-lg p-2.5 font-medium">
+            <option value="active">Active Resident</option>
+            <option value="notice">On Vacate Notice</option>
+            <option value="past">Past / Evicted</option>
+          </select>
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+          <button type="button" onclick="app.deleteTenant(document.getElementById('edit-tenant-id').value)" class="px-3.5 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-lg font-semibold transition flex items-center space-x-1">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <span>Delete Tenant</span>
+          </button>
+          <div class="flex items-center space-x-2">
+            <button type="button" onclick="app.closeModal('modal-edit-tenant')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
+            <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md transition">Update Tenant</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Edit SaaS User -->
+  <div id="modal-edit-user" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div>
+          <h3 class="font-bold text-slate-800 text-base">Edit User Profile &amp; Role</h3>
+          <p class="text-xs text-slate-500">Update system access, permission level, and property scope</p>
+        </div>
+        <button onclick="app.closeModal('modal-edit-user')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-edit-user" onsubmit="app.handleEditUserSubmit(event)" class="mt-4 space-y-3 text-xs">
+        <input type="hidden" id="edit-user-id" value="">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">User Full Name</label>
+          <input type="text" id="edit-user-name-input" required class="w-full border border-slate-300 rounded-lg p-2.5 font-medium">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Email Address (Login)</label>
+          <input type="email" id="edit-user-email-input" required class="w-full border border-slate-300 rounded-lg p-2.5">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Phone Number</label>
+            <input type="text" id="edit-user-phone-input" class="w-full border border-slate-300 rounded-lg p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">SaaS Role</label>
+            <select id="edit-user-role-input" class="w-full border border-slate-300 rounded-lg p-2.5 font-medium">
+              <option value="property_manager">Property Manager</option>
+              <option value="caretaker">Site Caretaker</option>
+              <option value="landlord">Landlord / Owner</option>
+              <option value="super_admin">Super Admin</option>
+              <option value="tenant">Resident Tenant</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Scoped Property (Optional)</label>
+          <select id="edit-user-prop-input" class="w-full border border-slate-300 rounded-lg p-2.5">
+            <option value="">-- All Properties (Global Access) --</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Account Status</label>
+          <select id="edit-user-status-input" class="w-full border border-slate-300 rounded-lg p-2.5 font-medium">
+            <option value="active">Active Access</option>
+            <option value="suspended">Suspended / Inactive</option>
+          </select>
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+          <button type="button" onclick="app.deleteUser(document.getElementById('edit-user-id').value)" class="px-3.5 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-lg font-semibold transition flex items-center space-x-1">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <span>Delete User</span>
+          </button>
+          <div class="flex items-center space-x-2">
+            <button type="button" onclick="app.closeModal('modal-edit-user')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
+            <button type="submit" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold shadow-md transition">Update User</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL: Clean Production Sign In -->
   <div id="modal-auth-login" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative">

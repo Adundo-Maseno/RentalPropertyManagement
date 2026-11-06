@@ -363,6 +363,47 @@ async function handleRequest(req, res) {
       return sendJSON(res, 201, { success: true, id: info.lastInsertRowid });
     }
 
+    if ((pathname === '/api/properties' || pathname.startsWith('/api/properties/')) && method === 'PUT') {
+      const b = await parseBody(req);
+      const pathId = pathname.startsWith('/api/properties/') ? pathname.split('/')[3] : null;
+      const propId = pathId || url.searchParams.get('id') || b.id;
+      if (!propId) return sendJSON(res, 400, { error: 'Property ID is required' });
+
+      db.prepare(`
+        UPDATE properties SET
+          name = COALESCE(?, name),
+          property_type = COALESCE(?, property_type),
+          address = COALESCE(?, address),
+          city = COALESCE(?, city),
+          landlord_name = COALESCE(?, landlord_name),
+          landlord_phone = COALESCE(?, landlord_phone),
+          landlord_email = COALESCE(?, landlord_email),
+          management_fee_pct = COALESCE(?, management_fee_pct),
+          paybill_number = COALESCE(?, paybill_number),
+          bank_name = COALESCE(?, bank_name),
+          bank_account = COALESCE(?, bank_account),
+          image_url = COALESCE(?, image_url)
+        WHERE id = ?
+      `).run(
+        b.name ?? null, b.property_type ?? null, b.address ?? null, b.city ?? null,
+        b.landlord_name ?? null, b.landlord_phone ?? null, b.landlord_email ?? null,
+        b.management_fee_pct !== undefined ? Number(b.management_fee_pct) : null,
+        b.paybill_number ?? null, b.bank_name ?? null, b.bank_account ?? null,
+        b.image_url ?? null,
+        Number(propId)
+      );
+      const updated = db.prepare('SELECT * FROM properties WHERE id = ?').get(Number(propId));
+      return sendJSON(res, 200, { success: true, property: updated });
+    }
+
+    if ((pathname === '/api/properties' || pathname.startsWith('/api/properties/')) && method === 'DELETE') {
+      const pathId = pathname.startsWith('/api/properties/') ? pathname.split('/')[3] : null;
+      const propId = pathId || url.searchParams.get('id');
+      if (!propId) return sendJSON(res, 400, { error: 'Property ID is required' });
+      db.prepare('DELETE FROM properties WHERE id = ?').run(Number(propId));
+      return sendJSON(res, 200, { success: true, message: 'Property deleted' });
+    }
+
     // 3. Units
     if (pathname === '/api/units' && method === 'GET') {
       const units = db.prepare(`
@@ -403,23 +444,31 @@ async function handleRequest(req, res) {
       return sendJSON(res, 201, { success: true, id: info.lastInsertRowid });
     }
 
-    if (pathname.startsWith('/api/units/') && method === 'PUT') {
-      const unitId = pathname.split('/')[3];
+    if ((pathname === '/api/units' || pathname.startsWith('/api/units/')) && method === 'PUT') {
+      const pathId = pathname.startsWith('/api/units/') ? pathname.split('/')[3] : null;
       const b = await parseBody(req);
+      const unitId = pathId || url.searchParams.get('id') || b.id;
+      if (!unitId) return sendJSON(res, 400, { error: 'Unit ID is required' });
+
       const stmt = db.prepare(`
         UPDATE units SET 
+          property_id = COALESCE(?, property_id),
           unit_number = COALESCE(?, unit_number),
+          floor = COALESCE(?, floor),
           unit_type = COALESCE(?, unit_type),
           base_rent = COALESCE(?, base_rent),
           service_charge = COALESCE(?, service_charge),
           garbage_fee = COALESCE(?, garbage_fee),
           status = COALESCE(?, status),
           meter_number = COALESCE(?, meter_number),
-          notes = COALESCE(?, notes)
+          notes = COALESCE(?, notes),
+          image_url = COALESCE(?, image_url)
         WHERE id = ?
       `);
       stmt.run(
+        b.property_id !== undefined ? Number(b.property_id) : null,
         b.unit_number ?? null,
+        b.floor ?? null,
         b.unit_type ?? null,
         b.base_rent !== undefined ? Number(b.base_rent) : null,
         b.service_charge !== undefined ? Number(b.service_charge) : null,
@@ -427,9 +476,19 @@ async function handleRequest(req, res) {
         b.status ?? null,
         b.meter_number ?? null,
         b.notes ?? null,
-        unitId
+        b.image_url ?? null,
+        Number(unitId)
       );
-      return sendJSON(res, 200, { success: true });
+      const updated = db.prepare('SELECT u.*, p.name as property_name FROM units u JOIN properties p ON u.property_id = p.id WHERE u.id = ?').get(Number(unitId));
+      return sendJSON(res, 200, { success: true, unit: updated });
+    }
+
+    if ((pathname === '/api/units' || pathname.startsWith('/api/units/')) && method === 'DELETE') {
+      const pathId = pathname.startsWith('/api/units/') ? pathname.split('/')[3] : null;
+      const unitId = pathId || url.searchParams.get('id');
+      if (!unitId) return sendJSON(res, 400, { error: 'Unit ID is required' });
+      db.prepare('DELETE FROM units WHERE id = ?').run(Number(unitId));
+      return sendJSON(res, 200, { success: true, message: 'Unit deleted' });
     }
 
     // 4. Tenants
@@ -576,6 +635,40 @@ async function handleRequest(req, res) {
         }
 
       return sendJSON(res, 201, { success: true, id: tenantId, tenant_id: tenantId, ...leaseInfo });
+    }
+
+    if ((pathname === '/api/tenants' || pathname.startsWith('/api/tenants/')) && method === 'PUT') {
+      const b = await parseBody(req);
+      const pathId = pathname.startsWith('/api/tenants/') ? pathname.split('/')[3] : null;
+      const tenantId = pathId || url.searchParams.get('id') || b.id;
+      if (!tenantId) return sendJSON(res, 400, { error: 'Tenant ID is required' });
+
+      db.prepare(`
+        UPDATE tenants SET
+          name = COALESCE(?, name),
+          phone = COALESCE(?, phone),
+          email = COALESCE(?, email),
+          id_number = COALESCE(?, id_number),
+          emergency_contact_name = COALESCE(?, emergency_contact_name),
+          emergency_contact_phone = COALESCE(?, emergency_contact_phone),
+          status = COALESCE(?, status)
+        WHERE id = ?
+      `).run(
+        b.name ?? null, b.phone ?? null, b.email ?? null, b.id_number ?? null,
+        b.emergency_contact_name ?? null, b.emergency_contact_phone ?? null,
+        b.status ?? null,
+        Number(tenantId)
+      );
+      const updated = db.prepare('SELECT * FROM tenants WHERE id = ?').get(Number(tenantId));
+      return sendJSON(res, 200, { success: true, tenant: updated });
+    }
+
+    if ((pathname === '/api/tenants' || pathname.startsWith('/api/tenants/')) && method === 'DELETE') {
+      const pathId = pathname.startsWith('/api/tenants/') ? pathname.split('/')[3] : null;
+      const tenantId = pathId || url.searchParams.get('id');
+      if (!tenantId) return sendJSON(res, 400, { error: 'Tenant ID is required' });
+      db.prepare('DELETE FROM tenants WHERE id = ?').run(Number(tenantId));
+      return sendJSON(res, 200, { success: true, message: 'Tenant deleted' });
     }
 
     // 5. Leases

@@ -156,7 +156,7 @@ class BomaSphereApp {
       property_manager: [
         'dashboard', 'properties', 'tenants', 'leases', 'inspections',
         'visitor-passes', 'amenities', 'invoices', 'payments', 'water',
-        'landlord', 'expenses', 'maintenance', 'communications', 'higgsfield'
+        'landlord', 'expenses', 'maintenance', 'communications', 'higgsfield', 'users'
       ],
       caretaker: [
         'dashboard', 'properties', 'water', 'maintenance', 'communications',
@@ -701,10 +701,18 @@ class BomaSphereApp {
 
             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
               <span class="text-xs text-slate-500 font-medium">Comm. Fee: <strong>${p.management_fee_pct}%</strong></span>
-              <button onclick="app.viewPropertyStatement(${p.id})" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center">
-                <span>Statement</span>
-                <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
-              </button>
+              <div class="flex items-center space-x-1.5">
+                <button onclick="app.viewPropertyStatement(${p.id})" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold flex items-center transition" title="View Financial Statement">
+                  <span>Statement</span>
+                  <i data-lucide="arrow-right" class="w-3 h-3 ml-1"></i>
+                </button>
+                <button onclick="app.openEditPropertyModal(${p.id})" class="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded transition" title="Edit Property">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="app.deleteProperty(${p.id}, '${this.escapeQuote(p.name)}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition" title="Delete Property">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -763,7 +771,13 @@ class BomaSphereApp {
             <div class="text-[10px] text-slate-400 font-mono">${u.tenant_phone}</div>
           ` : '<span class="text-slate-400 italic">No Active Tenant</span>'}
         </td>
-        <td class="py-3 px-4 text-right">
+        <td class="py-3 px-4 text-right space-x-1">
+          <button onclick="app.openEditUnitModal(${u.id})" class="p-1 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded transition" title="Edit Unit Specs / Status">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5 inline"></i>
+          </button>
+          <button onclick="app.deleteUnit(${u.id}, '${this.escapeQuote(u.unit_number)}')" class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition" title="Delete Unit">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5 inline"></i>
+          </button>
           ${u.status === 'vacant' ? `
             <button onclick="app.openAssignTenantModal(${u.id})" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[11px] font-semibold transition">Lease</button>
           ` : `
@@ -861,10 +875,16 @@ class BomaSphereApp {
             </span>
           </td>
           <td class="py-3 px-4 text-right space-x-1">
+            <button onclick="app.openEditTenantModal(${t.id})" class="p-1 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded transition" title="Edit Tenant Profile">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5 inline"></i>
+            </button>
+            <button onclick="app.deleteTenant(${t.id}, '${this.escapeQuote(t.name)}')" class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition" title="Delete Tenant">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5 inline"></i>
+            </button>
             <button onclick="app.viewTenantLedger(${t.id})" class="px-2 py-1 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded font-semibold text-[11px] transition" title="View Full Dispute-Proof Ledger Statement">Statement</button>
             <button onclick="app.openMpesaForTenant(${t.id})" class="px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded font-semibold text-[11px] hover:bg-emerald-100 transition" title="Trigger STK Push">Lipa M-Pesa</button>
             <button onclick="app.sendSMSAlert(${t.id})" class="p-1 text-slate-500 hover:text-slate-700 rounded" title="Send SMS reminder">
-              <i data-lucide="message-square" class="w-4 h-4"></i>
+              <i data-lucide="message-square" class="w-4 h-4 inline"></i>
             </button>
           </td>
         </tr>
@@ -2180,6 +2200,183 @@ class BomaSphereApp {
     }
   }
 
+  openEditPropertyModal(propId) {
+    const p = this.state.properties.find(x => x.id === Number(propId));
+    if (!p) return;
+    document.getElementById('edit-prop-id').value = p.id;
+    document.getElementById('edit-prop-name').value = p.name || '';
+    document.getElementById('edit-prop-type').value = p.property_type || 'Residential Multi-Family';
+    document.getElementById('edit-prop-city').value = p.city || '';
+    document.getElementById('edit-prop-address').value = p.address || '';
+    document.getElementById('edit-prop-landlord-name').value = p.landlord_name || '';
+    document.getElementById('edit-prop-landlord-phone').value = p.landlord_phone || '';
+    document.getElementById('edit-prop-landlord-email').value = p.landlord_email || '';
+    document.getElementById('edit-prop-fee').value = p.management_fee_pct || 10.0;
+    document.getElementById('edit-prop-paybill').value = p.paybill_number || '';
+    document.getElementById('edit-prop-bank').value = p.bank_name || p.bank_account || '';
+
+    if (p.image_url) {
+      this.setImagePreview('edit-prop', p.image_url);
+      const urlInput = document.getElementById('edit-prop-image-url');
+      if (urlInput) urlInput.value = p.image_url;
+    } else {
+      this.removeImage('edit-prop');
+    }
+    this.openModal('modal-edit-property');
+  }
+
+  async handleEditPropertySubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('edit-prop-id').value;
+    const name = document.getElementById('edit-prop-name').value;
+    const type = document.getElementById('edit-prop-type').value;
+    const city = document.getElementById('edit-prop-city').value;
+    const address = document.getElementById('edit-prop-address').value;
+    const landlordName = document.getElementById('edit-prop-landlord-name').value;
+    const landlordPhone = document.getElementById('edit-prop-landlord-phone').value;
+    const landlordEmail = document.getElementById('edit-prop-landlord-email').value;
+    const fee = document.getElementById('edit-prop-fee').value;
+    const paybill = document.getElementById('edit-prop-paybill').value;
+    const bank = document.getElementById('edit-prop-bank').value;
+    const imageUrl = document.getElementById('edit-prop-image-data')?.value || '';
+
+    try {
+      await this.fetchAPI(`/api/properties/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: Number(id),
+          name,
+          property_type: type,
+          city,
+          address,
+          landlord_name: landlordName,
+          landlord_phone: landlordPhone,
+          landlord_email: landlordEmail,
+          management_fee_pct: Number(fee),
+          paybill_number: paybill,
+          bank_name: bank,
+          image_url: imageUrl
+        })
+      });
+
+      this.closeModal('modal-edit-property');
+      this.showToast(`Property "${name}" updated successfully!`, 'success');
+      await this.refreshAllData();
+      this.renderProperties();
+    } catch (err) {
+      console.error(err);
+      this.showToast(err.message || 'Failed to update property', 'error');
+    }
+  }
+
+  async deleteProperty(propId, propName = 'this property') {
+    if (!confirm(`Are you sure you want to permanently delete "${propName}" and all associated units? This action cannot be undone.`)) {
+      return;
+    }
+    try {
+      await this.fetchAPI(`/api/properties/${propId}`, { method: 'DELETE' });
+      this.closeModal('modal-edit-property');
+      this.showToast(`Property deleted successfully`, 'success');
+      await this.refreshAllData();
+      this.renderProperties();
+      this.renderUnits();
+    } catch (err) {
+      console.error(err);
+      this.showToast(err.message || 'Failed to delete property', 'error');
+    }
+  }
+
+  openEditUnitModal(unitId) {
+    const u = this.state.units.find(x => x.id === Number(unitId));
+    if (!u) return;
+
+    const propSelect = document.getElementById('edit-unit-prop-select');
+    if (propSelect) {
+      propSelect.innerHTML = this.state.properties.map(p => `
+        <option value="${p.id}" ${p.id === u.property_id ? 'selected' : ''}>${p.name} (${p.city})</option>
+      `).join('');
+    }
+
+    document.getElementById('edit-unit-id').value = u.id;
+    document.getElementById('edit-unit-number-input').value = u.unit_number || '';
+    document.getElementById('edit-unit-floor-input').value = u.floor || 'Ground';
+    document.getElementById('edit-unit-type-input').value = u.unit_type || '2-Bedroom Master Ensuite';
+    document.getElementById('edit-unit-status-input').value = u.status || 'vacant';
+    document.getElementById('edit-unit-rent-input').value = u.base_rent || 0;
+    document.getElementById('edit-unit-service-input').value = u.service_charge || 0;
+    document.getElementById('edit-unit-garbage-input').value = u.garbage_fee || 0;
+    document.getElementById('edit-unit-meter-input').value = u.meter_number || '';
+
+    if (u.image_url) {
+      this.setImagePreview('edit-unit', u.image_url);
+      const urlInput = document.getElementById('edit-unit-image-url');
+      if (urlInput) urlInput.value = u.image_url;
+    } else {
+      this.removeImage('edit-unit');
+    }
+    this.openModal('modal-edit-unit');
+  }
+
+  async handleEditUnitSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('edit-unit-id').value;
+    const propertyId = document.getElementById('edit-unit-prop-select').value;
+    const unitNumber = document.getElementById('edit-unit-number-input').value;
+    const floor = document.getElementById('edit-unit-floor-input').value;
+    const unitType = document.getElementById('edit-unit-type-input').value;
+    const status = document.getElementById('edit-unit-status-input').value;
+    const rent = document.getElementById('edit-unit-rent-input').value;
+    const service = document.getElementById('edit-unit-service-input').value || 0;
+    const garbage = document.getElementById('edit-unit-garbage-input').value || 0;
+    const meter = document.getElementById('edit-unit-meter-input').value || '';
+    const imageUrl = document.getElementById('edit-unit-image-data')?.value || '';
+
+    try {
+      await this.fetchAPI(`/api/units/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: Number(id),
+          property_id: Number(propertyId),
+          unit_number: unitNumber,
+          floor,
+          unit_type: unitType,
+          status,
+          base_rent: Number(rent),
+          service_charge: Number(service),
+          garbage_fee: Number(garbage),
+          meter_number: meter,
+          image_url: imageUrl
+        })
+      });
+
+      this.closeModal('modal-edit-unit');
+      this.showToast(`Unit ${unitNumber} updated successfully!`, 'success');
+      await this.refreshAllData();
+      this.renderUnits();
+    } catch (err) {
+      console.error(err);
+      this.showToast(err.message || 'Failed to update unit', 'error');
+    }
+  }
+
+  async deleteUnit(unitId, unitNumber = 'this unit') {
+    if (!confirm(`Are you sure you want to permanently delete Unit ${unitNumber}? Active leases and billing history will be removed.`)) {
+      return;
+    }
+    try {
+      await this.fetchAPI(`/api/units/${unitId}`, { method: 'DELETE' });
+      this.closeModal('modal-edit-unit');
+      this.showToast(`Unit deleted successfully`, 'success');
+      await this.refreshAllData();
+      this.renderUnits();
+    } catch (err) {
+      console.error(err);
+      this.showToast(err.message || 'Failed to delete unit', 'error');
+    }
+  }
+
   // ==========================================
   // TENANT & LEASE MODALS
   // ==========================================
@@ -2279,6 +2476,76 @@ class BomaSphereApp {
     } catch (err) {
       console.error(err);
       this.showToast(err.message || 'Failed to add tenant', 'error');
+    }
+  }
+
+  openEditTenantModal(tenantId) {
+    const t = this.state.tenants.find(x => x.id === Number(tenantId));
+    if (!t) return;
+
+    document.getElementById('edit-tenant-id').value = t.id;
+    document.getElementById('edit-tenant-name-input').value = t.name || '';
+    document.getElementById('edit-tenant-phone-input').value = t.phone || '';
+    document.getElementById('edit-tenant-idnum-input').value = t.id_number || '';
+    document.getElementById('edit-tenant-email-input').value = t.email || '';
+    document.getElementById('edit-tenant-emg-name').value = t.emergency_contact_name || '';
+    document.getElementById('edit-tenant-emg-phone').value = t.emergency_contact_phone || '';
+    document.getElementById('edit-tenant-status-input').value = t.status || 'active';
+
+    this.openModal('modal-edit-tenant');
+  }
+
+  async handleEditTenantSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('edit-tenant-id').value;
+    const name = document.getElementById('edit-tenant-name-input').value;
+    const phone = document.getElementById('edit-tenant-phone-input').value;
+    const idNum = document.getElementById('edit-tenant-idnum-input').value;
+    const email = document.getElementById('edit-tenant-email-input').value;
+    const emgName = document.getElementById('edit-tenant-emg-name').value;
+    const emgPhone = document.getElementById('edit-tenant-emg-phone').value;
+    const status = document.getElementById('edit-tenant-status-input').value;
+
+    try {
+      await this.fetchAPI(`/api/tenants/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: Number(id),
+          name,
+          phone,
+          id_number: idNum,
+          email,
+          emergency_contact_name: emgName,
+          emergency_contact_phone: emgPhone,
+          status
+        })
+      });
+
+      this.closeModal('modal-edit-tenant');
+      this.showToast(`Tenant "${name}" updated successfully!`, 'success');
+      await this.refreshAllData();
+      this.renderTenants();
+    } catch (err) {
+      console.error(err);
+      this.showToast(err.message || 'Failed to update tenant', 'error');
+    }
+  }
+
+  async deleteTenant(tenantId, tenantName = 'this tenant') {
+    if (!confirm(`Are you sure you want to permanently delete tenant "${tenantName}"? This will terminate active leases.`)) {
+      return;
+    }
+    try {
+      await this.fetchAPI(`/api/tenants/${tenantId}`, { method: 'DELETE' });
+      this.closeModal('modal-edit-tenant');
+      this.showToast(`Tenant deleted successfully`, 'success');
+      await this.refreshAllData();
+      this.renderTenants();
+      this.renderUnits();
+    } catch (err) {
+      console.error(err);
+      this.showToast(err.message || 'Failed to delete tenant', 'error');
     }
   }
 
@@ -3607,7 +3874,7 @@ class BomaSphereApp {
         el.style.display = 'none';
       } else if (rbacType === 'invoicing' && (isCaretaker || isTenant || isLandlord)) {
         el.style.display = 'none';
-      } else if (rbacType === 'admin' && !isSuperAdmin) {
+      } else if (rbacType === 'admin' && !(isSuperAdmin || isPropertyManager)) {
         el.style.display = 'none';
       } else if (rbacType === 'expense' && (isCaretaker || isTenant)) {
         el.style.display = 'none';
@@ -3721,6 +3988,9 @@ class BomaSphereApp {
             <button onclick="app.copyUserEmail('${u.email}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-medium text-[11px] transition">
               Copy Email
             </button>
+            <button onclick="app.openEditUserModal(${u.id})" class="p-1 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded transition" title="Edit User">
+              <i data-lucide="edit-3" class="w-4 h-4 inline"></i>
+            </button>
             <button onclick="app.deleteUser(${u.id})" class="p-1 text-slate-400 hover:text-rose-600 rounded transition" title="Delete User">
               <i data-lucide="trash-2" class="w-4 h-4 inline"></i>
             </button>
@@ -3771,6 +4041,65 @@ class BomaSphereApp {
       this.renderUsers();
     } catch (err) {
       console.error(err);
+    }
+  }
+
+  openEditUserModal(userId) {
+    const u = this.state.users.find(x => x.id === Number(userId));
+    if (!u) return;
+
+    document.getElementById('edit-user-id').value = u.id;
+    document.getElementById('edit-user-name-input').value = u.name || '';
+    document.getElementById('edit-user-email-input').value = u.email || '';
+    document.getElementById('edit-user-phone-input').value = u.phone || '';
+    document.getElementById('edit-user-role-input').value = u.role || 'property_manager';
+
+    const propSelect = document.getElementById('edit-user-prop-input');
+    if (propSelect) {
+      propSelect.innerHTML = `
+        <option value="">-- All Properties (Global Access) --</option>
+        ${this.state.properties.map(p => `
+          <option value="${p.id}" ${p.id === u.property_id ? 'selected' : ''}>${p.name} (${p.city})</option>
+        `).join('')}
+      `;
+    }
+
+    document.getElementById('edit-user-status-input').value = u.status || 'active';
+    this.openModal('modal-edit-user');
+  }
+
+  async handleEditUserSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('edit-user-id').value;
+    const name = document.getElementById('edit-user-name-input').value;
+    const email = document.getElementById('edit-user-email-input').value;
+    const phone = document.getElementById('edit-user-phone-input').value;
+    const role = document.getElementById('edit-user-role-input').value;
+    const propertyId = document.getElementById('edit-user-prop-input').value;
+    const status = document.getElementById('edit-user-status-input').value;
+
+    try {
+      await this.fetchAPI(`/api/users/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: Number(id),
+          name,
+          email,
+          phone,
+          role,
+          property_id: propertyId ? Number(propertyId) : null,
+          status
+        })
+      });
+
+      this.closeModal('modal-edit-user');
+      this.showToast(`User "${name}" updated successfully!`, 'success');
+      await this.refreshAllData();
+      this.renderUsers();
+    } catch (err) {
+      console.error(err);
+      this.showToast(err.message || 'Failed to update user', 'error');
     }
   }
 
@@ -4202,6 +4531,11 @@ class BomaSphereApp {
     }
 
     return isNegative ? `-${formatted}` : formatted;
+  }
+
+  escapeQuote(str) {
+    if (!str) return '';
+    return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
   }
 
   // MODULE 1: DIGITAL LEASE AGREEMENTS & E-SIGNATURES
