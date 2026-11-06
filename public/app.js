@@ -668,42 +668,49 @@ class BomaSphereApp {
 
     grid.innerHTML = this.state.properties.map(p => {
       const occPct = p.total_units > 0 ? ((p.occupied_units / p.total_units) * 100).toFixed(0) : 0;
+      const coverImage = p.image_url || 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80';
       return `
-        <div class="bg-white rounded-xl p-5 border border-slate-200/90 shadow-xs hover:shadow-md transition flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between text-xs text-slate-400">
-              <span class="px-2 py-0.5 rounded bg-slate-100 font-medium text-slate-600">${p.property_type}</span>
-              <span class="font-bold text-emerald-600">${occPct}% Occupied</span>
-            </div>
-            <h3 class="font-bold text-slate-800 text-base mt-2">${p.name}</h3>
-            <p class="text-xs text-slate-500 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3 inline mr-1 text-slate-400"></i>${p.address}, ${p.city}</p>
-
-            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-600">
-              <div class="flex justify-between">
-                <span>Landlord:</span>
-                <strong class="text-slate-800 truncate max-w-[140px]">${p.landlord_name}</strong>
-              </div>
-              <div class="flex justify-between">
-                <span>Units Breakdown:</span>
-                <span><strong>${p.occupied_units}</strong> occ / <strong>${p.vacant_units}</strong> vac</span>
-              </div>
-              <div class="flex justify-between">
-                <span>Paybill / Bank:</span>
-                <span class="font-mono text-[11px] text-slate-700 truncate max-w-[150px]">${p.paybill_number || p.bank_name || 'N/A'}</span>
-              </div>
+        <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs hover:shadow-md transition flex flex-col justify-between overflow-hidden">
+          <div class="h-32 w-full relative bg-slate-900 overflow-hidden">
+            <img src="${coverImage}" alt="${p.name}" class="w-full h-full object-cover transition duration-500 hover:scale-105">
+            <div class="absolute top-2.5 inset-x-2.5 flex items-center justify-between text-xs">
+              <span class="px-2 py-0.5 rounded bg-slate-950/70 backdrop-blur-xs font-semibold text-white text-[11px]">${p.property_type}</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-600/90 backdrop-blur-xs font-bold text-white text-[11px]">${occPct}% Occupied</span>
             </div>
           </div>
+          <div class="p-5 flex-1 flex flex-col justify-between">
+            <div>
+              <h3 class="font-bold text-slate-800 text-base mt-1">${p.name}</h3>
+              <p class="text-xs text-slate-500 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3 inline mr-1 text-slate-400"></i>${p.address}, ${p.city}</p>
 
-          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-            <span class="text-xs text-slate-500 font-medium">Comm. Fee: <strong>${p.management_fee_pct}%</strong></span>
-            <button onclick="app.viewPropertyStatement(${p.id})" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center">
-              <span>Statement</span>
-              <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
-            </button>
+              <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-600">
+                <div class="flex justify-between">
+                  <span>Landlord:</span>
+                  <strong class="text-slate-800 truncate max-w-[140px]">${p.landlord_name}</strong>
+                </div>
+                <div class="flex justify-between">
+                  <span>Units Breakdown:</span>
+                  <span><strong>${p.occupied_units}</strong> occ / <strong>${p.vacant_units || (p.total_units - p.occupied_units)}</strong> vac</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Paybill / Bank:</span>
+                  <span class="font-mono text-[11px] text-slate-700 truncate max-w-[150px]">${p.paybill_number || p.bank_name || 'N/A'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-xs text-slate-500 font-medium">Comm. Fee: <strong>${p.management_fee_pct}%</strong></span>
+              <button onclick="app.viewPropertyStatement(${p.id})" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center">
+                <span>Statement</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+              </button>
+            </div>
           </div>
         </div>
       `;
     }).join('');
+    if (window.lucide) lucide.createIcons();
   }
 
   renderUnits() {
@@ -725,7 +732,15 @@ class BomaSphereApp {
 
     tbody.innerHTML = filtered.map(u => `
       <tr class="hover:bg-slate-50/80 transition-colors">
-        <td class="py-3 px-4 font-bold text-slate-800">${u.unit_number}</td>
+        <td class="py-3 px-4 font-bold text-slate-800">
+          <div class="flex items-center space-x-2.5">
+            ${u.image_url ? `<img src="${u.image_url}" alt="${u.unit_number}" class="w-8 h-8 rounded-lg object-cover border border-slate-200 shrink-0">` : `<div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 shrink-0"><i data-lucide="home" class="w-4 h-4"></i></div>`}
+            <div>
+              <span>${u.unit_number}</span>
+              ${u.status === 'vacant' ? `<span class="block text-[10px] text-emerald-600 font-semibold">Vacant</span>` : ''}
+            </div>
+          </div>
+        </td>
         <td class="py-3 px-4 text-slate-600">${u.property_name}</td>
         <td class="py-3 px-4 text-slate-600">
           <div>${u.unit_type}</div>
@@ -759,6 +774,7 @@ class BomaSphereApp {
         </td>
       </tr>
     `).join('');
+    if (window.lucide) lucide.createIcons();
 
     // Populate property filter dropdown if not populated
     const propFilter = document.getElementById('filter-units-property');
@@ -1997,9 +2013,89 @@ class BomaSphereApp {
   }
 
   // ==========================================
-  // PROPERTY & UNIT MODALS
+  // PROPERTY & UNIT MODALS & IMAGE UPLOAD
   // ==========================================
+  handleImageFileSelect(e, type) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.showToast('Please select a valid image file (PNG, JPG, WebP).', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        // Resize image to max 1200px to maintain high clarity while keeping payload lightweight
+        const maxDim = 1200;
+        let width = img.width;
+        let height = img.height;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+
+        this.setImagePreview(type, dataUrl);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  handleImageUrlInput(url, type) {
+    const trimmed = (url || '').trim();
+    if (!trimmed) {
+      this.removeImage(type, false);
+      return;
+    }
+    this.setImagePreview(type, trimmed);
+  }
+
+  setImagePreview(type, src) {
+    const hiddenInput = document.getElementById(`${type}-image-data`);
+    const previewImg = document.getElementById(`${type}-image-preview`);
+    const previewContainer = document.getElementById(`${type}-image-preview-container`);
+    const uploadPrompt = document.getElementById(`${type}-image-upload-prompt`);
+
+    if (hiddenInput) hiddenInput.value = src;
+    if (previewImg) previewImg.src = src;
+    if (previewContainer) previewContainer.classList.remove('hidden');
+    if (uploadPrompt) uploadPrompt.classList.add('hidden');
+    if (window.lucide) lucide.createIcons();
+  }
+
+  removeImage(type, clearUrlInput = true) {
+    const hiddenInput = document.getElementById(`${type}-image-data`);
+    const previewImg = document.getElementById(`${type}-image-preview`);
+    const previewContainer = document.getElementById(`${type}-image-preview-container`);
+    const uploadPrompt = document.getElementById(`${type}-image-upload-prompt`);
+    const fileInput = document.getElementById(`${type}-image-file`);
+    const urlInput = document.getElementById(`${type}-image-url`);
+
+    if (hiddenInput) hiddenInput.value = '';
+    if (previewImg) previewImg.src = '';
+    if (fileInput) fileInput.value = '';
+    if (clearUrlInput && urlInput) urlInput.value = '';
+    if (previewContainer) previewContainer.classList.add('hidden');
+    if (uploadPrompt) uploadPrompt.classList.remove('hidden');
+    if (window.lucide) lucide.createIcons();
+  }
+
   openAddPropertyModal() {
+    this.removeImage('prop');
     this.openModal('modal-add-property');
   }
 
@@ -2013,6 +2109,7 @@ class BomaSphereApp {
     const fee = document.getElementById('prop-fee').value;
     const paybill = document.getElementById('prop-paybill').value;
     const bank = document.getElementById('prop-bank').value;
+    const imageUrl = document.getElementById('prop-image-data')?.value || '';
 
     try {
       await this.fetchAPI('/api/properties', {
@@ -2021,7 +2118,8 @@ class BomaSphereApp {
         body: JSON.stringify({
           name, property_type: type, city, address,
           landlord_name: landlord, landlord_phone: '+254700000000', landlord_email: 'landlord@property.co.ke',
-          management_fee_pct: Number(fee), paybill_number: paybill, bank_name: bank
+          management_fee_pct: Number(fee), paybill_number: paybill, bank_name: bank,
+          image_url: imageUrl
         })
       });
 
@@ -2035,6 +2133,7 @@ class BomaSphereApp {
   }
 
   openAddUnitModal() {
+    this.removeImage('unit');
     const select = document.getElementById('unit-prop-select');
     select.innerHTML = this.state.properties.map(p => `
       <option value="${p.id}">${p.name} (${p.city})</option>
@@ -2052,6 +2151,7 @@ class BomaSphereApp {
     const service = document.getElementById('unit-service-input').value || 0;
     const garbage = document.getElementById('unit-garbage-input').value || 0;
     const meter = document.getElementById('unit-meter-input').value || '';
+    const imageUrl = document.getElementById('unit-image-data')?.value || '';
 
     try {
       await this.fetchAPI('/api/units', {
@@ -2066,7 +2166,8 @@ class BomaSphereApp {
           service_charge: Number(service),
           garbage_fee: Number(garbage),
           meter_number: meter,
-          status: 'vacant'
+          status: 'vacant',
+          image_url: imageUrl
         })
       });
 

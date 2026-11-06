@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS properties (
       paybill_number TEXT,
       bank_name TEXT,
       bank_account TEXT,
+      image_url TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -30,7 +31,8 @@ CREATE TABLE IF NOT EXISTS units (
       garbage_fee REAL DEFAULT 0.0,
       status TEXT DEFAULT 'vacant',
       meter_number TEXT,
-      notes TEXT
+      notes TEXT,
+      image_url TEXT
     );
 
 CREATE TABLE IF NOT EXISTS tenants (

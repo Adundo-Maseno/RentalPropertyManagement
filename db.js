@@ -53,6 +53,7 @@ function initSchema() {
       paybill_number TEXT,
       bank_name TEXT,
       bank_account TEXT,
+      image_url TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -67,7 +68,8 @@ function initSchema() {
       garbage_fee REAL DEFAULT 0.0,
       status TEXT DEFAULT 'vacant',
       meter_number TEXT,
-      notes TEXT
+      notes TEXT,
+      image_url TEXT
     );
 
     CREATE TABLE IF NOT EXISTS tenants (
@@ -386,6 +388,8 @@ function initSchema() {
   // Ensure columns exist if table was created previously
   try { db.exec("ALTER TABLE users ADD COLUMN password_hash TEXT DEFAULT 'password123'"); } catch (e) {}
   try { db.exec("ALTER TABLE users ADD COLUMN session_token TEXT"); } catch (e) {}
+  try { db.exec("ALTER TABLE properties ADD COLUMN image_url TEXT"); } catch (e) {}
+  try { db.exec("ALTER TABLE units ADD COLUMN image_url TEXT"); } catch (e) {}
 }
 
 function seedDatabase() {

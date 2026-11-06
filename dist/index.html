@@ -2110,6 +2110,27 @@
           </div>
         </div>
 
+        <!-- Property Cover Image / Photo Upload -->
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Property Cover Image</label>
+          <div class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center bg-slate-50 hover:bg-slate-100 transition relative">
+            <input type="file" id="prop-image-file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="app.handleImageFileSelect(event, 'prop')">
+            <div id="prop-image-upload-prompt" class="space-y-1">
+              <i data-lucide="image-plus" class="w-6 h-6 mx-auto text-slate-400"></i>
+              <p class="text-xs text-slate-600 font-medium"><span class="text-emerald-600 font-bold">Click to upload photo</span> or drag & drop</p>
+              <p class="text-[10px] text-slate-400">PNG, JPG, WebP (auto-optimized)</p>
+            </div>
+            <div id="prop-image-preview-container" class="hidden relative">
+              <img id="prop-image-preview" src="" alt="Property Preview" class="w-full h-28 object-cover rounded-lg border border-slate-200">
+              <button type="button" onclick="app.removeImage('prop')" class="absolute top-1.5 right-1.5 bg-rose-600 hover:bg-rose-700 text-white p-1 rounded-full shadow-md">
+                <i data-lucide="x" class="w-3 h-3"></i>
+              </button>
+            </div>
+          </div>
+          <input type="text" id="prop-image-url" placeholder="Or paste image URL (https://...)" oninput="app.handleImageUrlInput(this.value, 'prop')" class="w-full border border-slate-300 rounded-lg p-2 text-xs mt-1.5">
+          <input type="hidden" id="prop-image-data" value="">
+        </div>
+
         <div class="flex items-center justify-end space-x-2 pt-3">
           <button type="button" onclick="app.closeModal('modal-add-property')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
           <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md transition">Save Property</button>
@@ -2174,6 +2195,27 @@
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Water Meter Number</label>
           <input type="text" id="unit-meter-input" placeholder="e.g. WM-KIL-204" class="w-full border border-slate-300 rounded-lg p-2.5 font-mono">
+        </div>
+
+        <!-- Unit Vacancy Photo / Showcase Upload -->
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Unit Photo / Vacancy Showcase</label>
+          <div class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center bg-slate-50 hover:bg-slate-100 transition relative">
+            <input type="file" id="unit-image-file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="app.handleImageFileSelect(event, 'unit')">
+            <div id="unit-image-upload-prompt" class="space-y-1">
+              <i data-lucide="image-plus" class="w-6 h-6 mx-auto text-slate-400"></i>
+              <p class="text-xs text-slate-600 font-medium"><span class="text-emerald-600 font-bold">Click to upload unit photo</span></p>
+              <p class="text-[10px] text-slate-400">Displayed on Public Vacancies &amp; Virtual Tours</p>
+            </div>
+            <div id="unit-image-preview-container" class="hidden relative">
+              <img id="unit-image-preview" src="" alt="Unit Preview" class="w-full h-28 object-cover rounded-lg border border-slate-200">
+              <button type="button" onclick="app.removeImage('unit')" class="absolute top-1.5 right-1.5 bg-rose-600 hover:bg-rose-700 text-white p-1 rounded-full shadow-md">
+                <i data-lucide="x" class="w-3 h-3"></i>
+              </button>
+            </div>
+          </div>
+          <input type="text" id="unit-image-url" placeholder="Or paste image URL (https://...)" oninput="app.handleImageUrlInput(this.value, 'unit')" class="w-full border border-slate-300 rounded-lg p-2 text-xs mt-1.5">
+          <input type="hidden" id="unit-image-data" value="">
         </div>
 
         <div class="flex items-center justify-end space-x-2 pt-3">

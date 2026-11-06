@@ -78,6 +78,8 @@ async function ensureD1Schema(db) {
         }
       }
     }
+    try { await db.prepare("ALTER TABLE properties ADD COLUMN image_url TEXT").run(); } catch (e) {}
+    try { await db.prepare("ALTER TABLE units ADD COLUMN image_url TEXT").run(); } catch (e) {}
     console.log('✅ Cloudflare D1 tables and RBAC users verified and initialized.');
   } catch (err) {
     console.error('ensureD1Schema error:', err);
@@ -225,12 +227,13 @@ async function handleD1(context, json, corsHeaders) {
       const b = await request.json().catch(() => ({}));
       if (!b.name) return json({ error: 'Property name is required' }, 400);
       const res = await db.prepare(`
-        INSERT INTO properties (name, property_type, address, city, landlord_name, landlord_phone, landlord_email, management_fee_pct, paybill_number, bank_name, bank_account)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO properties (name, property_type, address, city, landlord_name, landlord_phone, landlord_email, management_fee_pct, paybill_number, bank_name, bank_account, image_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         b.name, b.property_type || 'Residential Apartments', b.address || '', b.city || 'Nairobi',
         b.landlord_name || 'Landlord', b.landlord_phone || '+254700000000', b.landlord_email || 'landlord@bomasphere.co.ke',
-        Number(b.management_fee_pct || 10.0), b.paybill_number || null, b.bank_name || null, b.bank_account || null
+        Number(b.management_fee_pct || 10.0), b.paybill_number || null, b.bank_name || null, b.bank_account || null,
+        b.image_url || null
       ).run();
       const id = res.meta?.last_row_id;
       const created = await db.prepare('SELECT * FROM properties WHERE id = ?').bind(id).first();
@@ -248,9 +251,10 @@ async function handleD1(context, json, corsHeaders) {
           city = coalesce(?, city),
           landlord_name = coalesce(?, landlord_name),
           landlord_phone = coalesce(?, landlord_phone),
-          landlord_email = coalesce(?, landlord_email)
+          landlord_email = coalesce(?, landlord_email),
+          image_url = coalesce(?, image_url)
         WHERE id = ?
-      `).bind(b.name || null, b.property_type || null, b.address || null, b.city || null, b.landlord_name || null, b.landlord_phone || null, b.landlord_email || null, Number(id)).run();
+      `).bind(b.name || null, b.property_type || null, b.address || null, b.city || null, b.landlord_name || null, b.landlord_phone || null, b.landlord_email || null, b.image_url || null, Number(id)).run();
       const updated = await db.prepare('SELECT * FROM properties WHERE id = ?').bind(Number(id)).first();
       return json({ success: true, property: updated });
     }
@@ -275,12 +279,13 @@ async function handleD1(context, json, corsHeaders) {
       const b = await request.json().catch(() => ({}));
       if (!b.property_id || !b.unit_number) return json({ error: 'Property ID and unit number are required' }, 400);
       const res = await db.prepare(`
-        INSERT INTO units (property_id, unit_number, floor, unit_type, base_rent, service_charge, garbage_fee, status, meter_number, notes)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO units (property_id, unit_number, floor, unit_type, base_rent, service_charge, garbage_fee, status, meter_number, notes, image_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         Number(b.property_id), b.unit_number, b.floor || 'Ground', b.unit_type || '2-Bedroom',
         Number(b.base_rent || 0), Number(b.service_charge || 0), Number(b.garbage_fee || 0),
-        b.status || 'vacant', b.meter_number || null, b.notes || null
+        b.status || 'vacant', b.meter_number || null, b.notes || null,
+        b.image_url || null
       ).run();
       const id = res.meta?.last_row_id;
       const created = await db.prepare('SELECT u.*, p.name as property_name FROM units u LEFT JOIN properties p ON u.property_id = p.id WHERE u.id = ?').bind(id).first();
@@ -300,14 +305,17 @@ async function handleD1(context, json, corsHeaders) {
           garbage_fee = coalesce(?, garbage_fee),
           status = coalesce(?, status),
           meter_number = coalesce(?, meter_number),
-          notes = coalesce(?, notes)
+          notes = coalesce(?, notes),
+          image_url = coalesce(?, image_url)
         WHERE id = ?
       `).bind(
         b.unit_number || null, b.floor || null, b.unit_type || null,
         b.base_rent !== undefined ? Number(b.base_rent) : null,
         b.service_charge !== undefined ? Number(b.service_charge) : null,
         b.garbage_fee !== undefined ? Number(b.garbage_fee) : null,
-        b.status || null, b.meter_number || null, b.notes || null, Number(id)
+        b.status || null, b.meter_number || null, b.notes || null,
+        b.image_url || null,
+        Number(id)
       ).run();
       const updated = await db.prepare('SELECT u.*, p.name as property_name FROM units u LEFT JOIN properties p ON u.property_id = p.id WHERE u.id = ?').bind(Number(id)).first();
       return json({ success: true, unit: updated });
@@ -515,17 +523,103 @@ async function handleD1(context, json, corsHeaders) {
       return json(rows);
     }
 
-    // 15. Public Vacancies
+    // 15. Public Vacancies & Book Viewing
     if (pathname === '/api/public/vacancies' && method === 'GET') {
-      const rows = (await db.prepare(`
-        SELECT u.id, u.unit_number, u.floor, u.unit_type, u.base_rent, u.service_charge, u.garbage_fee, u.status, u.notes,
-               p.id as property_id, p.name as property_name, p.property_type, p.address, p.city
+      let vacancies = (await db.prepare(`
+        SELECT 
+          u.id, u.unit_number, u.floor, u.unit_type, u.base_rent, u.service_charge, u.garbage_fee,
+          u.status, u.notes, u.image_url as unit_image,
+          p.id as property_id, p.name as property_name, p.property_type, p.address, p.city, p.image_url as property_image
         FROM units u
         JOIN properties p ON u.property_id = p.id
         WHERE u.status = 'vacant'
-        ORDER BY u.base_rent ASC
+        ORDER BY u.id DESC
       `).all()).results || [];
-      return json(rows);
+
+      // Graceful fallback if portfolio is 100% occupied or fresh
+      if (vacancies.length === 0) {
+        vacancies = (await db.prepare(`
+          SELECT 
+            u.id, u.unit_number, u.floor, u.unit_type, u.base_rent, u.service_charge, u.garbage_fee,
+            u.status, u.notes, u.image_url as unit_image,
+            p.id as property_id, p.name as property_name, p.property_type, p.address, p.city, p.image_url as property_image
+          FROM units u
+          JOIN properties p ON u.property_id = p.id
+          ORDER BY u.id DESC LIMIT 3
+        `).all()).results || [];
+      }
+
+      const defaultPhotos = [
+        'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop&q=80'
+      ];
+
+      const enriched = vacancies.map((v, idx) => {
+        let bedrooms = 2;
+        let bathrooms = 2;
+        let sqft = 1100;
+        const photo = v.unit_image || v.property_image || defaultPhotos[idx % defaultPhotos.length];
+
+        const ut = (v.unit_type || '').toLowerCase();
+        if (ut.includes('commercial') || ut.includes('office') || ut.includes('retail')) {
+          bedrooms = 0; bathrooms = 1; sqft = 850;
+        } else if (ut.includes('studio')) {
+          bedrooms = 1; bathrooms = 1; sqft = 450;
+        } else if (ut.includes('1-bedroom')) {
+          bedrooms = 1; bathrooms = 1; sqft = 650;
+        } else if (ut.includes('3-bedroom')) {
+          bedrooms = 3; bathrooms = 3; sqft = 1600;
+        } else if (ut.includes('4-bedroom') || ut.includes('penthouse') || ut.includes('townhouse')) {
+          bedrooms = 4; bathrooms = 4; sqft = 2400;
+        }
+
+        const mode = ut.includes('commercial') ? 'pan' : (ut.includes('townhouse') || ut.includes('penthouse') ? 'aerial' : 'dolly');
+
+        return {
+          id: v.id,
+          unit_number: v.unit_number,
+          floor: v.floor,
+          unit_type: v.unit_type,
+          base_rent: Number(v.base_rent),
+          service_charge: Number(v.service_charge || 0),
+          garbage_fee: Number(v.garbage_fee || 0),
+          property_id: v.property_id,
+          property_name: v.property_name,
+          property_type: v.property_type,
+          address: v.address,
+          city: v.city,
+          bedrooms,
+          bathrooms,
+          sqft,
+          photo,
+          total_monthly: Number(v.base_rent) + Number(v.service_charge || 0) + Number(v.garbage_fee || 0),
+          deposit: Number(v.base_rent) * 2,
+          higgsfield: {
+            mode,
+            rig: mode === 'aerial' ? 'Higgsfield Aerial Drone Arc (35mm)' : (mode === 'pan' ? 'Pedestal Cinema Pan' : 'Interior Dolly Glide'),
+            fps: 24,
+            prompt: `Cinematic 4K architectural glide through ${v.unit_type} at ${v.property_name}, ${v.city}. Natural lighting, photorealistic.`
+          }
+        };
+      });
+
+      return json({ success: true, count: enriched.length, vacancies: enriched });
+    }
+
+    if (pathname === '/api/public/book-viewing' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const { unit_id, prospect_name, phone, email, preferred_date, time_slot, notes } = b;
+      if (!unit_id || !prospect_name || !phone || !preferred_date) {
+        return json({ error: 'Unit ID, prospect name, phone, and preferred date are required.' }, 400);
+      }
+      const res = await db.prepare(`
+        INSERT INTO viewing_leads (unit_id, prospect_name, phone, email, preferred_date, time_slot, status, notes)
+        VALUES (?, ?, ?, ?, ?, ?, 'confirmed', ?)
+      `).bind(Number(unit_id), prospect_name, phone, email || '', preferred_date, time_slot || '10:00 AM', notes || '').run();
+      return json({ success: true, lead_id: res.meta?.last_row_id, message: 'Viewing booked successfully!' }, 201);
     }
   } catch (err) {
     console.error('D1 execution error:', err);
@@ -621,7 +715,8 @@ export async function onRequest(context) {
       management_fee_pct: Number(b.management_fee_pct || 8.5),
       paybill_number: b.paybill_number || '522522',
       bank_name: b.bank_name || 'KCB Bank',
-      bank_account: b.bank_account || ''
+      bank_account: b.bank_account || '',
+      image_url: b.image_url || null
     };
     DB.properties.push(newProp);
     return json({ success: true, id: newProp.id, name: newProp.name, property: newProp }, 201);
@@ -647,7 +742,8 @@ export async function onRequest(context) {
       garbage_fee: Number(b.garbage_fee || 500),
       status: b.status || 'vacant',
       meter_number: b.meter_number || `WM-${Math.floor(100 + Math.random() * 900)}`,
-      property_name: prop ? prop.name : 'Kilimani Royal Heights'
+      property_name: prop ? prop.name : 'Kilimani Royal Heights',
+      image_url: b.image_url || null
     };
     DB.units.push(newUnit);
     return json({ success: true, id: newUnit.id, unit_number: newUnit.unit_number, unit: newUnit }, 201);
@@ -1359,7 +1455,7 @@ export async function onRequest(context) {
       let bedrooms = 2;
       let bathrooms = 2;
       let sqft = 1100;
-      let photo = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80';
+      let photo = v.image_url || prop.image_url || 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80';
       let higgsfield = {
         mode: 'dolly',
         rig: 'Interior Tracking Glide (35mm Cine)',

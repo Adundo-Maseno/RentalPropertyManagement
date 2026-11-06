@@ -351,13 +351,14 @@ async function handleRequest(req, res) {
         return sendJSON(res, 400, { error: 'Property name is required.' });
       }
       const stmt = db.prepare(`
-        INSERT INTO properties (name, property_type, address, city, landlord_name, landlord_phone, landlord_email, management_fee_pct, paybill_number, bank_name, bank_account)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO properties (name, property_type, address, city, landlord_name, landlord_phone, landlord_email, management_fee_pct, paybill_number, bank_name, bank_account, image_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       const info = stmt.run(
         b.name, b.property_type || 'Residential Multi-Family', b.address || '', b.city || 'Nairobi',
         b.landlord_name || '', b.landlord_phone || '', b.landlord_email || '',
-        b.management_fee_pct || 10.0, b.paybill_number || '', b.bank_name || '', b.bank_account || ''
+        b.management_fee_pct || 10.0, b.paybill_number || '', b.bank_name || '', b.bank_account || '',
+        b.image_url || null
       );
       return sendJSON(res, 201, { success: true, id: info.lastInsertRowid });
     }
@@ -390,13 +391,14 @@ async function handleRequest(req, res) {
         return sendJSON(res, 400, { error: 'Property ID, unit number, and base rent are required.' });
       }
       const stmt = db.prepare(`
-        INSERT INTO units (property_id, unit_number, floor, unit_type, base_rent, service_charge, garbage_fee, status, meter_number, notes)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO units (property_id, unit_number, floor, unit_type, base_rent, service_charge, garbage_fee, status, meter_number, notes, image_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       const info = stmt.run(
         b.property_id, b.unit_number, b.floor || 'Ground', b.unit_type || '1-Bedroom',
         b.base_rent, b.service_charge || 0, b.garbage_fee || 0,
-        b.status || 'vacant', b.meter_number || '', b.notes || ''
+        b.status || 'vacant', b.meter_number || '', b.notes || '',
+        b.image_url || null
       );
       return sendJSON(res, 201, { success: true, id: info.lastInsertRowid });
     }
@@ -1511,12 +1513,12 @@ async function handleRequest(req, res) {
       let vacancies = db.prepare(`
         SELECT 
           u.id, u.unit_number, u.floor, u.unit_type, u.base_rent, u.service_charge, u.garbage_fee,
-          u.status, u.notes,
-          p.id as property_id, p.name as property_name, p.property_type, p.address, p.city
+          u.status, u.notes, u.image_url as unit_image,
+          p.id as property_id, p.name as property_name, p.property_type, p.address, p.city, p.image_url as property_image
         FROM units u
         JOIN properties p ON u.property_id = p.id
         WHERE u.status = 'vacant'
-        ORDER BY u.base_rent ASC
+        ORDER BY u.id DESC
       `).all();
 
       // Graceful fallback if portfolio is 100% occupied
@@ -1524,11 +1526,11 @@ async function handleRequest(req, res) {
         vacancies = db.prepare(`
           SELECT 
             u.id, u.unit_number, u.floor, u.unit_type, u.base_rent, u.service_charge, u.garbage_fee,
-            u.status, u.notes,
-            p.id as property_id, p.name as property_name, p.property_type, p.address, p.city
+            u.status, u.notes, u.image_url as unit_image,
+            p.id as property_id, p.name as property_name, p.property_type, p.address, p.city, p.image_url as property_image
           FROM units u
           JOIN properties p ON u.property_id = p.id
-          ORDER BY u.id DESC LIMIT 2
+          ORDER BY u.id DESC LIMIT 3
         `).all();
       }
 
@@ -1536,7 +1538,7 @@ async function handleRequest(req, res) {
         let bedrooms = 2;
         let bathrooms = 2;
         let sqft = 1100;
-        let photo = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80';
+        let photo = v.unit_image || v.property_image || 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80';
         let higgsfield = {
           mode: 'dolly',
           rig: 'Interior Tracking Glide (35mm Cine)',
@@ -1549,7 +1551,7 @@ async function handleRequest(req, res) {
           bedrooms = 0;
           bathrooms = 1;
           sqft = 650;
-          photo = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80';
+          photo = v.unit_image || v.property_image || 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80';
           higgsfield = {
             mode: 'pan',
             rig: 'Pedestal Horizontal Pan (24mm Cine)',
@@ -1561,7 +1563,7 @@ async function handleRequest(req, res) {
           bedrooms = 3;
           bathrooms = 3;
           sqft = 1650;
-          photo = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80';
+          photo = v.unit_image || v.property_image || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80';
           higgsfield = {
             mode: 'dolly',
             rig: 'Steadicam Dolly In (35mm Anamorphic)',
@@ -1573,7 +1575,7 @@ async function handleRequest(req, res) {
           bedrooms = 4;
           bathrooms = 4.5;
           sqft = 3200;
-          photo = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80';
+          photo = v.unit_image || v.property_image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80';
           higgsfield = {
             mode: 'aerial',
             rig: 'Cinema Drone 3D Arc Pullback',

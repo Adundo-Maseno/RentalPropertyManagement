@@ -548,7 +548,7 @@
       try {
         const res = await fetch('/api/public/vacancies');
         const data = await res.json();
-        allVacancies = data.vacancies || [];
+        allVacancies = data.vacancies || (Array.isArray(data) ? data : []);
         renderVacancies(allVacancies);
       } catch (err) {
         console.error('Failed to load vacancies:', err);
