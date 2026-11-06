@@ -621,6 +621,73 @@ async function handleD1(context, json, corsHeaders) {
       `).bind(Number(unit_id), prospect_name, phone, email || '', preferred_date, time_slot || '10:00 AM', notes || '').run();
       return json({ success: true, lead_id: res.meta?.last_row_id, message: 'Viewing booked successfully!' }, 201);
     }
+
+    // 16. Users Management (Full CRUD)
+    if (pathname === '/api/users' && method === 'GET') {
+      const user = await getUser();
+      if (!user) return json({ error: '401 Unauthorized: Valid authentication token required.' }, 401);
+      if (user.role !== 'super_admin' && user.role !== 'property_manager') {
+        return json({ error: `403 Forbidden: Role '${user.role}' is not authorized to inspect system user directories.` }, 403);
+      }
+      const rows = (await db.prepare('SELECT id, name, email, phone, role, property_id, tenant_id, status, created_at FROM users ORDER BY id ASC').all()).results || [];
+      return json(rows);
+    }
+
+    if (pathname === '/api/users' && method === 'POST') {
+      const user = await getUser();
+      if (!user) return json({ error: '401 Unauthorized: Valid authentication token required.' }, 401);
+      if (user.role !== 'super_admin' && user.role !== 'property_manager') {
+        return json({ error: '403 Forbidden: Provisioning SaaS users requires Administrative privileges.' }, 403);
+      }
+      const b = await request.json().catch(() => ({}));
+      if (!b.name || !b.email) return json({ error: 'Name and email are required to provision a user.' }, 400);
+      const existing = await db.prepare('SELECT id FROM users WHERE lower(email) = lower(?)').bind(b.email.trim()).first();
+      if (existing) return json({ error: 'User with this email already exists in system directory.' }, 409);
+      const role = b.role || 'caretaker';
+      const token = `token_${role}_${Date.now()}`;
+      const res = await db.prepare(`
+        INSERT INTO users (name, email, phone, role, property_id, tenant_id, status, password_hash, session_token)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'password123', ?)
+      `).bind(b.name, b.email.trim(), b.phone || null, role, b.property_id ? Number(b.property_id) : null, b.tenant_id ? Number(b.tenant_id) : null, b.status || 'active', token).run();
+      const id = res.meta?.last_row_id;
+      const created = await db.prepare('SELECT id, name, email, phone, role, property_id, tenant_id, status, created_at FROM users WHERE id = ?').bind(id).first();
+      return json({ success: true, id, user: created }, 201);
+    }
+
+    if ((pathname === '/api/users' || pathname.startsWith('/api/users/')) && method === 'PUT') {
+      const user = await getUser();
+      if (!user) return json({ error: '401 Unauthorized: Valid authentication token required.' }, 401);
+      if (user.role !== 'super_admin' && user.role !== 'property_manager') {
+        return json({ error: '403 Forbidden: Updating SaaS users requires Administrative privileges.' }, 403);
+      }
+      const b = await request.json().catch(() => ({}));
+      const id = url.searchParams.get('id') || b.id || (pathname.startsWith('/api/users/') ? pathname.split('/')[3] : null);
+      if (!id) return json({ error: 'User ID required' }, 400);
+      await db.prepare(`
+        UPDATE users SET
+          name = coalesce(?, name),
+          email = coalesce(?, email),
+          phone = coalesce(?, phone),
+          role = coalesce(?, role),
+          property_id = coalesce(?, property_id),
+          status = coalesce(?, status)
+        WHERE id = ?
+      `).bind(b.name || null, b.email ? b.email.trim() : null, b.phone || null, b.role || null, b.property_id ? Number(b.property_id) : null, b.status || null, Number(id)).run();
+      const updated = await db.prepare('SELECT id, name, email, phone, role, property_id, tenant_id, status, created_at FROM users WHERE id = ?').bind(Number(id)).first();
+      return json({ success: true, user: updated });
+    }
+
+    if ((pathname === '/api/users' || pathname.startsWith('/api/users/')) && method === 'DELETE') {
+      const user = await getUser();
+      if (!user) return json({ error: '401 Unauthorized: Valid authentication token required.' }, 401);
+      if (user.role !== 'super_admin' && user.role !== 'property_manager') {
+        return json({ error: '403 Forbidden: Removing SaaS users requires Administrative privileges.' }, 403);
+      }
+      const id = url.searchParams.get('id') || (pathname.startsWith('/api/users/') ? pathname.split('/')[3] : null);
+      if (!id) return json({ error: 'User ID required' }, 400);
+      await db.prepare('DELETE FROM users WHERE id = ?').bind(Number(id)).run();
+      return json({ success: true, message: 'User deleted successfully' });
+    }
   } catch (err) {
     console.error('D1 execution error:', err);
     if (err.message && err.message.includes('no such table')) {
