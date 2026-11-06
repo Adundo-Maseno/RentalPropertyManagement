@@ -2,3 +2,9 @@ name = "bomasphere-pms"
 compatibility_date = "2026-11-01"
 pages_build_output_dir = "public"
 
+[[d1_databases]]
+binding = "DB"
+database_name = "bomasphere-db"
+database_id = "dac2c813-b5de-480c-ab7c-9e97ef094e27"
+
+
