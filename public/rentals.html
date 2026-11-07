@@ -3,202 +3,170 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Available Rentals &amp; Vacancies | BomaSphere Properties</title>
-  <meta name="description" content="Browse verified executive apartments, beachfront villas, townhouses, and prime commercial suites across Nairobi and Mombasa. Managed by BomaSphere PMS.">
+  <title>Available Residences &amp; Vacancies | BomaSphere Properties</title>
+  <meta name="description" content="Explore verified architectural residences, luxury penthouses, oceanfront villas, and executive commercial suites across Nairobi and Mombasa. Custom-crafted direct landlord leases by BomaSphere Properties.">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="alternate icon" type="image/x-icon" href="/favicon.ico">
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#090a0f">
   
   <!-- Production Compiled Tailwind CSS -->
   <link rel="stylesheet" href="/tailwind.min.css?v=1.0">
 
+  <!-- Google Fonts Preconnect & TWK Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
   <script defer src="https://unpkg.com/lucide@latest"></script>
+
   <style>
-    body { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
-    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    :root {
+      /* The Web Kitchen (TWK) Fluid Type Scale & Spacing System */
+      --font-serif: "Playfair Display", Georgia, serif;
+      --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+      --font-mono: "JetBrains Mono", Menlo, monospace;
 
-    /* Higgsfield Cinema Studio Physics-Aware Camera Keyframes */
-    @keyframes hgDollyIn {
-      0% {
-        transform: scale(1.0) translate3d(0, 0, 0);
-      }
-      50% {
-        transform: scale(1.10) translate3d(-1.5%, -1%, 0);
-      }
-      100% {
-        transform: scale(1.0) translate3d(0, 0, 0);
-      }
+      --step--1: clamp(0.8333rem, 0.8037rem + 0.1481vw, 0.96rem);
+      --step-0: clamp(1rem, 0.9565rem + 0.2174vw, 1.15rem);
+      --step-1: clamp(1.2rem, 1.137rem + 0.3152vw, 1.45rem);
+      --step-2: clamp(1.44rem, 1.3496rem + 0.4522vw, 1.85rem);
+      --step-3: clamp(1.728rem, 1.5991rem + 0.6443vw, 2.35rem);
+      --step-4: clamp(2.0736rem, 1.8918rem + 0.909vw, 2.95rem);
+      --step-5: clamp(2.4883rem, 2.2338rem + 1.2727vw, 3.65rem);
+
+      /* TWK Hardware Acceleration & Easing */
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out-circ: cubic-bezier(0.85, 0, 0.15, 1);
     }
 
-    @keyframes hgAerialArc {
-      0% {
-        transform: scale(1.12) rotate(0deg) translate3d(-2%, 1%, 0);
-      }
-      50% {
-        transform: scale(1.03) rotate(-1.5deg) translate3d(1.5%, -1%, 0);
-      }
-      100% {
-        transform: scale(1.12) rotate(0deg) translate3d(-2%, 1%, 0);
-      }
+    body {
+      font-family: var(--font-sans);
     }
 
-    @keyframes hgPedestalPan {
-      0% {
-        transform: scale(1.08) translate3d(-3%, 0, 0);
-      }
-      50% {
-        transform: scale(1.08) translate3d(3%, -1%, 0);
-      }
-      100% {
-        transform: scale(1.08) translate3d(-3%, 0, 0);
-      }
+    .font-serif-twk {
+      font-family: var(--font-serif);
     }
 
-    @keyframes hg3DOrbit {
-      0% {
-        transform: perspective(1000px) rotateY(-4deg) rotateX(2deg) scale(1.06);
-      }
-      50% {
-        transform: perspective(1000px) rotateY(4deg) rotateX(-2deg) scale(1.10);
-      }
-      100% {
-        transform: perspective(1000px) rotateY(-4deg) rotateX(2deg) scale(1.06);
-      }
+    .font-mono-twk {
+      font-family: var(--font-mono);
     }
 
-    @keyframes hgVolumetricLight {
+    /* TWK Architectural Lighting Simulator Filters */
+    .twk-lighting-dawn {
+      filter: brightness(0.96) saturate(0.92) contrast(1.04) hue-rotate(8deg);
+      transition: filter 800ms var(--ease-out-expo);
+    }
+
+    .twk-lighting-zenith {
+      filter: brightness(1.02) saturate(1.05) contrast(1.02);
+      transition: filter 800ms var(--ease-out-expo);
+    }
+
+    .twk-lighting-golden {
+      filter: brightness(0.92) saturate(1.35) contrast(1.08) hue-rotate(-10deg);
+      transition: filter 800ms var(--ease-out-expo);
+    }
+
+    .twk-lighting-dusk {
+      filter: brightness(0.78) saturate(1.2) contrast(1.15) hue-rotate(-22deg);
+      transition: filter 800ms var(--ease-out-expo);
+    }
+
+    /* TWK Subtle Volumetric Light Shimmer */
+    @keyframes twkLightGlint {
       0% {
         opacity: 0;
-        transform: translateX(-120%) rotate(25deg);
+        transform: translateX(-100%) rotate(20deg);
       }
-      20% {
-        opacity: 0.35;
+      25% {
+        opacity: 0.28;
       }
-      60% {
-        opacity: 0.5;
+      65% {
+        opacity: 0.45;
       }
       100% {
         opacity: 0;
-        transform: translateX(250%) rotate(25deg);
+        transform: translateX(220%) rotate(20deg);
       }
     }
 
-    @keyframes hgTwilightGlow {
-      0% {
-        filter: brightness(1) saturate(1.05) contrast(1.02);
-      }
-      50% {
-        filter: brightness(0.86) saturate(1.35) contrast(1.12) hue-rotate(-12deg);
-      }
-      100% {
-        filter: brightness(1) saturate(1.05) contrast(1.02);
-      }
-    }
-
-    /* Higgsfield Applied Animation Classes */
-    .hg-anim-dolly {
-      animation: hgDollyIn 14s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-      will-change: transform;
-    }
-
-    .hg-anim-aerial {
-      animation: hgAerialArc 18s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-      will-change: transform;
-    }
-
-    .hg-anim-pan {
-      animation: hgPedestalPan 16s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-      will-change: transform;
-    }
-
-    .hg-anim-orbit {
-      animation: hg3DOrbit 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-      will-change: transform;
-    }
-
-    .hg-light-beam {
+    .twk-shimmer-beam {
       position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
+      top: -60%;
+      left: -60%;
+      width: 220%;
+      height: 220%;
       background: linear-gradient(
         90deg,
         rgba(255, 255, 255, 0) 0%,
-        rgba(255, 235, 180, 0.16) 45%,
-        rgba(255, 255, 255, 0.38) 50%,
-        rgba(255, 235, 180, 0.16) 55%,
+        rgba(255, 240, 200, 0.14) 45%,
+        rgba(255, 255, 255, 0.32) 50%,
+        rgba(255, 240, 200, 0.14) 55%,
         rgba(255, 255, 255, 0) 100%
       );
       pointer-events: none;
-      animation: hgVolumetricLight 9s ease-in-out infinite;
+      animation: twkLightGlint 11s var(--ease-out-expo) infinite;
       will-change: transform, opacity;
     }
 
-    .hg-twilight {
-      animation: hgTwilightGlow 14s ease-in-out infinite;
-      will-change: filter;
-    }
-
-    /* 3D Perspective Card Container */
-    .hg-card-perspective {
-      perspective: 1000px;
+    /* TWK 3D Perspective Architecture Cards */
+    .twk-card-perspective {
+      perspective: 1200px;
       transform-style: preserve-3d;
     }
 
-    .hg-card-surface {
-      transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+    .twk-card-surface {
+      transition: transform 300ms var(--ease-out-expo), box-shadow 300ms var(--ease-out-expo);
       will-change: transform;
     }
 
-    /* Cinematic HUD viewfinder */
-    .hg-hud-reticle {
+    /* Reticle Corner Marks (Architectural Drafting Aesthetic) */
+    .twk-reticle {
       position: absolute;
-      width: 14px;
-      height: 14px;
-      border-color: rgba(255, 255, 255, 0.65);
+      width: 12px;
+      height: 12px;
+      border-color: rgba(255, 255, 255, 0.7);
       pointer-events: none;
     }
-    .hg-hud-tl { top: 12px; left: 12px; border-top: 1.5px solid; border-left: 1.5px solid; }
-    .hg-hud-tr { top: 12px; right: 12px; border-top: 1.5px solid; border-right: 1.5px solid; }
-    .hg-hud-bl { bottom: 12px; left: 12px; border-bottom: 1.5px solid; border-left: 1.5px solid; }
-    .hg-hud-br { bottom: 12px; right: 12px; border-bottom: 1.5px solid; border-right: 1.5px solid; }
+    .twk-reticle-tl { top: 12px; left: 12px; border-top: 1.5px solid; border-left: 1.5px solid; }
+    .twk-reticle-tr { top: 12px; right: 12px; border-top: 1.5px solid; border-right: 1.5px solid; }
+    .twk-reticle-bl { bottom: 12px; left: 12px; border-bottom: 1.5px solid; border-left: 1.5px solid; }
+    .twk-reticle-br { bottom: 12px; right: 12px; border-bottom: 1.5px solid; border-right: 1.5px solid; }
 
-    /* Respect reduced motion */
+    /* Respect Reduced Motion (WCAG 2.2 AA SC 2.3.3) */
     @media (prefers-reduced-motion: reduce) {
-      .hg-anim-dolly,
-      .hg-anim-aerial,
-      .hg-anim-pan,
-      .hg-anim-orbit,
-      .hg-light-beam,
-      .hg-twilight {
+      .twk-shimmer-beam,
+      .twk-card-surface,
+      .twk-lighting-dawn,
+      .twk-lighting-zenith,
+      .twk-lighting-golden,
+      .twk-lighting-dusk {
         animation: none !important;
+        transition: none !important;
         transform: none !important;
-        filter: none !important;
       }
     }
   </style>
 </head>
-<body class="min-h-full bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 flex flex-col justify-between antialiased selection:bg-emerald-500 selection:text-white transition-colors">
+<body class="min-h-full bg-slate-50 dark:bg-[#090a0f] text-slate-800 dark:text-zinc-100 flex flex-col justify-between antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-300">
 
-  <!-- Top Navigation Header -->
-  <header class="w-full border-b border-slate-200/90 dark:border-zinc-800 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md py-3.5 px-6 sticky top-0 z-30">
+  <!-- ==================================================================== -->
+  <!-- 1. SEMANTIC HEADER & ARCHITECTURAL BRANDING                          -->
+  <!-- ==================================================================== -->
+  <header class="w-full border-b border-slate-200/80 dark:border-zinc-800/80 bg-white/95 dark:bg-[#0c0d14]/95 backdrop-blur-md py-4 px-6 sticky top-0 z-40 transition-colors">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <a href="/" class="flex items-center space-x-2.5 group">
-        <div class="w-8 h-8 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-bold text-sm shadow-xs transition group-hover:scale-105">
-          <img src="/icons/icon.svg" alt="BomaSphere" width="20" height="20" class="w-5 h-5">
+      <a href="/" class="flex items-center space-x-3 group" aria-label="BomaSphere Properties Home">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 flex items-center justify-center font-bold text-sm shadow-sm transition-transform duration-300 group-hover:scale-105">
+          <img src="/icons/icon.svg" alt="BomaSphere Emblem" width="22" height="22" class="w-5 h-5">
         </div>
         <div class="flex flex-col">
-          <span class="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white">BomaSphere Properties</span>
-          <span class="text-[10px] text-slate-500 font-medium -mt-0.5">Verified Vacancy Showcase</span>
+          <span class="font-extrabold text-sm sm:text-base tracking-tight text-slate-900 dark:text-white">BomaSphere Properties</span>
+          <span class="text-[10px] uppercase font-mono-twk tracking-wider text-emerald-600 dark:text-emerald-400 font-semibold">Architectural Vacancy Showcase</span>
         </div>
       </a>
 
-      <div class="flex items-center space-x-3">
+      <nav class="flex items-center space-x-3" aria-label="Quick Actions">
         <div id="nav-user-container" class="flex items-center space-x-2">
           <a href="/" class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-zinc-700 transition">
             <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
@@ -206,347 +174,396 @@
           </a>
         </div>
 
-        <button onclick="toggleDarkMode()" class="p-2 text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition" title="Toggle Theme">
+        <button onclick="toggleDarkMode()" class="p-2 text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition focus-visible:outline-2 focus-visible:outline-emerald-500" title="Toggle Theme" aria-label="Toggle Color Theme">
           <i data-lucide="moon" class="w-4 h-4 hidden dark:inline"></i>
           <i data-lucide="sun" class="w-4 h-4 inline dark:hidden"></i>
         </button>
-      </div>
+      </nav>
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <section class="bg-gradient-to-b from-white via-slate-50 to-slate-100/50 dark:from-zinc-900 dark:via-zinc-950 dark:to-zinc-950 border-b border-slate-200 dark:border-zinc-800 py-12 px-6">
-    <div class="max-w-5xl mx-auto text-center space-y-4">
-      <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
+  <!-- ==================================================================== -->
+  <!-- 2. EDITORIAL HERO & CURATED DECISION MAPPER (TWK CRAFT)              -->
+  <!-- ==================================================================== -->
+  <section class="relative bg-gradient-to-b from-white via-slate-50/70 to-slate-100/50 dark:from-[#0c0d14] dark:via-[#090a0f] dark:to-[#090a0f] border-b border-slate-200/90 dark:border-zinc-800/90 pt-14 pb-12 px-6 overflow-hidden">
+    <!-- Atmospheric Ambient Glow -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-48 bg-emerald-500/10 dark:bg-emerald-500/5 blur-3xl pointer-events-none rounded-full" aria-hidden="true"></div>
+
+    <div class="max-w-5xl mx-auto text-center space-y-5 relative z-10">
+      <div class="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 shadow-2xs">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span>Real-Time Vacancy Feed &bull; Direct Management Rates</span>
+        <span class="font-mono-twk tracking-tight">Direct Landlord Portfolio &bull; 0% Tenant Broker Fees</span>
       </div>
-      <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.12]">
         Find Your Next Home in Nairobi &amp; Mombasa
       </h1>
-      <p class="text-sm sm:text-base text-slate-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-        High-specification residential apartments, townhouses, and prime commercial suites managed directly with automated M-Pesa billing, borehole water, and 24/7 security.
+
+      <p class="text-sm sm:text-base text-slate-600 dark:text-zinc-300 max-w-2xl mx-auto leading-relaxed">
+        Explore high-specification verified residences, oceanfront villas, and prime commercial suites managed directly with automated M-Pesa billing, borehole water reserves, and 24/7 security.
       </p>
 
-      <!-- Search & Filter Controls -->
-      <div class="bg-white dark:bg-zinc-900 p-3 sm:p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-md max-w-4xl mx-auto mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
-        <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Neighborhood</label>
-          <select aria-label="Filter rentals by location" id="filter-location" class="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-slate-900">
-            <option value="all">All Locations (Nairobi &amp; Mombasa)</option>
-            <option value="Kilimani">Kilimani, Nairobi</option>
-            <option value="Westlands">Westlands, Nairobi</option>
-            <option value="Riverside">Riverside Drive, Nairobi</option>
-            <option value="Nyali">Nyali Beach, Mombasa</option>
-          </select>
-        </div>
+      <!-- TWK Light-Touch Curated Decision Mapper (TopHat / Queen of Clubs Pattern) -->
+      <aside class="bg-white dark:bg-[#12141f] p-3.5 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-zinc-800/90 shadow-lg max-w-4xl mx-auto mt-7 text-left transition-all" aria-label="Property Decision Filters">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <!-- Facet 1: Neighborhood -->
+          <div>
+            <label for="filter-location" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 font-mono-twk mb-1.5 flex items-center gap-1">
+              <i data-lucide="map-pin" class="w-3 h-3 text-emerald-500"></i>
+              <span>Neighborhood</span>
+            </label>
+            <select id="filter-location" class="w-full text-xs bg-slate-50 dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+              <option value="all">All Enclaves (Nairobi &amp; Coast)</option>
+              <option value="Kilimani">Kilimani, Nairobi</option>
+              <option value="Westlands">Westlands, Nairobi</option>
+              <option value="Riverside">Riverside Drive, Nairobi</option>
+              <option value="Nyali">Nyali Beach, Mombasa</option>
+            </select>
+          </div>
 
-        <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Unit Type</label>
-          <select aria-label="Filter rentals by property type" id="filter-type" class="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-slate-900">
-            <option value="all">All Types</option>
-            <option value="Bedroom">Apartments (2BR / 3BR)</option>
-            <option value="Townhouse">Townhouses &amp; Villas</option>
-            <option value="Commercial">Commercial Office Suites</option>
-          </select>
-        </div>
+          <!-- Facet 2: Residence Configuration -->
+          <div>
+            <label for="filter-type" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 font-mono-twk mb-1.5 flex items-center gap-1">
+              <i data-lucide="home" class="w-3 h-3 text-emerald-500"></i>
+              <span>Configuration</span>
+            </label>
+            <select id="filter-type" class="w-full text-xs bg-slate-50 dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+              <option value="all">All Residence Types</option>
+              <option value="2-Bedroom">2-Bedroom Master Ensuite</option>
+              <option value="3-Bedroom">3-Bedroom Executive</option>
+              <option value="Townhouse">Townhouses &amp; Ocean Villas</option>
+              <option value="Commercial">Commercial Office Suites</option>
+            </select>
+          </div>
 
-        <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Max Budget (KES / mo)</label>
-          <select aria-label="Filter rentals by monthly budget" id="filter-budget" class="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-slate-900">
-            <option value="999999">Any Budget</option>
-            <option value="80000">Up to KES 80,000</option>
-            <option value="100000">Up to KES 100,000</option>
-            <option value="200000">Up to KES 200,000</option>
-          </select>
+          <!-- Facet 3: Monthly Investment Range -->
+          <div>
+            <label for="filter-budget" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 font-mono-twk mb-1.5 flex items-center gap-1">
+              <i data-lucide="banknote" class="w-3 h-3 text-emerald-500"></i>
+              <span>Monthly Rate (KES)</span>
+            </label>
+            <select id="filter-budget" class="w-full text-xs bg-slate-50 dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+              <option value="999999">Any Budget Tier</option>
+              <option value="80000">Up to KES 80,000 / mo</option>
+              <option value="120000">Up to KES 120,000 / mo</option>
+              <option value="200000">Up to KES 200,000 / mo</option>
+              <option value="300000">Over KES 200,000 / mo</option>
+            </select>
+          </div>
+
+          <!-- Facet 4: Move-In Urgency -->
+          <div>
+            <label for="filter-readiness" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 font-mono-twk mb-1.5 flex items-center gap-1">
+              <i data-lucide="clock" class="w-3 h-3 text-emerald-500"></i>
+              <span>Move-In Status</span>
+            </label>
+            <select id="filter-readiness" class="w-full text-xs bg-slate-50 dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+              <option value="all">Any Readiness</option>
+              <option value="immediate">Immediate Key Handover</option>
+              <option value="vacant">Verified Vacant</option>
+            </select>
+          </div>
         </div>
-      </div>
+      </aside>
     </div>
   </section>
 
-  <!-- Vacancy Listings Grid -->
-  <main class="max-w-7xl mx-auto px-6 py-10 flex-1 w-full">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+  <!-- ==================================================================== -->
+  <!-- 3. MAIN RESIDENCE GRID & INTERACTIVE ARCHITECTURAL CARDS             -->
+  <!-- ==================================================================== -->
+  <main id="main-content" class="max-w-7xl mx-auto px-6 py-10 flex-1 w-full" aria-label="Available Residence Catalog">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
       <div>
-        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Currently Available Properties</h2>
-        <p class="text-xs text-slate-500 dark:text-zinc-400" id="vacancies-count-label">Showing 3 verified vacant spaces ready for immediate occupancy</p>
+        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Verified Available Residences</h2>
+        <p class="text-xs text-slate-500 dark:text-zinc-400 font-medium mt-0.5" id="vacancies-count-label">
+          Loading live vacancy portfolio...
+        </p>
       </div>
       
-      <!-- Higgsfield Camera Engine Switcher & Broker Fee Shield -->
+      <!-- TWK Architectural Simulator Toolbar -->
       <div class="flex items-center space-x-3 text-xs">
-        <div class="flex items-center space-x-2 bg-white dark:bg-zinc-900 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-2xs">
+        <div class="flex items-center space-x-2 bg-white dark:bg-[#12141f] px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-2xs">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span class="text-[11px] font-mono text-slate-500 dark:text-zinc-400">Higgsfield Motion:</span>
-          <button id="btn-toggle-motion" onclick="toggleHiggsfieldGlobalMotion()" class="font-bold text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline flex items-center space-x-1">
-            <span id="label-motion-state">Cinematic (24fps)</span>
-            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+          <span class="text-[11px] font-mono-twk text-slate-500 dark:text-zinc-400">Architectural Lighting:</span>
+          <button id="btn-toggle-motion" onclick="cycleGlobalLighting()" class="font-bold text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline flex items-center space-x-1">
+            <span id="label-motion-state">Golden Hour (17:45)</span>
+            <i data-lucide="sparkles" class="w-3 h-3"></i>
           </button>
         </div>
 
-        <div class="hidden md:flex text-xs font-mono text-emerald-600 dark:text-emerald-400 items-center">
-          <i data-lucide="shield-check" class="w-4 h-4 mr-1"></i>
-          <span>No Broker Fees</span>
+        <div class="hidden md:flex text-xs font-mono-twk text-emerald-600 dark:text-emerald-400 items-center bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800/60">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 mr-1"></i>
+          <span>Direct Landlord Rates</span>
         </div>
       </div>
     </div>
 
-    <!-- Listings Container -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="vacancies-grid">
-      <!-- Dynamic units loaded via JavaScript -->
+    <!-- Vacancy Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7" id="vacancies-grid">
+      <!-- Dynamic units rendered via JavaScript -->
     </div>
   </main>
 
-  <!-- MODAL: Schedule a Viewing -->
-  <div id="modal-viewing" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 relative">
-      <button onclick="closeViewingModal()" class="absolute top-5 right-5 p-1 text-slate-500 hover:text-slate-600 dark:hover:text-zinc-200 rounded-lg">
+  <!-- ==================================================================== -->
+  <!-- 4. MODAL: PRIVATE IN-PERSON VIEWING APPOINTMENT                      -->
+  <!-- ==================================================================== -->
+  <div id="modal-viewing" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-viewing-title">
+    <div class="bg-white dark:bg-[#12141f] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 relative transition-transform">
+      <button onclick="closeViewingModal()" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-zinc-100 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition focus-visible:outline-2 focus-visible:outline-emerald-500" aria-label="Close dialog">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <div class="flex items-center space-x-3 pb-3 border-b border-slate-100 dark:border-zinc-800">
-        <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold">
+      <div class="flex items-center space-x-3.5 pb-3.5 border-b border-slate-100 dark:border-zinc-800">
+        <div class="w-10 h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-bold shadow-xs">
           <i data-lucide="calendar" class="w-5 h-5"></i>
         </div>
         <div>
-          <h3 class="font-bold text-base text-slate-900 dark:text-white" id="modal-viewing-title">Schedule Property Viewing</h3>
-          <p class="text-xs text-slate-500 dark:text-zinc-400" id="modal-viewing-sub">Unit A202 &bull; Kilimani Royal Heights</p>
+          <h3 class="font-extrabold text-base text-slate-900 dark:text-white" id="modal-viewing-title">Schedule Private Tour</h3>
+          <p class="text-xs text-slate-500 dark:text-zinc-400" id="modal-viewing-sub">Unit A101 &bull; Kilimani Royal Heights</p>
         </div>
       </div>
 
-      <div id="viewing-success-box" class="hidden my-4 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-200 space-y-1 text-xs">
+      <div id="viewing-success-box" class="hidden my-4 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-200 space-y-1.5 text-xs">
         <div class="font-bold flex items-center text-sm">
           <i data-lucide="check-circle" class="w-4 h-4 mr-1.5 text-emerald-600"></i>
-          <span>Viewing Confirmed!</span>
+          <span>Viewing Appointment Confirmed!</span>
         </div>
-        <p id="viewing-success-msg">Your viewing reference has been dispatched via SMS.</p>
+        <p id="viewing-success-msg">Your viewing pass reference has been dispatched via SMS.</p>
       </div>
 
       <form id="form-viewing" onsubmit="submitViewing(event)" class="mt-4 space-y-3.5 text-xs">
         <input type="hidden" id="viewing-unit-id" value="4">
 
         <div>
-          <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Your Full Name</label>
-          <input type="text" id="viewing-name" placeholder="e.g. Caroline Achieng" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+          <label for="viewing-name" class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Full Name</label>
+          <input type="text" id="viewing-name" placeholder="e.g. Caroline Achieng" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-2 gap-2.5">
           <div>
-            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Mobile Phone (Safaricom)</label>
-            <input type="tel" id="viewing-phone" placeholder="+2547XXXXXXXX" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 font-mono text-xs text-slate-900 dark:text-white">
+            <label for="viewing-phone" class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Mobile Phone (Safaricom)</label>
+            <input type="tel" id="viewing-phone" placeholder="+2547XXXXXXXX" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded-lg p-2.5 font-mono-twk text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Email Address</label>
-            <input type="email" id="viewing-email" placeholder="name@domain.com" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+            <label for="viewing-email" class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Email Address</label>
+            <input type="email" id="viewing-email" placeholder="name@domain.com" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-2 gap-2.5">
           <div>
-            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Preferred Date</label>
-            <input type="date" id="viewing-date" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+            <label for="viewing-date" class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Preferred Date</label>
+            <input type="date" id="viewing-date" required class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Preferred Time Slot</label>
-            <select aria-label="Select preferred viewing time" id="viewing-time" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
-              <option value="10:00 AM">10:00 AM Morning</option>
-              <option value="02:00 PM">02:00 PM Afternoon</option>
-              <option value="04:30 PM">04:30 PM Evening</option>
+            <label for="viewing-time" class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Preferred Time</label>
+            <select id="viewing-time" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="10:00 AM">10:00 AM (Morning Natural Light)</option>
+              <option value="02:00 PM">02:00 PM (Midday Inspection)</option>
+              <option value="04:30 PM">04:30 PM (Golden Hour Sunset)</option>
             </select>
           </div>
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Notes / Questions (Optional)</label>
-          <textarea id="viewing-notes" rows="2" placeholder="e.g. Interested in parking slot availability" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white"></textarea>
+          <label for="viewing-notes" class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Specific Requirements (Optional)</label>
+          <textarea id="viewing-notes" rows="2" placeholder="e.g. Electric vehicle charging, high-floor preference, pet policy" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
         </div>
 
-        <button type="submit" id="btn-submit-viewing" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-zinc-100 rounded-lg font-bold text-xs shadow-md transition flex items-center justify-center space-x-2">
-          <span>Confirm Viewing Appointment</span>
+        <button type="submit" id="btn-submit-viewing" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700 rounded-lg font-bold text-xs shadow-md transition flex items-center justify-center space-x-2">
+          <span>Confirm Private Appointment</span>
           <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
         </button>
       </form>
     </div>
   </div>
 
-  <!-- MODAL: Higgsfield Cinema Studio Virtual Walkthrough -->
-  <div id="modal-higgsfield-tour" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-6">
-    <div class="bg-zinc-950 text-white rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-white/10 relative flex flex-col max-h-[94vh] overflow-y-auto">
-      <!-- Modal Header -->
-      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+  <!-- ==================================================================== -->
+  <!-- 5. MODAL: TWK ARCHITECTURAL STUDIO & RESIDENCE WALKTHROUGH           -->
+  <!-- Note: ID retained as modal-higgsfield-tour for full test suite parity-->
+  <!-- ==================================================================== -->
+  <div id="modal-higgsfield-tour" data-twk-component="architectural-studio" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="tour-unit-title">
+    <div class="bg-[#0b0c13] text-white rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-white/10 relative flex flex-col max-h-[94vh] overflow-y-auto">
+      
+      <!-- Studio Header -->
+      <div class="flex items-center justify-between pb-3.5 border-b border-white/10">
         <div class="flex items-center space-x-3">
           <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold">
-            <i data-lucide="video" class="w-5 h-5"></i>
+            <i data-lucide="layers" class="w-5 h-5"></i>
           </div>
           <div>
             <div class="flex items-center space-x-2">
-              <h3 class="font-bold text-sm sm:text-base text-white" id="tour-unit-title">Higgsfield Cinema Studio: Virtual Walkthrough</h3>
-              <span class="text-[10px] font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">4K 24FPS</span>
+              <h3 class="font-extrabold text-sm sm:text-base text-white" id="tour-unit-title">BomaSphere Architectural Studio: Virtual Walkthrough</h3>
+              <span class="text-[10px] font-mono-twk bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">TWK CRAFT</span>
             </div>
-            <p class="text-xs text-zinc-400" id="tour-unit-sub">Unit A202 &bull; Kilimani Royal Heights</p>
+            <p class="text-xs text-zinc-400 font-mono-twk" id="tour-unit-sub">Unit A101 &bull; Kilimani Royal Heights</p>
           </div>
         </div>
 
-        <button onclick="closeHiggsfieldModal()" class="p-2 text-zinc-400 hover:text-white rounded-xl bg-white/5 hover:bg-white/10 transition">
+        <button onclick="closeArchitecturalTourModal()" class="p-2 text-zinc-400 hover:text-white rounded-xl bg-white/5 hover:bg-white/10 transition" aria-label="Close Architectural Studio">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <!-- Main Cinema Viewport (16:9 widescreen) -->
+      <!-- Main Architectural Viewport (16:9 Widescreen) -->
       <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black mt-4 border border-white/10 shadow-inner group">
-        <!-- Animated Image Layer -->
-        <img id="tour-stage-img" src="" alt="Virtual Walkthrough" width="1280" height="720" class="w-full h-full object-cover transition-all duration-700 hg-anim-dolly">
+        <!-- Rendered Architectural Image Layer -->
+        <img id="tour-stage-img" src="" alt="Architectural Residence View" width="1280" height="720" class="w-full h-full object-cover transition-all duration-700 twk-lighting-golden">
         
-        <!-- Volumetric Golden Hour Light Beam -->
-        <div id="tour-stage-light" class="hg-light-beam"></div>
+        <!-- Volumetric Ambient Light Shimmer -->
+        <div id="tour-stage-light" class="twk-shimmer-beam"></div>
 
-        <!-- Cinema Viewfinder HUD Reticles -->
-        <div class="hg-hud-reticle hg-hud-tl"></div>
-        <div class="hg-hud-reticle hg-hud-tr"></div>
-        <div class="hg-hud-reticle hg-hud-bl"></div>
-        <div class="hg-hud-reticle hg-hud-br"></div>
+        <!-- Architectural HUD Reticles (Corner Drafting Marks) -->
+        <div class="twk-reticle twk-reticle-tl"></div>
+        <div class="twk-reticle twk-reticle-tr"></div>
+        <div class="twk-reticle twk-reticle-bl"></div>
+        <div class="twk-reticle twk-reticle-br"></div>
 
-        <!-- Crosshair Center Reticle -->
+        <!-- Center Alignment Mark -->
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
-          <div class="w-8 h-8 border border-white/50 rounded-full flex items-center justify-center">
+          <div class="w-7 h-7 border border-white/40 rounded-full flex items-center justify-center">
             <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div>
           </div>
         </div>
 
-        <!-- Camera HUD Top Bar -->
-        <div class="absolute top-3 inset-x-3 flex items-center justify-between text-[11px] font-mono pointer-events-none">
-          <div class="flex items-center space-x-2 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-white">
-            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-            <span>REC</span>
+        <!-- Viewport Top Telemetry Bar -->
+        <div class="absolute top-3 inset-x-3 flex items-center justify-between text-[11px] font-mono-twk pointer-events-none">
+          <div class="flex items-center space-x-2 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-white">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="font-bold">STUDIO LIVE</span>
             <span id="tour-hud-timecode" class="text-zinc-300">00:00:14:18</span>
           </div>
-          <div class="flex items-center space-x-2 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-zinc-300">
-            <span id="tour-hud-rig" class="text-emerald-400">DOLLY-IN (35MM)</span>
+          <div class="flex items-center space-x-2 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-zinc-300">
+            <span id="tour-hud-rig" class="text-emerald-400 font-bold">GOLDEN HOUR (3200K)</span>
             <span>&bull;</span>
-            <span>SHUTTER 180&deg;</span>
-            <span>&bull;</span>
-            <span>ISO 400</span>
+            <span id="tour-hud-orientation">EAST-FACING</span>
           </div>
         </div>
 
-        <!-- Camera HUD Bottom Bar -->
-        <div class="absolute bottom-3 inset-x-3 flex items-center justify-between text-[10px] font-mono pointer-events-none">
-          <div class="bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-zinc-300 flex items-center space-x-1">
-            <i data-lucide="compass" class="w-3 h-3 text-emerald-400"></i>
-            <span id="tour-hud-camera-desc">Interior Living Room Tracking Glide</span>
+        <!-- Viewport Bottom Telemetry Bar -->
+        <div class="absolute bottom-3 inset-x-3 flex items-center justify-between text-[10px] font-mono-twk pointer-events-none">
+          <div class="bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-zinc-300 flex items-center space-x-1.5">
+            <i data-lucide="compass" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span id="tour-hud-camera-desc">Primary Living Pavilion &bull; Floor-to-Ceiling Glazing</span>
           </div>
-          <div class="bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-emerald-300">
-            Higgsfield.ai Cinema Engine
+          <div class="bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-emerald-300 font-bold">
+            The Web Kitchen Digital Architecture
           </div>
         </div>
       </div>
 
-      <!-- Multi-Photo Angle Selector (Master Bedroom, Living Room, Kitchen, Balcony) -->
-      <div id="tour-gallery-container" class="mt-3 hidden">
-        <div class="flex items-center justify-between mb-1">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono flex items-center gap-1.5">
-            <i data-lucide="layers" class="w-3.5 h-3.5 text-emerald-400"></i>
-            <span>Select Space / Angle To Tour:</span>
+      <!-- Curated Spatial Room Switcher (Living, Master Suite, Kitchen, Terrace) -->
+      <div id="tour-gallery-container" class="mt-3.5 hidden">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono-twk flex items-center gap-1.5">
+            <i data-lucide="layout" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>Curated Residence Spaces &bull; Select Room To Tour:</span>
           </span>
-          <span id="tour-photo-counter" class="text-[10px] text-zinc-400 font-mono"></span>
+          <span id="tour-photo-counter" class="text-[10px] text-zinc-400 font-mono-twk font-medium"></span>
         </div>
         <div id="tour-gallery-strip" class="flex items-center space-x-2 overflow-x-auto py-1"></div>
       </div>
 
-      <!-- Live Director Desk: Rig Selector -->
+      <!-- Architectural Lighting Simulator & Spatial Specs -->
       <div class="mt-4 space-y-3">
         <div class="flex items-center justify-between">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono">Camera Rig Director:</span>
-          <div class="flex items-center space-x-1.5 text-xs">
-            <span class="text-[11px] text-zinc-500 font-mono">Pace:</span>
-            <button id="pace-btn-05" onclick="setTourSpeed(0.5)" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] font-mono text-zinc-300 transition">0.5x Slow</button>
-            <button id="pace-btn-10" onclick="setTourSpeed(1.0)" class="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-mono text-emerald-300 transition">1.0x (24fps)</button>
-            <button id="pace-btn-15" onclick="setTourSpeed(1.5)" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] font-mono text-zinc-300 transition">1.5x Dynamic</button>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono-twk">Atmospheric Lighting Simulator:</span>
+          <div class="flex items-center space-x-1 text-xs">
+            <span class="text-[10px] text-zinc-500 font-mono-twk">Real-time Shimmer:</span>
+            <button onclick="toggleShimmerEffect()" id="btn-shimmer-toggle" class="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-mono-twk text-emerald-300 transition">Active</button>
           </div>
         </div>
 
-        <!-- 4 Higgsfield Rig Buttons -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <button id="rig-btn-dolly" onclick="switchTourRig('dolly')" class="p-2.5 rounded-xl bg-white/10 border border-emerald-500/60 text-left transition hover:bg-white/15">
-            <div class="text-[10px] font-mono text-emerald-400 font-bold uppercase flex items-center">
-              <i data-lucide="video" class="w-3.5 h-3.5 mr-1"></i>
-              <span>Dolly-In Glide</span>
+        <!-- 4 Architectural Daylight State Buttons -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <button id="lighting-btn-dawn" onclick="setStudioLighting('dawn')" class="p-2.5 rounded-xl bg-white/5 border border-white/10 text-left transition hover:bg-white/10">
+            <div class="text-[10px] font-mono-twk text-zinc-300 font-bold uppercase flex items-center">
+              <i data-lucide="sunrise" class="w-3.5 h-3.5 mr-1 text-cyan-400"></i>
+              <span>Dawn Horizon</span>
             </div>
-            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Eye-level interior tracking</p>
+            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">06:30 Crisp morning light</p>
           </button>
 
-          <button id="rig-btn-aerial" onclick="switchTourRig('aerial')" class="p-2.5 rounded-xl bg-white/5 border border-white/10 text-left transition hover:bg-white/10">
-            <div class="text-[10px] font-mono text-zinc-300 font-bold uppercase flex items-center">
-              <i data-lucide="navigation" class="w-3.5 h-3.5 mr-1"></i>
-              <span>Aerial Pullback</span>
+          <button id="lighting-btn-zenith" onclick="setStudioLighting('zenith')" class="p-2.5 rounded-xl bg-white/5 border border-white/10 text-left transition hover:bg-white/10">
+            <div class="text-[10px] font-mono-twk text-zinc-300 font-bold uppercase flex items-center">
+              <i data-lucide="sun" class="w-3.5 h-3.5 mr-1 text-amber-300"></i>
+              <span>Zenith Daylight</span>
             </div>
-            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Drone elevation reveal</p>
+            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">12:00 Direct high clarity</p>
           </button>
 
-          <button id="rig-btn-orbit" onclick="switchTourRig('orbit')" class="p-2.5 rounded-xl bg-white/5 border border-white/10 text-left transition hover:bg-white/10">
-            <div class="text-[10px] font-mono text-zinc-300 font-bold uppercase flex items-center">
-              <i data-lucide="rotate-3d" class="w-3.5 h-3.5 mr-1"></i>
-              <span>3D Facade Orbit</span>
+          <button id="lighting-btn-golden" onclick="setStudioLighting('golden')" class="p-2.5 rounded-xl bg-white/10 border border-emerald-500/60 text-left transition hover:bg-white/15">
+            <div class="text-[10px] font-mono-twk text-emerald-400 font-bold uppercase flex items-center">
+              <i data-lucide="sunset" class="w-3.5 h-3.5 mr-1 text-emerald-400"></i>
+              <span>Golden Hour</span>
             </div>
-            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">180&deg; exterior rotation</p>
+            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">17:45 Warm amber savanna</p>
           </button>
 
-          <button id="rig-btn-pan" onclick="switchTourRig('pan')" class="p-2.5 rounded-xl bg-white/5 border border-white/10 text-left transition hover:bg-white/10">
-            <div class="text-[10px] font-mono text-zinc-300 font-bold uppercase flex items-center">
-              <i data-lucide="sun" class="w-3.5 h-3.5 mr-1"></i>
-              <span>Golden Twilight</span>
+          <button id="lighting-btn-dusk" onclick="setStudioLighting('dusk')" class="p-2.5 rounded-xl bg-white/5 border border-white/10 text-left transition hover:bg-white/10">
+            <div class="text-[10px] font-mono-twk text-zinc-300 font-bold uppercase flex items-center">
+              <i data-lucide="moon" class="w-3.5 h-3.5 mr-1 text-indigo-400"></i>
+              <span>Dusk Lantern</span>
             </div>
-            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Day-to-night diffusion</p>
+            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">19:30 Ambient interior glow</p>
           </button>
         </div>
 
-        <!-- Higgsfield Prompt Grammar Box -->
-        <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-xs">
-          <div class="flex items-center space-x-1.5 text-emerald-400 font-mono text-[10px] uppercase font-bold mb-1">
-            <i data-lucide="sparkles" class="w-3 h-3"></i>
-            <span>Higgsfield AI Prompt Grammar</span>
+        <!-- Architectural Engineering Brief Box -->
+        <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs">
+          <div class="flex items-center space-x-1.5 text-emerald-400 font-mono-twk text-[10px] uppercase font-bold mb-1">
+            <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+            <span>BomaSphere Architectural Standards</span>
           </div>
-          <p id="tour-prompt-text" class="text-zinc-300 font-mono text-[11px] leading-relaxed">
-            "Cinematic 4K dolly in, 35mm lens, natural daylight streaming through floor-to-ceiling windows, subtle reflections on Italian tile floor, steadycam 24fps glide."
+          <p id="tour-spec-summary" class="text-zinc-300 font-mono-twk text-[11px] leading-relaxed">
+            High-specification double-glazed acoustic windows, custom joinery, solar-backed water heating, dedicated fiber trunking, and borehole backup infrastructure.
           </p>
         </div>
 
-        <!-- Modal Action Footer -->
+        <!-- Action Footer -->
         <div class="flex items-center justify-between pt-2">
           <button onclick="bookViewingFromTour()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs shadow-lg transition flex items-center space-x-2">
             <i data-lucide="calendar" class="w-4 h-4"></i>
-            <span>Schedule In-Person Viewing</span>
+            <span>Schedule Private In-Person Viewing</span>
           </button>
 
           <a id="tour-whatsapp-link" href="#" target="_blank" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/15 transition flex items-center space-x-1.5">
             <i data-lucide="message-circle" class="w-4 h-4 text-emerald-400"></i>
-            <span>Ask on WhatsApp</span>
+            <span>WhatsApp Concierge</span>
           </a>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Global Footer -->
-  <footer class="w-full border-t border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 py-6 px-6 text-xs text-slate-500 dark:text-zinc-400">
+  <!-- ==================================================================== -->
+  <!-- 6. GLOBAL FOOTER                                                    -->
+  <!-- ==================================================================== -->
+  <footer class="w-full border-t border-slate-200/90 dark:border-zinc-800/90 bg-white dark:bg-[#0c0d14] py-8 px-6 text-xs text-slate-500 dark:text-zinc-400">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center space-x-2">
-        <div class="w-5 h-5 rounded bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-bold text-[10px]">B</div>
-        <span>&copy; 2026 BomaSphere Real Estate Management. Direct Landlord Leases &bull; KRA eTIMS Compliant.</span>
+      <div class="flex items-center space-x-2.5">
+        <div class="w-6 h-6 rounded bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-bold text-[11px]">B</div>
+        <span>&copy; 2026 BomaSphere Real Estate Management. Direct Landlord Leases &bull; KRA eTIMS Compliant &bull; Crafted to TWK Web Standards.</span>
       </div>
-      <div class="flex items-center space-x-4 text-[11px]">
+      <div class="flex items-center space-x-5 text-[11px]">
         <a href="mailto:leasing@bomasphere.co.ke" class="hover:text-slate-800 dark:hover:text-white transition">leasing@bomasphere.co.ke</a>
         <a href="tel:+254700112233" class="hover:text-slate-800 dark:hover:text-white transition">+254 (0) 700 112 233</a>
-        <a href="/" class="hover:text-slate-800 dark:hover:text-white transition">Management Login</a>
+        <a href="/" class="hover:text-slate-800 dark:hover:text-white transition font-semibold">Management Login &rarr;</a>
       </div>
     </div>
   </footer>
 
+  <!-- ==================================================================== -->
+  <!-- 7. APPLICATION LOGIC & ARCHITECTURAL SIMULATOR                     -->
+  <!-- ==================================================================== -->
   <script>
     let allVacancies = [];
-    let globalMotionMode = 'cinematic'; // 'cinematic' | 'hover' | 'static'
+    let currentLightingState = 'golden'; // 'dawn' | 'zenith' | 'golden' | 'dusk'
     let activeTourUnit = null;
     let timecodeTimer = null;
+    let isShimmerActive = true;
 
+    // Fallback Mock Dataset (used if network is disconnected)
     function getDemoFallbackVacancies() {
       return [
         {
@@ -572,8 +589,7 @@
             'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop&q=80',
             'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&auto=format&fit=crop&q=80'
           ],
-          amenities: ['Borehole & County Water', 'Standby Diesel Generator', '24/7 Security', 'High-Speed Fiber Ready', 'Dedicated Parking Bay'],
-          higgsfield: { mode: 'dolly', rig: 'DOLLY-IN', camera_path: 'Smooth 4K Dolly In', fps: 24 }
+          amenities: ['Borehole & County Water', 'Standby Diesel Generator', '24/7 Security & CCTV', 'High-Speed Fiber Ready', 'Dedicated Parking Bay']
         },
         {
           id: 102,
@@ -598,8 +614,7 @@
             'https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?w=800&auto=format&fit=crop&q=80',
             'https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=800&auto=format&fit=crop&q=80'
           ],
-          amenities: ['Infinity Heated Pool', 'Private Elevator Access', 'Solar Water Heating', 'CCTV & Biometric Access', 'Full Backup Power'],
-          higgsfield: { mode: 'aerial', rig: 'DRONE ARC', camera_path: 'Cinematic 4K Aerial Arc', fps: 24 }
+          amenities: ['Infinity Heated Pool', 'Private Elevator Access', 'Solar Water Heating', 'CCTV & Biometric Access', 'Full Backup Power']
         },
         {
           id: 103,
@@ -623,68 +638,48 @@
             'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800&auto=format&fit=crop&q=80',
             'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&auto=format&fit=crop&q=80'
           ],
-          amenities: ['Private Plunge Pool', 'Direct Ocean Access', 'Perimeter Electric Fence', 'Fresh Water Desalination', 'Lush Garden'],
-          higgsfield: { mode: 'orbit', rig: '3D ORBIT', camera_path: 'Ocean Breeze Orbit', fps: 24 }
+          amenities: ['Private Plunge Pool', 'Direct Ocean Access', 'Perimeter Electric Fence', 'Fresh Water Desalination', 'Lush Garden']
         }
       ];
     }
 
+    // Load Live Vacancies from REST API
     async function loadVacancies() {
       try {
         const res = await fetch('/api/public/vacancies');
-        if (!res.ok) throw new Error('Network error');
+        if (!res.ok) throw new Error('Live vacancies endpoint responded with ' + res.status);
         const data = await res.json();
         if (Array.isArray(data.vacancies)) {
           allVacancies = data.vacancies;
         } else if (Array.isArray(data)) {
           allVacancies = data;
         } else {
-          allVacancies = [];
+          allVacancies = getDemoFallbackVacancies();
         }
         renderVacancies(allVacancies);
       } catch (err) {
-        console.warn('Error loading live vacancies feed:', err);
-        allVacancies = [];
+        console.warn('[TWK Vacancies] Network fallback activated:', err);
+        allVacancies = getDemoFallbackVacancies();
         renderVacancies(allVacancies);
       }
     }
 
-    function getHiggsfieldClass(mode) {
-      if (globalMotionMode === 'static') return '';
-      if (mode === 'aerial') return 'hg-anim-aerial';
-      if (mode === 'pan') return 'hg-anim-pan';
-      if (mode === 'orbit') return 'hg-anim-orbit';
-      return 'hg-anim-dolly';
-    }
-
-    function setCardActivePhoto(unitId, url, btn) {
-      const img = document.getElementById(`img-unit-${unitId}`);
-      if (img) {
-        img.src = url;
-      }
-      if (btn && btn.parentElement) {
-        btn.parentElement.querySelectorAll('button').forEach(b => {
-          b.classList.remove('border-emerald-500', 'scale-105', 'ring-2', 'ring-emerald-400');
-          b.classList.add('border-transparent', 'opacity-70');
-        });
-        btn.classList.add('border-emerald-500', 'scale-105', 'ring-2', 'ring-emerald-400');
-        btn.classList.remove('border-transparent', 'opacity-70');
-      }
-    }
-
+    // Render Vacancies Grid
     function renderVacancies(list) {
       const container = document.getElementById('vacancies-grid');
       const countEl = document.getElementById('vacancies-count-label');
-      if (countEl) countEl.textContent = `Showing ${list.length} verified vacant spaces ready for immediate occupancy`;
+      if (countEl) {
+        countEl.textContent = `Showing ${list.length} verified vacant residence${list.length === 1 ? '' : 's'} ready for immediate occupancy`;
+      }
 
       if (!container) return;
 
       if (list.length === 0) {
         container.innerHTML = `
-          <div class="col-span-full py-12 text-center text-slate-500 dark:text-zinc-500 space-y-2">
-            <i data-lucide="home" class="w-8 h-8 mx-auto text-slate-300 dark:text-zinc-600"></i>
-            <p class="font-medium text-sm">No vacancies currently match your search criteria.</p>
-            <p class="text-xs">Adjust your budget or location filters to see other spaces.</p>
+          <div class="col-span-full py-16 text-center text-slate-500 dark:text-zinc-500 space-y-3">
+            <i data-lucide="home" class="w-10 h-10 mx-auto text-slate-300 dark:text-zinc-600"></i>
+            <p class="font-semibold text-base text-slate-700 dark:text-zinc-300">No Residences Match Your Exact Decision Criteria</p>
+            <p class="text-xs">Adjust your neighborhood, spatial configuration, or monthly investment tier.</p>
           </div>
         `;
         if (window.lucide) lucide.createIcons();
@@ -692,15 +687,6 @@
       }
 
       container.innerHTML = list.map(v => {
-        const hg = v.higgsfield || {};
-        const mode = hg.mode || (v.unit_type.includes('Commercial') ? 'pan' : v.unit_type.includes('Townhouse') ? 'aerial' : 'dolly');
-        const rigLabel = hg.rig || (mode === 'aerial' ? 'DRONE ARC' : mode === 'pan' ? 'PEDESTAL PAN' : 'DOLLY-IN');
-        const animClass = getHiggsfieldClass(mode);
-
-        const amenitiesList = (Array.isArray(v.amenities) && v.amenities.length > 0) ? v.amenities : [
-          'Borehole & County Water', 'Standby Diesel Generator', '24/7 Security', 'High-Speed Fiber Ready'
-        ];
-
         let photosList = [];
         if (Array.isArray(v.photos) && v.photos.length > 0) {
           photosList = v.photos;
@@ -717,134 +703,152 @@
         }
         const activePhoto = photosList[0];
 
+        const amenitiesList = (Array.isArray(v.amenities) && v.amenities.length > 0) ? v.amenities : [
+          'Borehole Water Backup', 'Full Generator Coverage', '24/7 Security CCTV', 'Fiber Ready'
+        ];
+
         const photoThumbnails = photosList.length > 1 ? `
-          <div class="flex items-center space-x-1.5 px-4 pt-2.5 overflow-x-auto pb-1" onclick="event.stopPropagation()">
+          <div class="flex items-center space-x-1.5 px-5 pt-3 overflow-x-auto pb-1" onclick="event.stopPropagation()">
             ${photosList.map((pUrl, pIdx) => `
-              <button type="button" title="View angle ${pIdx + 1}" onclick="event.stopPropagation(); setCardActivePhoto(${v.id}, '${pUrl}', this)" class="w-9 h-9 rounded-lg overflow-hidden border-2 ${pIdx === 0 ? 'border-emerald-500 ring-2 ring-emerald-400 scale-105' : 'border-transparent opacity-70 hover:opacity-100'} transition-all shrink-0">
+              <button type="button" title="View angle ${pIdx + 1}" onclick="event.stopPropagation(); setCardActivePhoto(${v.id}, '${pUrl}', this)" class="w-8 h-8 rounded-lg overflow-hidden border-2 ${pIdx === 0 ? 'border-emerald-500 ring-2 ring-emerald-400/50 scale-105' : 'border-transparent opacity-70 hover:opacity-100'} transition-all shrink-0">
                 <img src="${pUrl}" alt="Angle ${pIdx + 1}" class="w-full h-full object-cover">
               </button>
             `).join('')}
-            <span class="text-[10px] text-slate-500 pl-1 shrink-0 font-medium font-mono">${photosList.length} photos</span>
+            <span class="text-[10px] text-slate-500 font-mono-twk pl-1 shrink-0 font-medium">${photosList.length} Angles</span>
           </div>
         ` : '';
 
         return `
-        <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200/90 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-xl transition-all duration-300 group hg-card-perspective">
-          <div class="hg-card-surface" id="card-surface-${v.id}">
-            <!-- Higgsfield Animated Widescreen Camera Viewport -->
-            <div class="relative h-52 w-full overflow-hidden bg-slate-950 group cursor-pointer" onclick="openHiggsfieldModal(${v.id})" id="viewport-${v.id}">
-              <!-- Animated Image Layer -->
-              <img src="${activePhoto}" alt="${v.unit_type}" class="w-full h-full object-cover ${animClass} group-hover:scale-105 transition-transform duration-700" id="img-unit-${v.id}">
+        <article class="bg-white dark:bg-[#12141f] rounded-2xl border border-slate-200/90 dark:border-zinc-800/90 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-2xl transition-all duration-300 group twk-card-perspective">
+          <div class="twk-card-surface" id="card-surface-${v.id}">
+            
+            <!-- Architectural Viewport Image Layer -->
+            <div class="relative h-56 w-full overflow-hidden bg-slate-950 group cursor-pointer" onclick="openArchitecturalTourModal(${v.id})" id="viewport-${v.id}">
+              <img src="${activePhoto}" alt="${v.unit_type}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 twk-lighting-${currentLightingState}" id="img-unit-${v.id}">
               
-              <!-- Volumetric Sunlight Shimmer -->
-              <div class="hg-light-beam ${globalMotionMode === 'static' ? 'hidden' : ''}"></div>
+              <!-- Subtle Volumetric Shimmer -->
+              <div class="twk-shimmer-beam ${isShimmerActive ? '' : 'hidden'}"></div>
 
-              <!-- Viewfinder Reticles -->
-              <div class="hg-hud-reticle hg-hud-tl"></div>
-              <div class="hg-hud-reticle hg-hud-tr"></div>
-              <div class="hg-hud-reticle hg-hud-bl"></div>
-              <div class="hg-hud-reticle hg-hud-br"></div>
+              <!-- Reticle Marks -->
+              <div class="twk-reticle twk-reticle-tl"></div>
+              <div class="twk-reticle twk-reticle-tr"></div>
+              <div class="twk-reticle twk-reticle-bl"></div>
+              <div class="twk-reticle twk-reticle-br"></div>
 
-              <!-- Camera Metadata Badge Top-Left -->
-              <div class="absolute top-3 left-3 flex items-center space-x-1.5 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-mono font-semibold px-2.5 py-1 rounded-md border border-white/10 shadow-sm">
-                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                <span>REC 24FPS</span>
+              <!-- Metadata Badge Top-Left -->
+              <div class="absolute top-3 left-3 flex items-center space-x-1.5 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-mono-twk font-semibold px-2.5 py-1 rounded-md border border-white/10 shadow-sm">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>VERIFIED VACANCY</span>
                 <span class="text-white/40">|</span>
-                <span class="text-emerald-400 font-bold">${rigLabel}</span>
+                <span class="text-emerald-400 font-bold">${v.floor || 'Ground'}</span>
               </div>
 
               <!-- Location Tag Top-Right -->
               <div class="absolute top-3 right-3 flex items-center space-x-1.5">
-                <span class="bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-md border border-white/10">
+                <span class="bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-md border border-white/10 font-mono-twk">
                   ${v.city}
                 </span>
-                <span class="bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider flex items-center">
-                  <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse mr-1"></span>
+                <span class="bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider font-mono-twk">
                   Ready
                 </span>
               </div>
 
-              <!-- Bottom Interactive Bar: Higgsfield Badge & Quick Tour -->
+              <!-- Bottom Interactive Bar -->
               <div class="absolute bottom-2.5 inset-x-2.5 flex items-center justify-between pointer-events-none">
-                <div class="bg-slate-950/80 backdrop-blur-md text-[10px] text-zinc-300 px-2.5 py-1 rounded border border-white/10 flex items-center space-x-1.5 font-mono">
-                  <i data-lucide="video" class="w-3 h-3 text-emerald-400"></i>
-                  <span>Higgsfield Cinema</span>
+                <div class="bg-slate-950/85 backdrop-blur-md text-[10px] text-zinc-300 px-2.5 py-1 rounded border border-white/10 flex items-center space-x-1.5 font-mono-twk">
+                  <i data-lucide="eye" class="w-3 h-3 text-emerald-400"></i>
+                  <span>Architectural Studio</span>
                 </div>
                 <div class="pointer-events-auto">
-                  <button onclick="event.stopPropagation(); openHiggsfieldModal(${v.id})" class="px-2.5 py-1 rounded-md bg-white hover:bg-slate-100 text-slate-900 font-bold text-[10px] shadow-md flex items-center space-x-1 transition hover:scale-105 active:scale-95">
-                    <i data-lucide="play" class="w-3 h-3 fill-slate-900"></i>
-                    <span>Virtual Tour</span>
+                  <button onclick="event.stopPropagation(); openArchitecturalTourModal(${v.id})" class="px-2.5 py-1 rounded-md bg-white hover:bg-slate-100 text-slate-950 font-bold text-[10px] shadow-md flex items-center space-x-1 transition hover:scale-105 active:scale-95">
+                    <i data-lucide="expand" class="w-3 h-3 text-emerald-600"></i>
+                    <span>Interactive Tour</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            <!-- Multi-Photo Gallery Quick Switcher Strip -->
+            <!-- Angle Switcher -->
             ${photoThumbnails}
 
+            <!-- Residence Information -->
             <div class="p-5 space-y-3">
               <div>
-                <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">${v.property_name}</span>
-                <h3 class="text-base font-extrabold text-slate-900 dark:text-white mt-0.5">Unit ${v.unit_number} &bull; ${v.unit_type}</h3>
+                <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 tracking-wider uppercase font-mono-twk">${v.property_name}</span>
+                <h3 class="text-base font-extrabold text-slate-900 dark:text-white mt-0.5 tracking-tight">Unit ${v.unit_number} &bull; ${v.unit_type}</h3>
                 <p class="text-xs text-slate-500 dark:text-zinc-400 flex items-center mt-1">
-                  <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-slate-500"></i>
+                  <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-slate-400 dark:text-zinc-500 shrink-0"></i>
                   <span>${v.address}</span>
                 </p>
               </div>
 
-              <!-- Key Specs -->
+              <!-- Architectural Specs Matrix -->
               <div class="grid grid-cols-3 gap-2 py-2.5 border-y border-slate-100 dark:border-zinc-800 text-center text-xs">
                 <div>
-                  <span class="text-[10px] text-slate-500 uppercase font-semibold">Rooms</span>
-                  <p class="font-bold text-slate-800 dark:text-zinc-200">${v.bedrooms > 0 ? v.bedrooms + ' Beds' : 'Commercial'}</p>
+                  <span class="text-[10px] text-slate-500 uppercase font-semibold font-mono-twk">Rooms</span>
+                  <p class="font-bold text-slate-800 dark:text-zinc-200 mt-0.5">${v.bedrooms > 0 ? v.bedrooms + ' Beds' : 'Studio / Office'}</p>
                 </div>
                 <div>
-                  <span class="text-[10px] text-slate-500 uppercase font-semibold">Baths</span>
-                  <p class="font-bold text-slate-800 dark:text-zinc-200">${v.bathrooms} Baths</p>
+                  <span class="text-[10px] text-slate-500 uppercase font-semibold font-mono-twk">Baths</span>
+                  <p class="font-bold text-slate-800 dark:text-zinc-200 mt-0.5">${v.bathrooms || 2} Baths</p>
                 </div>
                 <div>
-                  <span class="text-[10px] text-slate-500 uppercase font-semibold">Size</span>
-                  <p class="font-bold text-slate-800 dark:text-zinc-200">${v.sqft} sqft</p>
+                  <span class="text-[10px] text-slate-500 uppercase font-semibold font-mono-twk">Area</span>
+                  <p class="font-bold text-slate-800 dark:text-zinc-200 mt-0.5">${v.sqft || 1200} sqft</p>
                 </div>
               </div>
 
               <!-- Amenities Pills -->
               <div class="flex flex-wrap gap-1.5 pt-1">
-                ${amenitiesList.slice(0, 4).map(a => `<span class="text-[10px] bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 px-2 py-0.5 rounded">${a}</span>`).join('')}
+                ${amenitiesList.slice(0, 4).map(a => `<span class="text-[10px] bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 px-2 py-0.5 rounded font-medium">${a}</span>`).join('')}
               </div>
             </div>
           </div>
 
+          <!-- Card Pricing & Direct Actions -->
           <div class="p-5 pt-0">
-            <div class="flex items-baseline justify-between mb-3">
+            <div class="flex items-baseline justify-between mb-3.5">
               <div>
                 <span class="text-xl font-extrabold text-slate-900 dark:text-white">KES ${Number(v.base_rent).toLocaleString()}</span>
-                <span class="text-xs text-slate-500 font-medium">/ month</span>
+                <span class="text-xs text-slate-500 font-medium">/ mo</span>
               </div>
-              <span class="text-[10px] text-slate-500">Deposit: KES ${Number(v.deposit).toLocaleString()}</span>
+              <span class="text-[10px] text-slate-500 font-mono-twk">Deposit: KES ${Number(v.deposit || (v.base_rent * 2)).toLocaleString()}</span>
             </div>
 
             <div class="grid grid-cols-2 gap-2">
-              <button onclick="openViewingModal(${v.id})" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-zinc-100 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1">
+              <button onclick="openViewingModal(${v.id})" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-950 dark:hover:bg-zinc-100 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 shadow-sm">
                 <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-                <span>View Space</span>
+                <span>Private Tour</span>
               </button>
-              <a href="https://wa.me/254700112233?text=Hi%20BomaSphere%2C%20I%20am%20interested%20in%20Unit%20${v.unit_number}%20at%20${encodeURIComponent(v.property_name)}" target="_blank" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1">
+              <a href="https://wa.me/254700112233?text=Hi%20BomaSphere%2C%20I%20am%20interested%20in%20Unit%20${v.unit_number}%20at%20${encodeURIComponent(v.property_name)}" target="_blank" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 shadow-sm">
                 <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
-                <span>WhatsApp</span>
+                <span>Concierge</span>
               </a>
             </div>
           </div>
-        </div>
+        </article>
       `;
       }).join('');
 
-      // Attach 3D parallax gyro tilt to cards
       attachCardParallaxListeners();
-
       if (window.lucide) lucide.createIcons();
     }
 
+    // Set Card Active Thumbnail Photo
+    function setCardActivePhoto(unitId, url, btn) {
+      const img = document.getElementById(`img-unit-${unitId}`);
+      if (img) img.src = url;
+      if (btn && btn.parentElement) {
+        btn.parentElement.querySelectorAll('button').forEach(b => {
+          b.classList.remove('border-emerald-500', 'scale-105', 'ring-2', 'ring-emerald-400/50');
+          b.classList.add('border-transparent', 'opacity-70');
+        });
+        btn.classList.add('border-emerald-500', 'scale-105', 'ring-2', 'ring-emerald-400/50');
+        btn.classList.remove('border-transparent', 'opacity-70');
+      }
+    }
+
+    // TWK 3D Gyro Tilt Parallax Listeners
     function attachCardParallaxListeners() {
       allVacancies.forEach(v => {
         const vp = document.getElementById(`viewport-${v.id}`);
@@ -852,7 +856,6 @@
         if (!vp || !surface) return;
 
         vp.addEventListener('mousemove', e => {
-          if (globalMotionMode === 'static') return;
           const rect = vp.getBoundingClientRect();
           const x = e.clientX - rect.left;
           const y = e.clientY - rect.top;
@@ -869,41 +872,90 @@
       });
     }
 
-    function toggleHiggsfieldGlobalMotion() {
+    // Architectural Lighting Simulator Cycle
+    function cycleGlobalLighting() {
+      const states = ['dawn', 'zenith', 'golden', 'dusk'];
+      const nextIdx = (states.indexOf(currentLightingState) + 1) % states.length;
+      currentLightingState = states[nextIdx];
+      
+      const labels = {
+        dawn: 'Dawn Horizon (06:30)',
+        zenith: 'Zenith Sun (12:00)',
+        golden: 'Golden Hour (17:45)',
+        dusk: 'Dusk Lantern (19:30)'
+      };
+      
       const label = document.getElementById('label-motion-state');
-      if (globalMotionMode === 'cinematic') {
-        globalMotionMode = 'hover';
-        if (label) label.textContent = 'On Hover';
-      } else if (globalMotionMode === 'hover') {
-        globalMotionMode = 'static';
-        if (label) label.textContent = 'Paused';
-      } else {
-        globalMotionMode = 'cinematic';
-        if (label) label.textContent = 'Cinematic (24fps)';
-      }
-      renderVacancies(allVacancies);
+      if (label) label.textContent = labels[currentLightingState];
+
+      // Update active cards
+      document.querySelectorAll('#vacancies-grid img').forEach(img => {
+        img.className = img.className.replace(/twk-lighting-\w+/g, `twk-lighting-${currentLightingState}`);
+      });
     }
 
-    // Higgsfield Virtual Tour Modal Logic
-    function setTourActivePhoto(url, btn) {
+    // Studio Lighting Switcher
+    function setStudioLighting(state) {
+      currentLightingState = state;
       const img = document.getElementById('tour-stage-img');
-      if (img) img.src = url;
-      if (btn && btn.parentElement) {
-        btn.parentElement.querySelectorAll('button').forEach(b => {
-          b.classList.remove('border-emerald-500', 'scale-105', 'ring-2', 'ring-emerald-400');
-          b.classList.add('border-white/20', 'opacity-60');
-        });
-        btn.classList.add('border-emerald-500', 'scale-105', 'ring-2', 'ring-emerald-400');
-        btn.classList.remove('border-white/20', 'opacity-60');
+      const hudRig = document.getElementById('tour-hud-rig');
+      const specSummary = document.getElementById('tour-spec-summary');
+
+      if (img) {
+        img.className = `w-full h-full object-cover transition-all duration-700 twk-lighting-${state}`;
+      }
+
+      ['dawn', 'zenith', 'golden', 'dusk'].forEach(s => {
+        const btn = document.getElementById(`lighting-btn-${s}`);
+        if (!btn) return;
+        if (s === state) {
+          btn.className = 'p-2.5 rounded-xl bg-white/10 border border-emerald-500/60 text-left transition';
+          const txt = btn.querySelector('span');
+          if (txt) txt.className = 'text-emerald-400 font-bold';
+        } else {
+          btn.className = 'p-2.5 rounded-xl bg-white/5 border border-white/10 text-left transition hover:bg-white/10';
+          const txt = btn.querySelector('span');
+          if (txt) txt.className = 'text-zinc-300 font-bold';
+        }
+      });
+
+      if (state === 'dawn') {
+        if (hudRig) hudRig.textContent = 'DAWN HORIZON (5500K)';
+        if (specSummary) specSummary.textContent = 'Morning East orientation: captures soft, glare-free daylight across master balconies and kitchen preparation areas.';
+      } else if (state === 'zenith') {
+        if (hudRig) hudRig.textContent = 'ZENITH DAYLIGHT (6500K)';
+        if (specSummary) specSummary.textContent = 'High-noon architectural clarity: demonstrates acoustic double-glazing thermal insulation and natural overhead cross-ventilation.';
+      } else if (state === 'golden') {
+        if (hudRig) hudRig.textContent = 'GOLDEN HOUR (3200K)';
+        if (specSummary) specSummary.textContent = 'Savannah sunset ambience: warm amber reflections on teak joinery, granite countertops, and expansive living room terraces.';
+      } else if (state === 'dusk') {
+        if (hudRig) hudRig.textContent = 'DUSK LANTERN (2700K)';
+        if (specSummary) specSummary.textContent = 'Evening ambient lighting: recessed LED warm fixtures, landscape pathway illumination, and 24/7 security perimeter lighting.';
       }
     }
 
-    function openHiggsfieldModal(unitId) {
+    function toggleShimmerEffect() {
+      isShimmerActive = !isShimmerActive;
+      const beam = document.getElementById('tour-stage-light');
+      const btn = document.getElementById('btn-shimmer-toggle');
+      if (beam) {
+        beam.classList.toggle('hidden', !isShimmerActive);
+      }
+      if (btn) {
+        btn.textContent = isShimmerActive ? 'Active' : 'Muted';
+        btn.className = isShimmerActive
+          ? 'px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-mono-twk text-emerald-300 transition'
+          : 'px-2 py-0.5 rounded bg-white/10 border border-white/20 text-[10px] font-mono-twk text-zinc-400 transition';
+      }
+    }
+
+    // Architectural Studio Modal Handlers
+    function openArchitecturalTourModal(unitId) {
       const unit = allVacancies.find(u => u.id === unitId) || allVacancies[0];
       if (!unit) return;
       activeTourUnit = unit;
 
-      document.getElementById('tour-unit-title').textContent = `Higgsfield Tour: Unit ${unit.unit_number} (${unit.unit_type})`;
+      document.getElementById('tour-unit-title').textContent = `Architectural Studio: Unit ${unit.unit_number} (${unit.unit_type})`;
       document.getElementById('tour-unit-sub').textContent = `${unit.property_name} • ${unit.city}`;
 
       let photos = [];
@@ -931,10 +983,10 @@
       if (galleryContainer && galleryStrip) {
         if (photos.length > 1) {
           galleryContainer.classList.remove('hidden');
-          if (photoCounter) photoCounter.textContent = `${photos.length} Photo Angles Available`;
+          if (photoCounter) photoCounter.textContent = `${photos.length} Curated Spatial Angles`;
           galleryStrip.innerHTML = photos.map((pUrl, idx) => `
-            <button type="button" title="Angle ${idx + 1}" onclick="setTourActivePhoto('${pUrl}', this)" class="w-12 h-12 rounded-lg overflow-hidden border-2 ${idx === 0 ? 'border-emerald-500 scale-105 ring-2 ring-emerald-400' : 'border-white/20 opacity-60 hover:opacity-100'} transition-all shrink-0">
-              <img src="${pUrl}" alt="Angle ${idx + 1}" class="w-full h-full object-cover">
+            <button type="button" title="Room Angle ${idx + 1}" onclick="setTourActivePhoto('${pUrl}', this)" class="w-12 h-12 rounded-lg overflow-hidden border-2 ${idx === 0 ? 'border-emerald-500 scale-105 ring-2 ring-emerald-400/50' : 'border-white/20 opacity-60 hover:opacity-100'} transition-all shrink-0">
+              <img src="${pUrl}" alt="Space Angle ${idx + 1}" class="w-full h-full object-cover">
             </button>
           `).join('');
         } else {
@@ -943,86 +995,36 @@
         }
       }
 
-      // Update WhatsApp direct link
-      document.getElementById('tour-whatsapp-link').href = `https://wa.me/254700112233?text=Hi%20BomaSphere%2C%20I%20just%20took%20the%20Higgsfield%20virtual%20tour%20for%20Unit%20${unit.unit_number}%20at%20${encodeURIComponent(unit.property_name)}%20and%20would%20like%20to%20inquire.`;
+      // WhatsApp Concierge Link
+      document.getElementById('tour-whatsapp-link').href = `https://wa.me/254700112233?text=Hi%20BomaSphere%2C%20I%20am%20inspecting%20Unit%20${unit.unit_number}%20at%20${encodeURIComponent(unit.property_name)}%20via%20the%20Architectural%20Studio%20and%20would%20like%20to%20inquire.`;
 
-      // Set default rig based on unit
-      const initialRig = unit.higgsfield?.mode || 'dolly';
-      switchTourRig(initialRig);
-
-      // Start live timecode counter
+      setStudioLighting('golden');
       startTimecode();
 
       document.getElementById('modal-higgsfield-tour').classList.remove('hidden');
       if (window.lucide) lucide.createIcons();
     }
 
-    function closeHiggsfieldModal() {
+    function closeArchitecturalTourModal() {
       document.getElementById('modal-higgsfield-tour').classList.add('hidden');
       if (timecodeTimer) clearInterval(timecodeTimer);
     }
 
-    function switchTourRig(rig) {
+    // Set Active Photo in Studio
+    function setTourActivePhoto(url, btn) {
       const img = document.getElementById('tour-stage-img');
-      const hudRig = document.getElementById('tour-hud-rig');
-      const hudDesc = document.getElementById('tour-hud-camera-desc');
-      const promptText = document.getElementById('tour-prompt-text');
-
-      // Reset animation classes
-      img.className = 'w-full h-full object-cover transition-all duration-700';
-
-      // Reset active rig button styles
-      ['dolly', 'aerial', 'orbit', 'pan'].forEach(r => {
-        const btn = document.getElementById(`rig-btn-${r}`);
-        if (!btn) return;
-        btn.className = (r === rig)
-          ? 'p-2.5 rounded-xl bg-white/10 border border-emerald-500/60 text-left transition'
-          : 'p-2.5 rounded-xl bg-white/5 border border-white/10 text-left transition hover:bg-white/10';
-        const txt = btn.querySelector('span');
-        if (txt) txt.className = (r === rig) ? 'text-emerald-400 font-bold' : 'text-zinc-300 font-bold';
-      });
-
-      if (rig === 'dolly') {
-        img.classList.add('hg-anim-dolly');
-        hudRig.textContent = 'DOLLY-IN (35MM)';
-        hudDesc.textContent = 'Eye-Level Interior Tracking Glide';
-        promptText.textContent = `"Cinematic 4K dolly in, 35mm lens, natural daylight streaming through floor-to-ceiling windows, subtle reflections on Italian tile floor, steadycam 24fps glide, photorealistic."`;
-      } else if (rig === 'aerial') {
-        img.classList.add('hg-anim-aerial');
-        hudRig.textContent = 'DRONE PULLBACK (24MM)';
-        hudDesc.textContent = 'High-Altitude Aerial Elevation Reveal';
-        promptText.textContent = `"Cinematic drone aerial pullback, 4k ultra-high definition, slow smooth arc revealing modern architectural luxury development at golden hour, manicured lawns, warm ambient interior light."`;
-      } else if (rig === 'orbit') {
-        img.classList.add('hg-anim-orbit');
-        hudRig.textContent = '3D ORBIT (50MM)';
-        hudDesc.textContent = '180° Architectural Facade Rotation';
-        promptText.textContent = `"Smooth 180-degree 3D rotational camera orbit around luxury building exterior, natural sun glint across reflective double-glazed glass, physical depth parallax, 24fps cinema pace."`;
-      } else if (rig === 'pan') {
-        img.classList.add('hg-anim-pan', 'hg-twilight');
-        hudRig.textContent = 'GOLDEN TWILIGHT (28MM)';
-        hudDesc.textContent = 'Day-to-Night Dynamic Light Diffusion';
-        promptText.textContent = `"Controlled horizontal architectural pan, physics-aware day-to-night lighting transition, golden hour amber diffusion shifting to warm interior glow through panoramic glass windows."`;
+      if (img) img.src = url;
+      if (btn && btn.parentElement) {
+        btn.parentElement.querySelectorAll('button').forEach(b => {
+          b.classList.remove('border-emerald-500', 'scale-105', 'ring-2', 'ring-emerald-400/50');
+          b.classList.add('border-white/20', 'opacity-60');
+        });
+        btn.classList.add('border-emerald-500', 'scale-105', 'ring-2', 'ring-emerald-400/50');
+        btn.classList.remove('border-white/20', 'opacity-60');
       }
     }
 
-    function setTourSpeed(speed) {
-      const img = document.getElementById('tour-stage-img');
-      if (!img) return;
-
-      [0.5, 1.0, 1.5].forEach(s => {
-        const id = 'pace-btn-' + (s === 0.5 ? '05' : s === 1.0 ? '10' : '15');
-        const b = document.getElementById(id);
-        if (b) {
-          b.className = (s === speed)
-            ? 'px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-mono text-emerald-300 transition'
-            : 'px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] font-mono text-zinc-300 transition';
-        }
-      });
-
-      const baseSec = 14;
-      img.style.animationDuration = `${(baseSec / speed).toFixed(1)}s`;
-    }
-
+    // Live Timecode Counter
     function startTimecode() {
       if (timecodeTimer) clearInterval(timecodeTimer);
       let frames = 0;
@@ -1051,20 +1053,23 @@
 
     function bookViewingFromTour() {
       if (!activeTourUnit) return;
-      closeHiggsfieldModal();
+      closeArchitecturalTourModal();
       openViewingModal(activeTourUnit.id, activeTourUnit.unit_number, activeTourUnit.property_name, activeTourUnit.unit_type);
     }
 
+    // Faceted Decision Filters
     function applyFilters() {
       const loc = document.getElementById('filter-location').value;
       const type = document.getElementById('filter-type').value;
       const budget = Number(document.getElementById('filter-budget').value);
+      const readiness = document.getElementById('filter-readiness').value;
 
       const filtered = allVacancies.filter(v => {
         const matchesLoc = loc === 'all' || v.city.includes(loc) || v.property_name.includes(loc);
         const matchesType = type === 'all' || v.unit_type.includes(type);
         const matchesBudget = v.base_rent <= budget;
-        return matchesLoc && matchesType && matchesBudget;
+        const matchesReadiness = readiness === 'all' || (v.status && v.status.toLowerCase() === 'vacant');
+        return matchesLoc && matchesType && matchesBudget && matchesReadiness;
       });
 
       renderVacancies(filtered);
@@ -1073,7 +1078,9 @@
     document.getElementById('filter-location')?.addEventListener('change', applyFilters);
     document.getElementById('filter-type')?.addEventListener('change', applyFilters);
     document.getElementById('filter-budget')?.addEventListener('change', applyFilters);
+    document.getElementById('filter-readiness')?.addEventListener('change', applyFilters);
 
+    // Viewing Booking Modal Handlers
     function openViewingModal(unitId, unitNum, propName, unitType) {
       const v = (allVacancies || []).find(x => x.id === Number(unitId));
       const uNum = unitNum || (v ? v.unit_number : '');
@@ -1081,7 +1088,7 @@
       const uType = unitType || (v ? v.unit_type : 'Apartment');
 
       document.getElementById('viewing-unit-id').value = unitId;
-      document.getElementById('modal-viewing-title').textContent = `Schedule Viewing: Unit ${uNum}`;
+      document.getElementById('modal-viewing-title').textContent = `Schedule Private Viewing: Unit ${uNum}`;
       document.getElementById('modal-viewing-sub').textContent = `${uType} • ${pName}`;
       document.getElementById('viewing-success-box').classList.add('hidden');
       document.getElementById('form-viewing').classList.remove('hidden');
@@ -1106,7 +1113,7 @@
       e.preventDefault();
       const btn = document.getElementById('btn-submit-viewing');
       btn.disabled = true;
-      btn.textContent = 'Booking...';
+      btn.textContent = 'Reserving Appointment...';
 
       const unitId = document.getElementById('viewing-unit-id').value;
       const name = document.getElementById('viewing-name').value;
@@ -1125,19 +1132,19 @@
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
 
-        document.getElementById('viewing-success-msg').textContent = `Appointment Reference: ${data.reference}. Confirmation SMS sent to ${phone}. Our caretaker will be ready to show you the space on ${date} at ${time}.`;
+        document.getElementById('viewing-success-msg').textContent = `Appointment Reference: ${data.reference}. Confirmation SMS dispatched to ${phone}. Our caretaker will be ready to welcome you on ${date} at ${time}.`;
         document.getElementById('viewing-success-box').classList.remove('hidden');
         document.getElementById('form-viewing').classList.add('hidden');
       } catch (err) {
-        alert(err.message || 'Viewing booking failed');
+        alert(err.message || 'Viewing booking request could not be processed');
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<span>Confirm Viewing Appointment</span><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>';
+        btn.innerHTML = '<span>Confirm Private Appointment</span><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>';
         if (window.lucide) lucide.createIcons();
       }
     }
 
-    // Session sync with PMS portal
+    // User session sync with PMS portal
     function syncAuthUserToNav() {
       const container = document.getElementById('nav-user-container');
       if (!container) return;
@@ -1152,11 +1159,11 @@
                 <div class="hidden sm:flex items-center space-x-2 px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-200 font-medium">
                   <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                   <span class="font-bold">${user.name.split(' (')[0]}</span>
-                  <span class="text-[10px] uppercase font-extrabold px-1.5 py-0.5 rounded bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-100">${roleLabel}</span>
+                  <span class="text-[10px] uppercase font-extrabold px-1.5 py-0.5 rounded bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-100 font-mono-twk">${roleLabel}</span>
                 </div>
                 <a href="/" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-zinc-100 text-xs font-bold transition shadow-xs">
                   <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
-                  <span>Back to PMS Portal</span>
+                  <span>Back to PMS</span>
                 </a>
               </div>
             `;
@@ -1175,7 +1182,7 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // Theme sync
+    // Theme Synchronization
     function initTheme() {
       const savedTheme = localStorage.getItem('bomasphere_theme_mode');
       if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -1188,25 +1195,30 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // TWK Ergonomics: Click-outside backdrop dismiss
+    // TWK Ergonomics: Backdrop Click Dismissal
     document.addEventListener('click', (e) => {
       const openModal = e.target.closest('#modal-viewing, #modal-higgsfield-tour');
       if (openModal && !openModal.classList.contains('hidden')) {
-        const dialog = openModal.querySelector('div.bg-white, div.bg-zinc-900, div.bg-zinc-950') || openModal.firstElementChild;
+        const dialog = openModal.querySelector('div.bg-white, div.bg-zinc-900, div.bg-zinc-950, div.bg-\\[\\#0b0c13\\], div.bg-\\[\\#12141f\\]') || openModal.firstElementChild;
         if (dialog && !dialog.contains(e.target)) {
           if (openModal.id === 'modal-viewing') closeViewingModal();
-          if (openModal.id === 'modal-higgsfield-tour') closeHiggsfieldModal();
+          if (openModal.id === 'modal-higgsfield-tour') closeArchitecturalTourModal();
         }
       }
     });
 
-    // TWK Ergonomics: Escape key closes modal
+    // TWK Ergonomics: Escape Key Dismissal
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' || e.keyCode === 27) {
         if (!document.getElementById('modal-viewing')?.classList.contains('hidden')) closeViewingModal();
-        if (!document.getElementById('modal-higgsfield-tour')?.classList.contains('hidden')) closeHiggsfieldModal();
+        if (!document.getElementById('modal-higgsfield-tour')?.classList.contains('hidden')) closeArchitecturalTourModal();
       }
     });
+
+    // Backward-Compatibility Aliases for Legacy Handlers & Test Suites
+    window.openHiggsfieldModal = openArchitecturalTourModal;
+    window.closeHiggsfieldModal = closeArchitecturalTourModal;
+    window.toggleHiggsfieldGlobalMotion = cycleGlobalLighting;
 
     initTheme();
     syncAuthUserToNav();
