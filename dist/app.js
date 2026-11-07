@@ -3222,8 +3222,8 @@ class BomaSphereApp {
     });
 
     // TWK Ergonomics: Escape key closes active modal
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.keyCode === 27) {
         const openModals = Array.from(document.querySelectorAll('[id^="modal-"].fixed.inset-0:not(.hidden)'));
         if (openModals.length > 0) {
           const topModal = openModals[openModals.length - 1];

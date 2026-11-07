@@ -1201,8 +1201,8 @@
     });
 
     // TWK Ergonomics: Escape key closes modal
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.keyCode === 27) {
         if (!document.getElementById('modal-viewing')?.classList.contains('hidden')) closeViewingModal();
         if (!document.getElementById('modal-higgsfield-tour')?.classList.contains('hidden')) closeHiggsfieldModal();
       }
