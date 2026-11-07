@@ -490,14 +490,27 @@ button:active:not(:disabled) {
 }
 
 /* Success Toast: 100% Solid Emerald with Crisp White Text */
+.toast,
+.toast span,
+.toast i,
+.toast svg,
+.toast button {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
 .toast-success {
   background-color: #064e3b !important;
   color: #ffffff !important;
   border-color: #10b981 !important;
 }
-html.dark .toast-success {
+html.dark .toast-success,
+html.dark .toast-success span,
+html.dark .toast-success i,
+html.dark .toast-success svg {
   background-color: #022c22 !important;
   color: #f0fdf4 !important;
+  stroke: #f0fdf4 !important;
   border-color: #34d399 !important;
 }
 
@@ -507,9 +520,13 @@ html.dark .toast-success {
   color: #ffffff !important;
   border-color: #f43f5e !important;
 }
-html.dark .toast-error {
+html.dark .toast-error,
+html.dark .toast-error span,
+html.dark .toast-error i,
+html.dark .toast-error svg {
   background-color: #4c0519 !important;
   color: #fff1f2 !important;
+  stroke: #fff1f2 !important;
   border-color: #fb7185 !important;
 }
 
@@ -519,9 +536,13 @@ html.dark .toast-error {
   color: #ffffff !important;
   border-color: #38bdf8 !important;
 }
-html.dark .toast-info {
+html.dark .toast-info,
+html.dark .toast-info span,
+html.dark .toast-info i,
+html.dark .toast-info svg {
   background-color: #0c1222 !important;
   color: #f8fafc !important;
+  stroke: #f8fafc !important;
   border-color: #60a5fa !important;
 }
 
