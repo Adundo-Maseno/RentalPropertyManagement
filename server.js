@@ -340,6 +340,30 @@ function generateSecureToken(prefix = 'bs_sess') {
   return `${prefix}_${crypto.randomBytes(24).toString('hex')}`;
 }
 
+// ====================================================================
+// CRYPTOGRAPHIC EVENT SOURCING & AUDIT TRAIL ENGINE
+// ====================================================================
+function logSystemAudit({ actorId = null, actorName = 'System Agent', actorRole = 'system', action, entityType, entityId, description, diff = null, ipAddress = '127.0.0.1' }) {
+  try {
+    const lastRow = db.prepare('SELECT checksum FROM system_audit_logs ORDER BY id DESC LIMIT 1').get();
+    const prevChecksum = (lastRow && lastRow.checksum) ? lastRow.checksum : 'GENESIS';
+    const timestamp = new Date().toISOString();
+    const diffJson = diff ? (typeof diff === 'string' ? diff : JSON.stringify(diff)) : null;
+    const payload = `${prevChecksum}|${action}|${entityType}|${entityId}|${diffJson || ''}|${timestamp}`;
+    const checksum = crypto.createHash('sha256').update(payload).digest('hex');
+
+    const stmt = db.prepare(`
+      INSERT INTO system_audit_logs (actor_id, actor_name, actor_role, action, entity_type, entity_id, description, diff_json, checksum, prev_checksum, ip_address, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(actorId, actorName, actorRole, action, entityType, entityId, description, diffJson, checksum, prevChecksum, ipAddress, timestamp);
+    return { checksum, prevChecksum, timestamp };
+  } catch (err) {
+    console.error('Failed to log system audit in SQLite:', err.message);
+    return null;
+  }
+}
+
 // ==========================================
 // REAL RBAC AUTHENTICATION & SESSION GUARDS
 // ==========================================
@@ -2300,6 +2324,216 @@ async function handleRequest(req, res) {
         WHERE id = ?
       `).run(b.status || null, b.notes || null, b.preferred_date || null, b.time_slot || null, id);
       return sendJSON(res, 200, { success: true, message: 'Viewing lead updated successfully.' });
+    }
+
+    // 1-Click Lead-to-Lease Pipeline Conversion
+    if ((pathname.startsWith('/api/viewing-leads/') || pathname.startsWith('/api/leads/')) && pathname.endsWith('/convert') && method === 'POST') {
+      const parts = pathname.split('/');
+      const id = parts[3];
+      const lead = db.prepare('SELECT * FROM viewing_leads WHERE id = ?').get(id);
+      if (!lead) {
+        return sendJSON(res, 404, { error: 'Viewing lead not found.' });
+      }
+
+      const unit = db.prepare(`
+        SELECT u.*, p.name as property_name, p.landlord_name 
+        FROM units u 
+        JOIN properties p ON u.property_id = p.id 
+        WHERE u.id = ?
+      `).get(lead.unit_id);
+      if (!unit) {
+        return sendJSON(res, 404, { error: 'Associated unit not found for this viewing lead.' });
+      }
+
+      // Parse optional overrides (move_in_date, rent_amount, deposit_amount)
+      let b = {};
+      try { b = await parseBody(req); } catch (e) {}
+
+      // 1. Create or link Tenant with vetted lifecycle
+      let tenant = db.prepare('SELECT * FROM tenants WHERE phone = ? OR (email IS NOT NULL AND email = ?)').get(lead.phone, lead.email || '');
+      if (!tenant) {
+        const insTenant = db.prepare(`
+          INSERT INTO tenants (name, phone, email, status, lifecycle_stage)
+          VALUES (?, ?, ?, 'active', 'vetted')
+        `).run(lead.prospect_name, lead.phone, lead.email || null);
+        tenant = db.prepare('SELECT * FROM tenants WHERE id = ?').get(insTenant.lastInsertRowid);
+      } else {
+        db.prepare("UPDATE tenants SET lifecycle_stage = 'vetted' WHERE id = ?").run(tenant.id);
+        tenant = db.prepare('SELECT * FROM tenants WHERE id = ?').get(tenant.id);
+      }
+
+      // 2. Mark unit as reserved
+      db.prepare("UPDATE units SET status = 'reserved' WHERE id = ?").run(unit.id);
+
+      // 3. Create or fetch active/pending Lease
+      const startDate = b.move_in_date || lead.preferred_date || new Date().toISOString().split('T')[0];
+      const startObj = new Date(startDate);
+      const endObj = new Date(startObj);
+      endObj.setFullYear(endObj.getFullYear() + 1);
+      const endDate = endObj.toISOString().split('T')[0];
+
+      let lease = db.prepare("SELECT * FROM leases WHERE unit_id = ? AND tenant_id = ? AND status != 'terminated'").get(unit.id, tenant.id);
+      if (!lease) {
+        const insLease = db.prepare(`
+          INSERT INTO leases (unit_id, tenant_id, start_date, end_date, monthly_rent, deposit_paid, water_deposit, status, terms)
+          VALUES (?, ?, ?, ?, ?, 0, 2500, 'pending_active', 'Standard 12-month residential tenancy agreement with 1-month deposit.')
+        `).run(unit.id, tenant.id, startDate, endDate, unit.base_rent);
+        lease = db.prepare('SELECT * FROM leases WHERE id = ?').get(insLease.lastInsertRowid);
+      }
+
+      // 4. Create Digital Lease Agreement
+      let agreement = db.prepare('SELECT * FROM lease_agreements WHERE lease_id = ?').get(lease.id);
+      if (!agreement) {
+        const agreementCode = `LSE-${Date.now().toString(36).toUpperCase()}-${unit.unit_number.replace(/\\s+/g, '')}`;
+        const clauses = "1. Rent payable by 5th. 2. Deposit refundable post-move-out inspection. 3. Subletting prohibited without prior written consent.";
+        const contractHash = crypto.createHash('sha256').update(`${agreementCode}|${tenant.id}|${unit.id}|${unit.base_rent}|${startDate}`).digest('hex');
+        const insAgreement = db.prepare(`
+          INSERT INTO lease_agreements (lease_id, unit_id, tenant_id, agreement_code, rent_amount, deposit_amount, start_date, end_date, terms_clauses, status, contract_hash)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_tenant', ?)
+        `).run(lease.id, unit.id, tenant.id, agreementCode, unit.base_rent, unit.base_rent, startDate, endDate, clauses, contractHash);
+        agreement = db.prepare('SELECT * FROM lease_agreements WHERE id = ?').get(insAgreement.lastInsertRowid);
+      }
+
+      // 5. Generate Initial Move-In Settlement Invoice
+      const invNum = `INV-INIT-${Date.now().toString(36).toUpperCase()}`;
+      const issueDate = new Date().toISOString().split('T')[0];
+      const dueObj = new Date();
+      dueObj.setDate(dueObj.getDate() + 5);
+      const dueDate = dueObj.toISOString().split('T')[0];
+      const currentMonth = `${new Date().toLocaleString('en-US', { month: 'short' })} ${new Date().getFullYear()}`;
+
+      const rentAmount = Number(unit.base_rent) || 0;
+      const serviceCharge = Number(unit.service_charge) || 0;
+      const garbageAmount = Number(unit.garbage_fee) || 0;
+      const moveInCharges = rentAmount + 2500; // Rent Deposit + Water Deposit
+      const totalAmount = rentAmount + serviceCharge + garbageAmount + moveInCharges;
+
+      const insInvoice = db.prepare(`
+        INSERT INTO invoices (
+          invoice_number, lease_id, tenant_id, unit_id, month, issue_date, due_date,
+          rent_amount, water_amount, garbage_amount, service_charge, late_fee, other_charges,
+          total_amount, amount_paid, balance, status, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, 0, ?, ?, 0, ?, 'unpaid', ?)
+      `).run(
+        invNum, lease.id, tenant.id, unit.id, currentMonth, issueDate, dueDate,
+        rentAmount, garbageAmount, serviceCharge, moveInCharges,
+        totalAmount, totalAmount, `Initial Move-In Settlement: 1st Month Rent (${rentAmount}), Security Deposit (${rentAmount}), Water Meter Deposit (2,500)`
+      );
+      const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(insInvoice.lastInsertRowid);
+
+      // 6. Mark lead as converted
+      db.prepare("UPDATE viewing_leads SET status = 'converted' WHERE id = ?").run(lead.id);
+
+      // 7. Cryptographic System Audit Log
+      const user = resolveRequestUser(req);
+      const auditLog = logSystemAudit({
+        actorId: user ? user.id : null,
+        actorName: user ? user.name : 'Pipeline Agent',
+        actorRole: user ? user.role : 'property_manager',
+        action: 'LEAD_CONVERTED',
+        entityType: 'viewing_lead',
+        entityId: lead.id,
+        description: `Lead "${lead.prospect_name}" converted to Tenant "${tenant.name}". Unit ${unit.unit_number} reserved, Lease Agreement #${agreement.agreement_code} drafted, Move-in Invoice #${invNum} generated.`,
+        diff: {
+          lead_id: lead.id,
+          tenant_id: tenant.id,
+          unit_id: unit.id,
+          lease_id: lease.id,
+          agreement_id: agreement.id,
+          agreement_code: agreement.agreement_code,
+          invoice_id: invoice.id,
+          invoice_number: invoice.invoice_number,
+          total_amount: totalAmount
+        },
+        ipAddress: req.socket?.remoteAddress || '127.0.0.1'
+      });
+
+      return sendJSON(res, 200, {
+        success: true,
+        message: `Lead successfully converted to Tenant and Lease Agreement #${agreement.agreement_code} generated.`,
+        tenant,
+        unit: { id: unit.id, unit_number: unit.unit_number, status: 'reserved' },
+        lease,
+        agreement,
+        invoice,
+        audit: auditLog
+      });
+    }
+
+    // Cryptographic Audit Ledger Query
+    if (pathname === '/api/audit-logs' && method === 'GET') {
+      const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+      const limit = Math.min(Number(urlObj.searchParams.get('limit')) || 50, 200);
+      const offset = Number(urlObj.searchParams.get('offset')) || 0;
+      const action = urlObj.searchParams.get('action');
+      const entityType = urlObj.searchParams.get('entity_type');
+
+      let query = 'SELECT * FROM system_audit_logs';
+      const whereClauses = [];
+      const params = [];
+
+      if (action) {
+        whereClauses.push('action = ?');
+        params.push(action);
+      }
+      if (entityType) {
+        whereClauses.push('entity_type = ?');
+        params.push(entityType);
+      }
+
+      if (whereClauses.length > 0) {
+        query += ' WHERE ' + whereClauses.join(' AND ');
+      }
+      query += ' ORDER BY id DESC LIMIT ? OFFSET ?';
+      params.push(limit, offset);
+
+      const logs = db.prepare(query).all(...params);
+      const totalCount = db.prepare('SELECT count(*) as total FROM system_audit_logs').get().total;
+
+      return sendJSON(res, 200, {
+        success: true,
+        total: totalCount,
+        count: logs.length,
+        logs
+      });
+    }
+
+    // Cryptographic Audit Ledger Integrity Verification
+    if (pathname === '/api/audit-logs/verify' && method === 'POST') {
+      const logs = db.prepare('SELECT * FROM system_audit_logs ORDER BY id ASC').all();
+      let isValid = true;
+      let brokenAtId = null;
+      let reason = null;
+      let lastChecksum = 'GENESIS';
+
+      for (const log of logs) {
+        if (log.prev_checksum !== lastChecksum) {
+          isValid = false;
+          brokenAtId = log.id;
+          reason = `Previous checksum mismatch at Record #${log.id}. Expected ${lastChecksum}, got ${log.prev_checksum}`;
+          break;
+        }
+        const payload = `${log.prev_checksum}|${log.action}|${log.entity_type}|${log.entity_id}|${log.diff_json || ''}|${log.created_at}`;
+        const computed = crypto.createHash('sha256').update(payload).digest('hex');
+        if (computed !== log.checksum) {
+          isValid = false;
+          brokenAtId = log.id;
+          reason = `Checksum verification failed at Record #${log.id}. Computed ${computed}, stored ${log.checksum}`;
+          break;
+        }
+        lastChecksum = log.checksum;
+      }
+
+      return sendJSON(res, 200, {
+        success: true,
+        is_valid: isValid,
+        total_verified: logs.length,
+        broken_at_id: brokenAtId,
+        chain_integrity: isValid ? '100% Tamper-Proof Intact' : 'TAMPERED_OR_CORRUPT',
+        latest_checksum: lastChecksum,
+        verified_at: new Date().toISOString(),
+        message: isValid ? `All ${logs.length} audit entries verified intact and cryptographically linked.` : reason
+      });
     }
 
     // ==========================================

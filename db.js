@@ -281,6 +281,22 @@ function initSchema() {
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS system_audit_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      actor_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      actor_name TEXT NOT NULL DEFAULT 'System Agent',
+      actor_role TEXT NOT NULL DEFAULT 'system',
+      action TEXT NOT NULL,
+      entity_type TEXT NOT NULL,
+      entity_id INTEGER NOT NULL,
+      description TEXT NOT NULL,
+      diff_json TEXT,
+      checksum TEXT NOT NULL,
+      prev_checksum TEXT,
+      ip_address TEXT DEFAULT '127.0.0.1',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE TABLE IF NOT EXISTS artisan_marketplace (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
@@ -425,6 +441,7 @@ function initSchema() {
   try { db.exec("ALTER TABLE users ADD COLUMN session_token TEXT"); } catch (e) {}
   try { db.exec("ALTER TABLE properties ADD COLUMN image_url TEXT"); } catch (e) {}
   try { db.exec("ALTER TABLE units ADD COLUMN image_url TEXT"); } catch (e) {}
+  try { db.exec("ALTER TABLE tenants ADD COLUMN lifecycle_stage TEXT DEFAULT 'active'"); } catch (e) {}
 }
 
 function seedDatabase() {

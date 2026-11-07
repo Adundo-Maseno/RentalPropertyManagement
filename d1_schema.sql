@@ -376,6 +376,22 @@ CREATE TABLE IF NOT EXISTS ratiba_standing_orders (
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+CREATE TABLE IF NOT EXISTS system_audit_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      actor_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      actor_name TEXT NOT NULL DEFAULT 'System Agent',
+      actor_role TEXT NOT NULL DEFAULT 'system',
+      action TEXT NOT NULL,
+      entity_type TEXT NOT NULL,
+      entity_id INTEGER NOT NULL,
+      description TEXT NOT NULL,
+      diff_json TEXT,
+      checksum TEXT NOT NULL,
+      prev_checksum TEXT,
+      ip_address TEXT DEFAULT '127.0.0.1',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
 -- ====================================================================
 -- Initial System RBAC Users (Preserved Passwords & Session Tokens)
 -- ====================================================================

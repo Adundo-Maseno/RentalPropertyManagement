@@ -167,12 +167,12 @@ class BomaSphereApp {
       super_admin: [
         'dashboard', 'properties', 'tenants', 'leases', 'inspections',
         'visitor-passes', 'amenities', 'invoices', 'payments', 'water',
-        'landlord', 'expenses', 'maintenance', 'communications', 'higgsfield', 'users'
+        'landlord', 'expenses', 'maintenance', 'communications', 'higgsfield', 'users', 'audit-logs'
       ],
       property_manager: [
         'dashboard', 'properties', 'tenants', 'leases', 'inspections',
         'visitor-passes', 'amenities', 'invoices', 'payments', 'water',
-        'landlord', 'expenses', 'maintenance', 'communications', 'higgsfield', 'users'
+        'landlord', 'expenses', 'maintenance', 'communications', 'higgsfield', 'users', 'audit-logs'
       ],
       caretaker: [
         'dashboard', 'properties', 'water', 'maintenance', 'communications',
@@ -180,7 +180,7 @@ class BomaSphereApp {
       ],
       landlord: [
         'dashboard', 'properties', 'landlord', 'maintenance', 'expenses',
-        'higgsfield'
+        'higgsfield', 'audit-logs'
       ],
       tenant: [
         'tenant-portal', 'visitor-passes', 'amenities'
@@ -542,6 +542,9 @@ class BomaSphereApp {
         break;
       case 'amenities':
         this.renderAmenities();
+        break;
+      case 'audit-logs':
+        this.renderAuditLogs();
         break;
     }
   }
@@ -6081,23 +6084,193 @@ class BomaSphereApp {
     }, 100);
   }
 
-  convertLeadToTenant(leadId) {
+  async convertLeadToTenant(leadId) {
     const lead = (this.state.viewingLeads || []).find(l => l.id === Number(leadId));
     if (!lead) return;
-    this.openAddTenantModal(lead.unit_id);
-    setTimeout(() => {
-      const nameInput = document.getElementById('tenant-name-input');
-      const phoneInput = document.getElementById('tenant-phone-input');
-      const emailInput = document.getElementById('tenant-email-input');
-      const unitSelect = document.getElementById('tenant-unit-select');
-      if (nameInput) nameInput.value = lead.prospect_name || '';
-      if (phoneInput) phoneInput.value = lead.phone || '';
-      if (emailInput && lead.email) emailInput.value = lead.email;
-      if (unitSelect && lead.unit_id) {
-        unitSelect.value = lead.unit_id;
-        this.onTenantModalUnitChange();
+
+    const confirmMsg = `Convert lead "${lead.prospect_name}" to full Tenancy for Unit ${lead.unit_number || 'associated'}?\n\nThis will automatically:\n• Create/link Tenant profile with Vetted status\n• Reserve Unit ${lead.unit_number || ''}\n• Draft Digital Tenancy Agreement\n• Issue Move-in Initial Settlement Invoice\n• Generate SHA-256 System Audit Log`;
+
+    if (!confirm(confirmMsg)) return;
+
+    try {
+      this.showToast('Initiating 1-Click Lead-to-Lease pipeline...', 'info');
+      const data = await this.fetchAPI(`/api/viewing-leads/${leadId}/convert`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          move_in_date: lead.preferred_date
+        })
+      });
+
+      this.showToast(`🎉 Success: Lead converted! Lease #${data.agreement?.agreement_code || ''} generated.`, 'success');
+      await this.refreshAllData();
+      this.renderViewingLeads();
+      
+      if (data.agreement?.id && confirm('Would you like to review and sign the new Lease Agreement now?')) {
+        this.switchView('leases');
+        setTimeout(() => this.openLeaseSignModal(data.agreement.id), 150);
       }
-    }, 100);
+    } catch (err) {
+      console.error('Lead conversion failed:', err);
+      this.showToast(err.message || 'Failed to convert lead to tenant', 'error');
+    }
+  }
+
+  async renderAuditLogs() {
+    const container = document.getElementById('audit-logs-table-body');
+    const totalEl = document.getElementById('audit-total-count');
+    const hashEl = document.getElementById('audit-latest-hash');
+    if (!container) return;
+
+    try {
+      container.innerHTML = `
+        <tr>
+          <td colspan="6" class="p-8 text-center text-slate-400">
+            <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-indigo-600 border-t-transparent mb-2"></div>
+            <p class="text-xs">Fetching cryptographic audit entries from immutable ledger...</p>
+          </td>
+        </tr>
+      `;
+
+      const data = await this.fetchAPI('/api/audit-logs?limit=100', { silent: true });
+      const logs = (data && Array.isArray(data.logs)) ? data.logs : [];
+      this.state.auditLogs = logs;
+
+      if (totalEl) totalEl.textContent = `${data.total || logs.length} Events`;
+      if (hashEl && logs.length > 0) {
+        hashEl.textContent = logs[0].checksum.slice(0, 16) + '...';
+        hashEl.title = logs[0].checksum;
+      }
+
+      if (logs.length === 0) {
+        container.innerHTML = `
+          <tr>
+            <td colspan="6" class="p-8 text-center text-slate-400">
+              <i data-lucide="shield-alert" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+              <p class="font-semibold text-slate-700 dark:text-zinc-300">No Audit Events Logged Yet</p>
+              <p class="text-xs text-slate-500 mt-0.5">As financial, tenancy, and lifecycle operations take place, cryptographic entries will record here automatically.</p>
+            </td>
+          </tr>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = logs.map(log => {
+        const actionColors = {
+          LEAD_CONVERTED: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800',
+          PAYMENT_RECORDED: 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-800',
+          LEASE_SIGNED: 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400 dark:border-purple-800',
+          MPESA_RECONCILED: 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-950/40 dark:text-teal-400 dark:border-teal-800',
+          INSPECTION_COMPLETED: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800',
+          ENTITY_CREATED: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800'
+        };
+        const badgeClass = actionColors[log.action] || 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-zinc-800 dark:text-zinc-300';
+        const dateStr = log.created_at ? new Date(log.created_at).toLocaleString('en-KE', { dateStyle: 'short', timeStyle: 'medium' }) : 'Recent';
+
+        return `
+          <tr class="hover:bg-slate-50/70 dark:hover:bg-zinc-800/40 transition text-xs font-sans">
+            <td class="py-3 px-4 font-mono text-[11px] text-slate-500 whitespace-nowrap">${dateStr}</td>
+            <td class="py-3 px-4">
+              <p class="font-bold text-slate-800 dark:text-white">${this.escapeHtml(log.actor_name || 'System')}</p>
+              <span class="inline-block text-[10px] text-slate-500 font-mono capitalize">${this.escapeHtml(log.actor_role || 'system')}</span>
+            </td>
+            <td class="py-3 px-4">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold border ${badgeClass}">
+                ${this.escapeHtml(log.action)}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-slate-700 dark:text-zinc-200 max-w-sm">
+              <p class="font-semibold text-xs leading-snug">${this.escapeHtml(log.description)}</p>
+              <p class="text-[10px] text-slate-400 font-mono mt-0.5">Entity: ${this.escapeHtml(log.entity_type)} #${log.entity_id}</p>
+            </td>
+            <td class="py-3 px-4 font-mono text-[10px]">
+              <div class="flex items-center space-x-1 text-slate-600 dark:text-slate-400" title="Prev: ${log.prev_checksum || 'GENESIS'}\nCur: ${log.checksum}">
+                <i data-lucide="link" class="w-3 h-3 text-emerald-600 shrink-0"></i>
+                <span class="truncate max-w-[100px]">${log.checksum.slice(0, 10)}...</span>
+              </div>
+            </td>
+            <td class="py-3 px-4 text-right">
+              ${log.diff_json ? `
+                <button onclick="app.inspectAuditDiff(${log.id})" class="px-2.5 py-1 text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 rounded text-xs font-semibold border border-indigo-200 dark:border-indigo-800 transition inline-flex items-center space-x-1">
+                  <i data-lucide="eye" class="w-3 h-3"></i>
+                  <span>Inspect</span>
+                </button>
+              ` : '<span class="text-slate-400 text-xs italic">-</span>'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      if (window.lucide) lucide.createIcons();
+    } catch (e) {
+      console.error('Failed to render audit logs:', e);
+      if (container) {
+        container.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-rose-500 text-xs">Error loading audit entries: ${this.escapeHtml(e.message)}</td></tr>`;
+      }
+    }
+  }
+
+  async verifyAuditLedger() {
+    const badgeEl = document.getElementById('audit-integrity-badge');
+    const btn = document.getElementById('btn-verify-audit');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<div class="inline-block animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent mr-1"></div> Verifying SHA-256 Chains...';
+    }
+
+    try {
+      const res = await this.fetchAPI('/api/audit-logs/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (res.is_valid) {
+        this.showToast(`🛡️ Cryptographic Integrity Verified: All ${res.total_verified} ledger entries 100% tamper-proof!`, 'success');
+        if (badgeEl) {
+          badgeEl.className = 'px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center space-x-1';
+          badgeEl.innerHTML = '<i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i><span>100% Tamper-Proof Intact</span>';
+        }
+      } else {
+        this.showToast(`⚠️ WARNING: Ledger verification broken at Record #${res.broken_at_id}!`, 'error');
+        if (badgeEl) {
+          badgeEl.className = 'px-2.5 py-0.5 rounded text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-400/30 flex items-center space-x-1';
+          badgeEl.innerHTML = '<i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-400"></i><span>Tamper Detected!</span>';
+        }
+      }
+      if (window.lucide) lucide.createIcons();
+    } catch (err) {
+      this.showToast(err.message || 'Verification check failed', 'error');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>Verify SHA-256 Chain</span>';
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+  }
+
+  inspectAuditDiff(logId) {
+    const log = (this.state.auditLogs || []).find(l => l.id === Number(logId));
+    if (!log) return;
+
+    let prettyDiff = log.diff_json;
+    try {
+      const parsed = JSON.parse(log.diff_json);
+      prettyDiff = JSON.stringify(parsed, null, 2);
+    } catch (e) {}
+
+    const modal = document.getElementById('modal-audit-diff');
+    if (!modal) return;
+
+    document.getElementById('audit-diff-title').textContent = `${log.action} (Log #${log.id})`;
+    document.getElementById('audit-diff-actor').textContent = `${log.actor_name} (${log.actor_role})`;
+    document.getElementById('audit-diff-date').textContent = log.created_at;
+    document.getElementById('audit-diff-checksum').textContent = log.checksum;
+    document.getElementById('audit-diff-prev').textContent = log.prev_checksum || 'GENESIS';
+    document.getElementById('audit-diff-content').textContent = prettyDiff;
+
+    this.openModal('modal-audit-diff');
   }
 
   async markViewingStatus(leadId, status) {

@@ -788,6 +788,88 @@ async function runTests() {
     console.log(`      Daraja 3.0 Ratiba active: ID ${so.id}, Ref: ${so.saf_standing_order_id}, Lifecycle: Created -> Listed -> Cancelled`);
   });
 
+  // 50. 1-Click Lead-to-Lease Pipeline Conversion
+  await test('Lead-to-Lease Pipeline: POST /api/viewing-leads/:id/convert automates Tenant creation, Unit reservation, Lease Agreement & Move-in Billing', async () => {
+    // 1. Create a viewing lead for testing
+    const bookRes = await invokeHandler('/api/public/book-viewing', 'POST', {
+      unit_id: 1,
+      prospect_name: 'Wanjiku Grace Pipeline Verification',
+      phone: '+254722998811',
+      email: 'grace.pipeline@bomasphere.co.ke',
+      preferred_date: '2026-11-15',
+      time_slot: '11:00 AM',
+      notes: 'Interested in signing immediately upon tour'
+    });
+    if (bookRes.statusCode !== 201 || !bookRes.json.lead_id) {
+      throw new Error(`Failed to create test viewing lead: ${bookRes.body}`);
+    }
+    const leadId = bookRes.json.lead_id;
+
+    // 2. Convert lead to full tenancy via pipeline
+    const convertRes = await invokeHandler(`/api/viewing-leads/${leadId}/convert`, 'POST', {
+      move_in_date: '2026-11-15'
+    }, {
+      'Authorization': 'Bearer token_property_manager'
+    });
+    if (convertRes.statusCode !== 200 || !convertRes.json.success) {
+      throw new Error(`Lead conversion pipeline failed (${convertRes.statusCode}): ${convertRes.body}`);
+    }
+
+    const { tenant, unit, lease, agreement, invoice, audit } = convertRes.json;
+    if (!tenant || tenant.lifecycle_stage !== 'vetted') {
+      throw new Error(`Tenant lifecycle stage expected 'vetted', got: ${JSON.stringify(tenant)}`);
+    }
+    if (!unit || unit.status !== 'reserved') {
+      throw new Error(`Unit status expected 'reserved', got: ${JSON.stringify(unit)}`);
+    }
+    if (!agreement || !agreement.agreement_code.startsWith('LSE-')) {
+      throw new Error(`Digital Lease Agreement code missing or invalid: ${JSON.stringify(agreement)}`);
+    }
+    if (!invoice || !invoice.invoice_number.startsWith('INV-INIT-')) {
+      throw new Error(`Initial Move-in Invoice missing or invalid: ${JSON.stringify(invoice)}`);
+    }
+    if (!audit || !audit.checksum) {
+      throw new Error(`Cryptographic audit record not returned from pipeline: ${JSON.stringify(audit)}`);
+    }
+
+    console.log(`      Lead #${leadId} converted! Tenant #${tenant.id} ("${tenant.name}"), Unit ${unit.unit_number} (${unit.status}), Agreement #${agreement.agreement_code}, Initial Invoice #${invoice.invoice_number}`);
+  });
+
+  // 51. Cryptographic System Audit Ledger & Chain Integrity
+  await test('Cryptographic Audit Engine: GET /api/audit-logs & POST /api/audit-logs/verify verifies 100% SHA-256 chain integrity', async () => {
+    // 1. Fetch audit logs
+    const listRes = await invokeHandler('/api/audit-logs?limit=50', 'GET', null, {
+      'Authorization': 'Bearer token_super_admin'
+    });
+    if (listRes.statusCode !== 200 || !listRes.json.success || !Array.isArray(listRes.json.logs)) {
+      throw new Error(`Failed to query audit logs (${listRes.statusCode}): ${listRes.body}`);
+    }
+    if (listRes.json.logs.length === 0) {
+      throw new Error('Audit logs table is unexpectedly empty after pipeline operations');
+    }
+
+    const firstLog = listRes.json.logs[0];
+    if (!firstLog.checksum || !firstLog.action || !firstLog.entity_type) {
+      throw new Error(`Audit log entry schema invalid: ${JSON.stringify(firstLog)}`);
+    }
+
+    // 2. Mathematically verify entire cryptographic chain from GENESIS to current head
+    const verifyRes = await invokeHandler('/api/audit-logs/verify', 'POST', {}, {
+      'Authorization': 'Bearer token_super_admin'
+    });
+    if (verifyRes.statusCode !== 200 || !verifyRes.json.success) {
+      throw new Error(`Audit chain verification failed (${verifyRes.statusCode}): ${verifyRes.body}`);
+    }
+    if (verifyRes.json.is_valid !== true) {
+      throw new Error(`Cryptographic chain verification reported TAMPER/BROKEN: ${verifyRes.body}`);
+    }
+    if (verifyRes.json.total_verified < 1) {
+      throw new Error(`Expected at least 1 verified entry, got ${verifyRes.json.total_verified}`);
+    }
+
+    console.log(`      Audit Ledger Integrity Verified: ${verifyRes.json.total_verified} chained records verified mathematically (Integrity: ${verifyRes.json.chain_integrity}, Latest Checksum: ${verifyRes.json.latest_checksum.slice(0, 16)}...)`);
+  });
+
   console.log(`\n=======================================================`);
   console.log(` TESTS COMPLETED: ${passed} PASSED, ${failed} FAILED `);
   console.log(`=======================================================`);

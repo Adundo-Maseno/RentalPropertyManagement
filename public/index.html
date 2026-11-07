@@ -222,6 +222,12 @@
           <span>Resident Portal</span>
         </button>
 
+        <button class="nav-link w-full flex items-center space-x-2.5 px-2.5 py-2 text-indigo-700 dark:text-indigo-400 font-medium" data-view="audit-logs">
+          <i data-lucide="shield-alert" class="w-4 h-4"></i>
+          <span class="flex-1 text-left">Audit &amp; Integrity Ledger</span>
+          <span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 font-mono font-bold">SHA-256</span>
+        </button>
+
         <a href="/rentals.html" target="_blank" class="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition mt-1 border border-emerald-200 dark:border-emerald-800/60">
           <div class="flex items-center space-x-2.5">
             <i data-lucide="globe" class="w-4 h-4"></i>
@@ -1731,6 +1737,93 @@
           </div>
         </section>
 
+        <!-- ==================================================== -->
+        <!-- VIEW: Cryptographic Audit Ledger & System Integrity -->
+        <!-- ==================================================== -->
+        <section id="view-audit-logs" class="view-panel hidden space-y-6">
+          <!-- Executive Banner -->
+          <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 text-white shadow-xl border border-indigo-500/20">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div class="flex items-center space-x-2">
+                  <span class="text-xs uppercase bg-indigo-500/20 text-indigo-300 font-extrabold px-2.5 py-0.5 rounded border border-indigo-400/30">
+                    Immutable Event Sourcing
+                  </span>
+                  <span id="audit-integrity-badge" class="px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center space-x-1">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    <span>100% Tamper-Proof Intact</span>
+                  </span>
+                </div>
+                <h2 class="text-2xl font-bold mt-2">Audit Ledger &amp; System Integrity</h2>
+                <p class="text-xs text-indigo-200 mt-0.5">
+                  Cryptographically linked SHA-256 chain recording every financial transaction, lease signing, and tenant lifecycle transition.
+                </p>
+              </div>
+
+              <div class="flex items-center space-x-3">
+                <button id="btn-verify-audit" onclick="app.verifyAuditLedger()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center space-x-2 transition cursor-pointer">
+                  <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                  <span>Verify SHA-256 Chain</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- KPI Metric Strip -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-5 border-t border-indigo-900/60 text-xs">
+              <div>
+                <span class="text-indigo-300/80 text-[11px] font-medium block">Total Recorded Mutations</span>
+                <span id="audit-total-count" class="text-xl font-extrabold text-white font-mono mt-0.5 block">Loading...</span>
+              </div>
+              <div>
+                <span class="text-indigo-300/80 text-[11px] font-medium block">Chain Genesis Anchor</span>
+                <span class="text-xl font-extrabold text-white font-mono mt-0.5 block">GENESIS</span>
+              </div>
+              <div>
+                <span class="text-indigo-300/80 text-[11px] font-medium block">Latest Hash Block</span>
+                <span id="audit-latest-hash" class="text-xs font-mono text-emerald-400 truncate mt-1 block">Analyzing...</span>
+              </div>
+              <div>
+                <span class="text-indigo-300/80 text-[11px] font-medium block">Audit Governance</span>
+                <span class="text-xs font-semibold text-indigo-200 mt-1 block">KRA / E-TIMS &amp; Eviction Law Ready</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Audit Table Card -->
+          <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-100 dark:border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div>
+                <h3 class="font-bold text-slate-800 dark:text-white text-sm">Chronological Audit Events</h3>
+                <p class="text-xs text-slate-500">Every record is mathematically chained to its predecessor with actor, timestamp and payload diffs.</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button onclick="app.renderAuditLogs()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 rounded-lg text-xs font-semibold flex items-center space-x-1 transition">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                  <span>Refresh</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-slate-50 dark:bg-zinc-800/60 text-slate-500 uppercase tracking-wider font-semibold text-[10px] border-b border-slate-200 dark:border-zinc-800">
+                    <th class="py-3 px-4">Timestamp (EAT)</th>
+                    <th class="py-3 px-4">Actor</th>
+                    <th class="py-3 px-4">Action</th>
+                    <th class="py-3 px-4">Entity &amp; Description</th>
+                    <th class="py-3 px-4">Cryptographic Link</th>
+                    <th class="py-3 px-4 text-right">State Diff</th>
+                  </tr>
+                </thead>
+                <tbody id="audit-logs-table-body" class="divide-y divide-slate-100 dark:divide-zinc-800">
+                  <!-- dynamically loaded -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
       </div>
     </main>
 
@@ -1739,6 +1832,54 @@
   <!-- ==================================================== -->
   <!-- MODALS -->
   <!-- ==================================================== -->
+
+  <!-- MODAL: Cryptographic Audit Diff Inspector -->
+  <div id="modal-audit-diff" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 relative overflow-hidden">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold">
+            <i data-lucide="binary" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-800 dark:text-white text-base" id="audit-diff-title">Audit Record Inspection</h3>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400" id="audit-diff-date">Timestamp</p>
+          </div>
+        </div>
+        <button onclick="app.closeModal('modal-audit-diff')" class="p-1 text-slate-500 hover:text-slate-600 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="mt-4 space-y-3 text-xs">
+        <div class="grid grid-cols-2 gap-2 p-3 bg-slate-50 dark:bg-zinc-800/50 rounded-xl">
+          <div>
+            <span class="text-slate-500 text-[10px] block">Actor</span>
+            <span id="audit-diff-actor" class="font-bold text-slate-800 dark:text-white">-</span>
+          </div>
+          <div>
+            <span class="text-slate-500 text-[10px] block">Previous Checksum</span>
+            <span id="audit-diff-prev" class="font-mono text-[10px] text-slate-600 dark:text-zinc-400 truncate block">-</span>
+          </div>
+          <div class="col-span-2">
+            <span class="text-slate-500 text-[10px] block">Cryptographic Checksum (SHA-256)</span>
+            <span id="audit-diff-checksum" class="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 break-all select-all block">-</span>
+          </div>
+        </div>
+
+        <div>
+          <span class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">State Mutation Diff (JSON)</span>
+          <pre id="audit-diff-content" class="p-3 bg-slate-900 text-emerald-400 font-mono text-[11px] rounded-xl overflow-x-auto max-h-60"></pre>
+        </div>
+      </div>
+
+      <div class="mt-5 flex justify-end">
+        <button onclick="app.closeModal('modal-audit-diff')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 rounded-xl text-xs font-semibold">
+          Close Inspection
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- MODAL: M-Pesa STK Push Simulator -->
   <div id="modal-mpesa" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
@@ -3913,7 +4054,7 @@
   <div id="toast-container"></div>
 
   <!-- Core Frontend Application Logic -->
-  <script defer src="app.js?v=3.9"></script>
+  <script defer src="app.js?v=4.0"></script>
 </body>
 </html>
 

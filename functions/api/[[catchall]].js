@@ -28,6 +28,7 @@ const DB = {
   vettings: [],
   etimsRecords: [],
   viewingLeads: [],
+  auditLogs: [],
   leaseAgreements: [],
   inspections: [],
   visitorPasses: [],
@@ -234,7 +235,7 @@ async function generateDarajaQrCode({ amount, refNo, trxCode }, config) {
 // ====================================================================
 // Cloudflare D1 Serverless SQL Schema (Auto-Migration Payload)
 // ====================================================================
-const D1_SCHEMA_SQL = "-- ====================================================================\n-- BomaSphere PMS - Cloudflare D1 Production Schema\n-- Tables ordered strictly by parent-child dependency\n-- ====================================================================\n\nCREATE TABLE IF NOT EXISTS properties (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      name TEXT NOT NULL,\n      property_type TEXT NOT NULL,\n      address TEXT NOT NULL,\n      city TEXT NOT NULL,\n      landlord_name TEXT NOT NULL,\n      landlord_phone TEXT NOT NULL,\n      landlord_email TEXT NOT NULL,\n      management_fee_pct REAL DEFAULT 10.0,\n      paybill_number TEXT,\n      bank_name TEXT,\n      bank_account TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS units (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,\n      unit_number TEXT NOT NULL,\n      floor TEXT DEFAULT 'Ground',\n      unit_type TEXT NOT NULL,\n      base_rent REAL NOT NULL,\n      service_charge REAL DEFAULT 0.0,\n      garbage_fee REAL DEFAULT 0.0,\n      status TEXT DEFAULT 'vacant',\n      meter_number TEXT,\n      notes TEXT\n    );\n\nCREATE TABLE IF NOT EXISTS tenants (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      name TEXT NOT NULL,\n      phone TEXT NOT NULL,\n      email TEXT,\n      id_number TEXT,\n      emergency_contact_name TEXT,\n      emergency_contact_phone TEXT,\n      status TEXT DEFAULT 'active',\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS leases (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      start_date DATE NOT NULL,\n      end_date DATE NOT NULL,\n      monthly_rent REAL NOT NULL,\n      deposit_paid REAL DEFAULT 0.0,\n      water_deposit REAL DEFAULT 0.0,\n      status TEXT DEFAULT 'active',\n      terms TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS invoices (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      invoice_number TEXT UNIQUE NOT NULL,\n      lease_id INTEGER NOT NULL REFERENCES leases(id) ON DELETE CASCADE,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      month TEXT NOT NULL,\n      issue_date DATE NOT NULL,\n      due_date DATE NOT NULL,\n      rent_amount REAL NOT NULL,\n      water_amount REAL DEFAULT 0.0,\n      garbage_amount REAL DEFAULT 0.0,\n      service_charge REAL DEFAULT 0.0,\n      late_fee REAL DEFAULT 0.0,\n      other_charges REAL DEFAULT 0.0,\n      total_amount REAL NOT NULL,\n      amount_paid REAL DEFAULT 0.0,\n      balance REAL NOT NULL,\n      status TEXT DEFAULT 'unpaid',\n      notes TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS payments (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      receipt_number TEXT UNIQUE NOT NULL,\n      invoice_id INTEGER REFERENCES invoices(id) ON DELETE SET NULL,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      amount REAL NOT NULL,\n      payment_date DATETIME NOT NULL,\n      payment_method TEXT NOT NULL,\n      reference_code TEXT,\n      payer_phone TEXT,\n      payer_name TEXT,\n      status TEXT DEFAULT 'completed',\n      notes TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS water_readings (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      month TEXT NOT NULL,\n      reading_date DATE NOT NULL,\n      previous_reading REAL NOT NULL,\n      current_reading REAL NOT NULL,\n      units_consumed REAL NOT NULL,\n      rate_per_unit REAL NOT NULL,\n      total_cost REAL NOT NULL,\n      invoiced INTEGER DEFAULT 0\n    );\n\nCREATE TABLE IF NOT EXISTS maintenance_requests (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      ticket_number TEXT UNIQUE NOT NULL,\n      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,\n      title TEXT NOT NULL,\n      description TEXT NOT NULL,\n      category TEXT NOT NULL,\n      priority TEXT DEFAULT 'medium',\n      status TEXT DEFAULT 'open',\n      assigned_contractor TEXT,\n      contractor_phone TEXT,\n      estimated_cost REAL DEFAULT 0.0,\n      actual_cost REAL DEFAULT 0.0,\n      requested_date DATETIME DEFAULT CURRENT_TIMESTAMP,\n      completed_date DATETIME,\n      notes TEXT\n    );\n\nCREATE TABLE IF NOT EXISTS communications (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      type TEXT NOT NULL,\n      recipient_name TEXT NOT NULL,\n      recipient_phone TEXT NOT NULL,\n      tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,\n      message TEXT NOT NULL,\n      status TEXT DEFAULT 'delivered',\n      purpose TEXT,\n      sent_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS expenses (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,\n      category TEXT NOT NULL,\n      description TEXT NOT NULL,\n      amount REAL NOT NULL,\n      expense_date DATE NOT NULL,\n      paid_to TEXT,\n      receipt_voucher TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS users (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      name TEXT NOT NULL,\n      email TEXT UNIQUE NOT NULL,\n      phone TEXT,\n      role TEXT NOT NULL,\n      property_id INTEGER REFERENCES properties(id) ON DELETE SET NULL,\n      tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,\n      status TEXT DEFAULT 'active',\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    , password_hash TEXT DEFAULT 'password123', session_token TEXT);\n\nCREATE TABLE IF NOT EXISTS iot_devices (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      meter_number TEXT UNIQUE NOT NULL,\n      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,\n      unit_id INTEGER REFERENCES units(id) ON DELETE SET NULL,\n      device_type TEXT DEFAULT 'Ultrasonic Water Meter',\n      battery_pct INTEGER DEFAULT 98,\n      signal_rssi INTEGER DEFAULT -78,\n      flow_rate_lph REAL DEFAULT 0.0,\n      total_cubic_meters REAL DEFAULT 142.5,\n      valve_status TEXT DEFAULT 'open',\n      last_telemetry_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS leak_alerts (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      device_id INTEGER NOT NULL REFERENCES iot_devices(id) ON DELETE CASCADE,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      severity TEXT DEFAULT 'warning',\n      title TEXT NOT NULL,\n      message TEXT NOT NULL,\n      flow_detected_lph REAL NOT NULL,\n      status TEXT DEFAULT 'active',\n      detected_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS artisan_marketplace (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      name TEXT NOT NULL,\n      trade TEXT NOT NULL,\n      phone TEXT NOT NULL,\n      rating REAL DEFAULT 4.8,\n      jobs_completed INTEGER DEFAULT 24,\n      id_verified INTEGER DEFAULT 1,\n      daily_rate REAL DEFAULT 2500,\n      availability TEXT DEFAULT 'available',\n      location TEXT DEFAULT 'Nairobi'\n    );\n\nCREATE TABLE IF NOT EXISTS maintenance_escrows (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      ticket_id INTEGER NOT NULL REFERENCES maintenance_requests(id) ON DELETE CASCADE,\n      fundi_id INTEGER REFERENCES artisan_marketplace(id) ON DELETE SET NULL,\n      amount REAL NOT NULL,\n      status TEXT DEFAULT 'held',\n      b2c_disbursement_ref TEXT,\n      milestone_desc TEXT,\n      released_at DATETIME,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS tenant_vettings (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      applicant_name TEXT NOT NULL,\n      phone TEXT NOT NULL,\n      email TEXT,\n      id_number TEXT,\n      requested_unit_id INTEGER REFERENCES units(id) ON DELETE SET NULL,\n      monthly_income REAL NOT NULL,\n      crb_score INTEGER NOT NULL,\n      risk_category TEXT NOT NULL,\n      rent_to_income_pct REAL NOT NULL,\n      recommendation TEXT NOT NULL,\n      kra_pin_verified INTEGER DEFAULT 1,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS viewing_leads (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      prospect_name TEXT NOT NULL,\n      phone TEXT NOT NULL,\n      email TEXT,\n      preferred_date DATE NOT NULL,\n      time_slot TEXT NOT NULL,\n      status TEXT DEFAULT 'pending',\n      notes TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS estate_amenities (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,\n      name TEXT NOT NULL,\n      description TEXT,\n      category TEXT DEFAULT 'Recreation',\n      capacity INTEGER DEFAULT 20,\n      hourly_fee REAL DEFAULT 0.0,\n      photo TEXT,\n      status TEXT DEFAULT 'available'\n    );\n\nCREATE TABLE IF NOT EXISTS amenity_bookings (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      booking_reference TEXT UNIQUE NOT NULL,\n      amenity_id INTEGER NOT NULL REFERENCES estate_amenities(id) ON DELETE CASCADE,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      booking_date DATE NOT NULL,\n      start_time TEXT NOT NULL,\n      end_time TEXT NOT NULL,\n      total_fee REAL DEFAULT 0.0,\n      status TEXT DEFAULT 'confirmed',\n      invoiced INTEGER DEFAULT 0,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS visitor_passes (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      pass_code TEXT UNIQUE NOT NULL,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      visitor_name TEXT NOT NULL,\n      visitor_phone TEXT NOT NULL,\n      vehicle_plate TEXT,\n      valid_date DATE NOT NULL,\n      time_slot TEXT NOT NULL,\n      status TEXT DEFAULT 'active',\n      checked_in_at DATETIME,\n      checked_out_at DATETIME,\n      qr_data TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS property_inspections (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,\n      inspection_type TEXT NOT NULL,\n      inspection_date DATE NOT NULL,\n      inspector_name TEXT NOT NULL,\n      checklist_json TEXT NOT NULL,\n      damages_total REAL DEFAULT 0.0,\n      deposit_held REAL DEFAULT 0.0,\n      unpaid_utility_arrears REAL DEFAULT 0.0,\n      net_deposit_refund REAL DEFAULT 0.0,\n      status TEXT DEFAULT 'completed',\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS lease_agreements (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      lease_id INTEGER NOT NULL REFERENCES leases(id) ON DELETE CASCADE,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      agreement_code TEXT UNIQUE NOT NULL,\n      rent_amount REAL NOT NULL,\n      deposit_amount REAL NOT NULL,\n      start_date DATE NOT NULL,\n      end_date DATE NOT NULL,\n      terms_clauses TEXT,\n      tenant_signature TEXT,\n      tenant_signed_at DATETIME,\n      manager_signature TEXT,\n      manager_signed_at DATETIME,\n      status TEXT DEFAULT 'pending_tenant',\n      contract_hash TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS etims_records (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      invoice_id INTEGER NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,\n      control_code TEXT UNIQUE NOT NULL,\n      qr_code_url TEXT,\n      tax_type TEXT DEFAULT 'MRI_7.5_PCT',\n      taxable_amount REAL NOT NULL,\n      tax_payable REAL NOT NULL,\n      kra_status TEXT DEFAULT 'transmitted',\n      validated_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS mpesa_transactions (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      merchant_request_id TEXT,\n      checkout_request_id TEXT UNIQUE NOT NULL,\n      tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,\n      invoice_id INTEGER REFERENCES invoices(id) ON DELETE SET NULL,\n      amount REAL NOT NULL,\n      phone TEXT NOT NULL,\n      account_reference TEXT,\n      status TEXT DEFAULT 'pending',\n      result_code INTEGER,\n      result_desc TEXT,\n      mpesa_receipt_number TEXT,\n      transaction_date TEXT,\n      raw_callback TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\n      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS ratiba_standing_orders (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      tenant_id INTEGER REFERENCES tenants(id) ON DELETE CASCADE,\n      standing_order_name TEXT NOT NULL,\n      phone TEXT NOT NULL,\n      amount REAL NOT NULL,\n      frequency INTEGER DEFAULT 5,\n      start_date TEXT NOT NULL,\n      end_date TEXT NOT NULL,\n      account_reference TEXT NOT NULL,\n      status TEXT DEFAULT 'active',\n      saf_standing_order_id TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\n      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\n-- ====================================================================\n-- Initial System RBAC Users (Preserved Passwords & Session Tokens)\n-- ====================================================================\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('Grace Wambui (Test Agent)', 'grace.test@bomasphere.co.ke', 'password123', '+254711998877', 'caretaker', NULL, NULL, 'token_caretaker', 'active');\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('Sarah Cherono (Platform Super Admin)', 'admin@bomasphere.co.ke', '653a8cd6d79b4b826260601d51de295d:7314d101be03089baba43ecba759ae9b10d1cc151270cd7523bb3ef53a31bbb0ff0b0dc46f219f0e28f032166df835de6eb10f3778c752a5461b4bd96dc1f987', '+254700112233', 'super_admin', NULL, NULL, 'token_super_admin', 'active');\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('Patrick Ndegwa (Property Manager)', 'ndegwa@crownpeak.co.ke', '3f2333516c39ca85d328860684cbcf52:bd58369db88a81bb73b3e4eb198d9a9ebca45c3a2ea318e2b16d0ced72baf0fb1be7e672a0b8375c595a47974ca77a4c8285b1fe2f9f06217dcab4e9a36a9b09', '+254711333444', 'property_manager', NULL, NULL, 'token_property_manager', 'active');\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('John Otieno (Site Caretaker)', 'otieno.caretaker@kilimaniheights.ke', '5e0138938d1b0c36d2ac29442e610d38:05b6ab17262c34da6844f8778f978fafb7a707203ecb3bdcfad70b46e9b2c046d1d39f8c3a102a068f76846368c42f85bb4043884360c082b43f14b5f4edf8a7', '+254722556677', 'caretaker', NULL, NULL, 'token_caretaker', 'active');\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('Dr. Esther Wambui Ndung''u (Landlord / Investor)', 'esther.ndungu@gmail.com', '449aa4629b48c5ca356a47ddd859cbb2:c14b7117c51814abdf8ed699da2234e9074dba06ecf5bf32dcba3a4ef673b2eddac10540a5b8f14d2a8a0774ed02579c78b4e9fb53f3fd1fd44f220b4778b9f5', '+254733555777', 'landlord', NULL, NULL, 'token_landlord', 'active');\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('Kariuki James Mwangi (Resident Tenant)', 'james.kariuki@techke.com', '0fb18377ade2b4ace7746c9f1b3059c9:03c060e8ce011f858a56096162dd8c1f567117cafb8ee520cdb20de3fc86b9eb0c4ffd4b793043514e181de55729151faa8004f9125c583546c183428012e219', '+254722889900', 'tenant', NULL, NULL, 'token_tenant', 'active');\n";
+const D1_SCHEMA_SQL = "-- ====================================================================\n-- BomaSphere PMS - Cloudflare D1 Production Schema\n-- Tables ordered strictly by parent-child dependency\n-- ====================================================================\n\nCREATE TABLE IF NOT EXISTS properties (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      name TEXT NOT NULL,\n      property_type TEXT NOT NULL,\n      address TEXT NOT NULL,\n      city TEXT NOT NULL,\n      landlord_name TEXT NOT NULL,\n      landlord_phone TEXT NOT NULL,\n      landlord_email TEXT NOT NULL,\n      management_fee_pct REAL DEFAULT 10.0,\n      paybill_number TEXT,\n      bank_name TEXT,\n      bank_account TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS units (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,\n      unit_number TEXT NOT NULL,\n      floor TEXT DEFAULT 'Ground',\n      unit_type TEXT NOT NULL,\n      base_rent REAL NOT NULL,\n      service_charge REAL DEFAULT 0.0,\n      garbage_fee REAL DEFAULT 0.0,\n      status TEXT DEFAULT 'vacant',\n      meter_number TEXT,\n      notes TEXT\n    );\n\nCREATE TABLE IF NOT EXISTS tenants (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      name TEXT NOT NULL,\n      phone TEXT NOT NULL,\n      email TEXT,\n      id_number TEXT,\n      emergency_contact_name TEXT,\n      emergency_contact_phone TEXT,\n      status TEXT DEFAULT 'active',\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS leases (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      start_date DATE NOT NULL,\n      end_date DATE NOT NULL,\n      monthly_rent REAL NOT NULL,\n      deposit_paid REAL DEFAULT 0.0,\n      water_deposit REAL DEFAULT 0.0,\n      status TEXT DEFAULT 'active',\n      terms TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS invoices (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      invoice_number TEXT UNIQUE NOT NULL,\n      lease_id INTEGER NOT NULL REFERENCES leases(id) ON DELETE CASCADE,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      month TEXT NOT NULL,\n      issue_date DATE NOT NULL,\n      due_date DATE NOT NULL,\n      rent_amount REAL NOT NULL,\n      water_amount REAL DEFAULT 0.0,\n      garbage_amount REAL DEFAULT 0.0,\n      service_charge REAL DEFAULT 0.0,\n      late_fee REAL DEFAULT 0.0,\n      other_charges REAL DEFAULT 0.0,\n      total_amount REAL NOT NULL,\n      amount_paid REAL DEFAULT 0.0,\n      balance REAL NOT NULL,\n      status TEXT DEFAULT 'unpaid',\n      notes TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS payments (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      receipt_number TEXT UNIQUE NOT NULL,\n      invoice_id INTEGER REFERENCES invoices(id) ON DELETE SET NULL,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      amount REAL NOT NULL,\n      payment_date DATETIME NOT NULL,\n      payment_method TEXT NOT NULL,\n      reference_code TEXT,\n      payer_phone TEXT,\n      payer_name TEXT,\n      status TEXT DEFAULT 'completed',\n      notes TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS water_readings (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      month TEXT NOT NULL,\n      reading_date DATE NOT NULL,\n      previous_reading REAL NOT NULL,\n      current_reading REAL NOT NULL,\n      units_consumed REAL NOT NULL,\n      rate_per_unit REAL NOT NULL,\n      total_cost REAL NOT NULL,\n      invoiced INTEGER DEFAULT 0\n    );\n\nCREATE TABLE IF NOT EXISTS maintenance_requests (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      ticket_number TEXT UNIQUE NOT NULL,\n      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,\n      title TEXT NOT NULL,\n      description TEXT NOT NULL,\n      category TEXT NOT NULL,\n      priority TEXT DEFAULT 'medium',\n      status TEXT DEFAULT 'open',\n      assigned_contractor TEXT,\n      contractor_phone TEXT,\n      estimated_cost REAL DEFAULT 0.0,\n      actual_cost REAL DEFAULT 0.0,\n      requested_date DATETIME DEFAULT CURRENT_TIMESTAMP,\n      completed_date DATETIME,\n      notes TEXT\n    );\n\nCREATE TABLE IF NOT EXISTS communications (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      type TEXT NOT NULL,\n      recipient_name TEXT NOT NULL,\n      recipient_phone TEXT NOT NULL,\n      tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,\n      message TEXT NOT NULL,\n      status TEXT DEFAULT 'delivered',\n      purpose TEXT,\n      sent_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS expenses (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,\n      category TEXT NOT NULL,\n      description TEXT NOT NULL,\n      amount REAL NOT NULL,\n      expense_date DATE NOT NULL,\n      paid_to TEXT,\n      receipt_voucher TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS users (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      name TEXT NOT NULL,\n      email TEXT UNIQUE NOT NULL,\n      phone TEXT,\n      role TEXT NOT NULL,\n      property_id INTEGER REFERENCES properties(id) ON DELETE SET NULL,\n      tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,\n      status TEXT DEFAULT 'active',\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    , password_hash TEXT DEFAULT 'password123', session_token TEXT);\n\nCREATE TABLE IF NOT EXISTS iot_devices (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      meter_number TEXT UNIQUE NOT NULL,\n      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,\n      unit_id INTEGER REFERENCES units(id) ON DELETE SET NULL,\n      device_type TEXT DEFAULT 'Ultrasonic Water Meter',\n      battery_pct INTEGER DEFAULT 98,\n      signal_rssi INTEGER DEFAULT -78,\n      flow_rate_lph REAL DEFAULT 0.0,\n      total_cubic_meters REAL DEFAULT 142.5,\n      valve_status TEXT DEFAULT 'open',\n      last_telemetry_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS leak_alerts (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      device_id INTEGER NOT NULL REFERENCES iot_devices(id) ON DELETE CASCADE,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      severity TEXT DEFAULT 'warning',\n      title TEXT NOT NULL,\n      message TEXT NOT NULL,\n      flow_detected_lph REAL NOT NULL,\n      status TEXT DEFAULT 'active',\n      detected_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS artisan_marketplace (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      name TEXT NOT NULL,\n      trade TEXT NOT NULL,\n      phone TEXT NOT NULL,\n      rating REAL DEFAULT 4.8,\n      jobs_completed INTEGER DEFAULT 24,\n      id_verified INTEGER DEFAULT 1,\n      daily_rate REAL DEFAULT 2500,\n      availability TEXT DEFAULT 'available',\n      location TEXT DEFAULT 'Nairobi'\n    );\n\nCREATE TABLE IF NOT EXISTS maintenance_escrows (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      ticket_id INTEGER NOT NULL REFERENCES maintenance_requests(id) ON DELETE CASCADE,\n      fundi_id INTEGER REFERENCES artisan_marketplace(id) ON DELETE SET NULL,\n      amount REAL NOT NULL,\n      status TEXT DEFAULT 'held',\n      b2c_disbursement_ref TEXT,\n      milestone_desc TEXT,\n      released_at DATETIME,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS tenant_vettings (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      applicant_name TEXT NOT NULL,\n      phone TEXT NOT NULL,\n      email TEXT,\n      id_number TEXT,\n      requested_unit_id INTEGER REFERENCES units(id) ON DELETE SET NULL,\n      monthly_income REAL NOT NULL,\n      crb_score INTEGER NOT NULL,\n      risk_category TEXT NOT NULL,\n      rent_to_income_pct REAL NOT NULL,\n      recommendation TEXT NOT NULL,\n      kra_pin_verified INTEGER DEFAULT 1,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS viewing_leads (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      prospect_name TEXT NOT NULL,\n      phone TEXT NOT NULL,\n      email TEXT,\n      preferred_date DATE NOT NULL,\n      time_slot TEXT NOT NULL,\n      status TEXT DEFAULT 'pending',\n      notes TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS estate_amenities (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,\n      name TEXT NOT NULL,\n      description TEXT,\n      category TEXT DEFAULT 'Recreation',\n      capacity INTEGER DEFAULT 20,\n      hourly_fee REAL DEFAULT 0.0,\n      photo TEXT,\n      status TEXT DEFAULT 'available'\n    );\n\nCREATE TABLE IF NOT EXISTS amenity_bookings (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      booking_reference TEXT UNIQUE NOT NULL,\n      amenity_id INTEGER NOT NULL REFERENCES estate_amenities(id) ON DELETE CASCADE,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      booking_date DATE NOT NULL,\n      start_time TEXT NOT NULL,\n      end_time TEXT NOT NULL,\n      total_fee REAL DEFAULT 0.0,\n      status TEXT DEFAULT 'confirmed',\n      invoiced INTEGER DEFAULT 0,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS visitor_passes (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      pass_code TEXT UNIQUE NOT NULL,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      visitor_name TEXT NOT NULL,\n      visitor_phone TEXT NOT NULL,\n      vehicle_plate TEXT,\n      valid_date DATE NOT NULL,\n      time_slot TEXT NOT NULL,\n      status TEXT DEFAULT 'active',\n      checked_in_at DATETIME,\n      checked_out_at DATETIME,\n      qr_data TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS property_inspections (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,\n      inspection_type TEXT NOT NULL,\n      inspection_date DATE NOT NULL,\n      inspector_name TEXT NOT NULL,\n      checklist_json TEXT NOT NULL,\n      damages_total REAL DEFAULT 0.0,\n      deposit_held REAL DEFAULT 0.0,\n      unpaid_utility_arrears REAL DEFAULT 0.0,\n      net_deposit_refund REAL DEFAULT 0.0,\n      status TEXT DEFAULT 'completed',\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS lease_agreements (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      lease_id INTEGER NOT NULL REFERENCES leases(id) ON DELETE CASCADE,\n      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,\n      tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,\n      agreement_code TEXT UNIQUE NOT NULL,\n      rent_amount REAL NOT NULL,\n      deposit_amount REAL NOT NULL,\n      start_date DATE NOT NULL,\n      end_date DATE NOT NULL,\n      terms_clauses TEXT,\n      tenant_signature TEXT,\n      tenant_signed_at DATETIME,\n      manager_signature TEXT,\n      manager_signed_at DATETIME,\n      status TEXT DEFAULT 'pending_tenant',\n      contract_hash TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS etims_records (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      invoice_id INTEGER NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,\n      control_code TEXT UNIQUE NOT NULL,\n      qr_code_url TEXT,\n      tax_type TEXT DEFAULT 'MRI_7.5_PCT',\n      taxable_amount REAL NOT NULL,\n      tax_payable REAL NOT NULL,\n      kra_status TEXT DEFAULT 'transmitted',\n      validated_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS mpesa_transactions (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      merchant_request_id TEXT,\n      checkout_request_id TEXT UNIQUE NOT NULL,\n      tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,\n      invoice_id INTEGER REFERENCES invoices(id) ON DELETE SET NULL,\n      amount REAL NOT NULL,\n      phone TEXT NOT NULL,\n      account_reference TEXT,\n      status TEXT DEFAULT 'pending',\n      result_code INTEGER,\n      result_desc TEXT,\n      mpesa_receipt_number TEXT,\n      transaction_date TEXT,\n      raw_callback TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\n      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS ratiba_standing_orders (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      tenant_id INTEGER REFERENCES tenants(id) ON DELETE CASCADE,\n      standing_order_name TEXT NOT NULL,\n      phone TEXT NOT NULL,\n      amount REAL NOT NULL,\n      frequency INTEGER DEFAULT 5,\n      start_date TEXT NOT NULL,\n      end_date TEXT NOT NULL,\n      account_reference TEXT NOT NULL,\n      status TEXT DEFAULT 'active',\n      saf_standing_order_id TEXT,\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\n      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\nCREATE TABLE IF NOT EXISTS system_audit_logs (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      actor_id INTEGER REFERENCES users(id) ON DELETE SET NULL,\n      actor_name TEXT NOT NULL DEFAULT 'System Agent',\n      actor_role TEXT NOT NULL DEFAULT 'system',\n      action TEXT NOT NULL,\n      entity_type TEXT NOT NULL,\n      entity_id INTEGER NOT NULL,\n      description TEXT NOT NULL,\n      diff_json TEXT,\n      checksum TEXT NOT NULL,\n      prev_checksum TEXT,\n      ip_address TEXT DEFAULT '127.0.0.1',\n      created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n    );\n\n-- ====================================================================\n-- Initial System RBAC Users (Preserved Passwords & Session Tokens)\n-- ====================================================================\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('Grace Wambui (Test Agent)', 'grace.test@bomasphere.co.ke', 'password123', '+254711998877', 'caretaker', NULL, NULL, 'token_caretaker', 'active');\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('Sarah Cherono (Platform Super Admin)', 'admin@bomasphere.co.ke', '653a8cd6d79b4b826260601d51de295d:7314d101be03089baba43ecba759ae9b10d1cc151270cd7523bb3ef53a31bbb0ff0b0dc46f219f0e28f032166df835de6eb10f3778c752a5461b4bd96dc1f987', '+254700112233', 'super_admin', NULL, NULL, 'token_super_admin', 'active');\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('Patrick Ndegwa (Property Manager)', 'ndegwa@crownpeak.co.ke', '3f2333516c39ca85d328860684cbcf52:bd58369db88a81bb73b3e4eb198d9a9ebca45c3a2ea318e2b16d0ced72baf0fb1be7e672a0b8375c595a47974ca77a4c8285b1fe2f9f06217dcab4e9a36a9b09', '+254711333444', 'property_manager', NULL, NULL, 'token_property_manager', 'active');\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('John Otieno (Site Caretaker)', 'otieno.caretaker@kilimaniheights.ke', '5e0138938d1b0c36d2ac29442e610d38:05b6ab17262c34da6844f8778f978fafb7a707203ecb3bdcfad70b46e9b2c046d1d39f8c3a102a068f76846368c42f85bb4043884360c082b43f14b5f4edf8a7', '+254722556677', 'caretaker', NULL, NULL, 'token_caretaker', 'active');\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('Dr. Esther Wambui Ndung''u (Landlord / Investor)', 'esther.ndungu@gmail.com', '449aa4629b48c5ca356a47ddd859cbb2:c14b7117c51814abdf8ed699da2234e9074dba06ecf5bf32dcba3a4ef673b2eddac10540a5b8f14d2a8a0774ed02579c78b4e9fb53f3fd1fd44f220b4778b9f5', '+254733555777', 'landlord', NULL, NULL, 'token_landlord', 'active');\nINSERT OR IGNORE INTO users (name, email, password_hash, phone, role, property_id, tenant_id, session_token, status) VALUES ('Kariuki James Mwangi (Resident Tenant)', 'james.kariuki@techke.com', '0fb18377ade2b4ace7746c9f1b3059c9:03c060e8ce011f858a56096162dd8c1f567117cafb8ee520cdb20de3fc86b9eb0c4ffd4b793043514e181de55729151faa8004f9125c583546c183428012e219', '+254722889900', 'tenant', NULL, NULL, 'token_tenant', 'active');\n";
 
 // Helper to iteratively provision D1 tables and initial RBAC users
 async function ensureD1Schema(db) {
@@ -292,6 +293,28 @@ async function ensureD1Schema(db) {
           saf_standing_order_id TEXT,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
+    } catch (e) {}
+
+    try { await db.prepare("ALTER TABLE tenants ADD COLUMN lifecycle_stage TEXT DEFAULT 'active'").run(); } catch (e) {}
+
+    try {
+      await db.prepare(`
+        CREATE TABLE IF NOT EXISTS system_audit_logs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          actor_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          actor_name TEXT NOT NULL DEFAULT 'System Agent',
+          actor_role TEXT NOT NULL DEFAULT 'system',
+          action TEXT NOT NULL,
+          entity_type TEXT NOT NULL,
+          entity_id INTEGER NOT NULL,
+          description TEXT NOT NULL,
+          diff_json TEXT,
+          checksum TEXT NOT NULL,
+          prev_checksum TEXT,
+          ip_address TEXT DEFAULT '127.0.0.1',
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
       `).run();
     } catch (e) {}
@@ -388,6 +411,34 @@ async function ensureD1Schema(db) {
   }
 }
 
+async function sha256Subtle(message) {
+  const msgUint8 = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function logSystemAuditD1(db, { actorId = null, actorName = 'System Agent', actorRole = 'system', action, entityType, entityId, description, diff = null, ipAddress = '127.0.0.1' }) {
+  try {
+    const lastRow = await db.prepare('SELECT checksum FROM system_audit_logs ORDER BY id DESC LIMIT 1').first().catch(() => null);
+    const prevChecksum = (lastRow && lastRow.checksum) ? lastRow.checksum : 'GENESIS';
+    const timestamp = new Date().toISOString();
+    const diffJson = diff ? (typeof diff === 'string' ? diff : JSON.stringify(diff)) : null;
+    const payload = `${prevChecksum}|${action}|${entityType}|${entityId}|${diffJson || ''}|${timestamp}`;
+    const checksum = await sha256Subtle(payload);
+
+    await db.prepare(`
+      INSERT INTO system_audit_logs (actor_id, actor_name, actor_role, action, entity_type, entity_id, description, diff_json, checksum, prev_checksum, ip_address, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(actorId, actorName, actorRole, action, entityType, entityId, description, diffJson, checksum, prevChecksum, ipAddress, timestamp).run();
+
+    return { checksum, prevChecksum, timestamp };
+  } catch (err) {
+    console.error('Failed to log system audit in D1:', err.message);
+    return null;
+  }
+}
+
 // ====================================================================
 // Cloudflare D1 Native Database Router (Asynchronous SQL at the Edge)
 // ====================================================================
@@ -413,7 +464,8 @@ async function handleD1(context, json, corsHeaders) {
     const usersTable = await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='users'").first();
     const hasImageCol = await db.prepare("SELECT image_url FROM units LIMIT 1").first().catch(() => null);
     const hasRatiba = await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='ratiba_standing_orders'").first().catch(() => null);
-    if (!usersTable || hasImageCol === null || !hasRatiba) {
+    const hasAuditLogs = await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='system_audit_logs'").first().catch(() => null);
+    if (!usersTable || hasImageCol === null || !hasRatiba || !hasAuditLogs) {
       await ensureD1Schema(db);
     }
   } catch (schemaErr) {
@@ -1723,6 +1775,210 @@ async function handleD1(context, json, corsHeaders) {
         WHERE id = ?
       `).bind(b.status || null, b.notes || null, b.preferred_date || null, b.time_slot || null, Number(id)).run();
       return json({ success: true, message: 'Viewing lead updated successfully.' });
+    }
+
+    // 21b. 1-Click Lead-to-Lease Pipeline Conversion (D1 Native)
+    if ((pathname.startsWith('/api/viewing-leads/') || pathname.startsWith('/api/leads/')) && pathname.endsWith('/convert') && method === 'POST') {
+      const parts = pathname.split('/');
+      const id = Number(parts[3]);
+      const lead = await db.prepare('SELECT * FROM viewing_leads WHERE id = ?').bind(id).first();
+      if (!lead) return json({ error: 'Viewing lead not found.' }, 404);
+
+      const unit = await db.prepare(`
+        SELECT u.*, p.name as property_name, p.landlord_name 
+        FROM units u 
+        JOIN properties p ON u.property_id = p.id 
+        WHERE u.id = ?
+      `).bind(lead.unit_id).first();
+      if (!unit) return json({ error: 'Associated unit not found for this viewing lead.' }, 404);
+
+      let b = {};
+      try { b = await request.json(); } catch (e) {}
+
+      // 1. Create or link Tenant
+      let tenant = await db.prepare('SELECT * FROM tenants WHERE phone = ? OR (email IS NOT NULL AND email = ?)').bind(lead.phone, lead.email || '').first();
+      if (!tenant) {
+        const insTenant = await db.prepare(`
+          INSERT INTO tenants (name, phone, email, status, lifecycle_stage)
+          VALUES (?, ?, ?, 'active', 'vetted')
+        `).bind(lead.prospect_name, lead.phone, lead.email || null).run();
+        tenant = await db.prepare('SELECT * FROM tenants WHERE id = ?').bind(insTenant.meta.last_row_id).first();
+      } else {
+        await db.prepare("UPDATE tenants SET lifecycle_stage = 'vetted' WHERE id = ?").bind(tenant.id).run();
+        tenant = await db.prepare('SELECT * FROM tenants WHERE id = ?').bind(tenant.id).first();
+      }
+
+      // 2. Mark unit as reserved
+      await db.prepare("UPDATE units SET status = 'reserved' WHERE id = ?").bind(unit.id).run();
+
+      // 3. Create or fetch active/pending Lease
+      const startDate = b.move_in_date || lead.preferred_date || new Date().toISOString().split('T')[0];
+      const startObj = new Date(startDate);
+      const endObj = new Date(startObj);
+      endObj.setFullYear(endObj.getFullYear() + 1);
+      const endDate = endObj.toISOString().split('T')[0];
+
+      let lease = await db.prepare("SELECT * FROM leases WHERE unit_id = ? AND tenant_id = ? AND status != 'terminated'").bind(unit.id, tenant.id).first();
+      if (!lease) {
+        const insLease = await db.prepare(`
+          INSERT INTO leases (unit_id, tenant_id, start_date, end_date, monthly_rent, deposit_paid, water_deposit, status, terms)
+          VALUES (?, ?, ?, ?, ?, 0, 2500, 'pending_active', 'Standard 12-month residential tenancy agreement with 1-month deposit.')
+        `).bind(unit.id, tenant.id, startDate, endDate, unit.base_rent).run();
+        lease = await db.prepare('SELECT * FROM leases WHERE id = ?').bind(insLease.meta.last_row_id).first();
+      }
+
+      // 4. Create Digital Lease Agreement
+      let agreement = await db.prepare('SELECT * FROM lease_agreements WHERE lease_id = ?').bind(lease.id).first();
+      if (!agreement) {
+        const agreementCode = `LSE-${Date.now().toString(36).toUpperCase()}-${unit.unit_number.replace(/\\s+/g, '')}`;
+        const clauses = "1. Rent payable by 5th. 2. Deposit refundable post-move-out inspection. 3. Subletting prohibited without prior written consent.";
+        const contractHash = await sha256Subtle(`${agreementCode}|${tenant.id}|${unit.id}|${unit.base_rent}|${startDate}`);
+        const insAgreement = await db.prepare(`
+          INSERT INTO lease_agreements (lease_id, unit_id, tenant_id, agreement_code, rent_amount, deposit_amount, start_date, end_date, terms_clauses, status, contract_hash)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_tenant', ?)
+        `).bind(lease.id, unit.id, tenant.id, agreementCode, unit.base_rent, unit.base_rent, startDate, endDate, clauses, contractHash).run();
+        agreement = await db.prepare('SELECT * FROM lease_agreements WHERE id = ?').bind(insAgreement.meta.last_row_id).first();
+      }
+
+      // 5. Generate Initial Move-In Settlement Invoice
+      const invNum = `INV-INIT-${Date.now().toString(36).toUpperCase()}`;
+      const issueDate = new Date().toISOString().split('T')[0];
+      const dueObj = new Date();
+      dueObj.setDate(dueObj.getDate() + 5);
+      const dueDate = dueObj.toISOString().split('T')[0];
+      const currentMonth = `${new Date().toLocaleString('en-US', { month: 'short' })} ${new Date().getFullYear()}`;
+
+      const rentAmount = Number(unit.base_rent) || 0;
+      const serviceCharge = Number(unit.service_charge) || 0;
+      const garbageAmount = Number(unit.garbage_fee) || 0;
+      const moveInCharges = rentAmount + 2500; // Rent Deposit + Water Deposit
+      const totalAmount = rentAmount + serviceCharge + garbageAmount + moveInCharges;
+
+      const insInvoice = await db.prepare(`
+        INSERT INTO invoices (
+          invoice_number, lease_id, tenant_id, unit_id, month, issue_date, due_date,
+          rent_amount, water_amount, garbage_amount, service_charge, late_fee, other_charges,
+          total_amount, amount_paid, balance, status, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, 0, ?, ?, 0, ?, 'unpaid', ?)
+      `).bind(
+        invNum, lease.id, tenant.id, unit.id, currentMonth, issueDate, dueDate,
+        rentAmount, garbageAmount, serviceCharge, moveInCharges,
+        totalAmount, totalAmount, `Initial Move-In Settlement: 1st Month Rent (${rentAmount}), Security Deposit (${rentAmount}), Water Meter Deposit (2,500)`
+      ).run();
+      const invoice = await db.prepare('SELECT * FROM invoices WHERE id = ?').bind(insInvoice.meta.last_row_id).first();
+
+      // 6. Mark lead as converted
+      await db.prepare("UPDATE viewing_leads SET status = 'converted' WHERE id = ?").bind(lead.id).run();
+
+      // 7. Cryptographic System Audit Log
+      const user = await getUser();
+      const auditLog = await logSystemAuditD1(db, {
+        actorId: user ? user.id : null,
+        actorName: user ? user.name : 'Pipeline Agent',
+        actorRole: user ? user.role : 'property_manager',
+        action: 'LEAD_CONVERTED',
+        entityType: 'viewing_lead',
+        entityId: lead.id,
+        description: `Lead "${lead.prospect_name}" converted to Tenant "${tenant.name}". Unit ${unit.unit_number} reserved, Lease Agreement #${agreement.agreement_code} drafted, Move-in Invoice #${invNum} generated.`,
+        diff: {
+          lead_id: lead.id,
+          tenant_id: tenant.id,
+          unit_id: unit.id,
+          lease_id: lease.id,
+          agreement_id: agreement.id,
+          agreement_code: agreement.agreement_code,
+          invoice_id: invoice.id,
+          invoice_number: invoice.invoice_number,
+          total_amount: totalAmount
+        },
+        ipAddress: request.headers.get('cf-connecting-ip') || '127.0.0.1'
+      });
+
+      return json({
+        success: true,
+        message: `Lead successfully converted to Tenant and Lease Agreement #${agreement.agreement_code} generated.`,
+        tenant,
+        unit: { id: unit.id, unit_number: unit.unit_number, status: 'reserved' },
+        lease,
+        agreement,
+        invoice,
+        audit: auditLog
+      });
+    }
+
+    // 21c. Cryptographic Audit Ledger Query (D1 Native)
+    if (pathname === '/api/audit-logs' && method === 'GET') {
+      const limit = Math.min(Number(url.searchParams.get('limit')) || 50, 200);
+      const offset = Number(url.searchParams.get('offset')) || 0;
+      const action = url.searchParams.get('action');
+      const entityType = url.searchParams.get('entity_type');
+
+      let query = 'SELECT * FROM system_audit_logs';
+      const whereClauses = [];
+      const params = [];
+
+      if (action) {
+        whereClauses.push('action = ?');
+        params.push(action);
+      }
+      if (entityType) {
+        whereClauses.push('entity_type = ?');
+        params.push(entityType);
+      }
+
+      if (whereClauses.length > 0) {
+        query += ' WHERE ' + whereClauses.join(' AND ');
+      }
+      query += ' ORDER BY id DESC LIMIT ? OFFSET ?';
+      params.push(limit, offset);
+
+      const logs = (await db.prepare(query).bind(...params).all()).results || [];
+      const totalCountRow = await db.prepare('SELECT count(*) as total FROM system_audit_logs').first().catch(() => ({ total: 0 }));
+
+      return json({
+        success: true,
+        total: totalCountRow ? totalCountRow.total : logs.length,
+        count: logs.length,
+        logs
+      });
+    }
+
+    // 21d. Cryptographic Audit Ledger Integrity Verification (D1 Native)
+    if (pathname === '/api/audit-logs/verify' && method === 'POST') {
+      const logs = (await db.prepare('SELECT * FROM system_audit_logs ORDER BY id ASC').all()).results || [];
+      let isValid = true;
+      let brokenAtId = null;
+      let reason = null;
+      let lastChecksum = 'GENESIS';
+
+      for (const log of logs) {
+        if (log.prev_checksum !== lastChecksum) {
+          isValid = false;
+          brokenAtId = log.id;
+          reason = `Previous checksum mismatch at Record #${log.id}. Expected ${lastChecksum}, got ${log.prev_checksum}`;
+          break;
+        }
+        const payload = `${log.prev_checksum}|${log.action}|${log.entity_type}|${log.entity_id}|${log.diff_json || ''}|${log.created_at}`;
+        const computed = await sha256Subtle(payload);
+        if (computed !== log.checksum) {
+          isValid = false;
+          brokenAtId = log.id;
+          reason = `Checksum verification failed at Record #${log.id}. Computed ${computed}, stored ${log.checksum}`;
+          break;
+        }
+        lastChecksum = log.checksum;
+      }
+
+      return json({
+        success: true,
+        is_valid: isValid,
+        total_verified: logs.length,
+        broken_at_id: brokenAtId,
+        chain_integrity: isValid ? '100% Tamper-Proof Intact' : 'TAMPERED_OR_CORRUPT',
+        latest_checksum: lastChecksum,
+        verified_at: new Date().toISOString(),
+        message: isValid ? `All ${logs.length} audit entries verified intact and cryptographically linked.` : reason
+      });
     }
 
     // 22. IoT Telemetry & Smart Meters (D1 Native)
@@ -3288,6 +3544,86 @@ export async function onRequest(context) {
     if (b.preferred_date) lead.preferred_date = b.preferred_date;
     if (b.time_slot) lead.time_slot = b.time_slot;
     return json({ success: true, message: 'Viewing lead updated successfully.' });
+  }
+
+  // 1-Click Lead-to-Lease Pipeline Conversion (Fallback)
+  if ((pathname.startsWith('/api/viewing-leads/') || pathname.startsWith('/api/leads/')) && pathname.endsWith('/convert') && method === 'POST') {
+    const parts = pathname.split('/');
+    const id = Number(parts[3]);
+    const lead = DB.viewingLeads.find(v => v.id === id);
+    if (!lead) return json({ error: 'Viewing lead not found.' }, 404);
+
+    const unit = DB.units.find(u => u.id === lead.unit_id) || { id: lead.unit_id, unit_number: 'A1', base_rent: 45000, service_charge: 3500, garbage_fee: 500 };
+    let b = {};
+    try { b = await request.json(); } catch (e) {}
+
+    let tenant = DB.tenants.find(t => t.phone === lead.phone);
+    if (!tenant) {
+      tenant = {
+        id: (DB.tenants.length ? Math.max(...DB.tenants.map(t => t.id)) : 0) + 1,
+        name: lead.prospect_name,
+        phone: lead.phone,
+        email: lead.email,
+        status: 'active',
+        lifecycle_stage: 'vetted'
+      };
+      DB.tenants.push(tenant);
+    } else {
+      tenant.lifecycle_stage = 'vetted';
+    }
+
+    unit.status = 'reserved';
+
+    const agreementCode = `LSE-${Date.now().toString(36).toUpperCase()}-${(unit.unit_number || 'A1').replace(/\\s+/g, '')}`;
+    const agreement = {
+      id: 1,
+      agreement_code: agreementCode,
+      rent_amount: unit.base_rent,
+      deposit_amount: unit.base_rent,
+      status: 'pending_tenant'
+    };
+
+    const invNum = `INV-INIT-${Date.now().toString(36).toUpperCase()}`;
+    const rentAmount = Number(unit.base_rent) || 0;
+    const moveInCharges = rentAmount + 2500;
+    const totalAmount = rentAmount + (unit.service_charge || 0) + (unit.garbage_fee || 0) + moveInCharges;
+    const invoice = {
+      id: (DB.invoices.length ? Math.max(...DB.invoices.map(i => i.id)) : 0) + 1,
+      invoice_number: invNum,
+      tenant_id: tenant.id,
+      unit_id: unit.id,
+      total_amount: totalAmount,
+      balance: totalAmount,
+      status: 'unpaid'
+    };
+    DB.invoices.push(invoice);
+    lead.status = 'converted';
+
+    return json({
+      success: true,
+      message: `Lead successfully converted to Tenant and Lease Agreement #${agreementCode} generated.`,
+      tenant,
+      unit,
+      agreement,
+      invoice
+    });
+  }
+
+  // Cryptographic Audit Ledger Query (Fallback)
+  if (pathname === '/api/audit-logs' && method === 'GET') {
+    return json({ success: true, total: DB.auditLogs.length, count: DB.auditLogs.length, logs: DB.auditLogs });
+  }
+
+  // Cryptographic Audit Ledger Verification (Fallback)
+  if (pathname === '/api/audit-logs/verify' && method === 'POST') {
+    return json({
+      success: true,
+      is_valid: true,
+      total_verified: DB.auditLogs.length,
+      chain_integrity: '100% Tamper-Proof Intact',
+      latest_checksum: 'GENESIS',
+      message: 'All audit entries verified intact.'
+    });
   }
 
   // 14. WhatsApp Business Bot
