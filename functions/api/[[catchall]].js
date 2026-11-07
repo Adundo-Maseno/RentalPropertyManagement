@@ -92,6 +92,81 @@ async function ensureD1Schema(db) {
       // Ignore unique constraints
     }
 
+    try {
+      const propCountRow = await db.prepare("SELECT count(*) as total FROM properties").first().catch(() => null);
+      if (!propCountRow || propCountRow.total <= 1) {
+        // 1. Properties
+        await db.prepare("INSERT OR REPLACE INTO properties (id, name, property_type, address, city, landlord_name, landlord_phone, landlord_email, management_fee_pct, paybill_number, bank_name, bank_account, image_url) VALUES (1, 'Kilimani Royal Heights', 'Residential Apartments', 'Argwings Kodhek Rd, Kilimani', 'Nairobi', 'Maziwa Investment Group', '+254722100200', 'finance@maziwa.co.ke', 8.5, '522522 / Acc: KRH-01', 'KCB Bank', '1189452300', 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80')").run();
+        await db.prepare("INSERT OR REPLACE INTO properties (id, name, property_type, address, city, landlord_name, landlord_phone, landlord_email, management_fee_pct, paybill_number, bank_name, bank_account, image_url) VALUES (2, 'Westlands Executive Suites', 'Mixed Commercial & Residential', 'Mpaka Road, Westlands', 'Nairobi', 'Crown Peak Holdings Ltd', '+254711333444', 'properties@crownpeak.co.ke', 10.0, '600100 / Acc: WES-99', 'Equity Bank', '0450293847291', 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=80')").run();
+        await db.prepare("INSERT OR REPLACE INTO properties (id, name, property_type, address, city, landlord_name, landlord_phone, landlord_email, management_fee_pct, paybill_number, bank_name, bank_account, image_url) VALUES (3, 'Riverside Green Court', 'Residential Townhouses', 'Riverside Drive', 'Nairobi', 'Dr. Esther Wambui Ndung''u', '+254733555777', 'esther.ndungu@gmail.com', 7.5, '247247 / Acc: RGC-12', 'Co-operative Bank', '01129384756200', 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80')").run();
+        await db.prepare("INSERT OR REPLACE INTO properties (id, name, property_type, address, city, landlord_name, landlord_phone, landlord_email, management_fee_pct, paybill_number, bank_name, bank_account, image_url) VALUES (4, 'Nyali Ocean Breeze Villas', 'Luxury Holiday & Long-let Villas', 'Links Road, Nyali', 'Mombasa', 'Sheikh Omar Al-Harthy', '+254720999888', 'omar.alharthy@coastinvest.com', 10.0, '522522 / Acc: NOB-04', 'NCBA Bank', '1004829103', 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80')").run();
+
+        // 2. Units
+        const units = [
+          [1, 1, 'A101', '1st Floor', '2-Bedroom Master Ensuite', 65000, 3500, 500, 'occupied', 'WM-KIL-101', 'Balcony facing pool', 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&auto=format&fit=crop&q=80'],
+          [2, 1, 'A102', '1st Floor', '2-Bedroom Master Ensuite', 65000, 3500, 500, 'occupied', 'WM-KIL-102', 'Road view', 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop&q=80'],
+          [3, 1, 'A201', '2nd Floor', '3-Bedroom with DSQ', 85000, 4500, 500, 'occupied', 'WM-KIL-201', 'High floor corner unit', 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop&q=80'],
+          [4, 1, 'A202', '2nd Floor', '3-Bedroom with DSQ', 85000, 4500, 500, 'vacant', 'WM-KIL-202', 'Freshly painted, ready for move-in', 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&auto=format&fit=crop&q=80'],
+          [5, 1, 'Penthouse 1', 'Top Floor', '4-Bedroom Luxury Penthouse', 140000, 6000, 750, 'occupied', 'WM-KIL-PH1', 'Rooftop terrace and private Jacuzzi', 'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?w=800&auto=format&fit=crop&q=80'],
+          [6, 2, 'Suite 101', '1st Floor', 'Commercial Office Space (850 sqft)', 95000, 12000, 1000, 'occupied', 'WM-WES-101', 'Fitted with conference room and AC', 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80'],
+          [7, 2, 'Suite 102', '1st Floor', 'Commercial Office Space (650 sqft)', 75000, 8500, 1000, 'vacant', 'WM-WES-102', 'Open layout, high foot traffic', 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=800&auto=format&fit=crop&q=80'],
+          [8, 2, 'Res B3', '3rd Floor', '1-Bedroom Executive Serviced', 55000, 4000, 500, 'occupied', 'WM-WES-B3', 'Fully furnished', 'https://images.unsplash.com/photo-1502005229762-ee1b2b8ab98f?w=800&auto=format&fit=crop&q=80'],
+          [9, 2, 'Res B4', '3rd Floor', 'Studio Loft Apartment', 42000, 3000, 500, 'maintenance', 'WM-WES-B4', 'Bathroom tile regrouting underway', 'https://images.unsplash.com/photo-1536376072261-38c75010e6c9?w=800&auto=format&fit=crop&q=80'],
+          [10, 3, 'Villa 4', 'Ground + 1', '4-Bedroom Townhouse with Garden', 180000, 7500, 1000, 'occupied', 'WM-RIV-04', 'Private garden and solar water heater', 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80'],
+          [11, 3, 'Villa 7', 'Ground + 1', '4-Bedroom Townhouse with Garden', 180000, 7500, 1000, 'vacant', 'WM-RIV-07', 'Vacated last month, deep cleaned', 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=80'],
+          [12, 4, 'Villa Palms', 'Ground + 1', '3-Bedroom Beachfront Villa', 120000, 5000, 800, 'occupied', 'WM-NYA-01', 'Swimming pool access', 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80']
+        ];
+        for (const u of units) {
+          await db.prepare("INSERT OR REPLACE INTO units (id, property_id, unit_number, floor, unit_type, base_rent, service_charge, garbage_fee, status, meter_number, notes, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(...u).run();
+        }
+
+        // 3. Tenants
+        const tenants = [
+          [1, 'Kariuki James Mwangi', '+254722889900', 'james.kariuki@techke.com', '28945612', 'Grace Mwangi (Wife)', '+254721445566', 'active'],
+          [2, 'Amina Hassan Mohamed', '+254710123456', 'amina.hassan@innovate.co.ke', '31098452', 'Farah Mohamed (Brother)', '+254734998877', 'active'],
+          [3, 'Brian Omondi Otieno', '+254798654321', 'brian.omondi@consultancy.org', '26781290', 'Brenda Otieno (Sister)', '+254712334455', 'active'],
+          [4, 'Nexus Law Advocates LLP', '+254700554433', 'admin@nexuslaw.co.ke', 'CPR/2019/94832', 'Senior Partner K. Mutua', '+254722998811', 'active'],
+          [5, 'David Kimani Ngugi', '+254725332211', 'david.kimani@safari.com', '25890143', 'Beatrice Ngugi (Mother)', '+254722114477', 'active'],
+          [6, 'Sophie Van Der Beek', '+254746112233', 'sophie.vdb@unep.org', 'PASSPORT-NL983214', 'Dirk Van Der Beek', '+31612345678', 'active'],
+          [7, 'Capt. Salim Bwanaheri', '+254720448833', 'salim.bwanaheri@kpa.co.ke', '24119830', 'Asha Salim (Wife)', '+254733221100', 'active']
+        ];
+        for (const t of tenants) {
+          await db.prepare("INSERT OR REPLACE INTO tenants (id, name, phone, email, id_number, emergency_contact_name, emergency_contact_phone, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").bind(...t).run();
+        }
+
+        // 4. Leases
+        const leases = [
+          [1, 1, 1, '2026-01-01', '2026-12-31', 65000, 65000, 5000, 'active', 'Standard 1-year residential lease. Rent due on 5th of every month.'],
+          [2, 2, 2, '2026-03-01', '2027-02-28', 65000, 65000, 5000, 'active', 'Standard 1-year lease.'],
+          [3, 3, 3, '2025-11-01', '2026-10-31', 85000, 85000, 7000, 'active', 'Includes 2 dedicated parking bays.'],
+          [4, 5, 6, '2026-02-01', '2027-01-31', 140000, 140000, 10000, 'active', 'Diplomatic lease clause.'],
+          [5, 6, 4, '2025-06-01', '2028-05-31', 95000, 190000, 15000, 'active', '3-year commercial office lease.'],
+          [6, 8, 5, '2026-04-01', '2027-03-31', 55000, 55000, 5000, 'active', 'Serviced apartment lease.'],
+          [7, 10, 6, '2025-09-01', '2026-08-31', 180000, 180000, 15000, 'active', 'High security townhouse.'],
+          [8, 12, 7, '2026-01-15', '2027-01-14', 120000, 120000, 10000, 'active', 'Beach villa long let.']
+        ];
+        for (const l of leases) {
+          await db.prepare("INSERT OR REPLACE INTO leases (id, unit_id, tenant_id, start_date, end_date, monthly_rent, deposit_paid, water_deposit, status, terms) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(...l).run();
+        }
+
+        // 5. Invoices for November 2026
+        const invoices = [
+          [1, 'INV-202611-001', 1, 1, 1, '2026-11', '2026-11-01', '2026-11-05', 65000, 2310, 500, 3500, 0, 71310, 71310, 0, 'paid', 'Automated monthly billing for Nov 2026'],
+          [2, 'INV-202611-002', 2, 2, 2, '2026-11', '2026-11-01', '2026-11-05', 65000, 2012.5, 500, 3500, 0, 71012.5, 40000, 31012.5, 'partially_paid', 'Partial payment received; balance due by 10th'],
+          [3, 'INV-202611-003', 3, 3, 3, '2026-11', '2026-11-01', '2026-11-05', 85000, 3587.5, 500, 4500, 2500, 96087.5, 0, 96087.5, 'overdue', 'Late fee applied as payment missed 5th deadline'],
+          [4, 'INV-202611-004', 4, 6, 5, '2026-11', '2026-11-01', '2026-11-05', 140000, 3937.5, 750, 6000, 0, 150687.5, 150687.5, 0, 'paid', 'NCBA Wire transfer'],
+          [5, 'INV-202611-005', 5, 4, 6, '2026-11', '2026-11-01', '2026-11-10', 95000, 2100, 1000, 12000, 0, 110100, 0, 110100, 'unpaid', 'Commercial office Nov invoice'],
+          [6, 'INV-202611-006', 6, 5, 8, '2026-11', '2026-11-01', '2026-11-05', 55000, 1487.5, 500, 4000, 0, 60987.5, 60987.5, 0, 'paid', 'Serviced apartment billing'],
+          [7, 'INV-202611-007', 8, 7, 12, '2026-11', '2026-11-01', '2026-11-05', 120000, 2975, 800, 5000, 0, 128775, 128775, 0, 'paid', 'Nyali coastal villa Nov rent']
+        ];
+        for (const inv of invoices) {
+          await db.prepare("INSERT OR REPLACE INTO invoices (id, invoice_number, lease_id, tenant_id, unit_id, month, issue_date, due_date, rent_amount, water_amount, garbage_amount, service_charge, late_fee, total_amount, amount_paid, balance, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(...inv).run();
+        }
+      }
+    } catch (e) {
+      console.warn('Portfolio seed error:', e);
+    }
+
     console.log('✅ Cloudflare D1 tables and RBAC users verified and initialized.');
   } catch (err) {
     console.error('ensureD1Schema error:', err);
