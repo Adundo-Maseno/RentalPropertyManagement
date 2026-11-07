@@ -645,16 +645,17 @@
         const res = await fetch('/api/public/vacancies');
         if (!res.ok) throw new Error('Network error');
         const data = await res.json();
-        const list = data.vacancies || (Array.isArray(data) ? data : []);
-        if (list && list.length > 0) {
-          allVacancies = list;
+        if (Array.isArray(data.vacancies)) {
+          allVacancies = data.vacancies;
+        } else if (Array.isArray(data)) {
+          allVacancies = data;
         } else {
-          allVacancies = getDemoFallbackVacancies();
+          allVacancies = [];
         }
         renderVacancies(allVacancies);
       } catch (err) {
-        console.warn('Using verified vacancy fallback list:', err);
-        allVacancies = getDemoFallbackVacancies();
+        console.warn('Error loading live vacancies feed:', err);
+        allVacancies = [];
         renderVacancies(allVacancies);
       }
     }

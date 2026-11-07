@@ -1603,6 +1603,7 @@ async function handleRequest(req, res) {
     // PUBLIC VACANCIES & VIEWING BOOKING API
     // ==========================================
     if (pathname === '/api/public/vacancies' && method === 'GET') {
+      const totalUnits = db.prepare('SELECT count(*) as count FROM units').get()?.count || 0;
       let vacancies = db.prepare(`
         SELECT 
           u.id, u.unit_number, u.floor, u.unit_type, u.base_rent, u.service_charge, u.garbage_fee,
@@ -1610,22 +1611,9 @@ async function handleRequest(req, res) {
           p.id as property_id, p.name as property_name, p.property_type, p.address, p.city, p.image_url as property_image
         FROM units u
         JOIN properties p ON u.property_id = p.id
-        WHERE u.status = 'vacant'
+        WHERE LOWER(TRIM(u.status)) = 'vacant'
         ORDER BY u.id DESC
       `).all();
-
-      // Graceful fallback if portfolio is 100% occupied
-      if (vacancies.length === 0) {
-        vacancies = db.prepare(`
-          SELECT 
-            u.id, u.unit_number, u.floor, u.unit_type, u.base_rent, u.service_charge, u.garbage_fee,
-            u.status, u.notes, u.image_url as unit_image,
-            p.id as property_id, p.name as property_name, p.property_type, p.address, p.city, p.image_url as property_image
-          FROM units u
-          JOIN properties p ON u.property_id = p.id
-          ORDER BY u.id DESC LIMIT 3
-        `).all();
-      }
 
       const enriched = vacancies.map(v => {
         let bedrooms = 2;

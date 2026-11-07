@@ -543,6 +543,9 @@ async function handleD1(context, json, corsHeaders) {
 
     // 15. Public Vacancies & Book Viewing
     if (pathname === '/api/public/vacancies' && method === 'GET') {
+      const totalUnitsRow = await db.prepare('SELECT count(*) as count FROM units').first().catch(() => ({ count: 0 }));
+      const totalUnits = totalUnitsRow?.count || 0;
+
       let vacancies = (await db.prepare(`
         SELECT 
           u.id, u.unit_number, u.floor, u.unit_type, u.base_rent, u.service_charge, u.garbage_fee,
@@ -550,12 +553,12 @@ async function handleD1(context, json, corsHeaders) {
           p.id as property_id, p.name as property_name, p.property_type, p.address, p.city, p.image_url as property_image
         FROM units u
         JOIN properties p ON u.property_id = p.id
-        WHERE u.status = 'vacant'
+        WHERE LOWER(TRIM(u.status)) = 'vacant'
         ORDER BY u.id DESC
       `).all()).results || [];
 
-      // Graceful fallback if database has no units or properties yet
-      if (vacancies.length === 0) {
+      // Fallback to sample showcase units ONLY if the entire database has 0 units created
+      if (totalUnits === 0 && vacancies.length === 0) {
         vacancies = [
           {
             id: 101, unit_number: 'A-402', floor: '4th Floor', unit_type: '2-Bedroom Master Ensuite',
