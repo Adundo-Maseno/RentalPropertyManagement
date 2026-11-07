@@ -124,7 +124,7 @@
       will-change: transform;
     }
 
-    /* Architectural Drafting Reticles */
+    /* Reticle Corner Marks */
     .twk-reticle {
       position: absolute;
       width: 14px;
@@ -136,6 +136,47 @@
     .twk-reticle-tr { top: 14px; right: 14px; border-top: 1.5px solid; border-right: 1.5px solid; }
     .twk-reticle-bl { bottom: 14px; left: 14px; border-bottom: 1.5px solid; border-left: 1.5px solid; }
     .twk-reticle-br { bottom: 14px; right: 14px; border-bottom: 1.5px solid; border-right: 1.5px solid; }
+
+    /* Explicit Studio Modal Split Architecture (68% Hero Image Canvas / 32% Sidebar) */
+    .twk-tour-modal-box {
+      width: 100%;
+      max-width: 1240px;
+      height: 92vh;
+      max-height: 860px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-radius: 24px;
+    }
+
+    @media (min-width: 960px) {
+      .twk-tour-modal-box {
+        display: grid !important;
+        grid-template-columns: 68% 32% !important;
+      }
+      .twk-tour-hero-canvas {
+        height: 100% !important;
+        min-height: 100% !important;
+      }
+      .twk-tour-sidebar {
+        height: 100% !important;
+        overflow-y: auto !important;
+        border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-top: none !important;
+      }
+    }
+
+    @media (max-width: 959px) {
+      .twk-tour-hero-canvas {
+        height: 52vh !important;
+        min-height: 320px !important;
+      }
+      .twk-tour-sidebar {
+        flex: 1 !important;
+        overflow-y: auto !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+      }
+    }
 
     /* Respect Reduced Motion */
     @media (prefers-reduced-motion: reduce) {
@@ -324,12 +365,12 @@
   <!-- ID retained as modal-higgsfield-tour for complete test suite parity  -->
   <!-- ==================================================================== -->
   <div id="modal-higgsfield-tour" data-twk-component="private-tour-studio" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-2 sm:p-5" role="dialog" aria-modal="true" aria-labelledby="tour-unit-title">
-    <div class="bg-[#0b0c13] text-white rounded-3xl max-w-6xl w-full h-[94vh] sm:h-[88vh] shadow-2xl border border-white/10 relative flex flex-col lg:grid lg:grid-cols-12 overflow-hidden">
+    <div class="twk-tour-modal-box bg-[#0b0c13] text-white shadow-2xl border border-white/10 relative">
       
       <!-- ================================================================ -->
-      <!-- A. DOMINANT IMAGE HERO CANVAS (Cols 1-8: 67% Width on Desktop)    -->
+      <!-- A. DOMINANT IMAGE HERO CANVAS (68% Width on Desktop)              -->
       <!-- ================================================================ -->
-      <div class="lg:col-span-8 relative h-72 sm:h-96 lg:h-full w-full overflow-hidden bg-black flex flex-col justify-between group">
+      <div class="twk-tour-hero-canvas relative w-full overflow-hidden bg-black flex flex-col justify-between group">
         <!-- Main Hero Architectural Photography Layer -->
         <img id="tour-stage-img" src="" alt="Architectural Residence Walkthrough" width="1600" height="1000" class="w-full h-full object-cover transition-all duration-700 twk-lighting-golden">
         
@@ -404,9 +445,9 @@
       </div>
 
       <!-- ================================================================ -->
-      <!-- B. EDITORIAL BOOKING & SPECIFICATION DRAWER (Cols 9-12: 33%)     -->
+      <!-- B. EDITORIAL BOOKING & SPECIFICATION DRAWER (32% on Desktop)     -->
       <!-- ================================================================ -->
-      <aside class="lg:col-span-4 bg-[#0e1017] border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col justify-between overflow-y-auto p-5 sm:p-6" aria-label="Residence Details and Booking">
+      <aside class="twk-tour-sidebar bg-[#0e1017] flex flex-col justify-between p-5 sm:p-6" aria-label="Residence Details and Booking">
         
         <!-- Header: Property & Pricing -->
         <div class="space-y-4">
@@ -1260,7 +1301,7 @@
     document.addEventListener('click', (e) => {
       const openModal = e.target.closest('#modal-viewing, #modal-higgsfield-tour');
       if (openModal && !openModal.classList.contains('hidden')) {
-        const dialog = openModal.querySelector('div.bg-white, div.bg-zinc-900, div.bg-zinc-950, div.bg-\\[\\#0b0c13\\], div.bg-\\[\\#12141f\\]') || openModal.firstElementChild;
+        const dialog = openModal.querySelector('div.bg-white, div.bg-zinc-900, div.bg-zinc-950, .twk-tour-modal-box') || openModal.firstElementChild;
         if (dialog && !dialog.contains(e.target)) {
           if (openModal.id === 'modal-viewing') closeViewingModal();
           if (openModal.id === 'modal-higgsfield-tour') closeArchitecturalTourModal();
