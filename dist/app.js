@@ -1522,46 +1522,66 @@ class BomaSphereApp {
   }
 
   // ==========================================
-  // MODAL ACTIONS & BILLING GATEWAYS
+  // MODAL ACTIONS & BILLING GATEWAYS (TWK Enhanced Physics & Ergonomics)
   // ==========================================
   openModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) {
-      modal.classList.remove('hidden');
+    if (!modal) return;
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    const dialog = modal.querySelector('div.bg-white, div.bg-zinc-900, div.bg-zinc-950, [role="dialog"]') || modal.firstElementChild;
+    if (dialog) {
+      dialog.setAttribute('role', 'dialog');
+      dialog.setAttribute('aria-modal', 'true');
       if (window.gsap && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        const dialog = modal.querySelector('div.bg-white') || modal.firstElementChild;
-        if (dialog) {
-          gsap.fromTo(dialog, 
-            { scale: 0.95, opacity: 0, y: 10 }, 
-            { scale: 1, opacity: 1, y: 0, duration: 0.22, ease: 'power2.out' }
-          );
-        }
+        const isMobile = window.innerWidth <= 640;
+        gsap.fromTo(modal, 
+          { opacity: 0 }, 
+          { opacity: 1, duration: 0.22, ease: 'power2.out' }
+        );
+        gsap.fromTo(dialog, 
+          isMobile ? { y: '100%', opacity: 1 } : { scale: 0.95, opacity: 0, y: 12 }, 
+          isMobile ? { y: '0%', opacity: 1, duration: 0.28, ease: 'power3.out' } : { scale: 1, opacity: 1, y: 0, duration: 0.24, ease: 'power3.out' }
+        );
       }
-      if (window.lucide) lucide.createIcons();
     }
+    if (window.lucide) lucide.createIcons();
   }
 
   closeModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) {
-      if (window.gsap && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        const dialog = modal.querySelector('div.bg-white') || modal.firstElementChild;
-        if (dialog) {
-          gsap.to(dialog, {
-            scale: 0.95,
-            opacity: 0,
-            duration: 0.15,
-            ease: 'power2.in',
-            onComplete: () => {
-              modal.classList.add('hidden');
-              gsap.set(dialog, { clearProps: 'all' });
-            }
-          });
-          return;
-        }
-      }
+    if (!modal || modal.classList.contains('hidden')) return;
+
+    const finalizeClose = () => {
       modal.classList.add('hidden');
+      const remainingOpen = document.querySelectorAll('[id^="modal-"]:not(.hidden)');
+      if (remainingOpen.length === 0) {
+        document.body.style.overflow = '';
+      }
+    };
+
+    if (window.gsap && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const dialog = modal.querySelector('div.bg-white, div.bg-zinc-900, div.bg-zinc-950, [role="dialog"]') || modal.firstElementChild;
+      if (dialog) {
+        const isMobile = window.innerWidth <= 640;
+        gsap.to(modal, { opacity: 0, duration: 0.16, ease: 'power2.in' });
+        gsap.to(dialog, {
+          y: isMobile ? '100%' : 8,
+          scale: isMobile ? 1 : 0.96,
+          opacity: 0,
+          duration: 0.16,
+          ease: 'power2.in',
+          onComplete: () => {
+            gsap.set([modal, dialog], { clearProps: 'all' });
+            finalizeClose();
+          }
+        });
+        return;
+      }
     }
+    finalizeClose();
   }
 
   // Open M-Pesa STK Push Modal
@@ -3188,6 +3208,29 @@ class BomaSphereApp {
     // Quick buttons
     document.getElementById('btn-quick-mpesa')?.addEventListener('click', () => this.openMpesaModal());
     document.getElementById('btn-quick-invoice')?.addEventListener('click', () => this.runBatchBilling());
+
+    // TWK Ergonomics: Backdrop Click-to-Close on all modals
+    document.addEventListener('click', (e) => {
+      const openModal = e.target.closest('[id^="modal-"]');
+      if (openModal && !openModal.classList.contains('hidden')) {
+        const dialog = openModal.querySelector('div.bg-white, div.bg-zinc-900, div.bg-zinc-950, [role="dialog"]') || openModal.firstElementChild;
+        // If clicked outside the dialog card (on the backdrop overlay)
+        if (dialog && !dialog.contains(e.target)) {
+          this.closeModal(openModal.id);
+        }
+      }
+    });
+
+    // TWK Ergonomics: Escape key closes active modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const openModals = Array.from(document.querySelectorAll('[id^="modal-"]:not(.hidden)'));
+        if (openModals.length > 0) {
+          const topModal = openModals[openModals.length - 1];
+          this.closeModal(topModal.id);
+        }
+      }
+    });
   }
 
   // ==========================================

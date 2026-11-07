@@ -190,7 +190,7 @@
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <a href="/" class="flex items-center space-x-2.5 group">
         <div class="w-8 h-8 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-bold text-sm shadow-xs transition group-hover:scale-105">
-          <img src="/icons/icon.svg" alt="BomaSphere" class="w-5 h-5">
+          <img src="/icons/icon.svg" alt="BomaSphere" width="20" height="20" class="w-5 h-5">
         </div>
         <div class="flex flex-col">
           <span class="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white">BomaSphere Properties</span>
@@ -394,7 +394,7 @@
       <!-- Main Cinema Viewport (16:9 widescreen) -->
       <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black mt-4 border border-white/10 shadow-inner group">
         <!-- Animated Image Layer -->
-        <img id="tour-stage-img" src="" alt="Virtual Walkthrough" class="w-full h-full object-cover transition-all duration-700 hg-anim-dolly">
+        <img id="tour-stage-img" src="" alt="Virtual Walkthrough" width="1280" height="720" class="w-full h-full object-cover transition-all duration-700 hg-anim-dolly">
         
         <!-- Volumetric Golden Hour Light Beam -->
         <div id="tour-stage-light" class="hg-light-beam"></div>
@@ -1187,6 +1187,26 @@
       localStorage.setItem('bomasphere_theme_mode', isDark ? 'dark' : 'light');
       if (window.lucide) lucide.createIcons();
     }
+
+    // TWK Ergonomics: Click-outside backdrop dismiss
+    document.addEventListener('click', (e) => {
+      const openModal = e.target.closest('#modal-viewing, #modal-higgsfield-tour');
+      if (openModal && !openModal.classList.contains('hidden')) {
+        const dialog = openModal.querySelector('div.bg-white, div.bg-zinc-900, div.bg-zinc-950') || openModal.firstElementChild;
+        if (dialog && !dialog.contains(e.target)) {
+          if (openModal.id === 'modal-viewing') closeViewingModal();
+          if (openModal.id === 'modal-higgsfield-tour') closeHiggsfieldModal();
+        }
+      }
+    });
+
+    // TWK Ergonomics: Escape key closes modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (!document.getElementById('modal-viewing')?.classList.contains('hidden')) closeViewingModal();
+        if (!document.getElementById('modal-higgsfield-tour')?.classList.contains('hidden')) closeHiggsfieldModal();
+      }
+    });
 
     initTheme();
     syncAuthUserToNav();

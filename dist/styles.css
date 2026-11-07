@@ -454,8 +454,12 @@ button:active:not(:disabled) {
   100% { transform: scale(2.6); opacity: 0; }
 }
 
-/* Frosted Modal Atmosphere (Amali Island Style Specular Depth) */
+/* Frosted Modal Atmosphere (Amali Island Style Specular Depth & TWK Ergonomics) */
+[id^="modal-"] {
+  cursor: pointer;
+}
 [id^="modal-"] > div {
+  cursor: default;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.35), 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
@@ -463,6 +467,12 @@ button:active:not(:disabled) {
 }
 html.dark [id^="modal-"] > div {
   border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* TWK Tactile Button & Micro-Interactions */
+button:not(:disabled):active {
+  transform: scale(0.98);
+  transition: transform 100ms ease;
 }
 
 /* High-Contrast Interactive Data Rows */
