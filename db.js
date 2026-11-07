@@ -246,6 +246,41 @@ function initSchema() {
       validated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS mpesa_transactions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      merchant_request_id TEXT,
+      checkout_request_id TEXT UNIQUE NOT NULL,
+      tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,
+      invoice_id INTEGER REFERENCES invoices(id) ON DELETE SET NULL,
+      amount REAL NOT NULL,
+      phone TEXT NOT NULL,
+      account_reference TEXT,
+      status TEXT DEFAULT 'pending',
+      result_code INTEGER,
+      result_desc TEXT,
+      mpesa_receipt_number TEXT,
+      transaction_date TEXT,
+      raw_callback TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS ratiba_standing_orders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tenant_id INTEGER REFERENCES tenants(id) ON DELETE CASCADE,
+      standing_order_name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      amount REAL NOT NULL,
+      frequency INTEGER DEFAULT 5,
+      start_date TEXT NOT NULL,
+      end_date TEXT NOT NULL,
+      account_reference TEXT NOT NULL,
+      status TEXT DEFAULT 'active',
+      saf_standing_order_id TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE TABLE IF NOT EXISTS artisan_marketplace (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,

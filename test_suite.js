@@ -669,6 +669,125 @@ async function runTests() {
     console.log('      Verified: Click-outside backdrop and Escape key handlers active across all modals');
   });
 
+  // TEST 47: Live Safaricom Daraja STK Push & Webhook Callback Reconciliation
+  await test('Safaricom Daraja: Full STK Push initiation, callback processing & instant rent reconciliation', async () => {
+    // 1. Fetch an unpaid invoice to link to the STK push
+    const invRes = await invokeHandler('/api/invoices');
+    const unpaidInv = invRes.json.find(i => Number(i.balance) > 0) || invRes.json[0];
+
+    // 2. Initiate STK Push
+    const stkPayload = {
+      phone: '0722123456',
+      amount: 1500,
+      invoice_id: unpaidInv.id,
+      tenant_id: unpaidInv.tenant_id,
+      account_reference: `Unit-${unpaidInv.unit_number || 'A101'}`
+    };
+    const stkRes = await invokeHandler('/api/mpesa/stkpush', 'POST', stkPayload, {
+      'Authorization': 'Bearer token_super_admin'
+    });
+    if (stkRes.statusCode !== 200 || !stkRes.json.checkout_request_id) {
+      throw new Error(`STK Push initiation failed (${stkRes.statusCode}): ${stkRes.body}`);
+    }
+    const checkoutId = stkRes.json.checkout_request_id;
+
+    // 3. Verify status polling endpoint returns 'pending'
+    const statusRes1 = await invokeHandler(`/api/mpesa/status/${encodeURIComponent(checkoutId)}`);
+    if (statusRes1.statusCode !== 200 || statusRes1.json.status !== 'pending') {
+      throw new Error(`Status polling did not return pending for newly created STK: ${statusRes1.body}`);
+    }
+
+    // 4. Dispatch Safaricom Webhook Callback
+    const testMpesaReceipt = 'QGK' + Math.floor(1000000 + Math.random() * 9000000);
+    const callbackPayload = {
+      Body: {
+        stkCallback: {
+          MerchantRequestID: stkRes.json.merchant_request_id,
+          CheckoutRequestID: checkoutId,
+          ResultCode: 0,
+          ResultDesc: "The service request is processed successfully.",
+          CallbackMetadata: {
+            Item: [
+              { Name: "Amount", Value: 1500 },
+              { Name: "MpesaReceiptNumber", Value: testMpesaReceipt },
+              { Name: "TransactionDate", Value: 20261107125900 },
+              { Name: "PhoneNumber", Value: 254722123456 }
+            ]
+          }
+        }
+      }
+    };
+    const cbRes = await invokeHandler('/api/mpesa/callback', 'POST', callbackPayload);
+    if (cbRes.statusCode !== 200 || cbRes.json.ResultCode !== 0) {
+      throw new Error(`Safaricom webhook callback failed (${cbRes.statusCode}): ${cbRes.body}`);
+    }
+
+    // 5. Verify status polling endpoint now reports 'completed' with M-Pesa receipt
+    const statusRes2 = await invokeHandler(`/api/mpesa/status/${encodeURIComponent(checkoutId)}`);
+    if (statusRes2.statusCode !== 200 || statusRes2.json.status !== 'completed' || statusRes2.json.mpesa_receipt_number !== testMpesaReceipt) {
+      throw new Error(`Transaction status did not update to completed after callback: ${statusRes2.body}`);
+    }
+
+    // 6. Verify payments table has recorded the M-Pesa payment
+    const payRes = await invokeHandler('/api/payments', 'GET', null, {
+      'Authorization': 'Bearer token_super_admin'
+    });
+    const reconciledPay = payRes.json.find(p => p.reference_code === testMpesaReceipt);
+    if (!reconciledPay) {
+      throw new Error(`Payment with reference ${testMpesaReceipt} was not created in payments ledger`);
+    }
+
+    console.log(`      STK Push ${checkoutId} successfully reconciled! M-Pesa Receipt: ${testMpesaReceipt}, Amount: KES 1,500`);
+  });
+
+  await test('Daraja 3.0: Dynamic M-Pesa QR Code generation for invoice checkout', async () => {
+    const res = await invokeHandler('/api/mpesa/qrcode', 'POST', {
+      amount: 25000,
+      ref_no: 'INV-202611-002',
+      trx_code: 'PB'
+    });
+    if (res.statusCode !== 200 || !res.json.success || !res.json.qr_code) {
+      throw new Error(`Failed to generate dynamic M-Pesa QR code: ${res.body}`);
+    }
+    if (res.json.amount !== 25000 || res.json.ref_no !== 'INV-202611-002') {
+      throw new Error(`M-Pesa QR code payload mismatch: ${res.body}`);
+    }
+    console.log(`      Daraja 3.0 QR Code successfully generated: Paybill ${res.json.shortcode}, Ref ${res.json.ref_no}, Amount KES ${res.json.amount}`);
+  });
+
+  await test('Daraja 3.0: M-Pesa Ratiba recurring standing order creation, listing & cancellation', async () => {
+    // 1. Create Ratiba Monthly Standing Order
+    const createRes = await invokeHandler('/api/mpesa/ratiba/create', 'POST', {
+      tenant_id: 1,
+      amount: 65000,
+      phone: '0722889900',
+      standing_order_name: 'Kilimani A101 Monthly Rent Auto-Debit',
+      frequency: 5,
+      account_reference: 'UNIT-A101'
+    });
+    if (createRes.statusCode !== 201 || !createRes.json.success || !createRes.json.standing_order) {
+      throw new Error(`Failed to create Ratiba standing order (${createRes.statusCode}): ${createRes.body}`);
+    }
+    const so = createRes.json.standing_order;
+    if (so.status !== 'active' || !so.saf_standing_order_id) {
+      throw new Error(`Standing order not active: ${createRes.body}`);
+    }
+
+    // 2. List Standing Orders for Tenant #1
+    const listRes = await invokeHandler(`/api/mpesa/ratiba/tenant/1`);
+    if (listRes.statusCode !== 200 || !Array.isArray(listRes.json) || listRes.json.length === 0) {
+      throw new Error(`Tenant standing orders not returned: ${listRes.body}`);
+    }
+
+    // 3. Cancel Standing Order
+    const cancelRes = await invokeHandler(`/api/mpesa/ratiba/cancel/${so.id}`, 'POST');
+    if (cancelRes.statusCode !== 200 || !cancelRes.json.success) {
+      throw new Error(`Failed to cancel standing order: ${cancelRes.body}`);
+    }
+
+    console.log(`      Daraja 3.0 Ratiba active: ID ${so.id}, Ref: ${so.saf_standing_order_id}, Lifecycle: Created -> Listed -> Cancelled`);
+  });
+
   console.log(`\n=======================================================`);
   console.log(` TESTS COMPLETED: ${passed} PASSED, ${failed} FAILED `);
   console.log(`=======================================================`);

@@ -1551,6 +1551,9 @@ class BomaSphereApp {
   }
 
   closeModal(modalId) {
+    if (modalId === 'modal-mpesa') {
+      this.resetMpesaModalState();
+    }
     const modal = document.getElementById(modalId);
     if (!modal || modal.classList.contains('hidden')) return;
 
@@ -1584,8 +1587,77 @@ class BomaSphereApp {
     finalizeClose();
   }
 
+  // Reset M-Pesa Modal & Clear Polling Loop
+  resetMpesaModalState() {
+    if (this.mpesaPollTimer) {
+      clearInterval(this.mpesaPollTimer);
+      this.mpesaPollTimer = null;
+    }
+    this.activeCheckoutRequestId = null;
+    const form = document.getElementById('form-mpesa-stk');
+    const waiting = document.getElementById('mpesa-stk-waiting');
+    const btn = document.getElementById('btn-submit-stk');
+    const simBtn = document.getElementById('btn-simulate-mpesa-pin');
+    if (form) form.classList.remove('hidden');
+    if (waiting) waiting.classList.add('hidden');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<i data-lucide="send" class="w-3.5 h-3.5"></i><span>Dispatch STK Prompt</span>`;
+    }
+    if (simBtn) {
+      simBtn.disabled = false;
+      simBtn.innerHTML = `<i data-lucide="check-check" class="w-3.5 h-3.5"></i><span>Simulate PIN Entry (Dev)</span>`;
+    }
+    if (window.lucide) lucide.createIcons();
+  }
+
+  cancelMpesaStkWaiting() {
+    this.resetMpesaModalState();
+    this.showToast('M-Pesa STK prompt cancelled.', 'info');
+  }
+
+  async simulateResidentMpesaPin() {
+    if (!this.activeCheckoutRequestId) {
+      this.showToast('No active STK Push request to simulate.', 'error');
+      return;
+    }
+    const btn = document.getElementById('btn-simulate-mpesa-pin');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `
+        <svg class="animate-spin h-3.5 w-3.5 text-white inline mr-1" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        <span>Authorizing...</span>
+      `;
+    }
+
+    try {
+      await this.fetchAPI('/api/mpesa/simulate-callback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          checkout_request_id: this.activeCheckoutRequestId,
+          result_code: 0
+        })
+      });
+      // The active polling loop will detect the 'completed' state on the next tick
+    } catch (err) {
+      console.error('M-Pesa simulation error:', err);
+      this.showToast('Simulation failed: ' + (err.message || 'Error'), 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="check-check" class="w-3.5 h-3.5"></i><span>Simulate PIN Entry (Dev)</span>`;
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+  }
+
   // Open M-Pesa STK Push Modal
   openMpesaModal() {
+    this.resetMpesaModalState();
+    this.switchMpesaTab('stk');
     const isTenantRole = this.state.authUser?.role === 'tenant';
     const select = document.getElementById('mpesa-tenant-select');
     if (select) {
@@ -1617,8 +1689,10 @@ class BomaSphereApp {
   openMpesaForTenant(tenantId) {
     this.openMpesaModal();
     const select = document.getElementById('mpesa-tenant-select');
-    select.value = tenantId;
-    this.onMpesaTenantChange(tenantId);
+    if (select) {
+      select.value = tenantId;
+      this.onMpesaTenantChange(tenantId);
+    }
   }
 
   openMpesaForInvoice(invoiceId) {
@@ -1662,52 +1736,328 @@ class BomaSphereApp {
 
   async handleMpesaSubmit(e) {
     e.preventDefault();
-    const tenantId = document.getElementById('mpesa-tenant-select').value;
-    const invoiceId = document.getElementById('mpesa-invoice-select').value || null;
-    const phone = document.getElementById('mpesa-phone-input').value;
-    const amount = document.getElementById('mpesa-amount-input').value;
+    const tenantId = document.getElementById('mpesa-tenant-select')?.value;
+    const invoiceId = document.getElementById('mpesa-invoice-select')?.value || null;
+    const phone = document.getElementById('mpesa-phone-input')?.value?.trim();
+    const amount = document.getElementById('mpesa-amount-input')?.value;
     const btn = document.getElementById('btn-submit-stk');
 
-    btn.disabled = true;
-    btn.innerHTML = `
-      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-      </svg>
-      <span>Pinging Handset...</span>
-    `;
+    if (!tenantId) {
+      this.showToast('Please select a tenant.', 'error');
+      return;
+    }
+    if (!phone || !amount || Number(amount) <= 0) {
+      this.showToast('Please provide a valid phone number and positive amount.', 'error');
+      return;
+    }
 
-    // Process Daraja STK Push prompt & USSD confirmation
-    await new Promise(r => setTimeout(r, 1400));
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        <span>Pinging Handset...</span>
+      `;
+    }
 
     try {
-      const res = await this.fetchAPI('/api/payments', {
+      const res = await this.fetchAPI('/api/mpesa/stkpush', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tenant_id: tenantId,
-          invoice_id: invoiceId,
-          amount: Number(amount),
-          payment_method: 'M-Pesa',
-          payer_phone: phone,
-          notes: 'Lipa Na M-Pesa Online STK Push confirmation'
+          invoice_id: invoiceId ? Number(invoiceId) : null,
+          phone: phone,
+          amount: Number(amount)
         })
       });
 
-      this.closeModal('modal-mpesa');
-      this.showToast(`🎉 M-Pesa ${res.reference_code} Confirmed! KES ${Number(amount).toLocaleString()} received.`, 'success');
-      
-      await this.refreshAllData();
-      
-      // Prompt receipt view
-      this.viewPrintableReceipt(res.payment_id);
+      if (!res || !res.checkout_request_id) {
+        throw new Error(res?.message || 'STK Push could not be initiated.');
+      }
+
+      this.activeCheckoutRequestId = res.checkout_request_id;
+
+      // Switch to waiting state
+      const form = document.getElementById('form-mpesa-stk');
+      const waiting = document.getElementById('mpesa-stk-waiting');
+      const waitPhone = document.getElementById('mpesa-wait-phone');
+      const waitAmount = document.getElementById('mpesa-wait-amount');
+      const waitReqId = document.getElementById('mpesa-wait-req-id');
+      const countdownEl = document.getElementById('mpesa-countdown');
+      const statusText = document.getElementById('mpesa-wait-status-text');
+
+      if (form) form.classList.add('hidden');
+      if (waiting) waiting.classList.remove('hidden');
+      if (waitPhone) waitPhone.textContent = phone;
+      if (waitAmount) waitAmount.textContent = `KES ${Number(amount).toLocaleString()}`;
+      if (waitReqId) waitReqId.textContent = res.checkout_request_id;
+      if (window.lucide) lucide.createIcons();
+
+      let timeLeft = 60;
+      if (countdownEl) countdownEl.textContent = String(timeLeft);
+
+      // Start Polling Interval
+      if (this.mpesaPollTimer) clearInterval(this.mpesaPollTimer);
+      this.mpesaPollTimer = setInterval(async () => {
+        timeLeft -= 2;
+        if (countdownEl) countdownEl.textContent = String(Math.max(0, timeLeft));
+
+        try {
+          const pollRes = await this.fetchAPI(`/api/mpesa/status/${encodeURIComponent(this.activeCheckoutRequestId)}`, { silent: true });
+          if (pollRes && pollRes.status === 'completed') {
+            clearInterval(this.mpesaPollTimer);
+            this.mpesaPollTimer = null;
+
+            if (statusText) {
+              statusText.innerHTML = `✓ Payment Confirmed! Receipt: <b>${pollRes.mpesa_receipt_number || 'OK'}</b>`;
+            }
+
+            this.showToast(`🎉 M-Pesa ${pollRes.mpesa_receipt_number || ''} Confirmed! KES ${Number(amount).toLocaleString()} received.`, 'success');
+            await this.refreshAllData();
+
+            setTimeout(() => {
+              this.closeModal('modal-mpesa');
+              if (pollRes.payment_id) {
+                this.viewPrintableReceipt(pollRes.payment_id);
+              }
+            }, 1200);
+            return;
+          }
+
+          if (pollRes && (pollRes.status === 'failed' || pollRes.status === 'cancelled')) {
+            clearInterval(this.mpesaPollTimer);
+            this.mpesaPollTimer = null;
+            this.showToast(`M-Pesa transaction ${pollRes.status}: ${pollRes.result_desc || 'Declined on handset'}`, 'error');
+            setTimeout(() => {
+              this.resetMpesaModalState();
+            }, 2500);
+            return;
+          }
+        } catch (pollErr) {
+          console.warn('M-Pesa status poll transient check:', pollErr.message);
+        }
+
+        if (timeLeft <= 0) {
+          clearInterval(this.mpesaPollTimer);
+          this.mpesaPollTimer = null;
+          if (statusText) {
+            statusText.textContent = 'Prompt timed out. If PIN was entered, payment will auto-reconcile shortly.';
+          }
+          this.showToast('STK prompt timed out. Verification will complete via background webhook.', 'info');
+          setTimeout(() => {
+            this.resetMpesaModalState();
+          }, 3000);
+        }
+      }, 2000);
 
     } catch (err) {
-      console.error(err);
+      console.error('M-Pesa STK Push error:', err);
+      this.showToast(err.message || 'Failed to dispatch M-Pesa STK Push', 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="send" class="w-3.5 h-3.5"></i><span>Dispatch STK Prompt</span>`;
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+  }
+
+  // Daraja 3.0 Tab Navigation
+  switchMpesaTab(tab) {
+    this.currentMpesaTab = tab;
+    const tabStk = document.getElementById('tab-mpesa-stk');
+    const tabQr = document.getElementById('tab-mpesa-qr');
+    const tabRatiba = document.getElementById('tab-mpesa-ratiba');
+    const paneStk = document.getElementById('tab-pane-stk');
+    const paneQr = document.getElementById('tab-pane-qr');
+    const paneRatiba = document.getElementById('tab-pane-ratiba');
+
+    // Reset tab active styling
+    [tabStk, tabQr, tabRatiba].forEach(t => {
+      if (!t) return;
+      t.className = 'pb-2 px-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center space-x-1 transition';
+    });
+
+    // Hide panes
+    if (paneStk) paneStk.classList.add('hidden');
+    if (paneQr) paneQr.classList.add('hidden');
+    if (paneRatiba) paneRatiba.classList.add('hidden');
+
+    if (tab === 'stk') {
+      if (tabStk) tabStk.className = 'pb-2 px-3 border-b-2 border-emerald-600 text-emerald-700 dark:text-emerald-400 font-bold flex items-center space-x-1';
+      if (paneStk) paneStk.classList.remove('hidden');
+    } else if (tab === 'qr') {
+      if (tabQr) tabQr.className = 'pb-2 px-3 border-b-2 border-emerald-600 text-emerald-700 dark:text-emerald-400 font-bold flex items-center space-x-1';
+      if (paneQr) paneQr.classList.remove('hidden');
+      this.loadMpesaQrCode();
+    } else if (tab === 'ratiba') {
+      if (tabRatiba) tabRatiba.className = 'pb-2 px-3 border-b-2 border-emerald-600 text-emerald-700 dark:text-emerald-400 font-bold flex items-center space-x-1';
+      if (paneRatiba) paneRatiba.classList.remove('hidden');
+      const tenantId = document.getElementById('mpesa-tenant-select')?.value;
+      const phone = document.getElementById('mpesa-phone-input')?.value;
+      const amount = document.getElementById('mpesa-amount-input')?.value;
+      if (phone && document.getElementById('ratiba-phone-input')) {
+        document.getElementById('ratiba-phone-input').value = phone;
+      }
+      if (amount && document.getElementById('ratiba-amount-input')) {
+        document.getElementById('ratiba-amount-input').value = amount;
+      }
+      if (tenantId) {
+        this.loadTenantRatibaOrders(tenantId);
+      }
+    }
+    if (window.lucide) lucide.createIcons();
+  }
+
+  async loadMpesaQrCode() {
+    const amount = Number(document.getElementById('mpesa-amount-input')?.value) || 25000;
+    const invoiceId = document.getElementById('mpesa-invoice-select')?.value;
+    const tenantId = document.getElementById('mpesa-tenant-select')?.value;
+    const refNo = invoiceId ? `INV-${invoiceId}` : (tenantId ? `UNIT-${tenantId}` : 'RENT-BOMA');
+
+    const spinner = document.getElementById('mpesa-qr-spinner');
+    const img = document.getElementById('mpesa-qr-image');
+    const amountEl = document.getElementById('mpesa-qr-amount');
+    const refEl = document.getElementById('mpesa-qr-ref');
+    const shortcodeEl = document.getElementById('mpesa-qr-shortcode');
+
+    if (spinner) spinner.classList.remove('hidden');
+    if (img) img.classList.add('hidden');
+    if (amountEl) amountEl.textContent = `KES ${amount.toLocaleString()}`;
+    if (refEl) refEl.textContent = refNo;
+
+    try {
+      const res = await this.fetchAPI('/api/mpesa/qrcode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount,
+          ref_no: refNo,
+          trx_code: 'PB'
+        })
+      });
+
+      const qrCodeData = res.qr_code || res.qrCode;
+      if (img && qrCodeData) {
+        img.src = qrCodeData;
+        img.classList.remove('hidden');
+      }
+      if (shortcodeEl) shortcodeEl.textContent = res.shortcode || '174379';
+    } catch (err) {
+      console.error('Failed to load M-Pesa QR code:', err);
+      this.showToast('Could not generate M-Pesa QR code: ' + err.message, 'error');
     } finally {
-      btn.disabled = false;
-      btn.innerHTML = `<i data-lucide="send" class="w-3.5 h-3.5"></i><span>Send STK Prompt</span>`;
-      if (window.lucide) lucide.createIcons();
+      if (spinner) spinner.classList.add('hidden');
+    }
+  }
+
+  refreshMpesaQrCode() {
+    this.loadMpesaQrCode();
+  }
+
+  async loadTenantRatibaOrders(tenantId) {
+    const container = document.getElementById('ratiba-orders-container');
+    if (!container) return;
+    if (!tenantId) {
+      container.innerHTML = '<p class="text-slate-400 italic">Please select a tenant to view standing orders.</p>';
+      return;
+    }
+
+    try {
+      const orders = await this.fetchAPI(`/api/mpesa/ratiba/tenant/${tenantId}`);
+      if (!orders || orders.length === 0) {
+        container.innerHTML = '<p class="text-slate-400 italic">No recurring standing orders configured.</p>';
+        return;
+      }
+
+      container.innerHTML = orders.map(o => `
+        <div class="p-2.5 bg-slate-50 dark:bg-slate-900/60 rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div>
+            <div class="font-bold text-slate-800 dark:text-slate-200">${this.escapeHtml(o.standing_order_name)}</div>
+            <div class="text-[10px] text-slate-500">KES ${Number(o.amount).toLocaleString()} &bull; Monthly &bull; Ref: ${o.account_reference}</div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${o.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}">${o.status.toUpperCase()}</span>
+            ${o.status === 'active' ? `
+              <button type="button" onclick="app.cancelTenantRatibaOrder(${o.id})" class="text-[10px] text-red-600 hover:text-red-700 underline font-semibold">Cancel</button>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      console.error('Failed to load standing orders:', err);
+      container.innerHTML = '<p class="text-red-500">Error loading standing orders.</p>';
+    }
+  }
+
+  async handleMpesaRatibaSubmit(e) {
+    e.preventDefault();
+    const tenantId = document.getElementById('mpesa-tenant-select')?.value;
+    const amount = document.getElementById('ratiba-amount-input')?.value;
+    const phone = document.getElementById('ratiba-phone-input')?.value;
+    const frequency = document.getElementById('ratiba-frequency-select')?.value || 5;
+    const day = document.getElementById('ratiba-day-select')?.value || 5;
+    const btn = document.getElementById('btn-submit-ratiba');
+
+    if (!tenantId) {
+      this.showToast('Please select a tenant first.', 'error');
+      return;
+    }
+    if (!amount || Number(amount) <= 0 || !phone) {
+      this.showToast('Please provide a valid amount and phone number.', 'error');
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `
+        <svg class="animate-spin h-3.5 w-3.5 text-white inline mr-1" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        <span>Registering Standing Order...</span>
+      `;
+    }
+
+    try {
+      const res = await this.fetchAPI('/api/mpesa/ratiba/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tenant_id: tenantId,
+          amount: Number(amount),
+          phone,
+          frequency: Number(frequency),
+          standing_order_name: `BomaSphere Monthly Rent Auto-Debit (Day ${day})`,
+          account_reference: `TENANT-${tenantId}`
+        })
+      });
+
+      this.showToast('🎉 M-Pesa Ratiba Recurring Standing Order Activated!', 'success');
+      await this.loadTenantRatibaOrders(tenantId);
+    } catch (err) {
+      console.error('Ratiba creation error:', err);
+      this.showToast('Failed to register Ratiba standing order: ' + err.message, 'error');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i><span>Activate Monthly Standing Order</span>`;
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+  }
+
+  async cancelTenantRatibaOrder(orderId) {
+    if (!confirm('Are you sure you want to cancel this recurring M-Pesa standing order?')) return;
+    try {
+      await this.fetchAPI(`/api/mpesa/ratiba/cancel/${orderId}`, { method: 'POST' });
+      this.showToast('Standing order cancelled successfully.', 'info');
+      const tenantId = document.getElementById('mpesa-tenant-select')?.value;
+      if (tenantId) await this.loadTenantRatibaOrders(tenantId);
+    } catch (err) {
+      this.showToast('Failed to cancel standing order: ' + err.message, 'error');
     }
   }
 

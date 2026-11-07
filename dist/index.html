@@ -1743,14 +1743,14 @@
   <!-- MODAL: M-Pesa STK Push Simulator -->
   <div id="modal-mpesa" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 relative overflow-hidden">
-      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
         <div class="flex items-center space-x-2">
-          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold">
             <i data-lucide="smartphone" class="w-5 h-5"></i>
           </div>
           <div>
-            <h3 class="font-bold text-slate-800 text-base">Lipa Na M-Pesa STK Push</h3>
-            <p class="text-[11px] text-slate-500">Safaricom Daraja Real-Time Gateway</p>
+            <h3 class="font-bold text-slate-800 dark:text-white text-base">Lipa Na M-Pesa Gateway</h3>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Safaricom Daraja 3.0 Cloud Platform</p>
           </div>
         </div>
         <button onclick="app.closeModal('modal-mpesa')" class="p-1 text-slate-500 hover:text-slate-600 rounded">
@@ -1758,44 +1758,192 @@
         </button>
       </div>
 
-      <form id="form-mpesa-stk" onsubmit="app.handleMpesaSubmit(event)" class="mt-4 space-y-4 text-xs">
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Select Tenant / Unit</label>
-          <select aria-label="Select tenant for STK Push" id="mpesa-tenant-select" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs font-medium" onchange="app.onMpesaTenantChange(this.value)">
-            <!-- dynamic -->
-          </select>
-        </div>
+      <!-- Daraja 3.0 Tab Switcher -->
+      <div class="flex border-b border-slate-200 dark:border-slate-800 mt-3 text-xs font-semibold">
+        <button type="button" id="tab-mpesa-stk" onclick="app.switchMpesaTab('stk')" class="pb-2 px-3 border-b-2 border-emerald-600 text-emerald-700 dark:text-emerald-400 flex items-center space-x-1">
+          <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+          <span>STK Prompt</span>
+        </button>
+        <button type="button" id="tab-mpesa-qr" onclick="app.switchMpesaTab('qr')" class="pb-2 px-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center space-x-1">
+          <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
+          <span>Scan QR</span>
+        </button>
+        <button type="button" id="tab-mpesa-ratiba" onclick="app.switchMpesaTab('ratiba')" class="pb-2 px-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center space-x-1">
+          <i data-lucide="repeat" class="w-3.5 h-3.5"></i>
+          <span>Ratiba Auto-Pay</span>
+        </button>
+      </div>
 
-        <div id="mpesa-invoice-container">
-          <label class="block font-semibold text-slate-700 mb-1">Select Outstanding Invoice</label>
-          <select aria-label="Select unpaid invoice for STK Push" id="mpesa-invoice-select" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs font-medium" onchange="app.onMpesaInvoiceChange(this.value)">
-            <!-- dynamic -->
-          </select>
-        </div>
+      <!-- Pane 1: STK Push -->
+      <div id="tab-pane-stk">
+        <form id="form-mpesa-stk" onsubmit="app.handleMpesaSubmit(event)" class="mt-4 space-y-4 text-xs">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Select Tenant / Unit</label>
+            <select aria-label="Select tenant for STK Push" id="mpesa-tenant-select" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs font-medium" onchange="app.onMpesaTenantChange(this.value)">
+              <!-- dynamic -->
+            </select>
+          </div>
 
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Tenant Phone Number (Safaricom)</label>
-          <input type="text" id="mpesa-phone-input" placeholder="+2547XXXXXXXX" required class="w-full border border-slate-300 rounded-lg p-2.5 font-mono text-xs">
-        </div>
+          <div id="mpesa-invoice-container">
+            <label class="block font-semibold text-slate-700 mb-1">Select Outstanding Invoice</label>
+            <select aria-label="Select unpaid invoice for STK Push" id="mpesa-invoice-select" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs font-medium" onchange="app.onMpesaInvoiceChange(this.value)">
+              <!-- dynamic -->
+            </select>
+          </div>
 
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Amount to Pay (KES)</label>
-          <input type="number" id="mpesa-amount-input" required class="w-full border border-slate-300 rounded-lg p-2.5 font-bold text-slate-800 text-sm">
-        </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Tenant Phone Number (Safaricom)</label>
+            <input type="text" id="mpesa-phone-input" placeholder="+2547XXXXXXXX" required class="w-full border border-slate-300 rounded-lg p-2.5 font-mono text-xs">
+          </div>
 
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Amount to Pay (KES)</label>
+            <input type="number" id="mpesa-amount-input" required class="w-full border border-slate-300 rounded-lg p-2.5 font-bold text-slate-800 text-sm">
+          </div>
+
+          <div class="bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800/60 text-[11px] text-emerald-800 dark:text-emerald-300">
+            <p class="font-semibold">Direct Gateway Processing:</p>
+            <p class="mt-0.5">Dispatches an instant encrypted STK push prompt to the tenant's registered handset. Upon PIN authorization, reconciliation code is issued and receipt delivered.</p>
+          </div>
+
+          <div class="flex items-center justify-end space-x-2 pt-2">
+            <button type="button" onclick="app.closeModal('modal-mpesa')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
+            <button type="submit" id="btn-submit-stk" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md transition flex items-center space-x-1.5">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              <span>Dispatch STK Prompt</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Active STK Push Waiting / Polling State -->
+        <div id="mpesa-stk-waiting" class="hidden mt-4 text-center py-4 space-y-4 text-xs">
+          <div class="relative w-16 h-16 mx-auto flex items-center justify-center">
+            <div class="absolute inset-0 rounded-full bg-emerald-400/20 animate-ping"></div>
+            <div class="relative w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 flex items-center justify-center shadow-inner">
+              <i data-lucide="smartphone-nfc" class="w-7 h-7 animate-pulse"></i>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-bold text-slate-800 dark:text-white">Prompt Sent to Handset</h4>
+            <p class="text-slate-500 text-[11px] mt-0.5">Please check your phone and enter your M-Pesa PIN.</p>
+          </div>
+
+          <div class="bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-left space-y-1.5 font-mono text-[11px]">
+            <div class="flex justify-between text-slate-600 dark:text-slate-400">
+              <span>Recipient:</span>
+              <span class="font-bold text-slate-800 dark:text-slate-200" id="mpesa-wait-phone">+254...</span>
+            </div>
+            <div class="flex justify-between text-slate-600 dark:text-slate-400">
+              <span>Amount:</span>
+              <span class="font-bold text-emerald-600 dark:text-emerald-400" id="mpesa-wait-amount">KES 0</span>
+            </div>
+            <div class="flex justify-between text-slate-600 dark:text-slate-400">
+              <span>Request ID:</span>
+              <span class="text-[10px] text-slate-500 truncate max-w-[180px]" id="mpesa-wait-req-id">-</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-center space-x-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+            <svg class="animate-spin h-3.5 w-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            </svg>
+            <span id="mpesa-wait-status-text">Awaiting Safaricom confirmation (<span id="mpesa-countdown">60</span>s)...</span>
+          </div>
+
+          <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-2">
+            <button type="button" onclick="app.cancelMpesaStkWaiting()" class="w-full sm:w-auto px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+              Cancel Prompt
+            </button>
+            <button type="button" id="btn-simulate-mpesa-pin" onclick="app.simulateResidentMpesaPin()" class="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-xs transition flex items-center justify-center space-x-1.5" title="Simulate entering PIN on resident handset">
+              <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
+              <span>Simulate PIN Entry (Dev)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pane 2: Daraja 3.0 Dynamic QR Code -->
+      <div id="tab-pane-qr" class="hidden mt-4 text-center space-y-3 text-xs">
+        <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800">
+          <p class="font-semibold text-slate-700 dark:text-slate-300">Scan to Pay via M-Pesa App or Camera</p>
+          <div id="mpesa-qr-container" class="my-3 flex justify-center">
+            <div class="w-52 h-52 bg-white p-2 rounded-xl border border-slate-200 shadow-inner flex items-center justify-center">
+              <img id="mpesa-qr-image" src="" alt="M-Pesa Dynamic QR" class="w-full h-full object-contain hidden" />
+              <div id="mpesa-qr-spinner" class="text-slate-400 flex flex-col items-center">
+                <svg class="animate-spin h-6 w-6 text-emerald-600 mb-1" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+                <span class="text-[10px]">Generating Daraja 3.0 QR...</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-[11px] font-mono text-slate-600 dark:text-slate-400 space-y-0.5">
+            <div>Paybill: <span class="font-bold text-slate-800 dark:text-white" id="mpesa-qr-shortcode">174379</span></div>
+            <div>Account: <span class="font-bold text-slate-800 dark:text-white" id="mpesa-qr-ref">RENT</span></div>
+            <div>Amount: <span class="font-bold text-emerald-600 dark:text-emerald-400" id="mpesa-qr-amount">KES 0</span></div>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-500">Open M-Pesa App &gt; Tap "Scan QR" &gt; Point at screen to approve instantly.</p>
+        <button type="button" onclick="app.loadMpesaQrCode()" class="px-3 py-1.5 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-50 transition text-xs">
+          Regenerate QR Code
+        </button>
+      </div>
+
+      <!-- Pane 3: Daraja 3.0 M-Pesa Ratiba (Standing Orders) -->
+      <div id="tab-pane-ratiba" class="hidden mt-4 space-y-3 text-xs">
         <div class="bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800/60 text-[11px] text-emerald-800 dark:text-emerald-300">
-          <p class="font-semibold">Direct Gateway Processing:</p>
-          <p class="mt-0.5">Dispatches an instant encrypted STK push prompt to the tenant's registered handset. Upon PIN authorization, reconciliation code is issued and receipt delivered.</p>
+          <p class="font-semibold flex items-center space-x-1.5">
+            <i data-lucide="repeat" class="w-3.5 h-3.5"></i>
+            <span>Safaricom M-Pesa Ratiba Standing Orders</span>
+          </p>
+          <p class="mt-1">Authorize automated monthly rent debit. Safaricom will automatically remit your rent on your chosen billing day each month without incurring late fees.</p>
         </div>
 
-        <div class="flex items-center justify-end space-x-2 pt-2">
-          <button type="button" onclick="app.closeModal('modal-mpesa')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
-          <button type="submit" id="btn-submit-stk" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md transition flex items-center space-x-1.5">
-            <i data-lucide="send" class="w-3.5 h-3.5"></i>
-            <span>Dispatch STK Prompt</span>
-          </button>
+        <form id="form-mpesa-ratiba" onsubmit="app.handleMpesaRatibaSubmit(event)" class="space-y-3">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Recurring Rent Amount (KES)</label>
+            <input type="number" id="ratiba-amount-input" required class="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 font-bold text-slate-800 text-sm">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Billing Frequency</label>
+              <select id="ratiba-frequency-select" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-xs">
+                <option value="5" selected>Monthly (Rent Cycle)</option>
+                <option value="3">Weekly</option>
+                <option value="7">Quarterly</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Execution Day</label>
+              <select id="ratiba-day-select" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-xs">
+                <option value="1">1st of the month</option>
+                <option value="5" selected>5th of the month</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Authorization Handset</label>
+            <input type="text" id="ratiba-phone-input" placeholder="+2547XXXXXXXX" required class="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2 font-mono text-xs">
+          </div>
+
+          <div class="flex items-center justify-end space-x-2 pt-2">
+            <button type="submit" id="btn-submit-ratiba" class="w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md transition flex items-center justify-center space-x-1.5">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+              <span>Activate Monthly Standing Order</span>
+            </button>
+          </div>
+        </form>
+
+        <div id="ratiba-active-list" class="pt-2 border-t border-slate-100 dark:border-slate-800">
+          <p class="font-semibold text-slate-600 text-[11px] mb-1">Active Standing Orders:</p>
+          <div id="ratiba-orders-container" class="space-y-1.5 text-[11px]">
+            <p class="text-slate-400 italic">No recurring standing orders configured.</p>
+          </div>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 
@@ -3765,7 +3913,7 @@
   <div id="toast-container"></div>
 
   <!-- Core Frontend Application Logic -->
-  <script defer src="app.js?v=3.7"></script>
+  <script defer src="app.js?v=3.9"></script>
 </body>
 </html>
 
