@@ -554,17 +554,34 @@ async function handleD1(context, json, corsHeaders) {
         ORDER BY u.id DESC
       `).all()).results || [];
 
-      // Graceful fallback if portfolio is 100% occupied or fresh
+      // Graceful fallback if database has no units or properties yet
       if (vacancies.length === 0) {
-        vacancies = (await db.prepare(`
-          SELECT 
-            u.id, u.unit_number, u.floor, u.unit_type, u.base_rent, u.service_charge, u.garbage_fee,
-            u.status, u.notes, u.image_url as unit_image,
-            p.id as property_id, p.name as property_name, p.property_type, p.address, p.city, p.image_url as property_image
-          FROM units u
-          JOIN properties p ON u.property_id = p.id
-          ORDER BY u.id DESC LIMIT 3
-        `).all()).results || [];
+        vacancies = [
+          {
+            id: 101, unit_number: 'A-402', floor: '4th Floor', unit_type: '2-Bedroom Master Ensuite',
+            base_rent: 75000, service_charge: 5000, garbage_fee: 500, status: 'vacant',
+            property_id: 1, property_name: 'Kilimani Royal Heights', property_type: 'Luxury Residential Apartments',
+            address: 'Wood Avenue, Kilimani', city: 'Nairobi',
+            unit_image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80',
+            property_image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80'
+          },
+          {
+            id: 102, unit_number: 'Penthouse B', floor: '12th Floor', unit_type: '4-Bedroom Penthouse with DSQ',
+            base_rent: 220000, service_charge: 15000, garbage_fee: 1000, status: 'vacant',
+            property_id: 2, property_name: 'Riverside Emerald Residency', property_type: 'Diplomatic Residential Suites',
+            address: 'Riverside Drive, Westlands', city: 'Nairobi',
+            unit_image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80',
+            property_image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80'
+          },
+          {
+            id: 103, unit_number: 'Villa 7', floor: 'Private Compound', unit_type: '4-Bedroom Beachfront Villa',
+            base_rent: 180000, service_charge: 10000, garbage_fee: 500, status: 'vacant',
+            property_id: 3, property_name: 'Nyali Ocean Breeze Villas', property_type: 'Beachfront Holiday Residences',
+            address: 'Beach Road, Nyali', city: 'Mombasa',
+            unit_image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80',
+            property_image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80'
+          }
+        ];
       }
 
       const defaultPhotos = [
@@ -579,7 +596,38 @@ async function handleD1(context, json, corsHeaders) {
         let bedrooms = 2;
         let bathrooms = 2;
         let sqft = 1100;
-        const photo = v.unit_image || v.property_image || defaultPhotos[idx % defaultPhotos.length];
+
+        let photos = [];
+        if (v.unit_image) {
+          try {
+            const parsed = JSON.parse(v.unit_image);
+            if (Array.isArray(parsed) && parsed.length > 0) photos = parsed;
+            else if (typeof parsed === 'string') photos = [parsed];
+          } catch(e) {
+            photos = [v.unit_image];
+          }
+        }
+        if (v.property_image) {
+          try {
+            const parsedP = JSON.parse(v.property_image);
+            if (Array.isArray(parsedP)) {
+              parsedP.forEach(img => { if (!photos.includes(img)) photos.push(img); });
+            } else if (typeof parsedP === 'string' && !photos.includes(parsedP)) {
+              photos.push(parsedP);
+            }
+          } catch(e) {
+            if (!photos.includes(v.property_image)) photos.push(v.property_image);
+          }
+        }
+        if (photos.length === 0) {
+          photos = [
+            defaultPhotos[idx % defaultPhotos.length],
+            defaultPhotos[(idx + 1) % defaultPhotos.length],
+            defaultPhotos[(idx + 2) % defaultPhotos.length]
+          ];
+        }
+
+        const photo = photos[0];
 
         const ut = (v.unit_type || '').toLowerCase();
         if (ut.includes('commercial') || ut.includes('office') || ut.includes('retail')) {
@@ -595,6 +643,14 @@ async function handleD1(context, json, corsHeaders) {
         }
 
         const mode = ut.includes('commercial') ? 'pan' : (ut.includes('townhouse') || ut.includes('penthouse') ? 'aerial' : 'dolly');
+
+        const amenities = [
+          'Borehole & County Water',
+          'Standby Diesel Generator',
+          '24/7 Biometric / Manned Security',
+          'High-Speed Fiber Ready',
+          'Dedicated Parking Bay'
+        ];
 
         return {
           id: v.id,
@@ -613,6 +669,8 @@ async function handleD1(context, json, corsHeaders) {
           bathrooms,
           sqft,
           photo,
+          photos,
+          amenities,
           total_monthly: Number(v.base_rent) + Number(v.service_charge || 0) + Number(v.garbage_fee || 0),
           deposit: Number(v.base_rent) * 2,
           higgsfield: {

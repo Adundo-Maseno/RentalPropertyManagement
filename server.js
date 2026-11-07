@@ -1681,12 +1681,39 @@ async function handleRequest(req, res) {
         const deposit = v.base_rent * 2;
         const totalMonthly = v.base_rent + (v.service_charge || 0) + (v.garbage_fee || 0);
 
+        let photos = [];
+        if (v.unit_image) {
+          try {
+            const parsed = JSON.parse(v.unit_image);
+            if (Array.isArray(parsed) && parsed.length > 0) photos = parsed;
+            else if (typeof parsed === 'string') photos = [parsed];
+          } catch(e) {
+            photos = [v.unit_image];
+          }
+        }
+        if (v.property_image) {
+          try {
+            const parsedP = JSON.parse(v.property_image);
+            if (Array.isArray(parsedP)) {
+              parsedP.forEach(img => { if (!photos.includes(img)) photos.push(img); });
+            } else if (typeof parsedP === 'string' && !photos.includes(parsedP)) {
+              photos.push(parsedP);
+            }
+          } catch(e) {
+            if (!photos.includes(v.property_image)) photos.push(v.property_image);
+          }
+        }
+        if (photos.length === 0) {
+          photos = [photo];
+        }
+
         return {
           ...v,
           bedrooms,
           bathrooms,
           sqft,
           photo,
+          photos,
           deposit,
           total_monthly: totalMonthly,
           higgsfield,

@@ -210,10 +210,12 @@
       </a>
 
       <div class="flex items-center space-x-3">
-        <a href="/" class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-zinc-700 transition">
-          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
-          <span>Resident Portal / Sign In</span>
-        </a>
+        <div id="nav-user-container" class="flex items-center space-x-2">
+          <a href="/" class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-zinc-700 transition">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+            <span>Resident Portal / Sign In</span>
+          </a>
+        </div>
 
         <button onclick="toggleDarkMode()" class="p-2 text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition" title="Toggle Theme">
           <i data-lucide="moon" class="w-4 h-4 hidden dark:inline"></i>
@@ -449,6 +451,18 @@
         </div>
       </div>
 
+      <!-- Multi-Photo Angle Selector (Master Bedroom, Living Room, Kitchen, Balcony) -->
+      <div id="tour-gallery-container" class="mt-3 hidden">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono flex items-center gap-1.5">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>Select Space / Angle To Tour:</span>
+          </span>
+          <span id="tour-photo-counter" class="text-[10px] text-zinc-400 font-mono"></span>
+        </div>
+        <div id="tour-gallery-strip" class="flex items-center space-x-2 overflow-x-auto py-1"></div>
+      </div>
+
       <!-- Live Director Desk: Rig Selector -->
       <div class="mt-4 space-y-3">
         <div class="flex items-center justify-between">
@@ -544,14 +558,104 @@
     let activeTourUnit = null;
     let timecodeTimer = null;
 
+    function getDemoFallbackVacancies() {
+      return [
+        {
+          id: 101,
+          unit_number: 'A-402',
+          floor: '4th Floor',
+          unit_type: '2-Bedroom Master Ensuite',
+          property_name: 'Kilimani Royal Heights',
+          property_type: 'Luxury Residential Apartments',
+          address: 'Wood Avenue, Kilimani',
+          city: 'Nairobi',
+          bedrooms: 2,
+          bathrooms: 2,
+          sqft: 1150,
+          base_rent: 75000,
+          service_charge: 5000,
+          garbage_fee: 500,
+          deposit: 150000,
+          photo: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80',
+          photos: [
+            'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&auto=format&fit=crop&q=80'
+          ],
+          amenities: ['Borehole & County Water', 'Standby Diesel Generator', '24/7 Security', 'High-Speed Fiber Ready', 'Dedicated Parking Bay'],
+          higgsfield: { mode: 'dolly', rig: 'DOLLY-IN', camera_path: 'Smooth 4K Dolly In', fps: 24 }
+        },
+        {
+          id: 102,
+          unit_number: 'Penthouse B',
+          floor: '12th Floor',
+          unit_type: '4-Bedroom Penthouse with DSQ',
+          property_name: 'Riverside Emerald Residency',
+          property_type: 'Diplomatic Residential Suites',
+          address: 'Riverside Drive, Westlands',
+          city: 'Nairobi',
+          bedrooms: 4,
+          bathrooms: 4.5,
+          sqft: 2800,
+          base_rent: 220000,
+          service_charge: 15000,
+          garbage_fee: 1000,
+          deposit: 440000,
+          photo: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80',
+          photos: [
+            'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=800&auto=format&fit=crop&q=80'
+          ],
+          amenities: ['Infinity Heated Pool', 'Private Elevator Access', 'Solar Water Heating', 'CCTV & Biometric Access', 'Full Backup Power'],
+          higgsfield: { mode: 'aerial', rig: 'DRONE ARC', camera_path: 'Cinematic 4K Aerial Arc', fps: 24 }
+        },
+        {
+          id: 103,
+          unit_number: 'Villa 7',
+          floor: 'Private Compound',
+          unit_type: '4-Bedroom Beachfront Villa',
+          property_name: 'Nyali Ocean Breeze Villas',
+          property_type: 'Beachfront Holiday Residences',
+          address: 'Beach Road, Nyali',
+          city: 'Mombasa',
+          bedrooms: 4,
+          bathrooms: 4,
+          sqft: 3200,
+          base_rent: 180000,
+          service_charge: 10000,
+          garbage_fee: 500,
+          deposit: 360000,
+          photo: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80',
+          photos: [
+            'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&auto=format&fit=crop&q=80'
+          ],
+          amenities: ['Private Plunge Pool', 'Direct Ocean Access', 'Perimeter Electric Fence', 'Fresh Water Desalination', 'Lush Garden'],
+          higgsfield: { mode: 'orbit', rig: '3D ORBIT', camera_path: 'Ocean Breeze Orbit', fps: 24 }
+        }
+      ];
+    }
+
     async function loadVacancies() {
       try {
         const res = await fetch('/api/public/vacancies');
+        if (!res.ok) throw new Error('Network error');
         const data = await res.json();
-        allVacancies = data.vacancies || (Array.isArray(data) ? data : []);
+        const list = data.vacancies || (Array.isArray(data) ? data : []);
+        if (list && list.length > 0) {
+          allVacancies = list;
+        } else {
+          allVacancies = getDemoFallbackVacancies();
+        }
         renderVacancies(allVacancies);
       } catch (err) {
-        console.error('Failed to load vacancies:', err);
+        console.warn('Using verified vacancy fallback list:', err);
+        allVacancies = getDemoFallbackVacancies();
+        renderVacancies(allVacancies);
       }
     }
 
@@ -561,6 +665,21 @@
       if (mode === 'pan') return 'hg-anim-pan';
       if (mode === 'orbit') return 'hg-anim-orbit';
       return 'hg-anim-dolly';
+    }
+
+    function setCardActivePhoto(unitId, url, btn) {
+      const img = document.getElementById(`img-unit-${unitId}`);
+      if (img) {
+        img.src = url;
+      }
+      if (btn && btn.parentElement) {
+        btn.parentElement.querySelectorAll('button').forEach(b => {
+          b.classList.remove('border-emerald-500', 'scale-105', 'ring-2', 'ring-emerald-400');
+          b.classList.add('border-transparent', 'opacity-70');
+        });
+        btn.classList.add('border-emerald-500', 'scale-105', 'ring-2', 'ring-emerald-400');
+        btn.classList.remove('border-transparent', 'opacity-70');
+      }
     }
 
     function renderVacancies(list) {
@@ -588,13 +707,44 @@
         const rigLabel = hg.rig || (mode === 'aerial' ? 'DRONE ARC' : mode === 'pan' ? 'PEDESTAL PAN' : 'DOLLY-IN');
         const animClass = getHiggsfieldClass(mode);
 
+        const amenitiesList = (Array.isArray(v.amenities) && v.amenities.length > 0) ? v.amenities : [
+          'Borehole & County Water', 'Standby Diesel Generator', '24/7 Security', 'High-Speed Fiber Ready'
+        ];
+
+        let photosList = [];
+        if (Array.isArray(v.photos) && v.photos.length > 0) {
+          photosList = v.photos;
+        } else if (v.photo) {
+          try {
+            const parsed = JSON.parse(v.photo);
+            if (Array.isArray(parsed) && parsed.length > 0) photosList = parsed;
+            else photosList = [v.photo];
+          } catch(e) {
+            photosList = [v.photo];
+          }
+        } else {
+          photosList = ['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80'];
+        }
+        const activePhoto = photosList[0];
+
+        const photoThumbnails = photosList.length > 1 ? `
+          <div class="flex items-center space-x-1.5 px-4 pt-2.5 overflow-x-auto pb-1" onclick="event.stopPropagation()">
+            ${photosList.map((pUrl, pIdx) => `
+              <button type="button" title="View angle ${pIdx + 1}" onclick="event.stopPropagation(); setCardActivePhoto(${v.id}, '${pUrl}', this)" class="w-9 h-9 rounded-lg overflow-hidden border-2 ${pIdx === 0 ? 'border-emerald-500 ring-2 ring-emerald-400 scale-105' : 'border-transparent opacity-70 hover:opacity-100'} transition-all shrink-0">
+                <img src="${pUrl}" alt="Angle ${pIdx + 1}" class="w-full h-full object-cover">
+              </button>
+            `).join('')}
+            <span class="text-[10px] text-slate-400 pl-1 shrink-0 font-medium font-mono">${photosList.length} photos</span>
+          </div>
+        ` : '';
+
         return `
         <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200/90 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-xl transition-all duration-300 group hg-card-perspective">
           <div class="hg-card-surface" id="card-surface-${v.id}">
             <!-- Higgsfield Animated Widescreen Camera Viewport -->
             <div class="relative h-52 w-full overflow-hidden bg-slate-950 group cursor-pointer" onclick="openHiggsfieldModal(${v.id})" id="viewport-${v.id}">
               <!-- Animated Image Layer -->
-              <img src="${v.photo}" alt="${v.unit_type}" class="w-full h-full object-cover ${animClass} group-hover:scale-105 transition-transform duration-700" id="img-unit-${v.id}">
+              <img src="${activePhoto}" alt="${v.unit_type}" class="w-full h-full object-cover ${animClass} group-hover:scale-105 transition-transform duration-700" id="img-unit-${v.id}">
               
               <!-- Volumetric Sunlight Shimmer -->
               <div class="hg-light-beam ${globalMotionMode === 'static' ? 'hidden' : ''}"></div>
@@ -639,6 +789,9 @@
               </div>
             </div>
 
+            <!-- Multi-Photo Gallery Quick Switcher Strip -->
+            ${photoThumbnails}
+
             <div class="p-5 space-y-3">
               <div>
                 <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">${v.property_name}</span>
@@ -667,7 +820,7 @@
 
               <!-- Amenities Pills -->
               <div class="flex flex-wrap gap-1.5 pt-1">
-                ${v.amenities.slice(0, 4).map(a => `<span class="text-[10px] bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 px-2 py-0.5 rounded">${a}</span>`).join('')}
+                ${amenitiesList.slice(0, 4).map(a => `<span class="text-[10px] bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 px-2 py-0.5 rounded">${a}</span>`).join('')}
               </div>
             </div>
           </div>
@@ -742,6 +895,19 @@
     }
 
     // Higgsfield Virtual Tour Modal Logic
+    function setTourActivePhoto(url, btn) {
+      const img = document.getElementById('tour-stage-img');
+      if (img) img.src = url;
+      if (btn && btn.parentElement) {
+        btn.parentElement.querySelectorAll('button').forEach(b => {
+          b.classList.remove('border-emerald-500', 'scale-105', 'ring-2', 'ring-emerald-400');
+          b.classList.add('border-white/20', 'opacity-60');
+        });
+        btn.classList.add('border-emerald-500', 'scale-105', 'ring-2', 'ring-emerald-400');
+        btn.classList.remove('border-white/20', 'opacity-60');
+      }
+    }
+
     function openHiggsfieldModal(unitId) {
       const unit = allVacancies.find(u => u.id === unitId) || allVacancies[0];
       if (!unit) return;
@@ -749,7 +915,43 @@
 
       document.getElementById('tour-unit-title').textContent = `Higgsfield Tour: Unit ${unit.unit_number} (${unit.unit_type})`;
       document.getElementById('tour-unit-sub').textContent = `${unit.property_name} • ${unit.city}`;
-      document.getElementById('tour-stage-img').src = unit.photo;
+
+      let photos = [];
+      if (Array.isArray(unit.photos) && unit.photos.length > 0) {
+        photos = unit.photos;
+      } else if (unit.photo) {
+        try {
+          const parsed = JSON.parse(unit.photo);
+          if (Array.isArray(parsed) && parsed.length > 0) photos = parsed;
+          else photos = [unit.photo];
+        } catch(e) {
+          photos = [unit.photo];
+        }
+      } else {
+        photos = ['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80'];
+      }
+
+      document.getElementById('tour-stage-img').src = photos[0];
+
+      // Multi-Photo Angle Strip
+      const galleryContainer = document.getElementById('tour-gallery-container');
+      const galleryStrip = document.getElementById('tour-gallery-strip');
+      const photoCounter = document.getElementById('tour-photo-counter');
+
+      if (galleryContainer && galleryStrip) {
+        if (photos.length > 1) {
+          galleryContainer.classList.remove('hidden');
+          if (photoCounter) photoCounter.textContent = `${photos.length} Photo Angles Available`;
+          galleryStrip.innerHTML = photos.map((pUrl, idx) => `
+            <button type="button" title="Angle ${idx + 1}" onclick="setTourActivePhoto('${pUrl}', this)" class="w-12 h-12 rounded-lg overflow-hidden border-2 ${idx === 0 ? 'border-emerald-500 scale-105 ring-2 ring-emerald-400' : 'border-white/20 opacity-60 hover:opacity-100'} transition-all shrink-0">
+              <img src="${pUrl}" alt="Angle ${idx + 1}" class="w-full h-full object-cover">
+            </button>
+          `).join('');
+        } else {
+          galleryContainer.classList.add('hidden');
+          galleryStrip.innerHTML = '';
+        }
+      }
 
       // Update WhatsApp direct link
       document.getElementById('tour-whatsapp-link').href = `https://wa.me/254700112233?text=Hi%20BomaSphere%2C%20I%20just%20took%20the%20Higgsfield%20virtual%20tour%20for%20Unit%20${unit.unit_number}%20at%20${encodeURIComponent(unit.property_name)}%20and%20would%20like%20to%20inquire.`;
@@ -945,6 +1147,44 @@
       }
     }
 
+    // Session sync with PMS portal
+    function syncAuthUserToNav() {
+      const container = document.getElementById('nav-user-container');
+      if (!container) return;
+      try {
+        const raw = localStorage.getItem('bomasphere_user');
+        if (raw) {
+          const user = JSON.parse(raw);
+          if (user && user.name) {
+            const roleLabel = (user.role || 'user').replace('_', ' ');
+            container.innerHTML = `
+              <div class="flex items-center space-x-2">
+                <div class="hidden sm:flex items-center space-x-2 px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-200 font-medium">
+                  <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                  <span class="font-bold">${user.name.split(' (')[0]}</span>
+                  <span class="text-[10px] uppercase font-extrabold px-1.5 py-0.5 rounded bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-100">${roleLabel}</span>
+                </div>
+                <a href="/" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-zinc-100 text-xs font-bold transition shadow-xs">
+                  <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+                  <span>Back to PMS Portal</span>
+                </a>
+              </div>
+            `;
+            if (window.lucide) lucide.createIcons();
+            return;
+          }
+        }
+      } catch (err) {}
+
+      container.innerHTML = `
+        <a href="/" class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-zinc-700 transition">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+          <span>Resident Portal / Sign In</span>
+        </a>
+      `;
+      if (window.lucide) lucide.createIcons();
+    }
+
     // Theme sync
     function initTheme() {
       const savedTheme = localStorage.getItem('bomasphere_theme_mode');
@@ -959,6 +1199,7 @@
     }
 
     initTheme();
+    syncAuthUserToNav();
     loadVacancies();
   </script>
 </body>

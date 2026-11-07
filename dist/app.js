@@ -69,6 +69,7 @@ class BomaSphereApp {
   }
 
   async init() {
+    this.loadCustomPermissions();
     this.restoreThemeAndMode();
     this.initServiceWorkerAndPwa();
     this.setupNavigation();
@@ -147,6 +148,21 @@ class BomaSphereApp {
   }
 
   getRolePermissions(role) {
+    if (this.customPermissions && this.customPermissions[role]) {
+      return this.customPermissions[role];
+    }
+    try {
+      const stored = localStorage.getItem('bomasphere_custom_permissions');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed[role]) {
+          if (!this.customPermissions) this.customPermissions = {};
+          this.customPermissions[role] = parsed[role];
+          return parsed[role];
+        }
+      }
+    } catch(e) {}
+
     const permissions = {
       super_admin: [
         'dashboard', 'properties', 'tenants', 'leases', 'inspections',
@@ -668,7 +684,8 @@ class BomaSphereApp {
 
     grid.innerHTML = this.state.properties.map(p => {
       const occPct = p.total_units > 0 ? ((p.occupied_units / p.total_units) * 100).toFixed(0) : 0;
-      const coverImage = p.image_url || 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80';
+      const allPhotos = this.extractAllPhotos(p.image_url);
+      const coverImage = this.extractFirstPhoto(p.image_url, 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80');
       return `
         <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs hover:shadow-md transition flex flex-col justify-between overflow-hidden">
           <div class="h-32 w-full relative bg-slate-900 overflow-hidden">
@@ -677,6 +694,12 @@ class BomaSphereApp {
               <span class="px-2 py-0.5 rounded bg-slate-950/70 backdrop-blur-xs font-semibold text-white text-[11px]">${p.property_type}</span>
               <span class="px-2 py-0.5 rounded bg-emerald-600/90 backdrop-blur-xs font-bold text-white text-[11px]">${occPct}% Occupied</span>
             </div>
+            ${allPhotos.length > 1 ? `
+              <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-slate-950/70 backdrop-blur-xs text-white text-[10px] font-mono flex items-center gap-1 font-semibold">
+                <i data-lucide="camera" class="w-3 h-3"></i>
+                <span>${allPhotos.length} photos</span>
+              </div>
+            ` : ''}
           </div>
           <div class="p-5 flex-1 flex flex-col justify-between">
             <div>
@@ -742,7 +765,7 @@ class BomaSphereApp {
       <tr class="hover:bg-slate-50/80 transition-colors">
         <td class="py-3 px-4 font-bold text-slate-800">
           <div class="flex items-center space-x-2.5">
-            ${u.image_url ? `<img src="${u.image_url}" alt="${u.unit_number}" class="w-8 h-8 rounded-lg object-cover border border-slate-200 shrink-0">` : `<div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 shrink-0"><i data-lucide="home" class="w-4 h-4"></i></div>`}
+            ${u.image_url ? `<img src="${this.extractFirstPhoto(u.image_url)}" alt="${u.unit_number}" class="w-8 h-8 rounded-lg object-cover border border-slate-200 shrink-0">` : `<div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 shrink-0"><i data-lucide="home" class="w-4 h-4"></i></div>`}
             <div>
               <span>${u.unit_number}</span>
               ${u.status === 'vacant' ? `<span class="block text-[10px] text-emerald-600 font-semibold">Vacant</span>` : ''}
@@ -2033,89 +2056,168 @@ class BomaSphereApp {
   }
 
   // ==========================================
-  // PROPERTY & UNIT MODALS & IMAGE UPLOAD
+  // PROPERTY & UNIT MULTI-IMAGE PHOTO STUDIO
   // ==========================================
-  handleImageFileSelect(e, type) {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
+  extractFirstPhoto(imgField, fallbackUrl = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80') {
+    if (!imgField) return fallbackUrl;
+    try {
+      const parsed = JSON.parse(imgField);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed[0] || fallbackUrl;
+      if (typeof parsed === 'string' && parsed.length > 0) return parsed;
+    } catch(e) {}
+    return (typeof imgField === 'string' && imgField.length > 0) ? imgField : fallbackUrl;
+  }
 
-    if (!file.type.startsWith('image/')) {
-      this.showToast('Please select a valid image file (PNG, JPG, WebP).', 'error');
-      return;
-    }
+  extractAllPhotos(imgField) {
+    if (!imgField) return [];
+    try {
+      const parsed = JSON.parse(imgField);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean);
+      if (typeof parsed === 'string' && parsed.length > 0) return [parsed];
+    } catch(e) {}
+    return (typeof imgField === 'string' && imgField.length > 0) ? [imgField] : [];
+  }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        // Resize image to max 1200px to maintain high clarity while keeping payload lightweight
-        const maxDim = 1200;
-        let width = img.width;
-        let height = img.height;
-        if (width > maxDim || height > maxDim) {
-          if (width > height) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
+  clearImageGallery(type) {
+    if (!this.imageGalleries) this.imageGalleries = {};
+    this.imageGalleries[type] = [];
+    this.renderImageGallery(type);
+  }
+
+  loadImageGallery(type, rawData) {
+    if (!this.imageGalleries) this.imageGalleries = {};
+    this.imageGalleries[type] = this.extractAllPhotos(rawData);
+    this.renderImageGallery(type);
+  }
+
+  handleImageFilesSelect(e, type) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    if (!this.imageGalleries) this.imageGalleries = {};
+    if (!this.imageGalleries[type]) this.imageGalleries[type] = [];
+
+    Array.from(files).forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 1200;
+          let width = img.width;
+          let height = img.height;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
           }
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
 
-        this.setImagePreview(type, dataUrl);
+          this.imageGalleries[type].push(dataUrl);
+          this.renderImageGallery(type);
+        };
+        img.src = event.target.result;
       };
-      img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
   }
 
-  handleImageUrlInput(url, type) {
-    const trimmed = (url || '').trim();
-    if (!trimmed) {
-      this.removeImage(type, false);
+  addGalleryUrl(type) {
+    const input = document.getElementById(`${type}-image-url-input`);
+    if (!input) return;
+    const url = (input.value || '').trim();
+    if (!url) {
+      this.showToast('Please enter an image URL', 'error');
       return;
     }
-    this.setImagePreview(type, trimmed);
+    if (!this.imageGalleries) this.imageGalleries = {};
+    if (!this.imageGalleries[type]) this.imageGalleries[type] = [];
+
+    this.imageGalleries[type].push(url);
+    input.value = '';
+    this.renderImageGallery(type);
+    this.showToast('Photo added to gallery', 'success');
   }
 
-  setImagePreview(type, src) {
-    const hiddenInput = document.getElementById(`${type}-image-data`);
-    const previewImg = document.getElementById(`${type}-image-preview`);
-    const previewContainer = document.getElementById(`${type}-image-preview-container`);
-    const uploadPrompt = document.getElementById(`${type}-image-upload-prompt`);
+  removeGalleryImage(type, index) {
+    if (!this.imageGalleries || !this.imageGalleries[type]) return;
+    this.imageGalleries[type].splice(index, 1);
+    this.renderImageGallery(type);
+  }
 
-    if (hiddenInput) hiddenInput.value = src;
-    if (previewImg) previewImg.src = src;
-    if (previewContainer) previewContainer.classList.remove('hidden');
-    if (uploadPrompt) uploadPrompt.classList.add('hidden');
+  setGalleryCover(type, index) {
+    if (!this.imageGalleries || !this.imageGalleries[type]) return;
+    const item = this.imageGalleries[type].splice(index, 1)[0];
+    this.imageGalleries[type].unshift(item);
+    this.renderImageGallery(type);
+    this.showToast('Set as main cover photo', 'success');
+  }
+
+  renderImageGallery(type) {
+    const grid = document.getElementById(`${type}-gallery-grid`);
+    const countEl = document.getElementById(`${type}-gallery-count`);
+    const hiddenInput = document.getElementById(`${type}-image-data`);
+
+    if (!this.imageGalleries) this.imageGalleries = {};
+    const list = this.imageGalleries[type] || [];
+
+    if (hiddenInput) {
+      hiddenInput.value = list.length > 0 ? JSON.stringify(list) : '';
+    }
+
+    if (countEl) {
+      countEl.textContent = `${list.length} photo${list.length === 1 ? '' : 's'}`;
+    }
+
+    if (!grid) return;
+
+    if (list.length === 0) {
+      grid.innerHTML = '';
+      return;
+    }
+
+    grid.innerHTML = list.map((src, idx) => `
+      <div class="relative group rounded-lg overflow-hidden border ${idx === 0 ? 'border-emerald-500 ring-2 ring-emerald-300' : 'border-slate-200'} bg-slate-900 aspect-video flex items-center justify-center">
+        <img src="${src}" alt="Photo ${idx + 1}" class="w-full h-full object-cover">
+        
+        <!-- Cover Badge -->
+        ${idx === 0 ? `
+          <span class="absolute top-1 left-1 bg-emerald-600 text-white text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded shadow-xs">
+            Cover
+          </span>
+        ` : `
+          <button type="button" onclick="app.setGalleryCover('${type}', ${idx})" class="absolute bottom-1 left-1 bg-slate-900/80 hover:bg-slate-900 text-white text-[9px] font-bold px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition shadow-xs">
+            Set Cover
+          </button>
+        `}
+
+        <!-- Delete Button -->
+        <button type="button" onclick="app.removeGalleryImage('${type}', ${idx})" class="absolute top-1 right-1 bg-rose-600 hover:bg-rose-700 text-white p-1 rounded-full shadow-xs opacity-80 hover:opacity-100 transition">
+          <i data-lucide="x" class="w-2.5 h-2.5"></i>
+        </button>
+      </div>
+    `).join('');
+
     if (window.lucide) lucide.createIcons();
   }
 
-  removeImage(type, clearUrlInput = true) {
-    const hiddenInput = document.getElementById(`${type}-image-data`);
-    const previewImg = document.getElementById(`${type}-image-preview`);
-    const previewContainer = document.getElementById(`${type}-image-preview-container`);
-    const uploadPrompt = document.getElementById(`${type}-image-upload-prompt`);
-    const fileInput = document.getElementById(`${type}-image-file`);
-    const urlInput = document.getElementById(`${type}-image-url`);
-
-    if (hiddenInput) hiddenInput.value = '';
-    if (previewImg) previewImg.src = '';
-    if (fileInput) fileInput.value = '';
-    if (clearUrlInput && urlInput) urlInput.value = '';
-    if (previewContainer) previewContainer.classList.add('hidden');
-    if (uploadPrompt) uploadPrompt.classList.remove('hidden');
-    if (window.lucide) lucide.createIcons();
+  // Compatibility shims
+  removeImage(type) {
+    this.clearImageGallery(type);
   }
 
   openAddPropertyModal() {
-    this.removeImage('prop');
+    this.clearImageGallery('prop');
     this.openModal('modal-add-property');
   }
 
@@ -2153,7 +2255,7 @@ class BomaSphereApp {
   }
 
   openAddUnitModal() {
-    this.removeImage('unit');
+    this.clearImageGallery('unit');
     const select = document.getElementById('unit-prop-select');
     select.innerHTML = this.state.properties.map(p => `
       <option value="${p.id}">${p.name} (${p.city})</option>
@@ -2215,13 +2317,7 @@ class BomaSphereApp {
     document.getElementById('edit-prop-paybill').value = p.paybill_number || '';
     document.getElementById('edit-prop-bank').value = p.bank_name || p.bank_account || '';
 
-    if (p.image_url) {
-      this.setImagePreview('edit-prop', p.image_url);
-      const urlInput = document.getElementById('edit-prop-image-url');
-      if (urlInput) urlInput.value = p.image_url;
-    } else {
-      this.removeImage('edit-prop');
-    }
+    this.loadImageGallery('edit-prop', p.image_url);
     this.openModal('modal-edit-property');
   }
 
@@ -2308,13 +2404,7 @@ class BomaSphereApp {
     document.getElementById('edit-unit-garbage-input').value = u.garbage_fee || 0;
     document.getElementById('edit-unit-meter-input').value = u.meter_number || '';
 
-    if (u.image_url) {
-      this.setImagePreview('edit-unit', u.image_url);
-      const urlInput = document.getElementById('edit-unit-image-url');
-      if (urlInput) urlInput.value = u.image_url;
-    } else {
-      this.removeImage('edit-unit');
-    }
+    this.loadImageGallery('edit-unit', u.image_url);
     this.openModal('modal-edit-unit');
   }
 
@@ -3783,6 +3873,10 @@ class BomaSphereApp {
     const user = this.state.authUser;
     if (!user) return;
 
+    try {
+      localStorage.setItem('bomasphere_user', JSON.stringify(user));
+    } catch(e) {}
+
     const roleTitles = {
       super_admin: 'Super Admin',
       property_manager: 'Property Manager',
@@ -3995,6 +4089,156 @@ class BomaSphereApp {
               <i data-lucide="trash-2" class="w-4 h-4 inline"></i>
             </button>
           </td>
+        </tr>
+      `;
+    }).join('');
+
+    if (window.lucide) lucide.createIcons();
+    this.renderPermissionsMatrix(this.isEditingRbac || false);
+  }
+
+  // ==========================================
+  // DYNAMIC ROLE PERMISSIONS MATRIX (RBAC)
+  // ==========================================
+  getDefaultRoleMatrix() {
+    return [
+      { key: 'properties', label: 'Properties & Units Management', super_admin: true, property_manager: true, caretaker: false, landlord: true, tenant: false },
+      { key: 'leases', label: 'Digital Lease Agreements & E-Sign', super_admin: true, property_manager: true, caretaker: false, landlord: true, tenant: false },
+      { key: 'invoices', label: 'Rent Invoicing & Automated Billing', super_admin: true, property_manager: true, caretaker: false, landlord: true, tenant: false },
+      { key: 'payments', label: 'M-Pesa STK & Bank Reconciliation', super_admin: true, property_manager: true, caretaker: false, landlord: true, tenant: true },
+      { key: 'water', label: 'Water Meter Sub-Meter Logging', super_admin: true, property_manager: true, caretaker: true, landlord: false, tenant: false },
+      { key: 'maintenance', label: 'Maintenance & Work Orders', super_admin: true, property_manager: true, caretaker: true, landlord: true, tenant: true },
+      { key: 'expenses', label: 'Operational Expense Tracking', super_admin: true, property_manager: true, caretaker: false, landlord: true, tenant: false },
+      { key: 'landlord', label: 'Landlord Remittance Statements', super_admin: true, property_manager: true, caretaker: false, landlord: true, tenant: false },
+      { key: 'communications', label: 'SMS & Email Broadcasts', super_admin: true, property_manager: true, caretaker: true, landlord: false, tenant: false },
+      { key: 'visitor-passes', label: 'Digital Visitor Gate Passes', super_admin: true, property_manager: true, caretaker: true, landlord: false, tenant: true },
+      { key: 'amenities', label: 'Facility & Amenity Booking', super_admin: true, property_manager: true, caretaker: false, landlord: false, tenant: true },
+      { key: 'inspections', label: 'Move-in / Move-out Inspections', super_admin: true, property_manager: true, caretaker: true, landlord: false, tenant: false },
+      { key: 'higgsfield', label: 'Higgsfield AI 3D Virtual Tours', super_admin: true, property_manager: true, caretaker: false, landlord: true, tenant: false },
+      { key: 'users', label: 'System Users & Role Management', super_admin: true, property_manager: true, caretaker: false, landlord: false, tenant: false }
+    ];
+  }
+
+  loadCustomPermissions() {
+    try {
+      const stored = localStorage.getItem('bomasphere_custom_permissions');
+      if (stored) {
+        this.customPermissions = JSON.parse(stored);
+      }
+    } catch(e) {
+      this.customPermissions = null;
+    }
+  }
+
+  toggleEditPermissionsMatrix() {
+    this.isEditingRbac = !this.isEditingRbac;
+    const btnLabel = document.getElementById('btn-toggle-rbac-edit-label');
+    const saveBtn = document.getElementById('btn-save-rbac');
+    if (btnLabel) btnLabel.textContent = this.isEditingRbac ? 'Cancel Editing' : 'Edit Permissions';
+    if (saveBtn) {
+      if (this.isEditingRbac) saveBtn.classList.remove('hidden');
+      else saveBtn.classList.add('hidden');
+    }
+    this.renderPermissionsMatrix(this.isEditingRbac);
+  }
+
+  toggleRoleCapability(role, moduleKey, checked) {
+    if (!this.customPermissions) {
+      this.customPermissions = {};
+      const roles = ['super_admin', 'property_manager', 'caretaker', 'landlord', 'tenant'];
+      roles.forEach(r => {
+        this.customPermissions[r] = [...this.getRolePermissions(r)];
+      });
+    }
+    if (!this.customPermissions[role]) {
+      this.customPermissions[role] = [...this.getRolePermissions(role)];
+    }
+    const idx = this.customPermissions[role].indexOf(moduleKey);
+    if (checked && idx === -1) {
+      this.customPermissions[role].push(moduleKey);
+    } else if (!checked && idx !== -1) {
+      this.customPermissions[role].splice(idx, 1);
+    }
+  }
+
+  savePermissionsMatrix() {
+    try {
+      if (!this.customPermissions) {
+        this.customPermissions = {};
+        const roles = ['super_admin', 'property_manager', 'caretaker', 'landlord', 'tenant'];
+        roles.forEach(r => {
+          this.customPermissions[r] = [...this.getRolePermissions(r)];
+        });
+      }
+      localStorage.setItem('bomasphere_custom_permissions', JSON.stringify(this.customPermissions));
+      this.isEditingRbac = false;
+      const btnLabel = document.getElementById('btn-toggle-rbac-edit-label');
+      const saveBtn = document.getElementById('btn-save-rbac');
+      if (btnLabel) btnLabel.textContent = 'Edit Permissions';
+      if (saveBtn) saveBtn.classList.add('hidden');
+      this.renderPermissionsMatrix(false);
+      this.updateUserSessionDisplay();
+      this.showToast('Live Role Permissions Matrix saved and active!', 'success');
+    } catch(e) {
+      this.showToast('Failed to save custom RBAC permissions', 'error');
+    }
+  }
+
+  resetPermissionsMatrix() {
+    if (!confirm('Reset all Role Permissions to system factory defaults?')) return;
+    try {
+      localStorage.removeItem('bomasphere_custom_permissions');
+      this.customPermissions = null;
+      this.isEditingRbac = false;
+      const btnLabel = document.getElementById('btn-toggle-rbac-edit-label');
+      const saveBtn = document.getElementById('btn-save-rbac');
+      if (btnLabel) btnLabel.textContent = 'Edit Permissions';
+      if (saveBtn) saveBtn.classList.add('hidden');
+      this.renderPermissionsMatrix(false);
+      this.updateUserSessionDisplay();
+      this.showToast('Permissions reset to factory defaults', 'success');
+    } catch(e) {}
+  }
+
+  renderPermissionsMatrix(isEditing = false) {
+    const tbody = document.getElementById('rbac-matrix-tbody');
+    if (!tbody) return;
+
+    const matrix = this.getDefaultRoleMatrix();
+    const roles = ['super_admin', 'property_manager', 'caretaker', 'landlord', 'tenant'];
+
+    tbody.innerHTML = matrix.map(row => {
+      const roleCells = roles.map(role => {
+        const allowedList = this.getRolePermissions(role);
+        const isAllowed = allowedList.includes(row.key);
+
+        if (isEditing) {
+          return `
+            <td class="py-2.5 px-3 text-center">
+              <input type="checkbox" ${isAllowed ? 'checked' : ''} onchange="app.toggleRoleCapability('${role}', '${row.key}', this.checked)" class="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+            </td>
+          `;
+        }
+
+        if (isAllowed) {
+          return `
+            <td class="py-2 px-3 text-center text-emerald-600 font-bold">
+              <span class="inline-flex items-center gap-1 text-[11px]"><i data-lucide="check" class="w-3.5 h-3.5"></i> Allowed</span>
+            </td>
+          `;
+        } else {
+          return `
+            <td class="py-2 px-3 text-center text-slate-400 font-bold">&minus;</td>
+          `;
+        }
+      }).join('');
+
+      return `
+        <tr class="hover:bg-slate-50/80 transition-colors">
+          <td class="py-2.5 px-3 font-semibold text-slate-800">
+            ${row.label}
+          </td>
+          ${roleCells}
         </tr>
       `;
     }).join('');
