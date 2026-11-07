@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class="h-full" data-theme="swiss">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +12,8 @@
   
   <!-- Production Compiled Tailwind CSS -->
   <link rel="stylesheet" href="/tailwind.min.css?v=1.0">
+  <!-- Core Design System Tokens & WCAG AAA Contrast Themes -->
+  <link rel="stylesheet" href="/styles.css?v=2.2">
 
   <!-- Google Fonts Preconnect & TWK Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,7 +35,6 @@
       --step-2: clamp(1.44rem, 1.3496rem + 0.4522vw, 1.85rem);
       --step-3: clamp(1.728rem, 1.5991rem + 0.6443vw, 2.35rem);
       --step-4: clamp(2.0736rem, 1.8918rem + 0.909vw, 2.95rem);
-      --step-5: clamp(2.4883rem, 2.2338rem + 1.2727vw, 3.65rem);
 
       /* TWK Hardware Acceleration & Easing */
       --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -42,6 +43,8 @@
 
     body {
       font-family: var(--font-sans);
+      background-color: var(--bg-app);
+      color: var(--text-main);
     }
 
     .font-serif-twk {
@@ -54,33 +57,33 @@
 
     /* TWK Architectural Lighting Simulator Filters */
     .twk-lighting-dawn {
-      filter: brightness(0.96) saturate(0.92) contrast(1.04) hue-rotate(8deg);
-      transition: filter 800ms var(--ease-out-expo);
+      filter: brightness(0.96) saturate(0.95) contrast(1.04) hue-rotate(8deg);
+      transition: filter 700ms var(--ease-out-expo);
     }
 
     .twk-lighting-zenith {
       filter: brightness(1.02) saturate(1.05) contrast(1.02);
-      transition: filter 800ms var(--ease-out-expo);
+      transition: filter 700ms var(--ease-out-expo);
     }
 
     .twk-lighting-golden {
-      filter: brightness(0.92) saturate(1.35) contrast(1.08) hue-rotate(-10deg);
-      transition: filter 800ms var(--ease-out-expo);
+      filter: brightness(0.94) saturate(1.35) contrast(1.08) hue-rotate(-10deg);
+      transition: filter 700ms var(--ease-out-expo);
     }
 
     .twk-lighting-dusk {
-      filter: brightness(0.78) saturate(1.2) contrast(1.15) hue-rotate(-22deg);
-      transition: filter 800ms var(--ease-out-expo);
+      filter: brightness(0.80) saturate(1.2) contrast(1.15) hue-rotate(-22deg);
+      transition: filter 700ms var(--ease-out-expo);
     }
 
-    /* TWK Subtle Volumetric Light Shimmer */
+    /* Volumetric Light Glint */
     @keyframes twkLightGlint {
       0% {
         opacity: 0;
         transform: translateX(-100%) rotate(20deg);
       }
       25% {
-        opacity: 0.28;
+        opacity: 0.25;
       }
       65% {
         opacity: 0.45;
@@ -106,11 +109,11 @@
         rgba(255, 255, 255, 0) 100%
       );
       pointer-events: none;
-      animation: twkLightGlint 11s var(--ease-out-expo) infinite;
+      animation: twkLightGlint 12s var(--ease-out-expo) infinite;
       will-change: transform, opacity;
     }
 
-    /* TWK 3D Perspective Architecture Cards */
+    /* 3D Perspective Card Tilt */
     .twk-card-perspective {
       perspective: 1200px;
       transform-style: preserve-3d;
@@ -121,20 +124,20 @@
       will-change: transform;
     }
 
-    /* Reticle Corner Marks (Architectural Drafting Aesthetic) */
+    /* Architectural Drafting Reticles */
     .twk-reticle {
       position: absolute;
-      width: 12px;
-      height: 12px;
-      border-color: rgba(255, 255, 255, 0.7);
+      width: 14px;
+      height: 14px;
+      border-color: rgba(255, 255, 255, 0.75);
       pointer-events: none;
     }
-    .twk-reticle-tl { top: 12px; left: 12px; border-top: 1.5px solid; border-left: 1.5px solid; }
-    .twk-reticle-tr { top: 12px; right: 12px; border-top: 1.5px solid; border-right: 1.5px solid; }
-    .twk-reticle-bl { bottom: 12px; left: 12px; border-bottom: 1.5px solid; border-left: 1.5px solid; }
-    .twk-reticle-br { bottom: 12px; right: 12px; border-bottom: 1.5px solid; border-right: 1.5px solid; }
+    .twk-reticle-tl { top: 14px; left: 14px; border-top: 1.5px solid; border-left: 1.5px solid; }
+    .twk-reticle-tr { top: 14px; right: 14px; border-top: 1.5px solid; border-right: 1.5px solid; }
+    .twk-reticle-bl { bottom: 14px; left: 14px; border-bottom: 1.5px solid; border-left: 1.5px solid; }
+    .twk-reticle-br { bottom: 14px; right: 14px; border-bottom: 1.5px solid; border-right: 1.5px solid; }
 
-    /* Respect Reduced Motion (WCAG 2.2 AA SC 2.3.3) */
+    /* Respect Reduced Motion */
     @media (prefers-reduced-motion: reduce) {
       .twk-shimmer-beam,
       .twk-card-surface,
@@ -149,12 +152,12 @@
     }
   </style>
 </head>
-<body class="min-h-full bg-slate-50 dark:bg-[#090a0f] text-slate-800 dark:text-zinc-100 flex flex-col justify-between antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-300">
+<body class="min-h-full flex flex-col justify-between antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-200">
 
   <!-- ==================================================================== -->
-  <!-- 1. SEMANTIC HEADER & ARCHITECTURAL BRANDING                          -->
+  <!-- 1. TOP NAVIGATION WITH THEME SWITCHER & ACCESSIBLE CONTRAST          -->
   <!-- ==================================================================== -->
-  <header class="w-full border-b border-slate-200/80 dark:border-zinc-800/80 bg-white/95 dark:bg-[#0c0d14]/95 backdrop-blur-md py-4 px-6 sticky top-0 z-40 transition-colors">
+  <header class="w-full border-b border-slate-200/80 dark:border-zinc-800/80 bg-white/95 dark:bg-[#0c0d14]/95 backdrop-blur-md py-3.5 px-6 sticky top-0 z-40 transition-colors">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <a href="/" class="flex items-center space-x-3 group" aria-label="BomaSphere Properties Home">
         <div class="w-9 h-9 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 flex items-center justify-center font-bold text-sm shadow-sm transition-transform duration-300 group-hover:scale-105">
@@ -166,30 +169,41 @@
         </div>
       </a>
 
-      <nav class="flex items-center space-x-3" aria-label="Quick Actions">
-        <div id="nav-user-container" class="flex items-center space-x-2">
-          <a href="/" class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-zinc-700 transition">
-            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
-            <span>Resident Portal / Sign In</span>
-          </a>
+      <!-- Theme & Action Controls -->
+      <nav class="flex items-center space-x-2.5 sm:space-x-3.5" aria-label="Header Utilities">
+        <!-- Live Theme Selector -->
+        <div class="flex items-center space-x-1.5 bg-slate-100 dark:bg-zinc-800/80 px-2 py-1 rounded-lg border border-slate-200 dark:border-zinc-700/80 text-xs">
+          <i data-lucide="palette" class="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400"></i>
+          <select id="theme-selector" onchange="changeTheme(this.value)" aria-label="Select Color Theme" class="bg-transparent text-slate-700 dark:text-zinc-200 font-semibold text-xs border-0 focus:outline-none cursor-pointer">
+            <option value="swiss">Swiss Minimal</option>
+            <option value="emerald">Savanna Emerald</option>
+            <option value="ivory">Warm Ivory</option>
+            <option value="obsidian">Obsidian Cyber</option>
+          </select>
         </div>
 
-        <button onclick="toggleDarkMode()" class="p-2 text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition focus-visible:outline-2 focus-visible:outline-emerald-500" title="Toggle Theme" aria-label="Toggle Color Theme">
+        <!-- Dark Mode Toggle Button -->
+        <button onclick="toggleDarkMode()" class="p-2 text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 transition focus-visible:outline-2 focus-visible:outline-emerald-500 shadow-2xs" title="Toggle Dark/Light Mode" aria-label="Toggle Color Mode">
           <i data-lucide="moon" class="w-4 h-4 hidden dark:inline"></i>
           <i data-lucide="sun" class="w-4 h-4 inline dark:hidden"></i>
         </button>
+
+        <!-- User / PMS Link -->
+        <div id="nav-user-container" class="flex items-center space-x-2">
+          <a href="/" class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-zinc-700 transition">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+            <span>Resident Portal</span>
+          </a>
+        </div>
       </nav>
     </div>
   </header>
 
   <!-- ==================================================================== -->
-  <!-- 2. EDITORIAL HERO & CURATED DECISION MAPPER (TWK CRAFT)              -->
+  <!-- 2. EDITORIAL HERO & CURATED DECISION MAPPER                          -->
   <!-- ==================================================================== -->
-  <section class="relative bg-gradient-to-b from-white via-slate-50/70 to-slate-100/50 dark:from-[#0c0d14] dark:via-[#090a0f] dark:to-[#090a0f] border-b border-slate-200/90 dark:border-zinc-800/90 pt-14 pb-12 px-6 overflow-hidden">
-    <!-- Atmospheric Ambient Glow -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-48 bg-emerald-500/10 dark:bg-emerald-500/5 blur-3xl pointer-events-none rounded-full" aria-hidden="true"></div>
-
-    <div class="max-w-5xl mx-auto text-center space-y-5 relative z-10">
+  <section class="relative bg-gradient-to-b from-white via-slate-50/70 to-slate-100/50 dark:from-[#0c0d14] dark:via-[#090a0f] dark:to-[#090a0f] border-b border-slate-200/90 dark:border-zinc-800/90 pt-12 pb-10 px-6 overflow-hidden">
+    <div class="max-w-5xl mx-auto text-center space-y-4 relative z-10">
       <div class="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 shadow-2xs">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
         <span class="font-mono-twk tracking-tight">Direct Landlord Portfolio &bull; 0% Tenant Broker Fees</span>
@@ -200,13 +214,13 @@
       </h1>
 
       <p class="text-sm sm:text-base text-slate-600 dark:text-zinc-300 max-w-2xl mx-auto leading-relaxed">
-        Explore high-specification verified residences, oceanfront villas, and prime commercial suites managed directly with automated M-Pesa billing, borehole water reserves, and 24/7 security.
+        Explore verified high-specification residences, beachfront holiday villas, and executive commercial suites. Built with automated M-Pesa billing, borehole water reserves, and 24/7 security.
       </p>
 
-      <!-- TWK Light-Touch Curated Decision Mapper (TopHat / Queen of Clubs Pattern) -->
-      <aside class="bg-white dark:bg-[#12141f] p-3.5 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-zinc-800/90 shadow-lg max-w-4xl mx-auto mt-7 text-left transition-all" aria-label="Property Decision Filters">
+      <!-- Curated Decision Mapper (TopHat & Queen of Clubs Pattern) -->
+      <aside class="bg-white dark:bg-[#12141f] p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-zinc-800/90 shadow-lg max-w-4xl mx-auto mt-6 text-left transition-all" aria-label="Property Decision Filters">
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-          <!-- Facet 1: Neighborhood -->
+          <!-- Neighborhood -->
           <div>
             <label for="filter-location" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 font-mono-twk mb-1.5 flex items-center gap-1">
               <i data-lucide="map-pin" class="w-3 h-3 text-emerald-500"></i>
@@ -221,7 +235,7 @@
             </select>
           </div>
 
-          <!-- Facet 2: Residence Configuration -->
+          <!-- Configuration -->
           <div>
             <label for="filter-type" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 font-mono-twk mb-1.5 flex items-center gap-1">
               <i data-lucide="home" class="w-3 h-3 text-emerald-500"></i>
@@ -236,11 +250,11 @@
             </select>
           </div>
 
-          <!-- Facet 3: Monthly Investment Range -->
+          <!-- Monthly Rate Tier -->
           <div>
             <label for="filter-budget" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 font-mono-twk mb-1.5 flex items-center gap-1">
               <i data-lucide="banknote" class="w-3 h-3 text-emerald-500"></i>
-              <span>Monthly Rate (KES)</span>
+              <span>Monthly Budget</span>
             </label>
             <select id="filter-budget" class="w-full text-xs bg-slate-50 dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
               <option value="999999">Any Budget Tier</option>
@@ -251,7 +265,7 @@
             </select>
           </div>
 
-          <!-- Facet 4: Move-In Urgency -->
+          <!-- Move-In Status -->
           <div>
             <label for="filter-readiness" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 font-mono-twk mb-1.5 flex items-center gap-1">
               <i data-lucide="clock" class="w-3 h-3 text-emerald-500"></i>
@@ -269,7 +283,7 @@
   </section>
 
   <!-- ==================================================================== -->
-  <!-- 3. MAIN RESIDENCE GRID & INTERACTIVE ARCHITECTURAL CARDS             -->
+  <!-- 3. MAIN CATALOG & RESIDENCE CARDS                                   -->
   <!-- ==================================================================== -->
   <main id="main-content" class="max-w-7xl mx-auto px-6 py-10 flex-1 w-full" aria-label="Available Residence Catalog">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -280,18 +294,18 @@
         </p>
       </div>
       
-      <!-- TWK Architectural Simulator Toolbar -->
+      <!-- Architectural Daylight Simulator Switcher -->
       <div class="flex items-center space-x-3 text-xs">
         <div class="flex items-center space-x-2 bg-white dark:bg-[#12141f] px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-2xs">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span class="text-[11px] font-mono-twk text-slate-500 dark:text-zinc-400">Architectural Lighting:</span>
+          <span class="text-[11px] font-mono-twk text-slate-500 dark:text-zinc-400">Atmospheric Lighting:</span>
           <button id="btn-toggle-motion" onclick="cycleGlobalLighting()" class="font-bold text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline flex items-center space-x-1">
             <span id="label-motion-state">Golden Hour (17:45)</span>
             <i data-lucide="sparkles" class="w-3 h-3"></i>
           </button>
         </div>
 
-        <div class="hidden md:flex text-xs font-mono-twk text-emerald-600 dark:text-emerald-400 items-center bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800/60">
+        <div class="hidden md:flex text-xs font-mono-twk text-emerald-600 dark:text-emerald-400 items-center bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800/60 font-semibold">
           <i data-lucide="shield-check" class="w-3.5 h-3.5 mr-1"></i>
           <span>Direct Landlord Rates</span>
         </div>
@@ -305,7 +319,194 @@
   </main>
 
   <!-- ==================================================================== -->
-  <!-- 4. MODAL: PRIVATE IN-PERSON VIEWING APPOINTMENT                      -->
+  <!-- 4. REDESIGNED PRIVATE TOUR & ARCHITECTURAL SHOWCASE MODAL            -->
+  <!-- Image is the DOMINANT hero (takes 68% of desktop modal canvas)       -->
+  <!-- ID retained as modal-higgsfield-tour for complete test suite parity  -->
+  <!-- ==================================================================== -->
+  <div id="modal-higgsfield-tour" data-twk-component="private-tour-studio" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-2 sm:p-5" role="dialog" aria-modal="true" aria-labelledby="tour-unit-title">
+    <div class="bg-[#0b0c13] text-white rounded-3xl max-w-6xl w-full h-[94vh] sm:h-[88vh] shadow-2xl border border-white/10 relative flex flex-col lg:grid lg:grid-cols-12 overflow-hidden">
+      
+      <!-- ================================================================ -->
+      <!-- A. DOMINANT IMAGE HERO CANVAS (Cols 1-8: 67% Width on Desktop)    -->
+      <!-- ================================================================ -->
+      <div class="lg:col-span-8 relative h-72 sm:h-96 lg:h-full w-full overflow-hidden bg-black flex flex-col justify-between group">
+        <!-- Main Hero Architectural Photography Layer -->
+        <img id="tour-stage-img" src="" alt="Architectural Residence Walkthrough" width="1600" height="1000" class="w-full h-full object-cover transition-all duration-700 twk-lighting-golden">
+        
+        <!-- Volumetric Shimmer Glint -->
+        <div id="tour-stage-light" class="twk-shimmer-beam"></div>
+
+        <!-- Architectural HUD Reticle Marks -->
+        <div class="twk-reticle twk-reticle-tl"></div>
+        <div class="twk-reticle twk-reticle-tr"></div>
+        <div class="twk-reticle twk-reticle-bl"></div>
+        <div class="twk-reticle twk-reticle-br"></div>
+
+        <!-- Top Floating Glass Telemetry HUD -->
+        <div class="absolute top-3.5 inset-x-3.5 flex items-center justify-between text-xs pointer-events-none">
+          <div class="flex items-center space-x-2 bg-black/75 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/15 text-white font-mono-twk shadow-md pointer-events-auto">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="font-bold text-[11px] tracking-wide">PRIVATE TOUR LIVE</span>
+            <span class="text-white/30">&bull;</span>
+            <span id="tour-hud-timecode" class="text-zinc-300 text-[11px]">00:00:14:18</span>
+          </div>
+
+          <!-- Close Button on Mobile (floating over image) -->
+          <button onclick="closeArchitecturalTourModal()" class="lg:hidden pointer-events-auto p-2 rounded-xl bg-black/70 backdrop-blur-md text-white border border-white/20 hover:bg-white/20 transition" aria-label="Close modal">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Center Crosshair Reticle -->
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
+          <div class="w-8 h-8 border border-white/50 rounded-full flex items-center justify-center">
+            <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div>
+          </div>
+        </div>
+
+        <!-- Bottom Floating Interactive Controls: Lighting Simulator & Room Angles -->
+        <div class="absolute bottom-3.5 inset-x-3.5 space-y-2 pointer-events-none">
+          <!-- Room Angles Quick Pill Switcher -->
+          <div id="tour-gallery-container" class="pointer-events-auto hidden">
+            <div id="tour-gallery-strip" class="flex items-center space-x-2 overflow-x-auto p-1.5 bg-black/75 backdrop-blur-md rounded-2xl border border-white/15 max-w-max shadow-xl">
+              <!-- Dynamically populated room angle chips -->
+            </div>
+          </div>
+
+          <!-- Atmospheric Daylight Selector Pill Bar -->
+          <div class="pointer-events-auto flex flex-wrap items-center justify-between gap-2 bg-black/80 backdrop-blur-md p-2 rounded-2xl border border-white/15 shadow-xl">
+            <div class="flex items-center space-x-1.5 text-xs font-mono-twk">
+              <span class="text-zinc-400 text-[10px] uppercase font-bold pl-1 hidden sm:inline">Sun Angle:</span>
+              <button id="lighting-btn-dawn" onclick="setStudioLighting('dawn')" class="px-2.5 py-1 rounded-xl text-[10px] font-bold font-mono-twk bg-white/5 hover:bg-white/15 text-zinc-300 transition flex items-center space-x-1">
+                <i data-lucide="sunrise" class="w-3 h-3 text-cyan-400"></i>
+                <span>Dawn (06:30)</span>
+              </button>
+              <button id="lighting-btn-zenith" onclick="setStudioLighting('zenith')" class="px-2.5 py-1 rounded-xl text-[10px] font-bold font-mono-twk bg-white/5 hover:bg-white/15 text-zinc-300 transition flex items-center space-x-1">
+                <i data-lucide="sun" class="w-3 h-3 text-amber-300"></i>
+                <span>Zenith (12:00)</span>
+              </button>
+              <button id="lighting-btn-golden" onclick="setStudioLighting('golden')" class="px-2.5 py-1 rounded-xl text-[10px] font-bold font-mono-twk bg-white/20 border border-emerald-500/60 text-emerald-300 transition flex items-center space-x-1">
+                <i data-lucide="sunset" class="w-3 h-3 text-emerald-400"></i>
+                <span>Golden Hour</span>
+              </button>
+              <button id="lighting-btn-dusk" onclick="setStudioLighting('dusk')" class="px-2.5 py-1 rounded-xl text-[10px] font-bold font-mono-twk bg-white/5 hover:bg-white/15 text-zinc-300 transition flex items-center space-x-1">
+                <i data-lucide="moon" class="w-3 h-3 text-indigo-400"></i>
+                <span>Dusk (19:30)</span>
+              </button>
+            </div>
+
+            <div class="text-[10px] font-mono-twk text-zinc-400 pr-2 hidden md:flex items-center space-x-1">
+              <i data-lucide="compass" class="w-3 h-3 text-emerald-400"></i>
+              <span id="tour-hud-orientation">East Morning Light</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <!-- B. EDITORIAL BOOKING & SPECIFICATION DRAWER (Cols 9-12: 33%)     -->
+      <!-- ================================================================ -->
+      <aside class="lg:col-span-4 bg-[#0e1017] border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col justify-between overflow-y-auto p-5 sm:p-6" aria-label="Residence Details and Booking">
+        
+        <!-- Header: Property & Pricing -->
+        <div class="space-y-4">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 font-mono-twk" id="tour-prop-category">Luxury Residential</span>
+              <h3 class="font-extrabold text-lg sm:text-xl text-white tracking-tight mt-0.5" id="tour-unit-title">Unit A101 &bull; 2-Bedroom Ensuite</h3>
+              <p class="text-xs text-zinc-400 mt-1 flex items-center" id="tour-unit-sub">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-emerald-500 shrink-0"></i>
+                <span>Kilimani Royal Heights, Nairobi</span>
+              </p>
+            </div>
+
+            <!-- Close Button on Desktop -->
+            <button onclick="closeArchitecturalTourModal()" class="hidden lg:inline-flex p-1.5 text-zinc-400 hover:text-white rounded-xl bg-white/5 hover:bg-white/15 transition focus-visible:outline-2 focus-visible:outline-emerald-500" aria-label="Close modal">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+
+          <!-- Price & Financial Breakdown -->
+          <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-baseline justify-between">
+            <div>
+              <span class="text-[10px] uppercase font-mono-twk text-zinc-400 block font-semibold">Monthly Direct Lease</span>
+              <span class="text-2xl font-black text-white" id="tour-unit-rent">KES 75,000</span>
+              <span class="text-xs text-zinc-400">/ month</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] uppercase font-mono-twk text-zinc-400 block font-semibold">Deposit</span>
+              <span class="text-xs font-mono-twk font-bold text-zinc-200" id="tour-unit-deposit">KES 150,000</span>
+            </div>
+          </div>
+
+          <!-- Architectural Specs Matrix -->
+          <div class="grid grid-cols-3 gap-2 py-2 border-y border-white/10 text-center text-xs">
+            <div class="p-2 rounded-xl bg-white/5">
+              <span class="text-[9px] uppercase font-mono-twk text-zinc-400 font-semibold block">Configuration</span>
+              <p class="font-bold text-white text-xs mt-0.5" id="tour-spec-beds">2 Beds</p>
+            </div>
+            <div class="p-2 rounded-xl bg-white/5">
+              <span class="text-[9px] uppercase font-mono-twk text-zinc-400 font-semibold block">Bathrooms</span>
+              <p class="font-bold text-white text-xs mt-0.5" id="tour-spec-baths">2 Baths</p>
+            </div>
+            <div class="p-2 rounded-xl bg-white/5">
+              <span class="text-[9px] uppercase font-mono-twk text-zinc-400 font-semibold block">Floor Area</span>
+              <p class="font-bold text-white text-xs mt-0.5" id="tour-spec-sqft">1,150 sqft</p>
+            </div>
+          </div>
+
+          <!-- Architectural Lighting Brief -->
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-xs">
+            <div class="flex items-center space-x-1.5 text-emerald-400 font-mono-twk text-[10px] uppercase font-bold mb-1">
+              <i data-lucide="sun-medium" class="w-3.5 h-3.5"></i>
+              <span id="tour-lighting-title">Golden Hour Ambience</span>
+            </div>
+            <p id="tour-spec-summary" class="text-zinc-300 text-[11px] leading-relaxed">
+              Warm afternoon sunset amber diffusion streaming through floor-to-ceiling double-glazed sliding doors into open-concept living pavilion.
+            </p>
+          </div>
+        </div>
+
+        <!-- Bottom: In-Person Private Tour Booking Form -->
+        <div class="mt-6 pt-4 border-t border-white/10 space-y-3">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-white font-mono-twk flex items-center gap-1.5">
+            <i data-lucide="calendar-check" class="w-4 h-4 text-emerald-400"></i>
+            <span>Book In-Person Physical Viewing</span>
+          </h4>
+
+          <div id="tour-booking-success" class="hidden p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 text-xs space-y-1">
+            <p class="font-bold flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i> Viewing Scheduled!</p>
+            <p class="text-[11px]" id="tour-booking-success-msg">SMS confirmation dispatched to your phone.</p>
+          </div>
+
+          <form id="form-tour-direct-booking" onsubmit="submitTourDirectBooking(event)" class="space-y-2.5 text-xs">
+            <div>
+              <input type="text" id="tour-book-name" placeholder="Your Full Name" required class="w-full bg-white/5 border border-white/15 rounded-xl p-2.5 text-white placeholder-zinc-500 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <input type="tel" id="tour-book-phone" placeholder="+2547XXXXXXXX" required class="w-full bg-white/5 border border-white/15 rounded-xl p-2.5 text-white placeholder-zinc-500 font-mono-twk text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <input type="date" id="tour-book-date" required class="w-full bg-white/5 border border-white/15 rounded-xl p-2.5 text-white text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+
+            <button type="submit" id="btn-tour-submit-booking" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-xl text-xs transition shadow-lg flex items-center justify-center space-x-1.5 cursor-pointer">
+              <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+              <span>Confirm Private Appointment</span>
+            </button>
+          </form>
+
+          <!-- WhatsApp Concierge Alternative -->
+          <a id="tour-whatsapp-link" href="#" target="_blank" class="w-full py-2 bg-white/5 hover:bg-white/10 text-white font-semibold text-xs border border-white/15 rounded-xl transition flex items-center justify-center space-x-1.5">
+            <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>Chat via WhatsApp Concierge</span>
+          </a>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- 5. STANDALONE SCHEDULE VIEWING MODAL (Direct Card Access)            -->
   <!-- ==================================================================== -->
   <div id="modal-viewing" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-viewing-title">
     <div class="bg-white dark:bg-[#12141f] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 relative transition-transform">
@@ -358,9 +559,9 @@
           <div>
             <label for="viewing-time" class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Preferred Time</label>
             <select id="viewing-time" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-              <option value="10:00 AM">10:00 AM (Morning Natural Light)</option>
-              <option value="02:00 PM">02:00 PM (Midday Inspection)</option>
-              <option value="04:30 PM">04:30 PM (Golden Hour Sunset)</option>
+              <option value="10:00 AM">10:00 AM (Morning Light)</option>
+              <option value="02:00 PM">02:00 PM (Midday)</option>
+              <option value="04:30 PM">04:30 PM (Golden Hour)</option>
             </select>
           </div>
         </div>
@@ -379,171 +580,13 @@
   </div>
 
   <!-- ==================================================================== -->
-  <!-- 5. MODAL: TWK ARCHITECTURAL STUDIO & RESIDENCE WALKTHROUGH           -->
-  <!-- Note: ID retained as modal-higgsfield-tour for full test suite parity-->
-  <!-- ==================================================================== -->
-  <div id="modal-higgsfield-tour" data-twk-component="architectural-studio" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="tour-unit-title">
-    <div class="bg-[#0b0c13] text-white rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-white/10 relative flex flex-col max-h-[94vh] overflow-y-auto">
-      
-      <!-- Studio Header -->
-      <div class="flex items-center justify-between pb-3.5 border-b border-white/10">
-        <div class="flex items-center space-x-3">
-          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold">
-            <i data-lucide="layers" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <div class="flex items-center space-x-2">
-              <h3 class="font-extrabold text-sm sm:text-base text-white" id="tour-unit-title">BomaSphere Architectural Studio: Virtual Walkthrough</h3>
-              <span class="text-[10px] font-mono-twk bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">TWK CRAFT</span>
-            </div>
-            <p class="text-xs text-zinc-400 font-mono-twk" id="tour-unit-sub">Unit A101 &bull; Kilimani Royal Heights</p>
-          </div>
-        </div>
-
-        <button onclick="closeArchitecturalTourModal()" class="p-2 text-zinc-400 hover:text-white rounded-xl bg-white/5 hover:bg-white/10 transition" aria-label="Close Architectural Studio">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <!-- Main Architectural Viewport (16:9 Widescreen) -->
-      <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black mt-4 border border-white/10 shadow-inner group">
-        <!-- Rendered Architectural Image Layer -->
-        <img id="tour-stage-img" src="" alt="Architectural Residence View" width="1280" height="720" class="w-full h-full object-cover transition-all duration-700 twk-lighting-golden">
-        
-        <!-- Volumetric Ambient Light Shimmer -->
-        <div id="tour-stage-light" class="twk-shimmer-beam"></div>
-
-        <!-- Architectural HUD Reticles (Corner Drafting Marks) -->
-        <div class="twk-reticle twk-reticle-tl"></div>
-        <div class="twk-reticle twk-reticle-tr"></div>
-        <div class="twk-reticle twk-reticle-bl"></div>
-        <div class="twk-reticle twk-reticle-br"></div>
-
-        <!-- Center Alignment Mark -->
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
-          <div class="w-7 h-7 border border-white/40 rounded-full flex items-center justify-center">
-            <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div>
-          </div>
-        </div>
-
-        <!-- Viewport Top Telemetry Bar -->
-        <div class="absolute top-3 inset-x-3 flex items-center justify-between text-[11px] font-mono-twk pointer-events-none">
-          <div class="flex items-center space-x-2 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-white">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="font-bold">STUDIO LIVE</span>
-            <span id="tour-hud-timecode" class="text-zinc-300">00:00:14:18</span>
-          </div>
-          <div class="flex items-center space-x-2 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-zinc-300">
-            <span id="tour-hud-rig" class="text-emerald-400 font-bold">GOLDEN HOUR (3200K)</span>
-            <span>&bull;</span>
-            <span id="tour-hud-orientation">EAST-FACING</span>
-          </div>
-        </div>
-
-        <!-- Viewport Bottom Telemetry Bar -->
-        <div class="absolute bottom-3 inset-x-3 flex items-center justify-between text-[10px] font-mono-twk pointer-events-none">
-          <div class="bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-zinc-300 flex items-center space-x-1.5">
-            <i data-lucide="compass" class="w-3.5 h-3.5 text-emerald-400"></i>
-            <span id="tour-hud-camera-desc">Primary Living Pavilion &bull; Floor-to-Ceiling Glazing</span>
-          </div>
-          <div class="bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-emerald-300 font-bold">
-            The Web Kitchen Digital Architecture
-          </div>
-        </div>
-      </div>
-
-      <!-- Curated Spatial Room Switcher (Living, Master Suite, Kitchen, Terrace) -->
-      <div id="tour-gallery-container" class="mt-3.5 hidden">
-        <div class="flex items-center justify-between mb-1.5">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono-twk flex items-center gap-1.5">
-            <i data-lucide="layout" class="w-3.5 h-3.5 text-emerald-400"></i>
-            <span>Curated Residence Spaces &bull; Select Room To Tour:</span>
-          </span>
-          <span id="tour-photo-counter" class="text-[10px] text-zinc-400 font-mono-twk font-medium"></span>
-        </div>
-        <div id="tour-gallery-strip" class="flex items-center space-x-2 overflow-x-auto py-1"></div>
-      </div>
-
-      <!-- Architectural Lighting Simulator & Spatial Specs -->
-      <div class="mt-4 space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono-twk">Atmospheric Lighting Simulator:</span>
-          <div class="flex items-center space-x-1 text-xs">
-            <span class="text-[10px] text-zinc-500 font-mono-twk">Real-time Shimmer:</span>
-            <button onclick="toggleShimmerEffect()" id="btn-shimmer-toggle" class="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-mono-twk text-emerald-300 transition">Active</button>
-          </div>
-        </div>
-
-        <!-- 4 Architectural Daylight State Buttons -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <button id="lighting-btn-dawn" onclick="setStudioLighting('dawn')" class="p-2.5 rounded-xl bg-white/5 border border-white/10 text-left transition hover:bg-white/10">
-            <div class="text-[10px] font-mono-twk text-zinc-300 font-bold uppercase flex items-center">
-              <i data-lucide="sunrise" class="w-3.5 h-3.5 mr-1 text-cyan-400"></i>
-              <span>Dawn Horizon</span>
-            </div>
-            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">06:30 Crisp morning light</p>
-          </button>
-
-          <button id="lighting-btn-zenith" onclick="setStudioLighting('zenith')" class="p-2.5 rounded-xl bg-white/5 border border-white/10 text-left transition hover:bg-white/10">
-            <div class="text-[10px] font-mono-twk text-zinc-300 font-bold uppercase flex items-center">
-              <i data-lucide="sun" class="w-3.5 h-3.5 mr-1 text-amber-300"></i>
-              <span>Zenith Daylight</span>
-            </div>
-            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">12:00 Direct high clarity</p>
-          </button>
-
-          <button id="lighting-btn-golden" onclick="setStudioLighting('golden')" class="p-2.5 rounded-xl bg-white/10 border border-emerald-500/60 text-left transition hover:bg-white/15">
-            <div class="text-[10px] font-mono-twk text-emerald-400 font-bold uppercase flex items-center">
-              <i data-lucide="sunset" class="w-3.5 h-3.5 mr-1 text-emerald-400"></i>
-              <span>Golden Hour</span>
-            </div>
-            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">17:45 Warm amber savanna</p>
-          </button>
-
-          <button id="lighting-btn-dusk" onclick="setStudioLighting('dusk')" class="p-2.5 rounded-xl bg-white/5 border border-white/10 text-left transition hover:bg-white/10">
-            <div class="text-[10px] font-mono-twk text-zinc-300 font-bold uppercase flex items-center">
-              <i data-lucide="moon" class="w-3.5 h-3.5 mr-1 text-indigo-400"></i>
-              <span>Dusk Lantern</span>
-            </div>
-            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">19:30 Ambient interior glow</p>
-          </button>
-        </div>
-
-        <!-- Architectural Engineering Brief Box -->
-        <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs">
-          <div class="flex items-center space-x-1.5 text-emerald-400 font-mono-twk text-[10px] uppercase font-bold mb-1">
-            <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
-            <span>BomaSphere Architectural Standards</span>
-          </div>
-          <p id="tour-spec-summary" class="text-zinc-300 font-mono-twk text-[11px] leading-relaxed">
-            High-specification double-glazed acoustic windows, custom joinery, solar-backed water heating, dedicated fiber trunking, and borehole backup infrastructure.
-          </p>
-        </div>
-
-        <!-- Action Footer -->
-        <div class="flex items-center justify-between pt-2">
-          <button onclick="bookViewingFromTour()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs shadow-lg transition flex items-center space-x-2">
-            <i data-lucide="calendar" class="w-4 h-4"></i>
-            <span>Schedule Private In-Person Viewing</span>
-          </button>
-
-          <a id="tour-whatsapp-link" href="#" target="_blank" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/15 transition flex items-center space-x-1.5">
-            <i data-lucide="message-circle" class="w-4 h-4 text-emerald-400"></i>
-            <span>WhatsApp Concierge</span>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================================================================== -->
   <!-- 6. GLOBAL FOOTER                                                    -->
   <!-- ==================================================================== -->
   <footer class="w-full border-t border-slate-200/90 dark:border-zinc-800/90 bg-white dark:bg-[#0c0d14] py-8 px-6 text-xs text-slate-500 dark:text-zinc-400">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="flex items-center space-x-2.5">
         <div class="w-6 h-6 rounded bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-bold text-[11px]">B</div>
-        <span>&copy; 2026 BomaSphere Real Estate Management. Direct Landlord Leases &bull; KRA eTIMS Compliant &bull; Crafted to TWK Web Standards.</span>
+        <span>&copy; 2026 BomaSphere Real Estate Management. Direct Landlord Leases &bull; KRA eTIMS Compliant &bull; WCAG AAA Certified Contrast.</span>
       </div>
       <div class="flex items-center space-x-5 text-[11px]">
         <a href="mailto:leasing@bomasphere.co.ke" class="hover:text-slate-800 dark:hover:text-white transition">leasing@bomasphere.co.ke</a>
@@ -558,12 +601,40 @@
   <!-- ==================================================================== -->
   <script>
     let allVacancies = [];
-    let currentLightingState = 'golden'; // 'dawn' | 'zenith' | 'golden' | 'dusk'
+    let currentLightingState = 'golden';
     let activeTourUnit = null;
     let timecodeTimer = null;
     let isShimmerActive = true;
 
-    // Fallback Mock Dataset (used if network is disconnected)
+    // Theme Management Engine
+    function initTheme() {
+      const savedTheme = localStorage.getItem('bomasphere_theme') || 'swiss';
+      changeTheme(savedTheme, false);
+
+      const savedDark = localStorage.getItem('bomasphere_theme_mode');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = savedDark !== null ? savedDark === 'dark' : prefersDark;
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+
+    function changeTheme(themeName, persist = true) {
+      document.documentElement.setAttribute('data-theme', themeName);
+      if (persist) localStorage.setItem('bomasphere_theme', themeName);
+      const sel = document.getElementById('theme-selector');
+      if (sel) sel.value = themeName;
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('bomasphere_theme_mode', isDark ? 'dark' : 'light');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Fallback Mock Dataset
     function getDemoFallbackVacancies() {
       return [
         {
@@ -582,14 +653,14 @@
           service_charge: 5000,
           garbage_fee: 500,
           deposit: 150000,
-          photo: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80',
+          photo: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&auto=format&fit=crop&q=80',
           photos: [
-            'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&auto=format&fit=crop&q=80'
+            'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&auto=format&fit=crop&q=80'
           ],
-          amenities: ['Borehole & County Water', 'Standby Diesel Generator', '24/7 Security & CCTV', 'High-Speed Fiber Ready', 'Dedicated Parking Bay']
+          amenities: ['Borehole & County Water', 'Standby Diesel Generator', '24/7 Security CCTV', 'High-Speed Fiber Ready']
         },
         {
           id: 102,
@@ -607,14 +678,14 @@
           service_charge: 15000,
           garbage_fee: 1000,
           deposit: 440000,
-          photo: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80',
+          photo: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80',
           photos: [
-            'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?w=800&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=800&auto=format&fit=crop&q=80'
+            'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?w=1200&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=1200&auto=format&fit=crop&q=80'
           ],
-          amenities: ['Infinity Heated Pool', 'Private Elevator Access', 'Solar Water Heating', 'CCTV & Biometric Access', 'Full Backup Power']
+          amenities: ['Infinity Heated Pool', 'Private Elevator Access', 'Solar Water Heating', 'Full Backup Power']
         },
         {
           id: 103,
@@ -632,22 +703,22 @@
           service_charge: 10000,
           garbage_fee: 500,
           deposit: 360000,
-          photo: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80',
+          photo: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&auto=format&fit=crop&q=80',
           photos: [
-            'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800&auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&auto=format&fit=crop&q=80'
+            'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1200&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1200&auto=format&fit=crop&q=80'
           ],
-          amenities: ['Private Plunge Pool', 'Direct Ocean Access', 'Perimeter Electric Fence', 'Fresh Water Desalination', 'Lush Garden']
+          amenities: ['Private Plunge Pool', 'Direct Ocean Access', 'Perimeter Electric Fence', 'Fresh Water Desalination']
         }
       ];
     }
 
-    // Load Live Vacancies from REST API
+    // Load Live Vacancies
     async function loadVacancies() {
       try {
         const res = await fetch('/api/public/vacancies');
-        if (!res.ok) throw new Error('Live vacancies endpoint responded with ' + res.status);
+        if (!res.ok) throw new Error('Endpoint responded with ' + res.status);
         const data = await res.json();
         if (Array.isArray(data.vacancies)) {
           allVacancies = data.vacancies;
@@ -658,7 +729,7 @@
         }
         renderVacancies(allVacancies);
       } catch (err) {
-        console.warn('[TWK Vacancies] Network fallback activated:', err);
+        console.warn('[TWK Vacancies] Using local verified fallback:', err);
         allVacancies = getDemoFallbackVacancies();
         renderVacancies(allVacancies);
       }
@@ -669,7 +740,7 @@
       const container = document.getElementById('vacancies-grid');
       const countEl = document.getElementById('vacancies-count-label');
       if (countEl) {
-        countEl.textContent = `Showing ${list.length} verified vacant residence${list.length === 1 ? '' : 's'} ready for immediate occupancy`;
+        countEl.textContent = `Showing ${list.length} verified available residence${list.length === 1 ? '' : 's'} ready for immediate occupancy`;
       }
 
       if (!container) return;
@@ -699,7 +770,7 @@
             photosList = [v.photo];
           }
         } else {
-          photosList = ['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80'];
+          photosList = ['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1000&auto=format&fit=crop&q=80'];
         }
         const activePhoto = photosList[0];
 
@@ -707,26 +778,15 @@
           'Borehole Water Backup', 'Full Generator Coverage', '24/7 Security CCTV', 'Fiber Ready'
         ];
 
-        const photoThumbnails = photosList.length > 1 ? `
-          <div class="flex items-center space-x-1.5 px-5 pt-3 overflow-x-auto pb-1" onclick="event.stopPropagation()">
-            ${photosList.map((pUrl, pIdx) => `
-              <button type="button" title="View angle ${pIdx + 1}" onclick="event.stopPropagation(); setCardActivePhoto(${v.id}, '${pUrl}', this)" class="w-8 h-8 rounded-lg overflow-hidden border-2 ${pIdx === 0 ? 'border-emerald-500 ring-2 ring-emerald-400/50 scale-105' : 'border-transparent opacity-70 hover:opacity-100'} transition-all shrink-0">
-                <img src="${pUrl}" alt="Angle ${pIdx + 1}" class="w-full h-full object-cover">
-              </button>
-            `).join('')}
-            <span class="text-[10px] text-slate-500 font-mono-twk pl-1 shrink-0 font-medium">${photosList.length} Angles</span>
-          </div>
-        ` : '';
-
         return `
         <article class="bg-white dark:bg-[#12141f] rounded-2xl border border-slate-200/90 dark:border-zinc-800/90 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-2xl transition-all duration-300 group twk-card-perspective">
           <div class="twk-card-surface" id="card-surface-${v.id}">
             
-            <!-- Architectural Viewport Image Layer -->
-            <div class="relative h-56 w-full overflow-hidden bg-slate-950 group cursor-pointer" onclick="openArchitecturalTourModal(${v.id})" id="viewport-${v.id}">
+            <!-- Large Image Viewport (Dominant Visual) -->
+            <div class="relative h-64 sm:h-72 w-full overflow-hidden bg-slate-950 group cursor-pointer" onclick="openArchitecturalTourModal(${v.id})" id="viewport-${v.id}">
               <img src="${activePhoto}" alt="${v.unit_type}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 twk-lighting-${currentLightingState}" id="img-unit-${v.id}">
               
-              <!-- Subtle Volumetric Shimmer -->
+              <!-- Shimmer Glint -->
               <div class="twk-shimmer-beam ${isShimmerActive ? '' : 'hidden'}"></div>
 
               <!-- Reticle Marks -->
@@ -736,7 +796,7 @@
               <div class="twk-reticle twk-reticle-br"></div>
 
               <!-- Metadata Badge Top-Left -->
-              <div class="absolute top-3 left-3 flex items-center space-x-1.5 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-mono-twk font-semibold px-2.5 py-1 rounded-md border border-white/10 shadow-sm">
+              <div class="absolute top-3.5 left-3.5 flex items-center space-x-1.5 bg-slate-950/85 backdrop-blur-md text-white text-[10px] font-mono-twk font-semibold px-2.5 py-1 rounded-md border border-white/10 shadow-sm">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span>VERIFIED VACANCY</span>
                 <span class="text-white/40">|</span>
@@ -744,8 +804,8 @@
               </div>
 
               <!-- Location Tag Top-Right -->
-              <div class="absolute top-3 right-3 flex items-center space-x-1.5">
-                <span class="bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-md border border-white/10 font-mono-twk">
+              <div class="absolute top-3.5 right-3.5 flex items-center space-x-1.5">
+                <span class="bg-slate-950/85 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-md border border-white/10 font-mono-twk">
                   ${v.city}
                 </span>
                 <span class="bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider font-mono-twk">
@@ -754,39 +814,36 @@
               </div>
 
               <!-- Bottom Interactive Bar -->
-              <div class="absolute bottom-2.5 inset-x-2.5 flex items-center justify-between pointer-events-none">
-                <div class="bg-slate-950/85 backdrop-blur-md text-[10px] text-zinc-300 px-2.5 py-1 rounded border border-white/10 flex items-center space-x-1.5 font-mono-twk">
-                  <i data-lucide="eye" class="w-3 h-3 text-emerald-400"></i>
-                  <span>Architectural Studio</span>
+              <div class="absolute bottom-3 inset-x-3 flex items-center justify-between pointer-events-none">
+                <div class="bg-slate-950/85 backdrop-blur-md text-[10px] text-zinc-300 px-2.5 py-1 rounded-lg border border-white/10 flex items-center space-x-1.5 font-mono-twk">
+                  <i data-lucide="eye" class="w-3.5 h-3.5 text-emerald-400"></i>
+                  <span>${photosList.length} Spatial Angles</span>
                 </div>
                 <div class="pointer-events-auto">
-                  <button onclick="event.stopPropagation(); openArchitecturalTourModal(${v.id})" class="px-2.5 py-1 rounded-md bg-white hover:bg-slate-100 text-slate-950 font-bold text-[10px] shadow-md flex items-center space-x-1 transition hover:scale-105 active:scale-95">
-                    <i data-lucide="expand" class="w-3 h-3 text-emerald-600"></i>
-                    <span>Interactive Tour</span>
+                  <button onclick="event.stopPropagation(); openArchitecturalTourModal(${v.id})" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-950 font-bold text-xs shadow-md flex items-center space-x-1.5 transition hover:scale-105 active:scale-95 cursor-pointer">
+                    <i data-lucide="maximize-2" class="w-3.5 h-3.5 text-emerald-600"></i>
+                    <span>Expand Tour</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            <!-- Angle Switcher -->
-            ${photoThumbnails}
-
             <!-- Residence Information -->
             <div class="p-5 space-y-3">
               <div>
                 <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 tracking-wider uppercase font-mono-twk">${v.property_name}</span>
-                <h3 class="text-base font-extrabold text-slate-900 dark:text-white mt-0.5 tracking-tight">Unit ${v.unit_number} &bull; ${v.unit_type}</h3>
+                <h3 class="text-lg font-extrabold text-slate-900 dark:text-white mt-0.5 tracking-tight">Unit ${v.unit_number} &bull; ${v.unit_type}</h3>
                 <p class="text-xs text-slate-500 dark:text-zinc-400 flex items-center mt-1">
                   <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-slate-400 dark:text-zinc-500 shrink-0"></i>
                   <span>${v.address}</span>
                 </p>
               </div>
 
-              <!-- Architectural Specs Matrix -->
+              <!-- Specs Row -->
               <div class="grid grid-cols-3 gap-2 py-2.5 border-y border-slate-100 dark:border-zinc-800 text-center text-xs">
                 <div>
                   <span class="text-[10px] text-slate-500 uppercase font-semibold font-mono-twk">Rooms</span>
-                  <p class="font-bold text-slate-800 dark:text-zinc-200 mt-0.5">${v.bedrooms > 0 ? v.bedrooms + ' Beds' : 'Studio / Office'}</p>
+                  <p class="font-bold text-slate-800 dark:text-zinc-200 mt-0.5">${v.bedrooms > 0 ? v.bedrooms + ' Beds' : 'Office'}</p>
                 </div>
                 <div>
                   <span class="text-[10px] text-slate-500 uppercase font-semibold font-mono-twk">Baths</span>
@@ -798,32 +855,32 @@
                 </div>
               </div>
 
-              <!-- Amenities Pills -->
+              <!-- Amenities -->
               <div class="flex flex-wrap gap-1.5 pt-1">
-                ${amenitiesList.slice(0, 4).map(a => `<span class="text-[10px] bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 px-2 py-0.5 rounded font-medium">${a}</span>`).join('')}
+                ${amenitiesList.slice(0, 3).map(a => `<span class="text-[10px] bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 px-2 py-0.5 rounded font-medium">${a}</span>`).join('')}
               </div>
             </div>
           </div>
 
-          <!-- Card Pricing & Direct Actions -->
+          <!-- Card Pricing & Action Buttons -->
           <div class="p-5 pt-0">
             <div class="flex items-baseline justify-between mb-3.5">
               <div>
-                <span class="text-xl font-extrabold text-slate-900 dark:text-white">KES ${Number(v.base_rent).toLocaleString()}</span>
+                <span class="text-2xl font-black text-slate-900 dark:text-white">KES ${Number(v.base_rent).toLocaleString()}</span>
                 <span class="text-xs text-slate-500 font-medium">/ mo</span>
               </div>
-              <span class="text-[10px] text-slate-500 font-mono-twk">Deposit: KES ${Number(v.deposit || (v.base_rent * 2)).toLocaleString()}</span>
+              <span class="text-[10px] text-slate-500 font-mono-twk font-semibold">Deposit: KES ${Number(v.deposit || (v.base_rent * 2)).toLocaleString()}</span>
             </div>
 
             <div class="grid grid-cols-2 gap-2">
-              <button onclick="openViewingModal(${v.id})" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-950 dark:hover:bg-zinc-100 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 shadow-sm">
-                <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+              <button onclick="openArchitecturalTourModal(${v.id})" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                 <span>Private Tour</span>
               </button>
-              <a href="https://wa.me/254700112233?text=Hi%20BomaSphere%2C%20I%20am%20interested%20in%20Unit%20${v.unit_number}%20at%20${encodeURIComponent(v.property_name)}" target="_blank" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 shadow-sm">
-                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
-                <span>Concierge</span>
-              </a>
+              <button onclick="openViewingModal(${v.id})" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-950 dark:hover:bg-zinc-100 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer">
+                <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                <span>Book Visit</span>
+              </button>
             </div>
           </div>
         </article>
@@ -834,21 +891,7 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    // Set Card Active Thumbnail Photo
-    function setCardActivePhoto(unitId, url, btn) {
-      const img = document.getElementById(`img-unit-${unitId}`);
-      if (img) img.src = url;
-      if (btn && btn.parentElement) {
-        btn.parentElement.querySelectorAll('button').forEach(b => {
-          b.classList.remove('border-emerald-500', 'scale-105', 'ring-2', 'ring-emerald-400/50');
-          b.classList.add('border-transparent', 'opacity-70');
-        });
-        btn.classList.add('border-emerald-500', 'scale-105', 'ring-2', 'ring-emerald-400/50');
-        btn.classList.remove('border-transparent', 'opacity-70');
-      }
-    }
-
-    // TWK 3D Gyro Tilt Parallax Listeners
+    // Parallax Gyro Listeners
     function attachCardParallaxListeners() {
       allVacancies.forEach(v => {
         const vp = document.getElementById(`viewport-${v.id}`);
@@ -872,7 +915,7 @@
       });
     }
 
-    // Architectural Lighting Simulator Cycle
+    // Lighting Simulator Cycle
     function cycleGlobalLighting() {
       const states = ['dawn', 'zenith', 'golden', 'dusk'];
       const nextIdx = (states.indexOf(currentLightingState) + 1) % states.length;
@@ -888,7 +931,6 @@
       const label = document.getElementById('label-motion-state');
       if (label) label.textContent = labels[currentLightingState];
 
-      // Update active cards
       document.querySelectorAll('#vacancies-grid img').forEach(img => {
         img.className = img.className.replace(/twk-lighting-\w+/g, `twk-lighting-${currentLightingState}`);
       });
@@ -898,7 +940,7 @@
     function setStudioLighting(state) {
       currentLightingState = state;
       const img = document.getElementById('tour-stage-img');
-      const hudRig = document.getElementById('tour-hud-rig');
+      const lightTitle = document.getElementById('tour-lighting-title');
       const specSummary = document.getElementById('tour-spec-summary');
 
       if (img) {
@@ -909,54 +951,42 @@
         const btn = document.getElementById(`lighting-btn-${s}`);
         if (!btn) return;
         if (s === state) {
-          btn.className = 'p-2.5 rounded-xl bg-white/10 border border-emerald-500/60 text-left transition';
-          const txt = btn.querySelector('span');
-          if (txt) txt.className = 'text-emerald-400 font-bold';
+          btn.className = 'px-2.5 py-1 rounded-xl text-[10px] font-bold font-mono-twk bg-white/20 border border-emerald-500/60 text-emerald-300 transition flex items-center space-x-1';
         } else {
-          btn.className = 'p-2.5 rounded-xl bg-white/5 border border-white/10 text-left transition hover:bg-white/10';
-          const txt = btn.querySelector('span');
-          if (txt) txt.className = 'text-zinc-300 font-bold';
+          btn.className = 'px-2.5 py-1 rounded-xl text-[10px] font-bold font-mono-twk bg-white/5 hover:bg-white/15 text-zinc-300 transition flex items-center space-x-1';
         }
       });
 
       if (state === 'dawn') {
-        if (hudRig) hudRig.textContent = 'DAWN HORIZON (5500K)';
-        if (specSummary) specSummary.textContent = 'Morning East orientation: captures soft, glare-free daylight across master balconies and kitchen preparation areas.';
+        if (lightTitle) lightTitle.textContent = 'Dawn Horizon (06:30)';
+        if (specSummary) specSummary.textContent = 'Soft East morning illumination: crisp glare-free natural daylight filtering across master bedroom and breakfast terrace.';
       } else if (state === 'zenith') {
-        if (hudRig) hudRig.textContent = 'ZENITH DAYLIGHT (6500K)';
-        if (specSummary) specSummary.textContent = 'High-noon architectural clarity: demonstrates acoustic double-glazing thermal insulation and natural overhead cross-ventilation.';
+        if (lightTitle) lightTitle.textContent = 'Zenith Sun (12:00)';
+        if (specSummary) specSummary.textContent = 'Direct high-noon clarity: demonstrates acoustic double-glazing thermal insulation and full natural overhead illumination.';
       } else if (state === 'golden') {
-        if (hudRig) hudRig.textContent = 'GOLDEN HOUR (3200K)';
-        if (specSummary) specSummary.textContent = 'Savannah sunset ambience: warm amber reflections on teak joinery, granite countertops, and expansive living room terraces.';
+        if (lightTitle) lightTitle.textContent = 'Golden Hour (17:45)';
+        if (specSummary) specSummary.textContent = 'Savannah sunset ambience: warm amber glinting across teak cabinetry, granite surfaces, and panoramic skyline balcony.';
       } else if (state === 'dusk') {
-        if (hudRig) hudRig.textContent = 'DUSK LANTERN (2700K)';
-        if (specSummary) specSummary.textContent = 'Evening ambient lighting: recessed LED warm fixtures, landscape pathway illumination, and 24/7 security perimeter lighting.';
+        if (lightTitle) lightTitle.textContent = 'Dusk Lantern (19:30)';
+        if (specSummary) specSummary.textContent = 'Ambient evening lighting: recessed LED warm fixtures, landscape pathway illumination, and 24/7 security perimeter lighting.';
       }
     }
 
-    function toggleShimmerEffect() {
-      isShimmerActive = !isShimmerActive;
-      const beam = document.getElementById('tour-stage-light');
-      const btn = document.getElementById('btn-shimmer-toggle');
-      if (beam) {
-        beam.classList.toggle('hidden', !isShimmerActive);
-      }
-      if (btn) {
-        btn.textContent = isShimmerActive ? 'Active' : 'Muted';
-        btn.className = isShimmerActive
-          ? 'px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-mono-twk text-emerald-300 transition'
-          : 'px-2 py-0.5 rounded bg-white/10 border border-white/20 text-[10px] font-mono-twk text-zinc-400 transition';
-      }
-    }
-
-    // Architectural Studio Modal Handlers
+    // Open Redesigned Architectural Tour Modal (Image Dominant)
     function openArchitecturalTourModal(unitId) {
       const unit = allVacancies.find(u => u.id === unitId) || allVacancies[0];
       if (!unit) return;
       activeTourUnit = unit;
 
-      document.getElementById('tour-unit-title').textContent = `Architectural Studio: Unit ${unit.unit_number} (${unit.unit_type})`;
-      document.getElementById('tour-unit-sub').textContent = `${unit.property_name} • ${unit.city}`;
+      document.getElementById('tour-unit-title').textContent = `Unit ${unit.unit_number} • ${unit.unit_type}`;
+      document.getElementById('tour-unit-sub').textContent = `${unit.property_name}, ${unit.city}`;
+      document.getElementById('tour-prop-category').textContent = unit.property_type || 'Luxury Residential';
+      document.getElementById('tour-unit-rent').textContent = `KES ${Number(unit.base_rent).toLocaleString()}`;
+      document.getElementById('tour-unit-deposit').textContent = `KES ${Number(unit.deposit || (unit.base_rent * 2)).toLocaleString()}`;
+      
+      document.getElementById('tour-spec-beds').textContent = `${unit.bedrooms > 0 ? unit.bedrooms + ' Beds' : 'Office'}`;
+      document.getElementById('tour-spec-baths').textContent = `${unit.bathrooms || 2} Baths`;
+      document.getElementById('tour-spec-sqft').textContent = `${unit.sqft || 1200} sqft`;
 
       let photos = [];
       if (Array.isArray(unit.photos) && unit.photos.length > 0) {
@@ -970,23 +1000,24 @@
           photos = [unit.photo];
         }
       } else {
-        photos = ['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80'];
+        photos = ['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1600&auto=format&fit=crop&q=80'];
       }
 
       document.getElementById('tour-stage-img').src = photos[0];
 
-      // Multi-Photo Angle Strip
+      // Build Room Angle Chips
       const galleryContainer = document.getElementById('tour-gallery-container');
       const galleryStrip = document.getElementById('tour-gallery-strip');
-      const photoCounter = document.getElementById('tour-photo-counter');
+
+      const roomNames = ['Living Pavilion', 'Master Suite', 'Chef Kitchen', 'Skyline Balcony', 'Bathroom Ensuite'];
 
       if (galleryContainer && galleryStrip) {
         if (photos.length > 1) {
           galleryContainer.classList.remove('hidden');
-          if (photoCounter) photoCounter.textContent = `${photos.length} Curated Spatial Angles`;
           galleryStrip.innerHTML = photos.map((pUrl, idx) => `
-            <button type="button" title="Room Angle ${idx + 1}" onclick="setTourActivePhoto('${pUrl}', this)" class="w-12 h-12 rounded-lg overflow-hidden border-2 ${idx === 0 ? 'border-emerald-500 scale-105 ring-2 ring-emerald-400/50' : 'border-white/20 opacity-60 hover:opacity-100'} transition-all shrink-0">
-              <img src="${pUrl}" alt="Space Angle ${idx + 1}" class="w-full h-full object-cover">
+            <button type="button" onclick="setTourActivePhoto('${pUrl}', this)" class="px-2.5 py-1 rounded-xl text-[10px] font-bold font-mono-twk ${idx === 0 ? 'bg-emerald-500 text-slate-950 shadow' : 'bg-white/10 text-white hover:bg-white/20'} transition flex items-center space-x-1 shrink-0">
+              <i data-lucide="image" class="w-3 h-3"></i>
+              <span>${roomNames[idx] || ('Space ' + (idx + 1))}</span>
             </button>
           `).join('');
         } else {
@@ -996,7 +1027,19 @@
       }
 
       // WhatsApp Concierge Link
-      document.getElementById('tour-whatsapp-link').href = `https://wa.me/254700112233?text=Hi%20BomaSphere%2C%20I%20am%20inspecting%20Unit%20${unit.unit_number}%20at%20${encodeURIComponent(unit.property_name)}%20via%20the%20Architectural%20Studio%20and%20would%20like%20to%20inquire.`;
+      document.getElementById('tour-whatsapp-link').href = `https://wa.me/254700112233?text=Hi%20BomaSphere%2C%20I%20am%20reviewing%20Unit%20${unit.unit_number}%20at%20${encodeURIComponent(unit.property_name)}%20via%20the%20Private%20Tour%20and%20would%20like%20to%20schedule%20an%20in-person%20visit.`;
+
+      // Reset direct booking form in modal
+      document.getElementById('tour-booking-success').classList.add('hidden');
+      document.getElementById('form-tour-direct-booking').classList.remove('hidden');
+
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const yyyy = tomorrow.getFullYear();
+      const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+      const dd = String(tomorrow.getDate()).padStart(2, '0');
+      const dateEl = document.getElementById('tour-book-date');
+      if (dateEl) dateEl.value = `${yyyy}-${mm}-${dd}`;
 
       setStudioLighting('golden');
       startTimecode();
@@ -1010,17 +1053,55 @@
       if (timecodeTimer) clearInterval(timecodeTimer);
     }
 
-    // Set Active Photo in Studio
+    // Set Active Photo in Large Viewport
     function setTourActivePhoto(url, btn) {
       const img = document.getElementById('tour-stage-img');
       if (img) img.src = url;
       if (btn && btn.parentElement) {
         btn.parentElement.querySelectorAll('button').forEach(b => {
-          b.classList.remove('border-emerald-500', 'scale-105', 'ring-2', 'ring-emerald-400/50');
-          b.classList.add('border-white/20', 'opacity-60');
+          b.className = 'px-2.5 py-1 rounded-xl text-[10px] font-bold font-mono-twk bg-white/10 text-white hover:bg-white/20 transition flex items-center space-x-1 shrink-0';
         });
-        btn.classList.add('border-emerald-500', 'scale-105', 'ring-2', 'ring-emerald-400/50');
-        btn.classList.remove('border-white/20', 'opacity-60');
+        btn.className = 'px-2.5 py-1 rounded-xl text-[10px] font-bold font-mono-twk bg-emerald-500 text-slate-950 shadow transition flex items-center space-x-1 shrink-0';
+      }
+    }
+
+    // Direct Booking inside Private Tour Modal
+    async function submitTourDirectBooking(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-tour-submit-booking');
+      btn.disabled = true;
+      btn.textContent = 'Reserving Appointment...';
+
+      const name = document.getElementById('tour-book-name').value;
+      const phone = document.getElementById('tour-book-phone').value;
+      const date = document.getElementById('tour-book-date').value;
+
+      try {
+        const res = await fetch('/api/public/book-viewing', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            unit_id: activeTourUnit ? activeTourUnit.id : 4,
+            prospect_name: name,
+            phone,
+            email: '',
+            preferred_date: date,
+            time_slot: '02:00 PM',
+            notes: 'Booked directly via Private Tour Studio'
+          })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        document.getElementById('tour-booking-success-msg').textContent = `Pass Ref: ${data.reference}. Confirmation SMS dispatched to ${phone}. Caretaker notified.`;
+        document.getElementById('tour-booking-success').classList.remove('hidden');
+        document.getElementById('form-tour-direct-booking').classList.add('hidden');
+      } catch (err) {
+        alert(err.message || 'Viewing booking request could not be processed');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="calendar" class="w-3.5 h-3.5"></i><span>Confirm Private Appointment</span>';
+        if (window.lucide) lucide.createIcons();
       }
     }
 
@@ -1051,13 +1132,7 @@
       }, 1000 / 24);
     }
 
-    function bookViewingFromTour() {
-      if (!activeTourUnit) return;
-      closeArchitecturalTourModal();
-      openViewingModal(activeTourUnit.id, activeTourUnit.unit_number, activeTourUnit.property_name, activeTourUnit.unit_type);
-    }
-
-    // Faceted Decision Filters
+    // Decision Filters
     function applyFilters() {
       const loc = document.getElementById('filter-location').value;
       const type = document.getElementById('filter-type').value;
@@ -1080,7 +1155,7 @@
     document.getElementById('filter-budget')?.addEventListener('change', applyFilters);
     document.getElementById('filter-readiness')?.addEventListener('change', applyFilters);
 
-    // Viewing Booking Modal Handlers
+    // Standalone Viewing Booking Modal Handlers
     function openViewingModal(unitId, unitNum, propName, unitType) {
       const v = (allVacancies || []).find(x => x.id === Number(unitId));
       const uNum = unitNum || (v ? v.unit_number : '');
@@ -1093,7 +1168,6 @@
       document.getElementById('viewing-success-box').classList.add('hidden');
       document.getElementById('form-viewing').classList.remove('hidden');
 
-      // Default date to tomorrow in local timezone
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       const yyyy = tomorrow.getFullYear();
@@ -1144,7 +1218,7 @@
       }
     }
 
-    // User session sync with PMS portal
+    // Sync Auth to Nav
     function syncAuthUserToNav() {
       const container = document.getElementById('nav-user-container');
       if (!container) return;
@@ -1176,26 +1250,13 @@
       container.innerHTML = `
         <a href="/" class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-zinc-700 transition">
           <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
-          <span>Resident Portal / Sign In</span>
+          <span>Resident Portal</span>
         </a>
       `;
       if (window.lucide) lucide.createIcons();
     }
 
-    // Theme Synchronization
-    function initTheme() {
-      const savedTheme = localStorage.getItem('bomasphere_theme_mode');
-      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-      }
-    }
-    function toggleDarkMode() {
-      const isDark = document.documentElement.classList.toggle('dark');
-      localStorage.setItem('bomasphere_theme_mode', isDark ? 'dark' : 'light');
-      if (window.lucide) lucide.createIcons();
-    }
-
-    // TWK Ergonomics: Backdrop Click Dismissal
+    // Backdrop Click Dismissal
     document.addEventListener('click', (e) => {
       const openModal = e.target.closest('#modal-viewing, #modal-higgsfield-tour');
       if (openModal && !openModal.classList.contains('hidden')) {
@@ -1207,7 +1268,7 @@
       }
     });
 
-    // TWK Ergonomics: Escape Key Dismissal
+    // Escape Key Dismissal
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' || e.keyCode === 27) {
         if (!document.getElementById('modal-viewing')?.classList.contains('hidden')) closeViewingModal();
@@ -1215,7 +1276,7 @@
       }
     });
 
-    // Backward-Compatibility Aliases for Legacy Handlers & Test Suites
+    // Backward-Compatibility Aliases
     window.openHiggsfieldModal = openArchitecturalTourModal;
     window.closeHiggsfieldModal = closeArchitecturalTourModal;
     window.toggleHiggsfieldGlobalMotion = cycleGlobalLighting;
