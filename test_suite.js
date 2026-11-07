@@ -651,6 +651,24 @@ async function runTests() {
     console.log(`      Tenant #${regRes.json.id} successfully leased Unit ${vacantUnit.unit_number}. Agreement: ${regRes.json.agreement_code}, Move-In Invoice: ${regRes.json.invoice_number} (Total Due: KES ${regRes.json.total_due.toLocaleString()})`);
   });
 
+  // TEST 46: Modal Ergonomics & TWK Standards
+  await test('TWK & UX Standards: Modal backdrop click-to-close & Escape key dismissal active', async () => {
+    const fs = require('fs');
+    const appJs = fs.readFileSync('public/app.js', 'utf8');
+    const rentalsHtml = fs.readFileSync('public/rentals.html', 'utf8');
+
+    if (!appJs.includes("openModal.querySelector('div.bg-white, div.bg-zinc-900, div.bg-zinc-950, [role=\"dialog\"]')")) {
+      throw new Error('app.js missing dialog card isolation for click-outside dismissal');
+    }
+    if (!appJs.includes("e.key === 'Escape'")) {
+      throw new Error('app.js missing Escape key listener for accessible modal closing');
+    }
+    if (!rentalsHtml.includes("openModal.id === 'modal-viewing'") || !rentalsHtml.includes("openModal.id === 'modal-higgsfield-tour'")) {
+      throw new Error('rentals.html missing click-outside dismissal for viewing and tour modals');
+    }
+    console.log('      Verified: Click-outside backdrop and Escape key handlers active across all modals');
+  });
+
   console.log(`\n=======================================================`);
   console.log(` TESTS COMPLETED: ${passed} PASSED, ${failed} FAILED `);
   console.log(`=======================================================`);

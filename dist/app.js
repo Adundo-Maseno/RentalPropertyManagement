@@ -1556,7 +1556,7 @@ class BomaSphereApp {
 
     const finalizeClose = () => {
       modal.classList.add('hidden');
-      const remainingOpen = document.querySelectorAll('[id^="modal-"]:not(.hidden)');
+      const remainingOpen = document.querySelectorAll('[id^="modal-"].fixed.inset-0:not(.hidden)');
       if (remainingOpen.length === 0) {
         document.body.style.overflow = '';
       }
@@ -3211,7 +3211,7 @@ class BomaSphereApp {
 
     // TWK Ergonomics: Backdrop Click-to-Close on all modals
     document.addEventListener('click', (e) => {
-      const openModal = e.target.closest('[id^="modal-"]');
+      const openModal = e.target.closest('[id^="modal-"].fixed.inset-0');
       if (openModal && !openModal.classList.contains('hidden')) {
         const dialog = openModal.querySelector('div.bg-white, div.bg-zinc-900, div.bg-zinc-950, [role="dialog"]') || openModal.firstElementChild;
         // If clicked outside the dialog card (on the backdrop overlay)
@@ -3224,7 +3224,7 @@ class BomaSphereApp {
     // TWK Ergonomics: Escape key closes active modal
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        const openModals = Array.from(document.querySelectorAll('[id^="modal-"]:not(.hidden)'));
+        const openModals = Array.from(document.querySelectorAll('[id^="modal-"].fixed.inset-0:not(.hidden)'));
         if (openModals.length > 0) {
           const topModal = openModals[openModals.length - 1];
           this.closeModal(topModal.id);
