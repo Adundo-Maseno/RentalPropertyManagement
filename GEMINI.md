@@ -41,3 +41,4 @@ The agent autonomously determines which phase to activate based on the nature of
      - Check UI rendering.
      - Inspect `browser_console_messages` to ensure zero uncaught errors.
      - Verify API network responses return 200/201.
+

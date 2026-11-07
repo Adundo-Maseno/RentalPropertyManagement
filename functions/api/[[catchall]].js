@@ -113,6 +113,10 @@ async function handleD1(context, json, corsHeaders) {
     await ensureD1Schema(db);
     return json({ success: true, message: 'D1 schema and RBAC users successfully initialized!' });
   }
+  if (pathname === '/api/reset-seed' && method === 'POST') {
+    await ensureD1Schema(db);
+    return json({ success: true, message: 'D1 database re-seeded successfully.' });
+  }
 
   // 1. Auto-provision D1 tables and RBAC users if database is fresh or columns missing
   try {
@@ -445,6 +449,30 @@ async function handleD1(context, json, corsHeaders) {
       const id = res.meta?.last_row_id;
       return json({ success: true, id, message: 'Lease created successfully' }, 201);
     }
+    if ((pathname === '/api/leases' || pathname.startsWith('/api/leases/')) && method === 'PUT') {
+      const pathId = pathname.startsWith('/api/leases/') ? pathname.split('/')[3] : null;
+      const b = await request.json().catch(() => ({}));
+      const id = pathId || b.id;
+      if (!id) return json({ error: 'Lease ID required' }, 400);
+
+      await db.prepare(`
+        UPDATE leases SET
+          monthly_rent = COALESCE(?, monthly_rent),
+          deposit_paid = COALESCE(?, deposit_paid),
+          water_deposit = COALESCE(?, water_deposit),
+          status = COALESCE(?, status),
+          end_date = COALESCE(?, end_date),
+          terms = COALESCE(?, terms)
+        WHERE id = ?
+      `).bind(
+        b.monthly_rent !== undefined ? Number(b.monthly_rent) : null,
+        b.deposit_paid !== undefined ? Number(b.deposit_paid) : null,
+        b.water_deposit !== undefined ? Number(b.water_deposit) : null,
+        b.status || null, b.end_date || null, b.terms || null, Number(id)
+      ).run();
+
+      return json({ success: true, message: 'Lease updated successfully.' });
+    }
 
     // 10. Invoices
     if (pathname === '/api/invoices' && method === 'GET') {
@@ -530,6 +558,50 @@ async function handleD1(context, json, corsHeaders) {
       `).all()).results || [];
       return json(rows);
     }
+    if (pathname === '/api/water-readings' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const { unit_id, month, reading_date, previous_reading, current_reading, rate_per_unit } = b;
+      if (!unit_id || previous_reading === undefined || current_reading === undefined) {
+        return json({ error: 'Unit ID, previous reading, and current reading are required.' }, 400);
+      }
+      const prev = Number(previous_reading);
+      const curr = Number(current_reading);
+      if (curr < prev) {
+        return json({ error: 'Current reading cannot be less than previous reading.' }, 400);
+      }
+      const consumed = Math.round((curr - prev) * 100) / 100;
+      const rate = Number(rate_per_unit || 180.00);
+      const total = Math.round(consumed * rate * 100) / 100;
+      const m = month || new Date().toISOString().slice(0, 7);
+      const d = reading_date || new Date().toISOString().slice(0, 10);
+
+      const resIns = await db.prepare(`
+        INSERT INTO water_readings (unit_id, month, reading_date, previous_reading, current_reading, units_consumed, rate_per_unit, total_cost, invoiced)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
+      `).bind(Number(unit_id), m, d, prev, curr, consumed, rate, total).run();
+
+      await db.prepare('UPDATE units SET meter_number = COALESCE(meter_number, ?) WHERE id = ?').bind(`WM-${unit_id}-01`, Number(unit_id)).run();
+
+      if (consumed >= 25) {
+        const u = await db.prepare('SELECT u.*, p.name as property_name FROM units u JOIN properties p ON u.property_id = p.id WHERE u.id = ?').bind(Number(unit_id)).first();
+        if (u) {
+          try {
+            await db.prepare(`
+              INSERT INTO leak_alerts (device_id, alert_type, flow_rate_lpm, severity, status, notes)
+              VALUES (1, 'high_consumption', ?, 'medium', 'active', ?)
+            `).bind(consumed, `Abnormal water consumption spike: ${consumed} units used in Unit ${u.unit_number} (${u.property_name}).`).run();
+          } catch (e) {}
+        }
+      }
+
+      return json({
+        success: true,
+        id: resIns.meta?.last_row_id,
+        units_consumed: consumed,
+        total_cost: total,
+        message: `Water reading recorded: ${consumed} units (KES ${total.toLocaleString()}).`
+      }, 201);
+    }
 
     // 13. Maintenance
     if (pathname === '/api/maintenance' && method === 'GET') {
@@ -543,6 +615,50 @@ async function handleD1(context, json, corsHeaders) {
       `).all()).results || [];
       return json(rows);
     }
+    if (pathname === '/api/maintenance' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const { property_id, unit_id, title, description, category, priority, tenant_id } = b;
+      if (!property_id || !unit_id || !title) {
+        return json({ error: 'Property, unit, and issue title are required.' }, 400);
+      }
+      const tNum = 'TKT-' + Math.floor(1000 + Math.random() * 9000);
+      const resIns = await db.prepare(`
+        INSERT INTO maintenance_requests (ticket_number, property_id, unit_id, tenant_id, title, description, category, priority, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open')
+      `).bind(
+        tNum, Number(property_id), Number(unit_id), tenant_id ? Number(tenant_id) : null,
+        title, description || '', category || 'Plumbing', priority || 'medium'
+      ).run();
+
+      return json({
+        success: true,
+        id: resIns.meta?.last_row_id,
+        ticket_number: tNum,
+        message: 'Maintenance ticket created successfully.'
+      }, 201);
+    }
+    if ((pathname === '/api/maintenance' || pathname.startsWith('/api/maintenance/')) && method === 'PUT') {
+      const pathId = pathname.startsWith('/api/maintenance/') ? pathname.split('/')[3] : null;
+      const b = await request.json().catch(() => ({}));
+      const id = pathId || b.id;
+      if (!id) return json({ error: 'Ticket ID required' }, 400);
+
+      await db.prepare(`
+        UPDATE maintenance_requests SET
+          status = COALESCE(?, status),
+          actual_cost = COALESCE(?, actual_cost),
+          assigned_contractor = COALESCE(?, assigned_contractor),
+          contractor_phone = COALESCE(?, contractor_phone),
+          completed_date = CASE WHEN ? = 'completed' THEN CURRENT_TIMESTAMP ELSE completed_date END
+        WHERE id = ?
+      `).bind(
+        b.status || null, b.actual_cost ? Number(b.actual_cost) : null,
+        b.assigned_contractor || null, b.contractor_phone || null,
+        b.status || null, Number(id)
+      ).run();
+
+      return json({ success: true, message: 'Maintenance ticket updated successfully.' });
+    }
 
     // 14. Expenses
     if (pathname === '/api/expenses' && method === 'GET') {
@@ -553,6 +669,27 @@ async function handleD1(context, json, corsHeaders) {
         ORDER BY e.expense_date DESC, e.id DESC
       `).all()).results || [];
       return json(rows);
+    }
+    if (pathname === '/api/expenses' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const { property_id, category, amount, description, expense_date, paid_to, receipt_number, payment_method } = b;
+      if (!property_id || !category || !amount) {
+        return json({ error: 'Property ID, category, and amount are required.' }, 400);
+      }
+      const resIns = await db.prepare(`
+        INSERT INTO expenses (property_id, category, amount, description, expense_date, paid_to, receipt_number, payment_method)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        Number(property_id), category, Number(amount), description || '',
+        expense_date || new Date().toISOString().slice(0, 10),
+        paid_to || '', receipt_number || null, payment_method || 'mpesa'
+      ).run();
+
+      return json({
+        success: true,
+        id: resIns.meta?.last_row_id,
+        message: 'Expense recorded successfully.'
+      }, 201);
     }
 
     // 15. Public Vacancies & Book Viewing
@@ -928,6 +1065,58 @@ async function handleD1(context, json, corsHeaders) {
       `).bind(type || 'SMS', recipient_name || 'Resident', recipient_phone, tenant_id ? Number(tenant_id) : null, message, purpose || 'Notice').run();
       return json({ success: true, id: resIns.meta?.last_row_id, message: 'Dispatched successfully' }, 201);
     }
+    if (pathname === '/api/whatsapp/webhook' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const phone = b.phone || b.From || '+254722889900';
+      const incomingText = (b.message || b.Body || '').trim();
+
+      let tenant = await db.prepare("SELECT * FROM tenants WHERE phone LIKE ? OR phone LIKE ?").bind(`%${phone.slice(-9)}%`, phone).first();
+      if (!tenant) tenant = await db.prepare("SELECT * FROM tenants LIMIT 1").first();
+
+      const cmd = incomingText.toUpperCase();
+      let replyText = '';
+      let action = 'menu';
+
+      if (cmd.includes('BALANCE') || cmd === '1') {
+        const inv = await db.prepare("SELECT * FROM invoices WHERE tenant_id = ? ORDER BY id DESC LIMIT 1").bind(tenant.id).first();
+        const bal = inv ? inv.balance : 0;
+        replyText = `Jambo ${tenant.name}! Your current BomaSphere balance is KES ${Number(bal).toLocaleString()}. Due date: 5th of this month. Pay easily via Paybill 522522, Account: ${inv?.invoice_number || 'RENT'}. Reply 'PAY' to trigger instant M-Pesa prompt.`;
+        action = 'balance';
+      } else if (cmd.includes('RECEIPT') || cmd === '2') {
+        const pmt = await db.prepare("SELECT * FROM payments WHERE tenant_id = ? ORDER BY id DESC LIMIT 1").bind(tenant.id).first();
+        if (pmt) {
+          replyText = `Official BomaSphere Receipt: ${pmt.receipt_number}. Paid KES ${Number(pmt.amount).toLocaleString()} via ${pmt.payment_method} on ${pmt.payment_date}. Ref: ${pmt.reference_code}. Status: Verified.`;
+        } else {
+          replyText = `No recent receipts found for account ${tenant.name}.`;
+        }
+        action = 'receipt';
+      } else if (cmd.includes('MAINTENANCE') || cmd.includes('REPAIR') || cmd === '3') {
+        replyText = `Karibu Maintenance Bot. Please reply with your unit number and a short description of the issue (e.g., 'A2 Leaking tap in kitchen'). We will alert the site caretaker and assign a certified artisan immediately.`;
+        action = 'maintenance';
+      } else {
+        replyText = `Karibu to BomaSphere Smart Concierge! How can we assist you today?\n1. Check Rent Balance\n2. View Latest Receipt\n3. Report Maintenance Issue\n4. Request Visitor Gate Pass\nReply with 1, 2, 3, or 4.`;
+        action = 'menu';
+      }
+
+      try {
+        await db.prepare(`
+          INSERT INTO communications (type, recipient_name, recipient_phone, message, status, purpose)
+          VALUES ('whatsapp', ?, ?, ?, 'delivered', ?)
+        `).bind(tenant.name, phone, replyText, action).run();
+      } catch (e) {}
+
+      return json({
+        success: true,
+        reply: replyText,
+        action,
+        tenant: tenant.name,
+        timestamp: new Date().toISOString()
+      });
+    }
+    if (pathname === '/api/whatsapp/history' && method === 'GET') {
+      const msgs = (await db.prepare("SELECT * FROM communications WHERE type = 'whatsapp' ORDER BY id DESC LIMIT 50").all()).results || [];
+      return json({ success: true, count: msgs.length, messages: msgs });
+    }
 
     // 20. Monthly Batch Invoicing Engine (D1 Native)
     if (pathname === '/api/invoices/generate-monthly' && method === 'POST') {
@@ -972,6 +1161,19 @@ async function handleD1(context, json, corsHeaders) {
         ORDER BY l.id DESC
       `).all()).results || [];
       return json({ success: true, count: leads.length, leads });
+    }
+    if (pathname.startsWith('/api/viewing-leads/') && method === 'PUT') {
+      const id = pathname.split('/')[3];
+      const b = await request.json().catch(() => ({}));
+      await db.prepare(`
+        UPDATE viewing_leads SET
+          status = COALESCE(?, status),
+          notes = COALESCE(?, notes),
+          preferred_date = COALESCE(?, preferred_date),
+          time_slot = COALESCE(?, time_slot)
+        WHERE id = ?
+      `).bind(b.status || null, b.notes || null, b.preferred_date || null, b.time_slot || null, Number(id)).run();
+      return json({ success: true, message: 'Viewing lead updated successfully.' });
     }
 
     // 22. IoT Telemetry & Smart Meters (D1 Native)
@@ -1031,6 +1233,32 @@ async function handleD1(context, json, corsHeaders) {
         records
       });
     }
+    if (pathname === '/api/tax/etims/generate' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const invoiceId = b.invoice_id || 1;
+      const inv = await db.prepare("SELECT * FROM invoices WHERE id = ?").bind(Number(invoiceId)).first();
+      if (!inv) return json({ error: 'Invoice not found' }, 404);
+
+      const ctrlCode = 'KRA-ETIMS-' + Math.random().toString(36).substring(2, 10).toUpperCase() + '-' + Date.now().toString().slice(-4);
+      const qrUrl = `https://etims.kra.go.ke/verify?control=${ctrlCode}&inv=${inv.invoice_number}&amount=${inv.total_amount}`;
+      const taxableAmount = inv.rent_amount || inv.total_amount;
+      const mriTax = Math.round(taxableAmount * 0.075 * 100) / 100;
+
+      const resIns = await db.prepare(`
+        INSERT INTO etims_records (invoice_id, control_code, qr_code_url, tax_type, taxable_amount, tax_payable, kra_status)
+        VALUES (?, ?, ?, 'MRI_7.5_PCT', ?, ?, 'transmitted')
+      `).bind(Number(invoiceId), ctrlCode, qrUrl, taxableAmount, mriTax).run();
+
+      return json({
+        success: true,
+        record_id: resIns.meta?.last_row_id,
+        control_code: ctrlCode,
+        qr_code_url: qrUrl,
+        taxable_amount: taxableAmount,
+        tax_payable: mriTax,
+        message: `eTIMS Fiscal Receipt generated. KES ${mriTax.toLocaleString()} (7.5% MRI) transmitted to KRA.`
+      }, 201);
+    }
 
     // 24. Artisan Escrow Marketplace (D1 Native)
     if (pathname === '/api/marketplace/fundis' && method === 'GET') {
@@ -1057,13 +1285,40 @@ async function handleD1(context, json, corsHeaders) {
       `).bind(Number(ticket_id), fundi_id ? Number(fundi_id) : null, Number(amount), milestone_desc || 'Repair milestone deposit').run();
       return json({ success: true, escrow_id: resIns.meta?.last_row_id, status: 'held', message: `KES ${Number(amount).toLocaleString()} locked in escrow.` }, 201);
     }
-    if (pathname === '/api/marketplace/escrow/release' || (pathname.includes('/escrows/') && pathname.endsWith('/release'))) {
+    const isEscrowRelease = (
+      (pathname === '/api/marketplace/escrow/release') ||
+      (pathname.startsWith('/api/artisan-marketplace/fundi-escrow/') && pathname.endsWith('/release')) ||
+      (pathname.startsWith('/api/marketplace/escrows/') && pathname.endsWith('/release'))
+    ) && method === 'POST';
+
+    if (isEscrowRelease) {
       const b = await request.json().catch(() => ({}));
-      let escrowId = b.escrow_id || (pathname.includes('/escrows/') ? pathname.split('/escrows/')[1].split('/')[0] : null);
+      let escrowId = b.escrow_id;
+      if (!escrowId && pathname.includes('/fundi-escrow/')) {
+        escrowId = pathname.split('/fundi-escrow/')[1].split('/')[0];
+      } else if (!escrowId && pathname.includes('/escrows/')) {
+        escrowId = pathname.split('/escrows/')[1].split('/')[0];
+      }
       if (!escrowId) return json({ error: 'Escrow ID required' }, 400);
-      const b2cRef = 'B2C-MPESA-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-      await db.prepare("UPDATE maintenance_escrows SET status = 'released', b2c_disbursement_ref = ?, released_at = CURRENT_TIMESTAMP WHERE id = ?").bind(b2cRef, Number(escrowId)).run();
-      return json({ success: true, status: 'released', b2c_disbursement_ref: b2cRef, message: 'Escrow funds successfully disbursed to contractor.' });
+      const escrow = await db.prepare('SELECT * FROM maintenance_escrows WHERE id = ?').bind(Number(escrowId)).first();
+      if (!escrow) return json({ error: 'Escrow record not found.' }, 404);
+
+      const b2cRef = 'B2C-MPESA-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+      await db.prepare("UPDATE maintenance_escrows SET status = 'disbursed', b2c_disbursement_ref = ?, released_at = CURRENT_TIMESTAMP WHERE id = ?").bind(b2cRef, Number(escrowId)).run();
+
+      if (escrow.ticket_id) {
+        await db.prepare("UPDATE maintenance_requests SET status = 'completed', actual_cost = ?, completed_date = CURRENT_TIMESTAMP WHERE id = ?").bind(escrow.amount, escrow.ticket_id).run();
+      }
+
+      return json({
+        success: true,
+        escrow_id: escrow.id,
+        status: 'disbursed',
+        b2c_disbursement_ref: b2cRef,
+        b2c_reference: b2cRef,
+        amount: escrow.amount,
+        message: `Escrow released! KES ${Number(escrow.amount).toLocaleString()} disbursed via M-Pesa B2C (${b2cRef}).`
+      });
     }
 
     // 25. Digital Lease Agreements & E-Sign (D1 Native)
@@ -1095,6 +1350,25 @@ async function handleD1(context, json, corsHeaders) {
       await db.prepare("UPDATE lease_agreements SET tenant_signature = ?, tenant_signed_at = CURRENT_TIMESTAMP, status = 'active' WHERE id = ?").bind(signature, Number(agreementId)).run();
       const updated = await db.prepare('SELECT * FROM lease_agreements WHERE id = ?').bind(Number(agreementId)).first();
       return json({ success: true, agreement: updated, message: 'Lease agreement signed and legally executed.' });
+    }
+    if (pathname === '/api/leases/agreements' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const { lease_id, unit_id, tenant_id, rent_amount, deposit_amount, start_date, end_date, terms_clauses } = b;
+      if (!unit_id || !tenant_id) return json({ error: 'Unit ID and Tenant ID are required.' }, 400);
+
+      const code = 'AGR-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      const resIns = await db.prepare(`
+        INSERT INTO lease_agreements (lease_id, unit_id, tenant_id, agreement_code, rent_amount, deposit_amount, start_date, end_date, terms_clauses, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_tenant')
+      `).bind(
+        lease_id ? Number(lease_id) : 1, Number(unit_id), Number(tenant_id), code,
+        Number(rent_amount || 0), Number(deposit_amount || 0),
+        start_date || new Date().toISOString().slice(0, 10),
+        end_date || new Date(Date.now() + 365*24*3600*1000).toISOString().slice(0, 10),
+        terms_clauses || 'Standard Residential Tenancy Agreement'
+      ).run();
+
+      return json({ success: true, agreement_code: code, id: resIns.meta?.last_row_id }, 201);
     }
 
     // 26. Move-In / Move-Out Inspections (D1 Native)
@@ -1132,6 +1406,22 @@ async function handleD1(context, json, corsHeaders) {
         JSON.stringify(items), damagesTotal, held, arrears, netRefund
       ).run();
       return json({ success: true, id: resIns.meta?.last_row_id, net_deposit_refund: netRefund }, 201);
+    }
+    if (pathname.startsWith('/api/inspections/') && pathname.endsWith('/settle-deposit') && method === 'POST') {
+      const id = pathname.split('/')[3];
+      const insp = await db.prepare("SELECT * FROM property_inspections WHERE id = ?").bind(Number(id)).first();
+      if (!insp) return json({ error: 'Inspection report not found' }, 404);
+
+      const refund = Number(insp.net_deposit_refund || 0);
+      await db.prepare("UPDATE property_inspections SET status = 'settled' WHERE id = ?").bind(Number(id)).run();
+
+      return json({
+        success: true,
+        settled: true,
+        inspection_id: Number(id),
+        net_refund: refund,
+        message: `Deposit settlement authorized! Net refund of KES ${refund.toLocaleString()} queued for M-Pesa B2C disbursement.`
+      });
     }
 
     // 27. Gated Estate Visitor Passes (D1 Native)
