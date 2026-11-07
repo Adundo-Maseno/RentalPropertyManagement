@@ -70,14 +70,14 @@
   <header class="w-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-zinc-800 px-4 sm:px-8 py-2.5 sticky top-0 z-40 select-none transition-colors">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <!-- Brand Logo -->
-      <a href="/" class="flex items-center space-x-2.5 group" aria-label="BomaSphere Properties Home">
+      <a href="/" class="flex items-center space-x-2.5 group shrink-0" aria-label="BomaSphere Properties Home">
         <img src="/icons/icon.svg" alt="BomaSphere" width="28" height="28" class="w-7 h-7 rounded shadow-xs shrink-0 transition-transform group-hover:scale-105">
         <div>
           <div class="font-bold text-slate-900 dark:text-white text-sm tracking-tight flex items-center gap-1.5">
-            <span>BomaSphere Properties</span>
+            <span>BomaSphere</span>
             <span class="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">Vacancies</span>
           </div>
-          <p class="text-[10px] text-slate-500 dark:text-zinc-400 -mt-0.5">Verified Direct Leases &bull; Nairobi &amp; Coast</p>
+          <p class="text-[10px] text-slate-500 dark:text-zinc-400 -mt-0.5 truncate max-w-[130px] sm:max-w-none">Direct Leases &bull; Nairobi &amp; Coast</p>
         </div>
       </a>
 
@@ -133,6 +133,16 @@
         <p class="text-sm text-slate-600 dark:text-zinc-400 max-w-2xl font-normal leading-relaxed">
           Explore vacant residential apartments, executive townhouses, and private coastal villas. Each residence is managed directly with automated M-Pesa billing, borehole water, and 24/7 security.
         </p>
+      </div>
+
+      <!-- Quick Location Pill Filter for Mobile & Desktop -->
+      <div class="flex items-center space-x-2 overflow-x-auto py-1 no-scrollbar text-xs">
+        <span class="text-slate-400 dark:text-zinc-500 font-semibold text-[11px] uppercase tracking-wider shrink-0 mr-1">Locations:</span>
+        <button type="button" onclick="selectQuickLocation('all')" class="quick-loc-pill active px-3 py-1 rounded-full text-xs font-semibold border border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900 shrink-0 transition cursor-pointer">All Locations</button>
+        <button type="button" onclick="selectQuickLocation('Kilimani')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Kilimani</button>
+        <button type="button" onclick="selectQuickLocation('Westlands')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Westlands</button>
+        <button type="button" onclick="selectQuickLocation('Riverside')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Riverside</button>
+        <button type="button" onclick="selectQuickLocation('Nyali')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Nyali Beach</button>
       </div>
 
       <!-- Clean Filter Form Controls -->
@@ -272,8 +282,9 @@
       </div>
     </div>
 
-    <!-- Slide-Over Booking Panel (Does not shrink the photo; cleanly docks on right) -->
-    <aside id="lightbox-booking-drawer" class="fixed right-0 top-0 bottom-0 w-full sm:w-88 bg-zinc-900 border-l border-zinc-800 p-6 shadow-2xl flex flex-col justify-between hidden z-40 transition-transform">
+    <!-- Slide-Over / Bottom Sheet Booking Panel (Adapts seamlessly on Mobile) -->
+    <aside id="lightbox-booking-drawer" class="fixed inset-x-0 bottom-0 sm:inset-x-auto sm:right-0 sm:top-0 sm:bottom-0 w-full sm:w-96 max-h-[85vh] sm:max-h-none overflow-y-auto bg-zinc-900 border-t sm:border-t-0 sm:border-l border-zinc-800 p-5 sm:p-6 rounded-t-2xl sm:rounded-none shadow-2xl flex flex-col justify-between hidden z-40 transition-transform">
+      <div class="sm:hidden w-12 h-1 rounded-full bg-zinc-700 mx-auto -mt-1 mb-3 shrink-0"></div>
       <div class="space-y-4">
         <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
           <h4 class="text-base font-bold text-white flex items-center gap-2">
@@ -350,8 +361,9 @@
   <!-- ==================================================================== -->
   <!-- 5. STANDALONE SCHEDULE VIEWING MODAL (Direct Card Access)            -->
   <!-- ==================================================================== -->
-  <div id="modal-viewing" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-viewing-title">
-    <div class="bg-white dark:bg-zinc-900 rounded-xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 relative transition-transform">
+  <div id="modal-viewing" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden flex sm:items-center items-end justify-center sm:p-4 p-0" role="dialog" aria-modal="true" aria-labelledby="modal-viewing-title">
+    <div class="bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 relative transition-transform max-h-[90vh] overflow-y-auto">
+      <div class="sm:hidden w-12 h-1 rounded-full bg-slate-300 dark:bg-zinc-700 mx-auto -mt-1 mb-3"></div>
       <button onclick="closeViewingModal()" class="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-zinc-100 rounded-lg transition" aria-label="Close dialog">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
@@ -945,6 +957,43 @@
       });
 
       renderVacancies(filtered);
+    }
+
+    // Quick Location Selection
+    function selectQuickLocation(loc) {
+      const locSelect = document.getElementById('filter-location');
+      if (locSelect) {
+        locSelect.value = loc;
+        applyFilters();
+      }
+      document.querySelectorAll('.quick-loc-pill').forEach(btn => {
+        if (btn.getAttribute('onclick')?.includes(`'${loc}'`)) {
+          btn.className = 'quick-loc-pill active px-3 py-1 rounded-full text-xs font-semibold border border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900 shrink-0 transition cursor-pointer';
+        } else {
+          btn.className = 'quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer';
+        }
+      });
+    }
+
+    // Mobile Touch Swipe Gesture Support for Fullscreen Lightbox
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const tourModalBox = document.getElementById('modal-higgsfield-tour');
+    if (tourModalBox) {
+      tourModalBox.addEventListener('touchstart', (e) => {
+        if (e.target.closest('#lightbox-booking-drawer')) return;
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      tourModalBox.addEventListener('touchend', (e) => {
+        if (e.target.closest('#lightbox-booking-drawer')) return;
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchEndX - touchStartX;
+        if (Math.abs(diff) > 45) {
+          if (diff < 0) stepTourPhoto(1);  // Swipe left -> next room photo
+          else stepTourPhoto(-1);           // Swipe right -> previous room photo
+        }
+      }, { passive: true });
     }
 
     document.getElementById('filter-location')?.addEventListener('change', applyFilters);
