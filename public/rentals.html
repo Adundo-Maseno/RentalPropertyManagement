@@ -10,24 +10,13 @@
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0f172a">
   
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: { 500: '#10b981', 600: '#059669', 700: '#047857' }
-          }
-        }
-      }
-    };
-  </script>
+  <!-- Production Compiled Tailwind CSS -->
+  <link rel="stylesheet" href="/tailwind.min.css?v=1.0">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script defer src="https://unpkg.com/lucide@latest"></script>
   <style>
     body { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
     .font-mono { font-family: 'JetBrains Mono', monospace; }
@@ -243,7 +232,7 @@
       <div class="bg-white dark:bg-zinc-900 p-3 sm:p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-md max-w-4xl mx-auto mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
         <div>
           <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Neighborhood</label>
-          <select id="filter-location" class="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-slate-900">
+          <select aria-label="Filter rentals by location" id="filter-location" class="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-slate-900">
             <option value="all">All Locations (Nairobi &amp; Mombasa)</option>
             <option value="Kilimani">Kilimani, Nairobi</option>
             <option value="Westlands">Westlands, Nairobi</option>
@@ -254,7 +243,7 @@
 
         <div>
           <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Unit Type</label>
-          <select id="filter-type" class="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-slate-900">
+          <select aria-label="Filter rentals by property type" id="filter-type" class="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-slate-900">
             <option value="all">All Types</option>
             <option value="Bedroom">Apartments (2BR / 3BR)</option>
             <option value="Townhouse">Townhouses &amp; Villas</option>
@@ -264,7 +253,7 @@
 
         <div>
           <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Max Budget (KES / mo)</label>
-          <select id="filter-budget" class="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-slate-900">
+          <select aria-label="Filter rentals by monthly budget" id="filter-budget" class="w-full text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg p-2.5 font-medium text-slate-800 dark:text-zinc-100 focus:ring-2 focus:ring-slate-900">
             <option value="999999">Any Budget</option>
             <option value="80000">Up to KES 80,000</option>
             <option value="100000">Up to KES 100,000</option>
@@ -358,7 +347,7 @@
           </div>
           <div>
             <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Preferred Time Slot</label>
-            <select id="viewing-time" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
+            <select aria-label="Select preferred viewing time" id="viewing-time" class="w-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white">
               <option value="10:00 AM">10:00 AM Morning</option>
               <option value="02:00 PM">02:00 PM Afternoon</option>
               <option value="04:30 PM">04:30 PM Evening</option>
