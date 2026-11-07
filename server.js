@@ -2,6 +2,28 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+
+// Load local .env variables if file exists (zero external dependencies)
+const envFilePath = path.join(__dirname, '.env');
+if (fs.existsSync(envFilePath)) {
+  try {
+    const envLines = fs.readFileSync(envFilePath, 'utf8').split('\n');
+    for (const rawLine of envLines) {
+      const line = rawLine.trim();
+      if (line && !line.startsWith('#') && line.includes('=')) {
+        const eqIdx = line.indexOf('=');
+        const k = line.slice(0, eqIdx).trim();
+        const v = line.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, '');
+        if (k && process.env[k] === undefined) {
+          process.env[k] = v;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Notice: Could not parse local .env file:', e.message);
+  }
+}
+
 const { db, initSchema, seedDatabase, hashPassword, verifyPassword } = require('./db.js');
 
 const PORT = process.env.PORT || 3000;
