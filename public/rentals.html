@@ -194,7 +194,7 @@
         </div>
         <div class="flex flex-col">
           <span class="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white">BomaSphere Properties</span>
-          <span class="text-[10px] text-slate-400 font-medium -mt-0.5">Verified Vacancy Showcase</span>
+          <span class="text-[10px] text-slate-500 font-medium -mt-0.5">Verified Vacancy Showcase</span>
         </div>
       </a>
 
@@ -299,7 +299,7 @@
   <!-- MODAL: Schedule a Viewing -->
   <div id="modal-viewing" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 relative">
-      <button onclick="closeViewingModal()" class="absolute top-5 right-5 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded-lg">
+      <button onclick="closeViewingModal()" class="absolute top-5 right-5 p-1 text-slate-500 hover:text-slate-600 dark:hover:text-zinc-200 rounded-lg">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
@@ -681,7 +681,7 @@
 
       if (list.length === 0) {
         container.innerHTML = `
-          <div class="col-span-full py-12 text-center text-slate-400 dark:text-zinc-500 space-y-2">
+          <div class="col-span-full py-12 text-center text-slate-500 dark:text-zinc-500 space-y-2">
             <i data-lucide="home" class="w-8 h-8 mx-auto text-slate-300 dark:text-zinc-600"></i>
             <p class="font-medium text-sm">No vacancies currently match your search criteria.</p>
             <p class="text-xs">Adjust your budget or location filters to see other spaces.</p>
@@ -724,7 +724,7 @@
                 <img src="${pUrl}" alt="Angle ${pIdx + 1}" class="w-full h-full object-cover">
               </button>
             `).join('')}
-            <span class="text-[10px] text-slate-400 pl-1 shrink-0 font-medium font-mono">${photosList.length} photos</span>
+            <span class="text-[10px] text-slate-500 pl-1 shrink-0 font-medium font-mono">${photosList.length} photos</span>
           </div>
         ` : '';
 
@@ -787,7 +787,7 @@
                 <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">${v.property_name}</span>
                 <h3 class="text-base font-extrabold text-slate-900 dark:text-white mt-0.5">Unit ${v.unit_number} &bull; ${v.unit_type}</h3>
                 <p class="text-xs text-slate-500 dark:text-zinc-400 flex items-center mt-1">
-                  <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-slate-400"></i>
+                  <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-slate-500"></i>
                   <span>${v.address}</span>
                 </p>
               </div>
@@ -795,15 +795,15 @@
               <!-- Key Specs -->
               <div class="grid grid-cols-3 gap-2 py-2.5 border-y border-slate-100 dark:border-zinc-800 text-center text-xs">
                 <div>
-                  <span class="text-[10px] text-slate-400 uppercase font-semibold">Rooms</span>
+                  <span class="text-[10px] text-slate-500 uppercase font-semibold">Rooms</span>
                   <p class="font-bold text-slate-800 dark:text-zinc-200">${v.bedrooms > 0 ? v.bedrooms + ' Beds' : 'Commercial'}</p>
                 </div>
                 <div>
-                  <span class="text-[10px] text-slate-400 uppercase font-semibold">Baths</span>
+                  <span class="text-[10px] text-slate-500 uppercase font-semibold">Baths</span>
                   <p class="font-bold text-slate-800 dark:text-zinc-200">${v.bathrooms} Baths</p>
                 </div>
                 <div>
-                  <span class="text-[10px] text-slate-400 uppercase font-semibold">Size</span>
+                  <span class="text-[10px] text-slate-500 uppercase font-semibold">Size</span>
                   <p class="font-bold text-slate-800 dark:text-zinc-200">${v.sqft} sqft</p>
                 </div>
               </div>
@@ -819,9 +819,9 @@
             <div class="flex items-baseline justify-between mb-3">
               <div>
                 <span class="text-xl font-extrabold text-slate-900 dark:text-white">KES ${Number(v.base_rent).toLocaleString()}</span>
-                <span class="text-xs text-slate-400 font-medium">/ month</span>
+                <span class="text-xs text-slate-500 font-medium">/ month</span>
               </div>
-              <span class="text-[10px] text-slate-400">Deposit: KES ${Number(v.deposit).toLocaleString()}</span>
+              <span class="text-[10px] text-slate-500">Deposit: KES ${Number(v.deposit).toLocaleString()}</span>
             </div>
 
             <div class="grid grid-cols-2 gap-2">

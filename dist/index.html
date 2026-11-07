@@ -61,7 +61,7 @@
       </button>
       <div class="flex items-center space-x-2">
         <img src="/icons/icon.svg" alt="BomaSphere" class="w-6 h-6 rounded shadow-xs shrink-0">
-        <span class="font-bold text-sm tracking-tight text-slate-900 dark:text-white">BomaSphere <span class="text-[10px] font-normal text-slate-400">PMS</span></span>
+        <span class="font-bold text-sm tracking-tight text-slate-900 dark:text-white">BomaSphere <span class="text-[10px] font-normal text-slate-500">PMS</span></span>
       </div>
     </div>
     
@@ -107,7 +107,7 @@
             <p class="text-[10px] text-slate-500 -mt-0.5">Property Management</p>
           </div>
         </div>
-        <button onclick="app.toggleMobileDrawer(false)" class="lg:hidden p-2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 rounded-lg transition" title="Close Menu">
+        <button onclick="app.toggleMobileDrawer(false)" class="lg:hidden p-2 text-slate-500 hover:text-slate-700 dark:hover:text-zinc-200 rounded-lg transition" title="Close Menu">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -494,10 +494,10 @@
                   </div>
                   <div>
                     <h3 class="font-bold text-slate-800 text-sm">Live Payments Feed</h3>
-                    <p class="text-[11px] text-slate-400">Instant mobile money & bank confirmations</p>
+                    <p class="text-[11px] text-slate-500">Instant mobile money & bank confirmations</p>
                   </div>
                 </div>
-                <button class="text-xs font-semibold text-emerald-600 hover:text-emerald-700" onclick="app.switchView('payments')">View All</button>
+                <button class="text-xs font-semibold text-emerald-700 hover:text-emerald-800" onclick="app.switchView('payments')">View All</button>
               </div>
 
               <div class="divide-y divide-slate-100" id="dash-recent-payments">
@@ -514,10 +514,10 @@
                   </div>
                   <div>
                     <h3 class="font-bold text-slate-800 text-sm">Urgent Maintenance Tickets</h3>
-                    <p class="text-[11px] text-slate-400">Work orders requiring attention</p>
+                    <p class="text-[11px] text-slate-500">Work orders requiring attention</p>
                   </div>
                 </div>
-                <button class="text-xs font-semibold text-emerald-600 hover:text-emerald-700" onclick="app.switchView('maintenance')">Manage Work</button>
+                <button class="text-xs font-semibold text-emerald-700 hover:text-emerald-800" onclick="app.switchView('maintenance')">Manage Work</button>
               </div>
 
               <div class="divide-y divide-slate-100" id="dash-recent-tickets">
@@ -562,7 +562,7 @@
               <div class="flex items-center space-x-2">
                 <i data-lucide="door-closed" class="w-4 h-4 text-slate-500"></i>
                 <h3 class="font-bold text-slate-800 text-sm">Units Directory</h3>
-                <span class="text-xs text-slate-400" id="units-table-count">(12 Units)</span>
+                <span class="text-xs text-slate-500" id="units-table-count">(12 Units)</span>
               </div>
               <div class="flex items-center space-x-2">
                 <select aria-label="Filter units by status" id="filter-units-status" class="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-emerald-500 focus:border-emerald-500">
@@ -631,7 +631,7 @@
             <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div class="relative w-72">
                 <input type="text" id="tenant-search-input" placeholder="Search tenant by name, phone or ID..." class="w-full text-xs pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
-                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2"></i>
+                <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-2.5 top-2"></i>
               </div>
               <span class="text-xs text-slate-500" id="tenants-count-label">7 Registered Tenants</span>
             </div>
@@ -894,7 +894,7 @@
                 </div>
                 <div>
                   <h3 class="font-bold text-sm text-white">LoRaWAN &amp; Ultrasonic Smart Meter Fleet</h3>
-                  <p class="text-[11px] text-slate-400">Real-time pulse telemetry with automated midnight burst &amp; leak anomaly detection</p>
+                  <p class="text-[11px] text-slate-500">Real-time pulse telemetry with automated midnight burst &amp; leak anomaly detection</p>
                 </div>
               </div>
               <button onclick="app.refreshIotTelemetry()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium flex items-center space-x-1 self-start sm:self-auto">
@@ -1075,7 +1075,7 @@
               </div>
             </div>
             <div class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-100 text-[11px]">
-              <span class="text-slate-400 font-semibold self-center">Templates:</span>
+              <span class="text-slate-500 font-semibold self-center">Templates:</span>
               <button onclick="app.useTemplate('arrears')" class="px-2 py-1 bg-rose-50 text-rose-700 rounded border border-rose-200 hover:bg-rose-100">Overdue Arrears Notice</button>
               <button onclick="app.useTemplate('water')" class="px-2 py-1 bg-blue-50 text-blue-700 rounded border border-blue-200 hover:bg-blue-100">Water Tank Maintenance</button>
               <button onclick="app.useTemplate('inspection')" class="px-2 py-1 bg-amber-50 text-amber-700 rounded border border-amber-200 hover:bg-amber-100">Annual Routine Inspection</button>
@@ -1103,19 +1103,19 @@
                 <span class="font-bold text-slate-700 block">Click a Prompt to Test Bot:</span>
                 <button onclick="app.sendTestWhatsapp('BALANCE')" class="w-full text-left p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition flex items-center justify-between">
                   <span>1. Check Current Balance</span>
-                  <code class="text-[10px] text-slate-400">BALANCE</code>
+                  <code class="text-[10px] text-slate-500">BALANCE</code>
                 </button>
                 <button onclick="app.sendTestWhatsapp('RECEIPT')" class="w-full text-left p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition flex items-center justify-between">
                   <span>2. Retrieve Latest Receipt</span>
-                  <code class="text-[10px] text-slate-400">RECEIPT</code>
+                  <code class="text-[10px] text-slate-500">RECEIPT</code>
                 </button>
                 <button onclick="app.sendTestWhatsapp('PAY')" class="w-full text-left p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition flex items-center justify-between">
                   <span>3. Request M-Pesa STK Push</span>
-                  <code class="text-[10px] text-slate-400">PAY</code>
+                  <code class="text-[10px] text-slate-500">PAY</code>
                 </button>
                 <button onclick="app.sendTestWhatsapp('TICKET Bathroom pipe leaking')" class="w-full text-left p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition flex items-center justify-between">
                   <span>4. Report Maintenance Ticket</span>
-                  <code class="text-[10px] text-slate-400">TICKET ...</code>
+                  <code class="text-[10px] text-slate-500">TICKET ...</code>
                 </button>
               </div>
 
@@ -1246,7 +1246,7 @@
             <div>
               <div class="flex items-center space-x-2">
                 <span class="text-xs font-mono font-bold uppercase tracking-wider bg-violet-100 text-violet-800 px-2 py-0.5 rounded border border-violet-200">Higgsfield.ai Cinema Studio &amp; Soul ID</span>
-                <span class="text-xs text-slate-400 font-mono">Physics-Aware Camera Engine</span>
+                <span class="text-xs text-slate-500 font-mono">Physics-Aware Camera Engine</span>
               </div>
               <h2 class="text-lg font-bold text-slate-900 mt-1">Cinematic Virtual Tours &amp; AI Staging</h2>
               <p class="text-xs text-slate-500">Produce 4K drone flythroughs, interior dolly walkthroughs, and move-in inspection proof.</p>
@@ -1330,7 +1330,7 @@
                   </div>
                   <div>
                     <h4 class="font-bold text-sm text-white" id="hg-preview-title">Kilimani Royal Heights &bull; Unit A202 Walkthrough</h4>
-                    <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto" id="hg-preview-desc">Click "Render 4K Cinematic Walkthrough" to generate physics-aware drone and interior tour footage.</p>
+                    <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto" id="hg-preview-desc">Click "Render 4K Cinematic Walkthrough" to generate physics-aware drone and interior tour footage.</p>
                   </div>
                 </div>
 
@@ -1350,7 +1350,7 @@
               </div>
 
               <!-- Gallery Bar -->
-              <div class="mt-4 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+              <div class="mt-4 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
                 <span class="font-mono text-[11px]">Recent Renders:</span>
                 <div class="flex space-x-2">
                   <button onclick="app.loadSampleTour('kilimani')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition">Kilimani Balcony</button>
@@ -1372,7 +1372,7 @@
             <div>
               <div class="flex items-center space-x-2">
                 <span class="text-xs font-mono font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-200">SaaS Multi-Tenant RBAC</span>
-                <span class="text-xs text-slate-400 font-mono">Role-Based Access Control</span>
+                <span class="text-xs text-slate-500 font-mono">Role-Based Access Control</span>
               </div>
               <h2 class="text-lg font-bold text-slate-900 mt-1">Users &amp; Role Permissions Directory</h2>
               <p class="text-xs text-slate-500">Manage platform super admins, agency managers, field caretakers, property owners, and tenant portal logins.</p>
@@ -1753,7 +1753,7 @@
             <p class="text-[11px] text-slate-500">Safaricom Daraja Real-Time Gateway</p>
           </div>
         </div>
-        <button onclick="app.closeModal('modal-mpesa')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+        <button onclick="app.closeModal('modal-mpesa')" class="p-1 text-slate-500 hover:text-slate-600 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -1804,7 +1804,7 @@
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
       <div class="flex items-center justify-between pb-4 border-b border-slate-100">
         <h3 class="font-bold text-slate-800 text-base">Record Bank / Cash Payment</h3>
-        <button onclick="app.closeModal('modal-manual-payment')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+        <button onclick="app.closeModal('modal-manual-payment')" class="p-1 text-slate-500 hover:text-slate-600 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -1863,7 +1863,7 @@
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
       <div class="flex items-center justify-between pb-4 border-b border-slate-100">
         <h3 class="font-bold text-slate-800 text-base">Record Water Meter Reading</h3>
-        <button onclick="app.closeModal('modal-water-reading')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+        <button onclick="app.closeModal('modal-water-reading')" class="p-1 text-slate-500 hover:text-slate-600 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -1922,7 +1922,7 @@
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
       <div class="flex items-center justify-between pb-4 border-b border-slate-100">
         <h3 class="font-bold text-slate-800 text-base">Create Maintenance Work Order</h3>
-        <button onclick="app.closeModal('modal-maintenance-ticket')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+        <button onclick="app.closeModal('modal-maintenance-ticket')" class="p-1 text-slate-500 hover:text-slate-600 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -1998,7 +1998,7 @@
             <i data-lucide="printer" class="w-3.5 h-3.5"></i>
             <span>Print / Save PDF</span>
           </button>
-          <button onclick="app.closeModal('modal-printable')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+          <button onclick="app.closeModal('modal-printable')" class="p-1 text-slate-500 hover:text-slate-600 rounded">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
@@ -2015,7 +2015,7 @@
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
       <div class="flex items-center justify-between pb-4 border-b border-slate-100">
         <h3 class="font-bold text-slate-800 text-base">Add New Property</h3>
-        <button onclick="app.closeModal('modal-add-property')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+        <button onclick="app.closeModal('modal-add-property')" class="p-1 text-slate-500 hover:text-slate-600 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -2074,9 +2074,9 @@
           <div class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center bg-slate-50 hover:bg-slate-100 transition relative">
             <input type="file" id="prop-image-file" accept="image/*" multiple class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="app.handleImageFilesSelect(event, 'prop')">
             <div class="space-y-1 pointer-events-none">
-              <i data-lucide="images" class="w-6 h-6 mx-auto text-slate-400"></i>
+              <i data-lucide="images" class="w-6 h-6 mx-auto text-slate-500"></i>
               <p class="text-xs text-slate-600 font-medium"><span class="text-emerald-600 font-bold">Click to upload multiple photos</span> (Cover, Living, Beds, Kitchen)</p>
-              <p class="text-[10px] text-slate-400">Select multiple files at once &bull; PNG, JPG, WebP</p>
+              <p class="text-[10px] text-slate-500">Select multiple files at once &bull; PNG, JPG, WebP</p>
             </div>
           </div>
 
@@ -2107,7 +2107,7 @@
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
       <div class="flex items-center justify-between pb-4 border-b border-slate-100">
         <h3 class="font-bold text-slate-800 text-base">Add Unit to Property</h3>
-        <button onclick="app.closeModal('modal-add-unit')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+        <button onclick="app.closeModal('modal-add-unit')" class="p-1 text-slate-500 hover:text-slate-600 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -2169,9 +2169,9 @@
           <div class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center bg-slate-50 hover:bg-slate-100 transition relative">
             <input type="file" id="unit-image-file" accept="image/*" multiple class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="app.handleImageFilesSelect(event, 'unit')">
             <div class="space-y-1 pointer-events-none">
-              <i data-lucide="images" class="w-6 h-6 mx-auto text-slate-400"></i>
+              <i data-lucide="images" class="w-6 h-6 mx-auto text-slate-500"></i>
               <p class="text-xs text-slate-600 font-medium"><span class="text-emerald-600 font-bold">Click to upload multiple unit photos</span></p>
-              <p class="text-[10px] text-slate-400">Master Bedroom, Living Room, Kitchen, Washrooms, Balcony</p>
+              <p class="text-[10px] text-slate-500">Master Bedroom, Living Room, Kitchen, Washrooms, Balcony</p>
             </div>
           </div>
 
@@ -2202,7 +2202,7 @@
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
       <div class="flex items-center justify-between pb-4 border-b border-slate-100">
         <h3 class="font-bold text-slate-800 text-base">Register New Tenant</h3>
-        <button onclick="app.closeModal('modal-add-tenant')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+        <button onclick="app.closeModal('modal-add-tenant')" class="p-1 text-slate-500 hover:text-slate-600 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -2268,7 +2268,7 @@
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
       <div class="flex items-center justify-between pb-4 border-b border-slate-100">
         <h3 class="font-bold text-slate-800 text-base">Invite / Provision SaaS User</h3>
-        <button onclick="app.closeModal('modal-add-user')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+        <button onclick="app.closeModal('modal-add-user')" class="p-1 text-slate-500 hover:text-slate-600 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -2309,7 +2309,7 @@
           <label class="block font-semibold text-slate-700 mb-1">Temporary / Initial Password</label>
           <div class="relative">
             <input type="password" id="user-password-input" placeholder="Default: password123 (or set custom)" class="w-full border border-slate-300 rounded-lg p-2.5 pr-10 font-mono">
-            <button type="button" onclick="app.togglePasswordVisibility('user-password-input', this)" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600">
+            <button type="button" onclick="app.togglePasswordVisibility('user-password-input', this)" class="absolute right-2.5 top-2.5 text-slate-500 hover:text-slate-600">
               <i data-lucide="eye" class="w-4 h-4"></i>
             </button>
           </div>
@@ -2332,7 +2332,7 @@
           <h3 class="font-bold text-slate-800 text-base">Edit Property Details</h3>
           <p class="text-xs text-slate-500">Update building information, landlord details, and media</p>
         </div>
-        <button onclick="app.closeModal('modal-edit-property')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+        <button onclick="app.closeModal('modal-edit-property')" class="p-1 text-slate-500 hover:text-slate-600 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -2400,9 +2400,9 @@
           <div class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center bg-slate-50 hover:bg-slate-100 transition relative">
             <input type="file" id="edit-prop-image-file" accept="image/*" multiple class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="app.handleImageFilesSelect(event, 'edit-prop')">
             <div class="space-y-1 pointer-events-none">
-              <i data-lucide="images" class="w-6 h-6 mx-auto text-slate-400"></i>
+              <i data-lucide="images" class="w-6 h-6 mx-auto text-slate-500"></i>
               <p class="text-xs text-slate-600 font-medium"><span class="text-emerald-600 font-bold">Click to add/upload multiple photos</span> (Cover, Living, Beds, Kitchen)</p>
-              <p class="text-[10px] text-slate-400">Select multiple files at once &bull; PNG, JPG, WebP</p>
+              <p class="text-[10px] text-slate-500">Select multiple files at once &bull; PNG, JPG, WebP</p>
             </div>
           </div>
 
@@ -2442,7 +2442,7 @@
           <h3 class="font-bold text-slate-800 text-base">Edit Unit</h3>
           <p class="text-xs text-slate-500">Update unit specs, rental pricing, status, and photos</p>
         </div>
-        <button onclick="app.closeModal('modal-edit-unit')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+        <button onclick="app.closeModal('modal-edit-unit')" class="p-1 text-slate-500 hover:text-slate-600 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -2515,9 +2515,9 @@
           <div class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center bg-slate-50 hover:bg-slate-100 transition relative">
             <input type="file" id="edit-unit-image-file" accept="image/*" multiple class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="app.handleImageFilesSelect(event, 'edit-unit')">
             <div class="space-y-1 pointer-events-none">
-              <i data-lucide="images" class="w-6 h-6 mx-auto text-slate-400"></i>
+              <i data-lucide="images" class="w-6 h-6 mx-auto text-slate-500"></i>
               <p class="text-xs text-slate-600 font-medium"><span class="text-emerald-600 font-bold">Click to add/upload multiple photos</span></p>
-              <p class="text-[10px] text-slate-400">Master Bedroom, Living Room, Kitchen, Washrooms, Balcony</p>
+              <p class="text-[10px] text-slate-500">Master Bedroom, Living Room, Kitchen, Washrooms, Balcony</p>
             </div>
           </div>
 
@@ -2557,7 +2557,7 @@
           <h3 class="font-bold text-slate-800 text-base">Edit Tenant Profile</h3>
           <p class="text-xs text-slate-500">Update personal, contact, and identity records</p>
         </div>
-        <button onclick="app.closeModal('modal-edit-tenant')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+        <button onclick="app.closeModal('modal-edit-tenant')" class="p-1 text-slate-500 hover:text-slate-600 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -2623,7 +2623,7 @@
           <h3 class="font-bold text-slate-800 text-base">Edit User Profile &amp; Role</h3>
           <p class="text-xs text-slate-500">Update system access, permission level, and property scope</p>
         </div>
-        <button onclick="app.closeModal('modal-edit-user')" class="p-1 text-slate-400 hover:text-slate-600 rounded">
+        <button onclick="app.closeModal('modal-edit-user')" class="p-1 text-slate-500 hover:text-slate-600 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -2671,7 +2671,7 @@
           <label class="block font-semibold text-slate-700 mb-1">Reset Password (Optional)</label>
           <div class="relative">
             <input type="password" id="edit-user-password-input" placeholder="Leave blank to keep current password" class="w-full border border-slate-300 rounded-lg p-2.5 pr-10 font-mono">
-            <button type="button" onclick="app.togglePasswordVisibility('edit-user-password-input', this)" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600">
+            <button type="button" onclick="app.togglePasswordVisibility('edit-user-password-input', this)" class="absolute right-2.5 top-2.5 text-slate-500 hover:text-slate-600">
               <i data-lucide="eye" class="w-4 h-4"></i>
             </button>
           </div>
@@ -2697,7 +2697,7 @@
     <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative">
       
       <!-- Close button (available when switching accounts) -->
-      <button id="btn-close-auth-modal" onclick="app.closeModal('modal-auth-login')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 rounded-lg transition" title="Close">
+      <button id="btn-close-auth-modal" onclick="app.closeModal('modal-auth-login')" class="absolute top-5 right-5 p-1.5 text-slate-500 hover:text-slate-600 dark:hover:text-zinc-300 rounded-lg transition" title="Close">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
@@ -2721,7 +2721,7 @@
         <div>
           <label class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5" for="login-email-input">Work Email</label>
           <div class="relative">
-            <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+            <i data-lucide="mail" class="w-4 h-4 text-slate-500 absolute left-3 top-3"></i>
             <input type="email" id="login-email-input" placeholder="name@bomasphere.co.ke" required class="w-full border border-slate-300 dark:border-zinc-700 rounded-lg pl-9 pr-3 py-2.5 text-xs bg-white dark:bg-zinc-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-zinc-400 transition">
           </div>
         </div>
@@ -2732,7 +2732,7 @@
             <button type="button" onclick="app.toggleLoginPasswordVisibility()" id="btn-toggle-password" class="text-[11px] text-slate-500 hover:text-slate-800 dark:hover:text-zinc-300">Show</button>
           </div>
           <div class="relative">
-            <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+            <i data-lucide="lock" class="w-4 h-4 text-slate-500 absolute left-3 top-3"></i>
             <input type="password" id="login-password-input" placeholder="••••••••" required class="w-full border border-slate-300 dark:border-zinc-700 rounded-lg pl-9 pr-3 py-2.5 text-xs bg-white dark:bg-zinc-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-zinc-400 transition">
           </div>
         </div>
@@ -2742,7 +2742,7 @@
             <input type="checkbox" id="login-remember-me" checked class="rounded border-slate-300 dark:border-zinc-700 text-slate-900">
             <span>Keep me signed in</span>
           </label>
-          <span class="text-[11px] text-slate-400">Default: password123</span>
+          <span class="text-[11px] text-slate-500">Default: password123</span>
         </div>
 
         <button type="submit" id="login-submit-btn" class="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold text-xs shadow-md transition flex items-center justify-center space-x-2 min-h-[44px]">
@@ -2763,7 +2763,7 @@
           <div><span class="text-blue-600 dark:text-blue-400 font-semibold">Caretaker:</span> otieno.caretaker@kilimaniheights.ke</div>
           <div><span class="text-amber-600 dark:text-amber-400 font-semibold">Landlord:</span> esther.ndungu@gmail.com</div>
           <div><span class="text-teal-600 dark:text-teal-400 font-semibold">Tenant:</span> james.kariuki@techke.com</div>
-          <div class="text-[10px] text-slate-400 pt-1 font-sans">Universal password: <code class="font-mono">password123</code> (or role password)</div>
+          <div class="text-[10px] text-slate-500 pt-1 font-sans">Universal password: <code class="font-mono">password123</code> (or role password)</div>
         </div>
       </details>
 
@@ -2773,7 +2773,7 @@
   <!-- MODAL: AI Tenant Vetting & Financial Risk Scoring (Feature 2) -->
   <div id="modal-tenant-vetting" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative max-h-[90vh] overflow-y-auto">
-      <button onclick="app.closeModal('modal-tenant-vetting')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+      <button onclick="app.closeModal('modal-tenant-vetting')" class="absolute top-5 right-5 p-1.5 text-slate-500 hover:text-slate-600 rounded-lg">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
@@ -2855,7 +2855,7 @@
   <!-- MODAL: Artisan Escrow Marketplace (Feature 5) -->
   <div id="modal-artisan-marketplace" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative max-h-[90vh] overflow-y-auto">
-      <button onclick="app.closeModal('modal-artisan-marketplace')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+      <button onclick="app.closeModal('modal-artisan-marketplace')" class="absolute top-5 right-5 p-1.5 text-slate-500 hover:text-slate-600 rounded-lg">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
@@ -2907,7 +2907,7 @@
   <!-- MODAL: KRA eTIMS & 7.5% MRI Tax Viewer (Feature 4) -->
   <div id="modal-etims-cert" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative">
-      <button onclick="app.closeModal('modal-etims-cert')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+      <button onclick="app.closeModal('modal-etims-cert')" class="absolute top-5 right-5 p-1.5 text-slate-500 hover:text-slate-600 rounded-lg">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
@@ -2928,7 +2928,7 @@
   <!-- MODAL: Digital Lease Agreements & E-Signature Pad (Module 1) -->
   <div id="modal-lease-sign" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative max-h-[92vh] overflow-y-auto">
-      <button onclick="app.closeModal('modal-lease-sign')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+      <button onclick="app.closeModal('modal-lease-sign')" class="absolute top-5 right-5 p-1.5 text-slate-500 hover:text-slate-600 rounded-lg">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
@@ -2946,15 +2946,15 @@
         <!-- Contract Metadata Cards -->
         <div class="grid grid-cols-3 gap-2 p-3 bg-slate-50 dark:bg-zinc-800/60 rounded-xl text-center">
           <div>
-            <span class="text-[10px] text-slate-400 font-bold uppercase">Monthly Rent</span>
+            <span class="text-[10px] text-slate-500 font-bold uppercase">Monthly Rent</span>
             <p class="font-bold text-slate-900 dark:text-white mt-0.5" id="modal-lease-rent"><span id="sign-lease-rent">KES 0.00</span></p>
           </div>
           <div>
-            <span class="text-[10px] text-slate-400 font-bold uppercase">Security Deposit</span>
+            <span class="text-[10px] text-slate-500 font-bold uppercase">Security Deposit</span>
             <p class="font-bold text-slate-900 dark:text-white mt-0.5" id="modal-lease-deposit">KES 0.00</p>
           </div>
           <div>
-            <span class="text-[10px] text-slate-400 font-bold uppercase">Period / Governing Law</span>
+            <span class="text-[10px] text-slate-500 font-bold uppercase">Period / Governing Law</span>
             <p class="font-bold text-emerald-600 dark:text-emerald-400 mt-0.5" id="modal-lease-period"><span id="sign-lease-period">Kenya (Cap 296)</span></p>
           </div>
         </div>
@@ -2974,14 +2974,14 @@
               <i data-lucide="pen-tool" class="w-3.5 h-3.5 mr-1 text-emerald-600"></i>
               <span>Draw or Type E-Signature (Finger or Mouse)</span>
             </span>
-            <button onclick="app.clearLeaseSignature()" class="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 underline">
+            <button onclick="app.clearLeaseSignature()" class="text-[11px] text-slate-500 hover:text-slate-600 dark:hover:text-zinc-200 underline">
               Clear Signature
             </button>
           </div>
           <div class="border-2 border-dashed border-slate-300 dark:border-zinc-600 rounded-lg overflow-hidden bg-white dark:bg-zinc-950 flex justify-center">
             <canvas id="lease-signature-pad" width="460" height="120" class="w-full cursor-crosshair touch-none"></canvas>
           </div>
-          <div class="flex items-center justify-between mt-2 text-[10px] text-slate-400">
+          <div class="flex items-center justify-between mt-2 text-[10px] text-slate-500">
             <span>By signing, you execute a legally binding contract under the Kenya Law of Contract.</span>
             <span class="font-mono text-emerald-600">SHA-256 Verifiable</span>
           </div>
@@ -2999,7 +2999,7 @@
   <!-- MODAL: Move-In / Move-Out Inspection & Deposit Settlement (Module 2) -->
   <div id="modal-new-inspection" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative max-h-[92vh] overflow-y-auto">
-      <button onclick="app.closeModal('modal-new-inspection')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+      <button onclick="app.closeModal('modal-new-inspection')" class="absolute top-5 right-5 p-1.5 text-slate-500 hover:text-slate-600 rounded-lg">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
@@ -3102,7 +3102,7 @@
   <!-- MODAL: Gated Estate Visitor Pass Creator (Module 3) -->
   <div id="modal-new-visitor-pass" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative">
-      <button onclick="app.closeModal('modal-new-visitor-pass')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+      <button onclick="app.closeModal('modal-new-visitor-pass')" class="absolute top-5 right-5 p-1.5 text-slate-500 hover:text-slate-600 rounded-lg">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
@@ -3160,7 +3160,7 @@
   <!-- MODAL: Security Gate Guard Scanner (Module 3) -->
   <div id="modal-visitor-scanner" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative">
-      <button onclick="app.closeModal('modal-visitor-scanner')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+      <button onclick="app.closeModal('modal-visitor-scanner')" class="absolute top-5 right-5 p-1.5 text-slate-500 hover:text-slate-600 rounded-lg">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
@@ -3199,7 +3199,7 @@
   <!-- MODAL: Diaspora Landlord Multi-Currency & ROI Hub (Module 4) -->
   <div id="modal-diaspora-roi" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative max-h-[92vh] overflow-y-auto">
-      <button onclick="app.closeModal('modal-diaspora-roi')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+      <button onclick="app.closeModal('modal-diaspora-roi')" class="absolute top-5 right-5 p-1.5 text-slate-500 hover:text-slate-600 rounded-lg">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
@@ -3222,7 +3222,7 @@
   <!-- MODAL: Estate Amenity Booking Form (Module 5) -->
   <div id="modal-new-amenity-booking" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-zinc-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 relative">
-      <button onclick="app.closeModal('modal-new-amenity-booking')" class="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+      <button onclick="app.closeModal('modal-new-amenity-booking')" class="absolute top-5 right-5 p-1.5 text-slate-500 hover:text-slate-600 rounded-lg">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
@@ -3296,7 +3296,7 @@
           <h3 class="font-bold text-slate-900 dark:text-white text-base">Execute Tenancy Lease Agreement</h3>
           <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Assign a unit to a tenant with binding terms and deposits</p>
         </div>
-        <button onclick="app.closeModal('modal-create-lease')" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded">
+        <button onclick="app.closeModal('modal-create-lease')" class="p-1 text-slate-500 hover:text-slate-600 dark:hover:text-zinc-200 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -3369,7 +3369,7 @@
             <p class="text-xs text-slate-500 dark:text-zinc-400">Digital lease bound &amp; move-in ledger generated</p>
           </div>
         </div>
-        <button type="button" onclick="app.closeModal('modal-movein-payment-prompt')" class="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition">
+        <button type="button" onclick="app.closeModal('modal-movein-payment-prompt')" class="text-slate-500 hover:text-slate-600 dark:hover:text-zinc-200 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -3442,7 +3442,7 @@
               <span>Digital Lease &amp; E-Sign</span>
             </button>
           </div>
-          <button type="button" onclick="app.closeModal('modal-movein-payment-prompt')" class="w-full py-2 text-center text-xs text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 transition">
+          <button type="button" onclick="app.closeModal('modal-movein-payment-prompt')" class="w-full py-2 text-center text-xs text-slate-500 hover:text-slate-600 dark:hover:text-zinc-300 transition">
             Dismiss &amp; Review on Dashboard Later
           </button>
         </div>
@@ -3458,7 +3458,7 @@
           <h3 class="font-bold text-slate-900 dark:text-white text-base">Generate Custom Billing Invoice</h3>
           <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Issue an itemized rent &amp; utility statement to an active tenant</p>
         </div>
-        <button onclick="app.closeModal('modal-custom-invoice')" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded">
+        <button onclick="app.closeModal('modal-custom-invoice')" class="p-1 text-slate-500 hover:text-slate-600 dark:hover:text-zinc-200 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -3536,7 +3536,7 @@
           <h3 class="font-bold text-slate-900 dark:text-white text-base">Record Operating Expense</h3>
           <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Disburse property operational funds, contractor vouchers or utility bills</p>
         </div>
-        <button onclick="app.closeModal('modal-add-expense')" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded">
+        <button onclick="app.closeModal('modal-add-expense')" class="p-1 text-slate-500 hover:text-slate-600 dark:hover:text-zinc-200 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -3612,7 +3612,7 @@
             <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Send bulk rent payment reminder notices to tenants with overdue or pending balances</p>
           </div>
         </div>
-        <button onclick="app.closeModal('modal-send-5th-sms')" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded">
+        <button onclick="app.closeModal('modal-send-5th-sms')" class="p-1 text-slate-500 hover:text-slate-600 dark:hover:text-zinc-200 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -3678,7 +3678,7 @@
             <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Send instant SMS or WhatsApp blast to all active tenants</p>
           </div>
         </div>
-        <button onclick="app.closeModal('modal-broadcast')" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded">
+        <button onclick="app.closeModal('modal-broadcast')" class="p-1 text-slate-500 hover:text-slate-600 dark:hover:text-zinc-200 rounded">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
