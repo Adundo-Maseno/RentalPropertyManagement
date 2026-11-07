@@ -248,6 +248,49 @@ async function ensureD1Schema(db) {
     }
     try { await db.prepare("ALTER TABLE properties ADD COLUMN image_url TEXT").run(); } catch (e) {}
     try { await db.prepare("ALTER TABLE units ADD COLUMN image_url TEXT").run(); } catch (e) {}
+
+    try {
+      await db.prepare(`
+        CREATE TABLE IF NOT EXISTS mpesa_transactions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          merchant_request_id TEXT,
+          checkout_request_id TEXT UNIQUE NOT NULL,
+          tenant_id INTEGER REFERENCES tenants(id) ON DELETE SET NULL,
+          invoice_id INTEGER REFERENCES invoices(id) ON DELETE SET NULL,
+          amount REAL NOT NULL,
+          phone TEXT NOT NULL,
+          account_reference TEXT,
+          status TEXT DEFAULT 'pending',
+          result_code INTEGER,
+          result_desc TEXT,
+          mpesa_receipt_number TEXT,
+          transaction_date TEXT,
+          raw_callback TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
+    } catch (e) {}
+
+    try {
+      await db.prepare(`
+        CREATE TABLE IF NOT EXISTS ratiba_standing_orders (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          tenant_id INTEGER REFERENCES tenants(id) ON DELETE CASCADE,
+          standing_order_name TEXT NOT NULL,
+          phone TEXT NOT NULL,
+          amount REAL NOT NULL,
+          frequency INTEGER DEFAULT 5,
+          start_date TEXT NOT NULL,
+          end_date TEXT NOT NULL,
+          account_reference TEXT NOT NULL,
+          status TEXT DEFAULT 'active',
+          saf_standing_order_id TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
+    } catch (e) {}
     
     try {
       await db.prepare("INSERT OR IGNORE INTO artisan_marketplace (id, name, trade, phone, rating, jobs_completed, daily_rate, availability, location) VALUES (1, 'QuickFix Plumbers Ltd', 'Plumbing & Drainage', '+254711223344', 4.9, 48, 2500, 'available', 'Nairobi')").run();
@@ -361,11 +404,12 @@ async function handleD1(context, json, corsHeaders) {
     return json({ success: true, message: 'D1 database re-seeded successfully.' });
   }
 
-  // 1. Auto-provision D1 tables and RBAC users if database is fresh or columns missing
+  // 1. Auto-provision D1 tables and RBAC users if database is fresh or columns/tables missing
   try {
     const usersTable = await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='users'").first();
     const hasImageCol = await db.prepare("SELECT image_url FROM units LIMIT 1").first().catch(() => null);
-    if (!usersTable || hasImageCol === null) {
+    const hasRatiba = await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='ratiba_standing_orders'").first().catch(() => null);
+    if (!usersTable || hasImageCol === null || !hasRatiba) {
       await ensureD1Schema(db);
     }
   } catch (schemaErr) {
@@ -1007,12 +1051,22 @@ async function handleD1(context, json, corsHeaders) {
       }
 
       const safStandingOrderId = `SO_RATIBA_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
-      await db.prepare(`
-        INSERT INTO ratiba_standing_orders (
-          tenant_id, standing_order_name, phone, amount, frequency,
-          start_date, end_date, account_reference, status, saf_standing_order_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?)
-      `).bind(tenantId, standingOrderName, phone, amount, frequency, startDate, endDate, accountReference, safStandingOrderId).run();
+      try {
+        await db.prepare(`
+          INSERT INTO ratiba_standing_orders (
+            tenant_id, standing_order_name, phone, amount, frequency,
+            start_date, end_date, account_reference, status, saf_standing_order_id
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?)
+        `).bind(tenantId, standingOrderName, phone, amount, frequency, startDate, endDate, accountReference, safStandingOrderId).run();
+      } catch (insertErr) {
+        await ensureD1Schema(db);
+        await db.prepare(`
+          INSERT INTO ratiba_standing_orders (
+            tenant_id, standing_order_name, phone, amount, frequency,
+            start_date, end_date, account_reference, status, saf_standing_order_id
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?)
+        `).bind(tenantId, standingOrderName, phone, amount, frequency, startDate, endDate, accountReference, safStandingOrderId).run();
+      }
 
       const created = await db.prepare('SELECT * FROM ratiba_standing_orders WHERE saf_standing_order_id = ?').bind(safStandingOrderId).first().catch(() => null);
       return json({
