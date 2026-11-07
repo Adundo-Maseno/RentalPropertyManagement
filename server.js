@@ -24,6 +24,31 @@ if (fs.existsSync(envFilePath)) {
   }
 }
 
+// Load configuration variables from wrangler.toml [vars] if present
+const wranglerFilePath = path.join(__dirname, 'wrangler.toml');
+if (fs.existsSync(wranglerFilePath)) {
+  try {
+    const tomlContent = fs.readFileSync(wranglerFilePath, 'utf8');
+    const varsMatch = tomlContent.match(/\[vars\]([\s\S]*?)(?=\n\[|$)/);
+    if (varsMatch) {
+      const lines = varsMatch[1].split('\n');
+      for (const rawLine of lines) {
+        const line = rawLine.trim();
+        if (line && !line.startsWith('#') && line.includes('=')) {
+          const eqIdx = line.indexOf('=');
+          const k = line.slice(0, eqIdx).trim();
+          const v = line.slice(eqIdx + 1).split('#')[0].trim().replace(/^["']|["']$/g, '');
+          if (k && process.env[k] === undefined) {
+            process.env[k] = v;
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Notice: Could not parse wrangler.toml [vars]:', e.message);
+  }
+}
+
 const { db, initSchema, seedDatabase, hashPassword, verifyPassword } = require('./db.js');
 
 const PORT = process.env.PORT || 3000;
