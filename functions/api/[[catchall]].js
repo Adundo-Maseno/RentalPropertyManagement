@@ -102,10 +102,11 @@ async function handleD1(context, json, corsHeaders) {
     return json({ success: true, message: 'D1 schema and RBAC users successfully initialized!' });
   }
 
-  // 1. Auto-provision D1 tables and RBAC users if database is fresh
+  // 1. Auto-provision D1 tables and RBAC users if database is fresh or columns missing
   try {
     const usersTable = await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='users'").first();
-    if (!usersTable) {
+    const hasImageCol = await db.prepare("SELECT image_url FROM units LIMIT 1").first().catch(() => null);
+    if (!usersTable || hasImageCol === null) {
       await ensureD1Schema(db);
     }
   } catch (schemaErr) {
