@@ -949,9 +949,13 @@
       const readiness = document.getElementById('filter-readiness').value;
 
       const filtered = allVacancies.filter(v => {
-        const matchesLoc = loc === 'all' || v.city.includes(loc) || v.property_name.includes(loc);
-        const matchesType = type === 'all' || v.unit_type.includes(type);
-        const matchesBudget = v.base_rent <= budget;
+        const locLower = loc.toLowerCase();
+        const matchesLoc = loc === 'all' || 
+          (v.city && v.city.toLowerCase().includes(locLower)) || 
+          (v.property_name && v.property_name.toLowerCase().includes(locLower)) ||
+          (v.address && v.address.toLowerCase().includes(locLower));
+        const matchesType = type === 'all' || (v.unit_type && v.unit_type.toLowerCase().includes(type.toLowerCase()));
+        const matchesBudget = Number(v.base_rent) <= budget;
         const matchesReadiness = readiness === 'all' || (v.status && v.status.toLowerCase() === 'vacant');
         return matchesLoc && matchesType && matchesBudget && matchesReadiness;
       });
