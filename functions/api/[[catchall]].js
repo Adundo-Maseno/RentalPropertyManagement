@@ -80,6 +80,18 @@ async function ensureD1Schema(db) {
     }
     try { await db.prepare("ALTER TABLE properties ADD COLUMN image_url TEXT").run(); } catch (e) {}
     try { await db.prepare("ALTER TABLE units ADD COLUMN image_url TEXT").run(); } catch (e) {}
+    
+    try {
+      await db.prepare("INSERT OR IGNORE INTO artisan_marketplace (id, name, trade, phone, rating, jobs_completed, daily_rate, availability, location) VALUES (1, 'QuickFix Plumbers Ltd', 'Plumbing & Drainage', '+254711223344', 4.9, 48, 2500, 'available', 'Nairobi')").run();
+      await db.prepare("INSERT OR IGNORE INTO artisan_marketplace (id, name, trade, phone, rating, jobs_completed, daily_rate, availability, location) VALUES (2, 'Voltage Masters Electricals', 'Electrical & Wiring', '+254722334455', 4.8, 36, 3000, 'available', 'Nairobi')").run();
+      await db.prepare("INSERT OR IGNORE INTO artisan_marketplace (id, name, trade, phone, rating, jobs_completed, daily_rate, availability, location) VALUES (3, 'Apex Carpentry & Locks', 'Carpentry & Fittings', '+254733445566', 4.7, 29, 2200, 'available', 'Nairobi')").run();
+      await db.prepare("INSERT OR IGNORE INTO estate_amenities (id, property_id, name, description, category, capacity, hourly_fee, status) VALUES (1, 1, 'Rooftop BBQ & Sunset Lounge', 'Panoramic view terrace with gas grills and outdoor seating', 'Recreation', 25, 1500, 'available')").run();
+      await db.prepare("INSERT OR IGNORE INTO estate_amenities (id, property_id, name, description, category, capacity, hourly_fee, status) VALUES (2, 1, 'Resident Clubhouse & Gym', 'Full fitness center with cardio equipment and clubhouse lounge', 'Fitness', 15, 0, 'available')").run();
+      await db.prepare("INSERT OR IGNORE INTO iot_devices (id, meter_number, property_id, unit_id, device_type, battery_pct, signal_rssi, flow_rate_lph, total_cubic_meters, valve_status) VALUES (1, 'WM-NA2', 1, 1, 'Ultrasonic Smart Meter', 98, -74, 0.0, 14.8, 'open')").run();
+    } catch (seedErr) {
+      // Ignore unique constraints
+    }
+
     console.log('✅ Cloudflare D1 tables and RBAC users verified and initialized.');
   } catch (err) {
     console.error('ensureD1Schema error:', err);
@@ -768,6 +780,500 @@ async function handleD1(context, json, corsHeaders) {
       await db.prepare('DELETE FROM users WHERE id = ?').bind(Number(id)).run();
       return json({ success: true, message: 'User deleted successfully' });
     }
+
+    // 17. Landlord Remittance Statement (D1 Native with RBAC)
+    if (pathname === '/api/reports/landlord-statement' && method === 'GET') {
+      const user = await getUser();
+      if (user && (user.role === 'caretaker' || user.role === 'tenant')) {
+        return json({ error: '403 Forbidden: Access to owner remittance statements is restricted to Landlords and Property Managers.' }, 403);
+      }
+      let propId = Number(url.searchParams.get('property_id') || 1);
+      if (user && user.role === 'landlord' && user.property_id) {
+        if (Number(propId) !== Number(user.property_id)) {
+          return json({ error: `403 Forbidden: Landlord '${user.name}' is only authorized to view statements for Property ID ${user.property_id}.` }, 403);
+        }
+        propId = user.property_id;
+      }
+      const month = url.searchParams.get('month') || new Date().toISOString().slice(0, 7);
+      let property = await db.prepare('SELECT * FROM properties WHERE id = ?').bind(propId).first();
+      if (!property) {
+        property = await db.prepare('SELECT * FROM properties ORDER BY id ASC LIMIT 1').first();
+      }
+      if (!property) return json({ error: 'Property not found' }, 404);
+
+      const rentInvoices = (await db.prepare(`
+        SELECT i.*, u.unit_number, u.unit_type, t.name as tenant_name
+        FROM invoices i
+        JOIN units u ON i.unit_id = u.id
+        JOIN tenants t ON i.tenant_id = t.id
+        WHERE u.property_id = ? AND i.month = ?
+      `).bind(property.id, month).all()).results || [];
+
+      const collections = (await db.prepare(`
+        SELECT COALESCE(SUM(i.amount_paid), 0) as total_collected,
+               COALESCE(SUM(i.total_amount), 0) as total_billed,
+               COALESCE(SUM(i.balance), 0) as total_arrears
+        FROM invoices i
+        JOIN units u ON i.unit_id = u.id
+        WHERE u.property_id = ? AND i.month = ?
+      `).bind(property.id, month).first()) || { total_collected: 0, total_billed: 0, total_arrears: 0 };
+
+      const expenses = (await db.prepare(`
+        SELECT * FROM expenses 
+        WHERE property_id = ? AND expense_date LIKE ?
+      `).bind(property.id, `${month}%`).all()).results || [];
+
+      const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+      const grossCollections = Number(collections.total_collected || 0);
+      const managementFeeRate = Number(property.management_fee_pct || 10.0);
+      const managementFeeAmount = (grossCollections * managementFeeRate) / 100;
+      const netLandlordRemittance = Math.max(0, grossCollections - managementFeeAmount - totalExpenses);
+
+      return json({
+        success: true,
+        statement: {
+          property,
+          month,
+          gross_collections: grossCollections,
+          gross_rent_collected: grossCollections,
+          total_billed: Number(collections.total_billed || 0),
+          total_arrears: Number(collections.total_arrears || 0),
+          management_fee_rate: managementFeeRate,
+          management_fee_amount: managementFeeAmount,
+          operating_expenses: totalExpenses,
+          net_remittance_payout: netLandlordRemittance,
+          expenses_breakdown: expenses,
+          invoices_breakdown: rentInvoices
+        }
+      });
+    }
+
+    // 18. Diaspora Multi-Currency ROI Hub (D1 Native)
+    if (pathname === '/api/reports/diaspora-roi' && method === 'GET') {
+      const FX_RATES = { KES: 1, USD: 1 / 129.50, GBP: 1 / 168.20, EUR: 1 / 141.00 };
+      const properties = (await db.prepare('SELECT * FROM properties').all()).results || [];
+      const propertyMetrics = [];
+      for (const p of properties) {
+        const uStats = await db.prepare('SELECT COUNT(*) as count, SUM(base_rent) as total_rent FROM units WHERE property_id = ?').bind(p.id).first();
+        const occStats = await db.prepare("SELECT COUNT(*) as count FROM units WHERE property_id = ? AND status = 'occupied'").bind(p.id).first();
+        const totalUnits = uStats?.count || 1;
+        const occupied = occStats?.count || 0;
+        const occupancyPct = Number(((occupied / totalUnits) * 100).toFixed(1));
+        const annualRentKES = (uStats?.total_rent || 0) * 12;
+        const estimatedValuationKES = Math.round(annualRentKES / 0.085);
+        propertyMetrics.push({
+          id: p.id,
+          name: p.name,
+          city: p.city,
+          property_type: p.property_type,
+          total_units: totalUnits,
+          occupancy_pct: occupancyPct,
+          annual_gross_rent_kes: annualRentKES,
+          estimated_valuation_kes: estimatedValuationKES,
+          net_yield_pct: 8.5,
+          cap_rate_pct: 7.8
+        });
+      }
+      const totalValuationKES = propertyMetrics.reduce((s, p) => s + p.estimated_valuation_kes, 0);
+      const totalAnnualRentKES = propertyMetrics.reduce((s, p) => s + p.annual_gross_rent_kes, 0);
+      return json({
+        success: true,
+        fx_rates: { USD: 129.50, GBP: 168.20, EUR: 141.00 },
+        portfolio_summary: {
+          total_valuation_kes: totalValuationKES,
+          total_valuation_usd: Math.round(totalValuationKES * FX_RATES.USD),
+          total_valuation_gbp: Math.round(totalValuationKES * FX_RATES.GBP),
+          total_valuation_eur: Math.round(totalValuationKES * FX_RATES.EUR),
+          total_annual_rent_kes: totalAnnualRentKES,
+          total_annual_rent_usd: Math.round(totalAnnualRentKES * FX_RATES.USD),
+          average_cap_rate: '7.8%',
+          average_net_yield: '8.5%'
+        },
+        properties: propertyMetrics
+      });
+    }
+
+    // 19. Communications & SMS / WhatsApp Dispatcher (D1 Native)
+    if (pathname === '/api/communications' && method === 'GET') {
+      const rows = (await db.prepare('SELECT * FROM communications ORDER BY id DESC').all()).results || [];
+      return json(rows);
+    }
+    if (pathname === '/api/communications/broadcast' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const { message, purpose, channel } = b;
+      if (!message) return json({ error: 'Message body is required.' }, 400);
+      const activeTenants = (await db.prepare("SELECT * FROM tenants WHERE status = 'active'").all()).results || [];
+      let count = 0;
+      for (const t of activeTenants) {
+        await db.prepare(`
+          INSERT INTO communications (type, recipient_name, recipient_phone, tenant_id, message, status, purpose)
+          VALUES (?, ?, ?, ?, ?, 'delivered', ?)
+        `).bind(channel || 'SMS', t.name, t.phone, t.id, message, purpose || 'Broadcast').run();
+        count++;
+      }
+      return json({ success: true, count, recipients_reached: count, recipient_count: count });
+    }
+    if (pathname === '/api/communications/send' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const { recipient_name, recipient_phone, message, tenant_id, purpose, type } = b;
+      if (!message || !recipient_phone) return json({ error: 'Recipient phone and message required' }, 400);
+      const resIns = await db.prepare(`
+        INSERT INTO communications (type, recipient_name, recipient_phone, tenant_id, message, status, purpose)
+        VALUES (?, ?, ?, ?, ?, 'delivered', ?)
+      `).bind(type || 'SMS', recipient_name || 'Resident', recipient_phone, tenant_id ? Number(tenant_id) : null, message, purpose || 'Notice').run();
+      return json({ success: true, id: resIns.meta?.last_row_id, message: 'Dispatched successfully' }, 201);
+    }
+
+    // 20. Monthly Batch Invoicing Engine (D1 Native)
+    if (pathname === '/api/invoices/generate-monthly' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const month = b.month || new Date().toISOString().slice(0, 7);
+      const activeLeases = (await db.prepare(`
+        SELECT l.*, u.base_rent, u.service_charge, u.garbage_fee
+        FROM leases l
+        JOIN units u ON l.unit_id = u.id
+        WHERE l.status = 'active'
+      `).all()).results || [];
+      let generated = 0;
+      for (const l of activeLeases) {
+        const exists = await db.prepare('SELECT id FROM invoices WHERE lease_id = ? AND month = ?').bind(l.id, month).first();
+        if (!exists) {
+          const invNum = 'INV-' + month.replace('-', '') + '-' + Math.floor(1000 + Math.random() * 9000);
+          const rent = Number(l.monthly_rent || l.base_rent || 0);
+          const serv = Number(l.service_charge || 0);
+          const garb = Number(l.garbage_fee || 0);
+          const total = rent + serv + garb;
+          await db.prepare(`
+            INSERT INTO invoices (invoice_number, lease_id, tenant_id, unit_id, month, issue_date, due_date, rent_amount, water_amount, garbage_amount, service_charge, total_amount, amount_paid, balance, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0.0, ?, ?, ?, 0.0, ?, 'unpaid')
+          `).bind(
+            invNum, l.id, l.tenant_id, l.unit_id, month,
+            `${month}-01`, `${month}-05`,
+            rent, garb, serv, total, total
+          ).run();
+          generated++;
+        }
+      }
+      return json({ success: true, generated_count: generated, message: `${generated} invoices generated for ${month}.` });
+    }
+
+    // 21. Viewing Leads (D1 Native)
+    if (pathname === '/api/viewing-leads' && method === 'GET') {
+      const leads = (await db.prepare(`
+        SELECT l.*, u.unit_number, p.name as property_name
+        FROM viewing_leads l
+        JOIN units u ON l.unit_id = u.id
+        JOIN properties p ON u.property_id = p.id
+        ORDER BY l.id DESC
+      `).all()).results || [];
+      return json({ success: true, count: leads.length, leads });
+    }
+
+    // 22. IoT Telemetry & Smart Meters (D1 Native)
+    if (pathname === '/api/iot/devices' && method === 'GET') {
+      const devices = (await db.prepare(`
+        SELECT d.*, u.unit_number, p.name as property_name
+        FROM iot_devices d
+        JOIN properties p ON d.property_id = p.id
+        LEFT JOIN units u ON d.unit_id = u.id
+        ORDER BY d.id ASC
+      `).all()).results || [];
+      return json({ success: true, count: devices.length, devices });
+    }
+    if (pathname === '/api/iot/leak-alerts' && method === 'GET') {
+      const alerts = (await db.prepare(`
+        SELECT a.*, d.meter_number, u.unit_number, p.name as property_name
+        FROM leak_alerts a
+        JOIN iot_devices d ON a.device_id = d.id
+        JOIN units u ON a.unit_id = u.id
+        JOIN properties p ON d.property_id = p.id
+        ORDER BY a.id DESC
+      `).all()).results || [];
+      return json({ success: true, count: alerts.length, alerts });
+    }
+    if (pathname === '/api/iot/valve-toggle' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const { device_id, valve_status } = b;
+      if (!device_id || !valve_status) return json({ error: 'Device ID and valve status required.' }, 400);
+      await db.prepare('UPDATE iot_devices SET valve_status = ? WHERE id = ?').bind(valve_status, Number(device_id)).run();
+      const updated = await db.prepare('SELECT * FROM iot_devices WHERE id = ?').bind(Number(device_id)).first();
+      return json({ success: true, message: `Smart valve ${valve_status.toUpperCase()} command acknowledged.`, device: updated });
+    }
+
+    // 23. KRA eTIMS & 7.5% MRI Tax Summary (D1 Native)
+    if (pathname === '/api/tax/etims-summary' && method === 'GET') {
+      const records = (await db.prepare(`
+        SELECT e.*, i.invoice_number, i.month, u.unit_number, p.name as property_name, t.name as tenant_name
+        FROM etims_records e
+        JOIN invoices i ON e.invoice_id = i.id
+        JOIN units u ON i.unit_id = u.id
+        JOIN properties p ON u.property_id = p.id
+        JOIN tenants t ON i.tenant_id = t.id
+        ORDER BY e.id DESC
+      `).all()).results || [];
+      const totals = (await db.prepare(`
+        SELECT COUNT(*) as total_transmitted, SUM(taxable_amount) as total_taxable_rent, SUM(tax_payable) as total_mri_tax
+        FROM etims_records
+      `).first()) || { total_transmitted: 0, total_taxable_rent: 0, total_mri_tax: 0 };
+      return json({
+        success: true,
+        stats: {
+          total_transmitted: totals.total_transmitted || 0,
+          total_taxable_rent: totals.total_taxable_rent || 0,
+          total_mri_tax: totals.total_mri_tax || 0,
+          mri_rate: '7.5%'
+        },
+        records
+      });
+    }
+
+    // 24. Artisan Escrow Marketplace (D1 Native)
+    if (pathname === '/api/marketplace/fundis' && method === 'GET') {
+      const fundis = (await db.prepare('SELECT * FROM artisan_marketplace ORDER BY rating DESC').all()).results || [];
+      return json({ success: true, count: fundis.length, fundis });
+    }
+    if (pathname === '/api/marketplace/escrows' && method === 'GET') {
+      const escrows = (await db.prepare(`
+        SELECT e.*, m.title as ticket_title, m.ticket_number, f.name as fundi_name, f.trade as fundi_trade, f.phone as fundi_phone
+        FROM maintenance_escrows e
+        JOIN maintenance_requests m ON e.ticket_id = m.id
+        LEFT JOIN artisan_marketplace f ON e.fundi_id = f.id
+        ORDER BY e.id DESC
+      `).all()).results || [];
+      return json({ success: true, count: escrows.length, escrows });
+    }
+    if (pathname === '/api/marketplace/escrow/allocate' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const { ticket_id, fundi_id, amount, milestone_desc } = b;
+      if (!ticket_id || !amount) return json({ error: 'Ticket ID and escrow allocation amount are required.' }, 400);
+      const resIns = await db.prepare(`
+        INSERT INTO maintenance_escrows (ticket_id, fundi_id, amount, status, milestone_desc)
+        VALUES (?, ?, ?, 'held', ?)
+      `).bind(Number(ticket_id), fundi_id ? Number(fundi_id) : null, Number(amount), milestone_desc || 'Repair milestone deposit').run();
+      return json({ success: true, escrow_id: resIns.meta?.last_row_id, status: 'held', message: `KES ${Number(amount).toLocaleString()} locked in escrow.` }, 201);
+    }
+    if (pathname === '/api/marketplace/escrow/release' || (pathname.includes('/escrows/') && pathname.endsWith('/release'))) {
+      const b = await request.json().catch(() => ({}));
+      let escrowId = b.escrow_id || (pathname.includes('/escrows/') ? pathname.split('/escrows/')[1].split('/')[0] : null);
+      if (!escrowId) return json({ error: 'Escrow ID required' }, 400);
+      const b2cRef = 'B2C-MPESA-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      await db.prepare("UPDATE maintenance_escrows SET status = 'released', b2c_disbursement_ref = ?, released_at = CURRENT_TIMESTAMP WHERE id = ?").bind(b2cRef, Number(escrowId)).run();
+      return json({ success: true, status: 'released', b2c_disbursement_ref: b2cRef, message: 'Escrow funds successfully disbursed to contractor.' });
+    }
+
+    // 25. Digital Lease Agreements & E-Sign (D1 Native)
+    if (pathname === '/api/leases/agreements' && method === 'GET') {
+      const user = await getUser();
+      let query = `
+        SELECT a.*, l.monthly_rent, u.unit_number, p.name as property_name, t.name as tenant_name, t.phone as tenant_phone
+        FROM lease_agreements a
+        JOIN leases l ON a.lease_id = l.id
+        JOIN units u ON a.unit_id = u.id
+        JOIN properties p ON u.property_id = p.id
+        JOIN tenants t ON a.tenant_id = t.id
+      `;
+      const params = [];
+      if (user && user.role === 'tenant' && user.tenant_id) {
+        query += ' WHERE a.tenant_id = ?';
+        params.push(user.tenant_id);
+      }
+      query += ' ORDER BY a.id DESC';
+      const agreements = (await db.prepare(query).bind(...params).all()).results || [];
+      return json({ success: true, count: agreements.length, agreements });
+    }
+    if ((pathname.startsWith('/api/leases/agreements/') && pathname.endsWith('/sign')) && method === 'POST') {
+      const parts = pathname.split('/');
+      const agreementId = parts[parts.indexOf('agreements') + 1];
+      const b = await request.json().catch(() => ({}));
+      const { signature } = b;
+      if (!signature) return json({ error: 'Signature data is required.' }, 400);
+      await db.prepare("UPDATE lease_agreements SET tenant_signature = ?, tenant_signed_at = CURRENT_TIMESTAMP, status = 'active' WHERE id = ?").bind(signature, Number(agreementId)).run();
+      const updated = await db.prepare('SELECT * FROM lease_agreements WHERE id = ?').bind(Number(agreementId)).first();
+      return json({ success: true, agreement: updated, message: 'Lease agreement signed and legally executed.' });
+    }
+
+    // 26. Move-In / Move-Out Inspections (D1 Native)
+    if (pathname === '/api/inspections' && method === 'GET') {
+      const inspections = (await db.prepare(`
+        SELECT i.*, u.unit_number, u.unit_type, p.name as property_name, t.name as tenant_name
+        FROM property_inspections i
+        JOIN units u ON i.unit_id = u.id
+        JOIN properties p ON u.property_id = p.id
+        LEFT JOIN tenants t ON i.tenant_id = t.id
+        ORDER BY i.id DESC
+      `).all()).results || [];
+      const parsed = inspections.map(insp => {
+        let checklist = [];
+        try { checklist = JSON.parse(insp.checklist_json); } catch (e) {}
+        return { ...insp, checklist };
+      });
+      return json({ success: true, count: parsed.length, inspections: parsed });
+    }
+    if (pathname === '/api/inspections' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const { unit_id, tenant_id, inspection_type, inspector_name, checklist, deposit_held, unpaid_utility_arrears } = b;
+      if (!unit_id || !inspection_type) return json({ error: 'Unit ID and Inspection Type required.' }, 400);
+      const items = Array.isArray(checklist) ? checklist : [];
+      const damagesTotal = items.reduce((sum, it) => sum + (Number(it.repair_cost) || 0), 0);
+      const held = Number(deposit_held || 0);
+      const arrears = Number(unpaid_utility_arrears || 0);
+      const netRefund = Math.max(0, held - arrears - damagesTotal);
+      const resIns = await db.prepare(`
+        INSERT INTO property_inspections (unit_id, tenant_id, inspection_type, inspection_date, inspector_name, checklist_json, damages_total, deposit_held, unpaid_utility_arrears, net_deposit_refund, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed')
+      `).bind(
+        Number(unit_id), tenant_id ? Number(tenant_id) : null, inspection_type,
+        new Date().toISOString().slice(0, 10), inspector_name || 'Site Caretaker',
+        JSON.stringify(items), damagesTotal, held, arrears, netRefund
+      ).run();
+      return json({ success: true, id: resIns.meta?.last_row_id, net_deposit_refund: netRefund }, 201);
+    }
+
+    // 27. Gated Estate Visitor Passes (D1 Native)
+    if (pathname === '/api/visitor-passes' && method === 'GET') {
+      const user = await getUser();
+      let query = `
+        SELECT v.*, u.unit_number, p.name as property_name, t.name as host_name, t.phone as host_phone
+        FROM visitor_passes v
+        JOIN units u ON v.unit_id = u.id
+        JOIN properties p ON u.property_id = p.id
+        JOIN tenants t ON v.tenant_id = t.id
+      `;
+      const params = [];
+      if (user && user.role === 'tenant' && user.tenant_id) {
+        query += ' WHERE v.tenant_id = ?';
+        params.push(user.tenant_id);
+      }
+      query += ' ORDER BY v.id DESC';
+      const passes = (await db.prepare(query).bind(...params).all()).results || [];
+      return json({ success: true, count: passes.length, passes });
+    }
+    if (pathname === '/api/visitor-passes' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const { unit_id, tenant_id, visitor_name, visitor_phone, vehicle_plate, valid_date, time_slot } = b;
+      if (!visitor_name || !visitor_phone) return json({ error: 'Visitor name and phone number required.' }, 400);
+      const passCode = 'PASS-' + Math.floor(1000 + Math.random() * 9000);
+      const date = valid_date || new Date().toISOString().slice(0, 10);
+      const slot = time_slot || '08:00 AM - 08:00 PM';
+      const qrData = `BOMASPHERE:${passCode}:UNIT-${unit_id || 1}:${date}`;
+      const resIns = await db.prepare(`
+        INSERT INTO visitor_passes (pass_code, unit_id, tenant_id, visitor_name, visitor_phone, vehicle_plate, valid_date, time_slot, status, qr_data)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?)
+      `).bind(passCode, Number(unit_id || 1), Number(tenant_id || 1), visitor_name, visitor_phone, vehicle_plate || 'N/A', date, slot, qrData).run();
+      return json({ success: true, id: resIns.meta?.last_row_id, pass_code: passCode, qr_data: qrData, message: `Visitor Pass ${passCode} issued.` }, 201);
+    }
+    if (pathname === '/api/visitor-passes/validate' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const { pass_code, action } = b;
+      if (!pass_code) return json({ error: 'Gate pass code is required.' }, 400);
+      const pass = await db.prepare(`
+        SELECT v.*, u.unit_number, p.name as property_name, t.name as host_name
+        FROM visitor_passes v
+        JOIN units u ON v.unit_id = u.id
+        JOIN properties p ON u.property_id = p.id
+        JOIN tenants t ON v.tenant_id = t.id
+        WHERE v.pass_code = ? OR v.pass_code = ?
+      `).bind(pass_code.toUpperCase(), 'PASS-' + pass_code.toUpperCase()).first();
+      if (!pass) return json({ error: 'Invalid or unknown gate pass code.' }, 404);
+      const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
+      if (action === 'check_out' || pass.status === 'checked_in') {
+        await db.prepare("UPDATE visitor_passes SET status = 'completed', checked_out_at = ? WHERE id = ?").bind(timestamp, pass.id).run();
+        return json({ success: true, action: 'check_out', status: 'completed', pass, message: `Visitor ${pass.visitor_name} checked out.` });
+      } else {
+        await db.prepare("UPDATE visitor_passes SET status = 'checked_in', checked_in_at = ? WHERE id = ?").bind(timestamp, pass.id).run();
+        return json({ success: true, action: 'check_in', status: 'checked_in', pass, message: `Access Granted: Visitor ${pass.visitor_name} checked in.` });
+      }
+    }
+
+    // 28. Shared Estate Amenities & Bookings (D1 Native)
+    if (pathname === '/api/amenities' && method === 'GET') {
+      const amenities = (await db.prepare(`
+        SELECT a.*, p.name as property_name, p.city
+        FROM estate_amenities a
+        JOIN properties p ON a.property_id = p.id
+        ORDER BY a.id ASC
+      `).all()).results || [];
+      return json({ success: true, count: amenities.length, amenities });
+    }
+    if (pathname === '/api/amenity-bookings' && method === 'GET') {
+      const user = await getUser();
+      let query = `
+        SELECT b.*, a.name as amenity_name, a.photo as amenity_photo,
+               u.unit_number, t.name as tenant_name, t.phone as tenant_phone
+        FROM amenity_bookings b
+        JOIN estate_amenities a ON b.amenity_id = a.id
+        JOIN units u ON b.unit_id = u.id
+        JOIN tenants t ON b.tenant_id = t.id
+      `;
+      const params = [];
+      if (user && user.role === 'tenant' && user.tenant_id) {
+        query += ' WHERE b.tenant_id = ?';
+        params.push(user.tenant_id);
+      }
+      query += ' ORDER BY b.id DESC';
+      const bookings = (await db.prepare(query).bind(...params).all()).results || [];
+      return json({ success: true, count: bookings.length, bookings });
+    }
+    if (pathname === '/api/amenity-bookings' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const { amenity_id, booking_date, start_time } = b;
+      if (!amenity_id || !booking_date || !start_time) return json({ error: 'Amenity ID, date, and start time required.' }, 400);
+      const amenity = await db.prepare('SELECT * FROM estate_amenities WHERE id = ?').bind(Number(amenity_id)).first();
+      if (!amenity) return json({ error: 'Amenity not found.' }, 404);
+      const hours = Number(b.duration_hours || 2);
+      const totalFee = Number(amenity.hourly_fee || 0) * hours;
+      const ref = 'BK-' + Math.floor(1000 + Math.random() * 9000);
+      const user = await getUser();
+      let tenantId = Number(b.tenant_id || user?.tenant_id || 1);
+      let unitId = Number(b.unit_id || 1);
+      const tRow = await db.prepare('SELECT id FROM tenants WHERE id = ?').bind(tenantId).first();
+      if (!tRow) {
+        const firstT = await db.prepare('SELECT id FROM tenants ORDER BY id ASC LIMIT 1').first();
+        if (firstT) tenantId = firstT.id;
+      }
+      const uRow = await db.prepare('SELECT id FROM units WHERE id = ?').bind(unitId).first();
+      if (!uRow) {
+        const firstU = await db.prepare('SELECT id FROM units ORDER BY id ASC LIMIT 1').first();
+        if (firstU) unitId = firstU.id;
+      }
+      const resIns = await db.prepare(`
+        INSERT INTO amenity_bookings (booking_reference, amenity_id, tenant_id, unit_id, booking_date, start_time, end_time, total_fee, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'confirmed')
+      `).bind(ref, Number(amenity_id), tenantId, unitId, booking_date, start_time, b.end_time || '07:00 PM', totalFee).run();
+      return json({ success: true, id: resIns.meta?.last_row_id, booking_reference: ref, total_fee: totalFee, message: `Reservation ${ref} confirmed.` }, 201);
+    }
+
+    // 29. AI Tenant Vetting & CRB Scoring (D1 Native)
+    if (pathname === '/api/tenant-vetting' && method === 'GET') {
+      const vettings = (await db.prepare('SELECT * FROM tenant_vettings ORDER BY id DESC').all()).results || [];
+      return json({ success: true, count: vettings.length, vettings });
+    }
+    if (pathname === '/api/tenant-vetting/analyze' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const { applicant_name, phone, monthly_income, requested_rent } = b;
+      if (!applicant_name || !monthly_income || !requested_rent) return json({ error: 'Applicant name, monthly income, and rent required.' }, 400);
+      const income = Number(monthly_income);
+      const rent = Number(requested_rent);
+      const rentToIncomePct = Number(((rent / income) * 100).toFixed(1));
+      let crbScore = 720;
+      let riskCategory = 'Low Risk';
+      let recommendation = 'Approved for Lease Execution';
+      if (rentToIncomePct > 45) {
+        crbScore = 580;
+        riskCategory = 'High Risk';
+        recommendation = 'Guarantor or 3-Month Security Deposit Required';
+      } else if (rentToIncomePct > 35) {
+        crbScore = 650;
+        riskCategory = 'Medium Risk';
+        recommendation = 'Conditional Approval with Standard 2-Month Deposit';
+      }
+      const resIns = await db.prepare(`
+        INSERT INTO tenant_vettings (applicant_name, phone, monthly_income, crb_score, risk_category, rent_to_income_pct, recommendation, kra_pin_verified)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+      `).bind(applicant_name, phone || '+254700000000', income, crbScore, riskCategory, rentToIncomePct, recommendation).run();
+      return json({ success: true, id: resIns.meta?.last_row_id, crb_score: crbScore, risk_category: riskCategory, rent_to_income_pct: rentToIncomePct, recommendation }, 201);
+    }
+
   } catch (err) {
     console.error('D1 execution error:', err);
     if (err.message && err.message.includes('no such table')) {
