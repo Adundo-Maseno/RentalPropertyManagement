@@ -32,3 +32,9 @@ desktop.ini
 
 # Scratch and temporary audit scripts
 scratch/
+
+# Local agent skills and workspace rules (keep global in ~/.gemini/config/skills)
+.agent/
+.agents/
+_agent/
+_agents/
