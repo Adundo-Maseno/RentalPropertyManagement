@@ -5980,22 +5980,25 @@ class BomaSphereApp {
     if (!container) return;
 
     const toast = document.createElement('div');
-    const colorClasses = type === 'success' 
-      ? 'bg-emerald-900 text-white border-emerald-700' 
-      : (type === 'error' ? 'bg-rose-900 text-white border-rose-700' : 'bg-slate-900 text-white border-slate-700');
+    const toastClass = type === 'success' ? 'toast-success' : (type === 'error' ? 'toast-error' : 'toast-info');
+    const iconName = type === 'success' ? 'check-circle' : (type === 'error' ? 'alert-triangle' : 'info');
 
-    toast.className = `toast show p-3.5 rounded-xl border shadow-xl flex items-center space-x-2 text-xs font-medium max-w-sm ${colorClasses}`;
+    toast.className = `toast show ${toastClass}`;
     toast.innerHTML = `
-      <span class="w-2 h-2 rounded-full ${type === 'success' ? 'bg-emerald-400' : (type === 'error' ? 'bg-rose-400' : 'bg-blue-400')}"></span>
-      <span class="flex-1">${escapeHtml(message)}</span>
+      <i data-lucide="${iconName}" class="w-4 h-4 shrink-0"></i>
+      <span class="flex-1 font-semibold">${escapeHtml(message)}</span>
+      <button onclick="this.parentElement.remove()" class="p-0.5 hover:opacity-100 transition shrink-0 opacity-70 cursor-pointer" aria-label="Dismiss toast">
+        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+      </button>
     `;
 
     container.appendChild(toast);
+    if (window.lucide) lucide.createIcons();
 
     setTimeout(() => {
       toast.classList.remove('show');
-      setTimeout(() => toast.remove(), 400);
-    }, 4000);
+      setTimeout(() => toast.remove(), 350);
+    }, 4500);
   }
 
   // ==========================================

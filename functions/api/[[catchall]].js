@@ -1222,7 +1222,7 @@ async function handleD1(context, json, corsHeaders) {
       if (!property_id || !unit_id || !title) {
         return json({ error: 'Property, unit, and issue title are required.' }, 400);
       }
-      const tNum = 'TKT-' + Math.floor(1000 + Math.random() * 9000);
+      const tNum = `TKT-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
       const resIns = await db.prepare(`
         INSERT INTO maintenance_requests (ticket_number, property_id, unit_id, tenant_id, title, description, category, priority, status)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open')

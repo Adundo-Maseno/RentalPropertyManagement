@@ -1750,7 +1750,7 @@ async function handleRequest(req, res) {
 
     if (pathname === '/api/maintenance' && method === 'POST') {
       const b = await parseBody(req);
-      const ticketNum = `TKT-${Math.floor(1000 + Math.random() * 9000)}`;
+      const ticketNum = `TKT-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
       let propId = b.property_id || null;
       if (!propId && b.unit_id) {
         const u = db.prepare('SELECT property_id FROM units WHERE id = ?').get(b.unit_id);
@@ -2572,7 +2572,7 @@ async function handleRequest(req, res) {
         action = 'pay';
       } else if (cmd.startsWith('TICKET') || cmd === '4') {
         const issue = incomingText.replace(/^TICKET/i, '').trim() || 'General repairs needed';
-        const tktNum = 'TKT-' + Math.floor(1000 + Math.random() * 9000);
+        const tktNum = `TKT-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
         const unit = db.prepare("SELECT * FROM units LIMIT 1").get();
         db.prepare(`
           INSERT INTO maintenance_requests (ticket_number, property_id, unit_id, tenant_id, title, description, category, priority, status)
