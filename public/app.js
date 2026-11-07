@@ -3865,6 +3865,40 @@ class BomaSphereApp {
     this.showToast(`Email copied: ${email}`, 'info');
   }
 
+  copyUserCredentials(email, name, role) {
+    const roleLabels = {
+      super_admin: 'Super Admin',
+      property_manager: 'Property Manager',
+      caretaker: 'Site Caretaker',
+      landlord: 'Landlord / Owner',
+      tenant: 'Resident Tenant'
+    };
+    const roleTitle = roleLabels[role] || role;
+    const portalUrl = window.location.origin;
+    const msg = `Jambo ${name}!\nYour BomaSphere Property Management account is active.\n\n` +
+      `🌐 Portal: ${portalUrl}\n` +
+      `👤 Email: ${email}\n` +
+      `🔑 Initial Password: password123\n` +
+      `🛡️ Role: ${roleTitle}\n\n` +
+      `Please log in at the portal with your email and password.`;
+
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(msg);
+    }
+    this.showToast(`Login invite copied for ${name}! (Default Password: password123)`, 'success');
+  }
+
+  togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPass = input.type === 'password';
+    input.type = isPass ? 'text' : 'password';
+    if (btn) {
+      btn.innerHTML = isPass ? '<i data-lucide="eye-off" class="w-4 h-4"></i>' : '<i data-lucide="eye" class="w-4 h-4"></i>';
+      if (window.lucide) lucide.createIcons();
+    }
+  }
+
   openAuthModal() {
     this.openModal('modal-auth-login');
   }
@@ -4079,7 +4113,11 @@ class BomaSphereApp {
             </span>
           </td>
           <td class="py-3 px-4 text-right space-x-1.5">
-            <button onclick="app.copyUserEmail('${u.email}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-medium text-[11px] transition">
+            <button onclick="app.copyUserCredentials('${this.escapeQuote(u.email)}', '${this.escapeQuote(u.name)}', '${u.role}')" class="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded font-medium text-[11px] transition inline-flex items-center gap-1" title="Copy Login Invite Details">
+              <i data-lucide="share-2" class="w-3 h-3"></i>
+              <span>Invite</span>
+            </button>
+            <button onclick="app.copyUserEmail('${u.email}')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-medium text-[11px] transition">
               Copy Email
             </button>
             <button onclick="app.openEditUserModal(${u.id})" class="p-1 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded transition" title="Edit User">
@@ -4264,6 +4302,7 @@ class BomaSphereApp {
     const phone = document.getElementById('user-phone-input').value;
     const role = document.getElementById('user-role-input').value;
     const propVal = document.getElementById('user-prop-input').value;
+    const password = document.getElementById('user-password-input')?.value?.trim() || 'password123';
 
     try {
       await this.fetchAPI('/api/users', {
@@ -4274,17 +4313,19 @@ class BomaSphereApp {
           email,
           phone,
           role,
-          property_id: propVal ? Number(propVal) : null
+          property_id: propVal ? Number(propVal) : null,
+          password
         })
       });
 
       this.closeModal('modal-add-user');
       document.getElementById('form-add-user').reset();
-      this.showToast(`User ${name} provisioned successfully!`, 'success');
+      this.showToast(`User ${name} provisioned! Login password: ${password}`, 'success');
       await this.refreshAllData();
       this.renderUsers();
     } catch (err) {
       console.error(err);
+      this.showToast(err.message || 'Failed to provision user', 'error');
     }
   }
 
@@ -4309,6 +4350,8 @@ class BomaSphereApp {
     }
 
     document.getElementById('edit-user-status-input').value = u.status || 'active';
+    const pwdInput = document.getElementById('edit-user-password-input');
+    if (pwdInput) pwdInput.value = '';
     this.openModal('modal-edit-user');
   }
 
@@ -4321,6 +4364,7 @@ class BomaSphereApp {
     const role = document.getElementById('edit-user-role-input').value;
     const propertyId = document.getElementById('edit-user-prop-input').value;
     const status = document.getElementById('edit-user-status-input').value;
+    const password = document.getElementById('edit-user-password-input')?.value?.trim();
 
     try {
       await this.fetchAPI(`/api/users/${id}`, {
@@ -4333,12 +4377,13 @@ class BomaSphereApp {
           phone,
           role,
           property_id: propertyId ? Number(propertyId) : null,
-          status
+          status,
+          password: password || undefined
         })
       });
 
       this.closeModal('modal-edit-user');
-      this.showToast(`User "${name}" updated successfully!`, 'success');
+      this.showToast(`User "${name}" updated successfully!${password ? ' (Password changed)' : ''}`, 'success');
       await this.refreshAllData();
       this.renderUsers();
     } catch (err) {

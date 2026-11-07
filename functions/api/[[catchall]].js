@@ -174,7 +174,8 @@ async function handleD1(context, json, corsHeaders) {
         tenant: 'Tenant@2026'
       };
       const expected = rolePasswords[user.role] || 'password123';
-      if (password !== expected && password !== 'password123') {
+      const isMatch = (password === expected) || (password === 'password123') || (user.password_hash && password === user.password_hash);
+      if (!isMatch) {
         return json({ error: 'Invalid email or password' }, 401);
       }
       const token = user.session_token || `token_${user.role}`;
@@ -737,10 +738,11 @@ async function handleD1(context, json, corsHeaders) {
       if (existing) return json({ error: 'User with this email already exists in system directory.' }, 409);
       const role = b.role || 'caretaker';
       const token = `token_${role}_${Date.now()}`;
+      const pwd = (b.password && b.password.trim()) ? b.password.trim() : 'password123';
       const res = await db.prepare(`
         INSERT INTO users (name, email, phone, role, property_id, tenant_id, status, password_hash, session_token)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'password123', ?)
-      `).bind(b.name, b.email.trim(), b.phone || null, role, b.property_id ? Number(b.property_id) : null, b.tenant_id ? Number(b.tenant_id) : null, b.status || 'active', token).run();
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(b.name, b.email.trim(), b.phone || null, role, b.property_id ? Number(b.property_id) : null, b.tenant_id ? Number(b.tenant_id) : null, b.status || 'active', pwd, token).run();
       const id = res.meta?.last_row_id;
       const created = await db.prepare('SELECT id, name, email, phone, role, property_id, tenant_id, status, created_at FROM users WHERE id = ?').bind(id).first();
       return json({ success: true, id, user: created }, 201);
@@ -765,6 +767,9 @@ async function handleD1(context, json, corsHeaders) {
           status = coalesce(?, status)
         WHERE id = ?
       `).bind(b.name || null, b.email ? b.email.trim() : null, b.phone || null, b.role || null, b.property_id ? Number(b.property_id) : null, b.status || null, Number(id)).run();
+      if (b.password && b.password.trim()) {
+        await db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').bind(b.password.trim(), Number(id)).run();
+      }
       const updated = await db.prepare('SELECT id, name, email, phone, role, property_id, tenant_id, status, created_at FROM users WHERE id = ?').bind(Number(id)).first();
       return json({ success: true, user: updated });
     }

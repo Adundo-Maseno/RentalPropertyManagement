@@ -1560,6 +1560,9 @@ async function handleRequest(req, res) {
         b.status ?? null,
         userId
       );
+      if (b.password && b.password.trim()) {
+        db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hashPassword(b.password.trim()), userId);
+      }
       return sendJSON(res, 200, { success: true });
     }
 
