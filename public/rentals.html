@@ -175,51 +175,19 @@
         </div>
       </div>
 
-      <!-- Quick Region Pill Filter for Kenya Nationwide -->
-      <div class="flex items-center space-x-2 overflow-x-auto py-1 no-scrollbar text-xs">
-        <span class="text-slate-400 dark:text-zinc-500 font-semibold text-[11px] uppercase tracking-wider shrink-0 mr-1">Regions:</span>
+      <!-- Quick Location Pill Filter (Dynamically Populated from DB Vacancies) -->
+      <div id="quick-region-filters" class="flex items-center space-x-2 overflow-x-auto py-1 no-scrollbar text-xs">
+        <span class="text-slate-400 dark:text-zinc-500 font-semibold text-[11px] uppercase tracking-wider shrink-0 mr-1">Locations:</span>
         <button type="button" onclick="selectQuickLocation('all')" class="quick-loc-pill active px-3 py-1 rounded-full text-xs font-semibold border border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900 shrink-0 transition cursor-pointer">All Kenya</button>
-        <button type="button" onclick="selectQuickLocation('Nairobi')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Nairobi Metro</button>
-        <button type="button" onclick="selectQuickLocation('Mombasa')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Coast (Mombasa &amp; Diani)</button>
-        <button type="button" onclick="selectQuickLocation('Nakuru')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Rift Valley (Nakuru &amp; Eldoret)</button>
-        <button type="button" onclick="selectQuickLocation('Kiambu')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Central (Kiambu &amp; Mt. Kenya)</button>
-        <button type="button" onclick="selectQuickLocation('Kisumu')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Western (Kisumu &amp; Lake)</button>
       </div>
 
       <!-- Advanced Filter Form Controls -->
       <aside class="bg-slate-50 dark:bg-zinc-800/80 p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-zinc-700 shadow-xs" aria-label="Filter Properties">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <div>
-            <label for="filter-location" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">County / Region</label>
+            <label for="filter-location" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">County / Neighborhood</label>
             <select id="filter-location" class="w-full text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md px-2.5 py-1.5 text-slate-800 dark:text-zinc-100 font-medium focus:ring-1 focus:ring-emerald-500 focus:outline-none transition cursor-pointer">
-              <option value="all">All Kenya (47 Counties)</option>
-              <optgroup label="Nairobi Metropolitan">
-                <option value="Kilimani">Kilimani, Nairobi</option>
-                <option value="Westlands">Westlands, Nairobi</option>
-                <option value="Riverside">Riverside Drive, Nairobi</option>
-                <option value="Karen">Karen &amp; Langata</option>
-                <option value="Runda">Runda &amp; Muthaiga</option>
-              </optgroup>
-              <optgroup label="Coast &amp; Marine">
-                <option value="Nyali">Nyali Beach, Mombasa</option>
-                <option value="Mombasa">Mombasa CBD &amp; Environs</option>
-                <option value="Diani">Diani Beach, Kwale</option>
-                <option value="Malindi">Malindi &amp; Watamu</option>
-              </optgroup>
-              <optgroup label="Rift Valley">
-                <option value="Nakuru">Milimani &amp; Nakuru City</option>
-                <option value="Eldoret">Eldoret &amp; Uasin Gishu</option>
-                <option value="Naivasha">Naivasha &amp; Lake Basin</option>
-              </optgroup>
-              <optgroup label="Central &amp; Mt. Kenya">
-                <option value="Kiambu">Kiambu Road &amp; Ruiru</option>
-                <option value="Thika">Thika Town &amp; Murang'a</option>
-                <option value="Nanyuki">Nanyuki &amp; Laikipia</option>
-              </optgroup>
-              <optgroup label="Western &amp; Lake Region">
-                <option value="Kisumu">Riat Hills &amp; Kisumu City</option>
-                <option value="Kakamega">Kakamega Town</option>
-              </optgroup>
+              <option value="all">All Locations (Loading...)</option>
             </select>
           </div>
 
@@ -422,7 +390,7 @@
         </div>
 
         <!-- Schedule Visit Trigger -->
-        <button onclick="toggleLightboxBookingDrawer()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-md transition flex items-center space-x-1.5 cursor-pointer">
+        <button onclick="openViewingModal(activeTourUnit ? activeTourUnit.id : null)" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-md transition flex items-center space-x-1.5 cursor-pointer hover:scale-105 active:scale-95" title="Schedule Private In-Person Viewing">
           <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
           <span>Book Visit</span>
         </button>
@@ -458,142 +426,121 @@
       </div>
     </div>
 
-    <!-- Slide-Over / Bottom Sheet Booking Panel -->
-    <aside id="lightbox-booking-drawer" class="fixed inset-x-0 bottom-0 sm:inset-x-auto sm:right-0 sm:top-0 sm:bottom-0 w-full sm:w-96 max-h-[85vh] sm:max-h-none overflow-y-auto bg-zinc-900 border-t sm:border-t-0 sm:border-l border-zinc-800 p-5 sm:p-6 rounded-t-2xl sm:rounded-none shadow-2xl flex flex-col justify-between hidden z-40 transition-transform">
-      <div class="sm:hidden w-12 h-1 rounded-full bg-zinc-700 mx-auto -mt-1 mb-3 shrink-0"></div>
-      <div class="space-y-4">
-        <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
-          <h4 class="text-base font-bold text-white flex items-center gap-2">
-            <i data-lucide="calendar-check" class="w-4 h-4 text-emerald-400"></i>
-            <span>Schedule Private Viewing</span>
-          </h4>
-          <button onclick="toggleLightboxBookingDrawer()" class="p-1.5 text-zinc-400 hover:text-white rounded-md transition cursor-pointer" aria-label="Close drawer">
-            <i data-lucide="x" class="w-4 h-4"></i>
-          </button>
-        </div>
-
-        <!-- Rent Info Box -->
-        <div class="p-3.5 rounded-lg bg-zinc-800/80 border border-zinc-700/80 space-y-1">
-          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Direct Monthly Rate</span>
-          <p class="text-xl font-extrabold text-white font-mono" id="tour-drawer-rent">KES 75,000</p>
-          <p class="text-xs text-zinc-400 font-mono" id="tour-drawer-deposit">Deposit: KES 150,000</p>
-        </div>
-
-        <!-- Specs Matrix -->
-        <div class="grid grid-cols-3 gap-2 text-center text-xs">
-          <div class="p-2 rounded bg-zinc-800 border border-zinc-700">
-            <span class="text-[10px] uppercase text-zinc-400 block font-semibold">Rooms</span>
-            <p class="font-bold text-white mt-0.5" id="tour-drawer-beds">2 Beds</p>
-          </div>
-          <div class="p-2 rounded bg-zinc-800 border border-zinc-700">
-            <span class="text-[10px] uppercase text-zinc-400 block font-semibold">Baths</span>
-            <p class="font-bold text-white mt-0.5" id="tour-drawer-baths">2 Baths</p>
-          </div>
-          <div class="p-2 rounded bg-zinc-800 border border-zinc-700">
-            <span class="text-[10px] uppercase text-zinc-400 block font-semibold">Area</span>
-            <p class="font-bold text-white mt-0.5" id="tour-drawer-sqft">1,150 sqft</p>
-          </div>
-        </div>
-
-        <div id="lightbox-booking-success" class="hidden p-3 rounded-lg bg-emerald-950 border border-emerald-800 text-emerald-200 text-xs space-y-1">
-          <p class="font-bold flex items-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i> Appointment Confirmed!</p>
-          <p class="text-[11px]" id="lightbox-booking-success-msg">SMS confirmation sent to your mobile phone.</p>
-        </div>
-
-        <!-- Booking Form -->
-        <form id="form-lightbox-booking" onsubmit="submitLightboxBooking(event)" class="space-y-3 text-xs">
-          <div>
-            <label class="block text-zinc-300 text-[11px] font-semibold mb-1">Full Name</label>
-            <input type="text" id="lightbox-book-name" placeholder="e.g. Caroline Achieng" required class="w-full bg-zinc-800 border border-zinc-700 rounded-md p-2 text-white text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none">
-          </div>
-
-          <div>
-            <label class="block text-zinc-300 text-[11px] font-semibold mb-1">Mobile Phone (M-Pesa enabled)</label>
-            <input type="tel" id="lightbox-book-phone" placeholder="+2547XXXXXXXX" required class="w-full bg-zinc-800 border border-zinc-700 rounded-md p-2 font-mono text-white text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none">
-          </div>
-
-          <div>
-            <label class="block text-zinc-300 text-[11px] font-semibold mb-1">Preferred Date</label>
-            <input type="date" id="lightbox-book-date" required class="w-full bg-zinc-800 border border-zinc-700 rounded-md p-2 text-white text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none">
-          </div>
-
-          <button type="submit" id="btn-lightbox-submit-booking" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs transition shadow-sm cursor-pointer flex items-center justify-center space-x-1.5 mt-2">
-            <i data-lucide="calendar-check" class="w-3.5 h-3.5"></i>
-            <span>Confirm Viewing</span>
-          </button>
-        </form>
-      </div>
-
-      <!-- WhatsApp Inquiry -->
-      <div class="pt-4 border-t border-zinc-800">
-        <a id="tour-whatsapp-link" href="#" target="_blank" class="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs border border-zinc-700 rounded-lg transition flex items-center justify-center space-x-2">
-          <i data-lucide="message-circle" class="w-4 h-4 text-emerald-400"></i>
-          <span>Ask Caretaker on WhatsApp</span>
-        </a>
-      </div>
-    </aside>
+    <!-- Hidden compatibility stubs -->
+    <div id="lightbox-booking-drawer" class="hidden"></div>
+    <div id="lightbox-booking-success" class="hidden"></div>
+    <div id="lightbox-booking-success-msg" class="hidden"></div>
+    <form id="form-lightbox-booking" class="hidden"></form>
+    <a id="tour-whatsapp-link" href="#" class="hidden"></a>
   </div>
 
   <!-- ==================================================================== -->
-  <!-- 6. STANDALONE SCHEDULE VIEWING MODAL (Direct Card Access)            -->
+  <!-- 6. SCHEDULE VIEWING MODAL (Direct Card & Virtual Tour Access)         -->
   <!-- ==================================================================== -->
-  <div id="modal-viewing" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden flex sm:items-center items-end justify-center sm:p-4 p-0" role="dialog" aria-modal="true" aria-labelledby="modal-viewing-title">
-    <div class="bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 relative transition-transform max-h-[90vh] overflow-y-auto">
-      <div class="sm:hidden w-12 h-1 rounded-full bg-slate-300 dark:bg-zinc-700 mx-auto -mt-1 mb-3"></div>
-      <button onclick="closeViewingModal()" class="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-zinc-100 rounded-lg transition" aria-label="Close dialog">
+  <div id="modal-viewing" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[60] hidden flex sm:items-center items-end justify-center sm:p-4 p-0 transition-opacity" role="dialog" aria-modal="true" aria-labelledby="modal-viewing-title">
+    <div class="bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-2xl max-w-lg w-full p-5 sm:p-7 shadow-2xl border border-slate-200/90 dark:border-zinc-800 relative transition-transform max-h-[92vh] overflow-y-auto">
+      <div class="sm:hidden w-12 h-1 rounded-full bg-slate-300 dark:bg-zinc-700 mx-auto -mt-1 mb-4"></div>
+      
+      <!-- Close Button -->
+      <button onclick="closeViewingModal()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-800 dark:hover:text-zinc-100 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition cursor-pointer" aria-label="Close dialog" title="Close (Esc)">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <div class="flex items-center space-x-3 pb-3 border-b border-slate-200 dark:border-zinc-800">
-        <div class="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold shadow-xs">
-          <i data-lucide="calendar" class="w-4 h-4"></i>
+      <!-- Header with Trust Badge -->
+      <div class="pb-3 border-b border-slate-200 dark:border-zinc-800">
+        <div class="flex items-center space-x-2 mb-1.5">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+            <i data-lucide="shield-check" class="w-3 h-3 mr-1 text-emerald-600 dark:text-emerald-400"></i>
+            Direct Landlord Viewing &bull; Zero Agency Fees
+          </span>
         </div>
-        <div>
-          <h3 class="text-base font-bold text-slate-900 dark:text-white" id="modal-viewing-title">Schedule Viewing</h3>
-          <p class="text-xs text-slate-500 dark:text-zinc-400" id="modal-viewing-sub">Unit &bull; Property Name</p>
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight" id="modal-viewing-title">Schedule Private Viewing</h3>
+        <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5" id="modal-viewing-sub">Unit &bull; Property Name</p>
+      </div>
+
+      <!-- Property Snapshot Preview Card -->
+      <div id="modal-viewing-preview-card" class="my-3.5 p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700/80 flex items-center justify-between">
+        <div class="flex items-center space-x-3 min-w-0">
+          <img id="modal-viewing-thumb" src="" alt="Unit Preview" class="w-14 h-14 rounded-lg object-cover border border-slate-200 dark:border-zinc-700 shrink-0">
+          <div class="min-w-0">
+            <p class="text-xs font-bold text-slate-900 dark:text-white truncate" id="modal-viewing-prop-name">Property Name</p>
+            <p class="text-[11px] text-slate-500 dark:text-zinc-400 truncate" id="modal-viewing-prop-addr">Location</p>
+            <div class="flex items-center space-x-2 text-[10px] text-slate-600 dark:text-zinc-300 font-medium mt-1">
+              <span id="modal-viewing-beds">2 Beds</span>
+              <span>&bull;</span>
+              <span id="modal-viewing-baths">2 Ba</span>
+              <span>&bull;</span>
+              <span id="modal-viewing-sqft">1,100 sqft</span>
+            </div>
+          </div>
+        </div>
+        <div class="text-right shrink-0 pl-2">
+          <div class="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 font-mono" id="modal-viewing-rent">KES 75,000 / mo</div>
+          <div class="text-[10px] text-slate-400 dark:text-zinc-500 font-mono" id="modal-viewing-deposit">Deposit: KES 150,000</div>
         </div>
       </div>
 
-      <div id="viewing-success-box" class="hidden my-3 p-3.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 space-y-1 text-xs">
-        <div class="font-bold flex items-center">
-          <i data-lucide="check-circle" class="w-4 h-4 mr-1.5 text-emerald-600"></i>
-          <span>Appointment Confirmed!</span>
+      <!-- Success Notice -->
+      <div id="viewing-success-box" class="hidden my-3 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-100 space-y-2 text-xs">
+        <div class="font-bold flex items-center text-sm">
+          <i data-lucide="check-circle-2" class="w-5 h-5 mr-2 text-emerald-600 dark:text-emerald-400"></i>
+          <span>Viewing Appointment Confirmed!</span>
         </div>
-        <p id="viewing-success-msg">Your viewing reference pass has been sent via SMS.</p>
+        <p id="viewing-success-msg" class="text-xs text-emerald-800 dark:text-emerald-200">Your viewing pass reference has been generated. Confirmation SMS sent.</p>
+        <div class="pt-2 flex items-center space-x-2">
+          <button type="button" onclick="closeViewingModal()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-xs transition cursor-pointer">Done</button>
+          <a id="viewing-success-whatsapp" href="#" target="_blank" class="px-3 py-1.5 rounded-lg border border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300 font-semibold text-xs hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition inline-flex items-center space-x-1.5">
+            <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+            <span>Chat Caretaker on WhatsApp</span>
+          </a>
+        </div>
       </div>
 
-      <form id="form-viewing" onsubmit="submitViewing(event)" class="mt-4 space-y-3 text-xs">
+      <!-- Booking Form -->
+      <form id="form-viewing" onsubmit="submitViewing(event)" class="space-y-3.5 text-xs">
         <input type="hidden" id="viewing-unit-id" value="4">
 
         <div>
           <label for="viewing-name" class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Full Name</label>
-          <input type="text" id="viewing-name" placeholder="e.g. Caroline Achieng" required class="w-full border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 rounded-md p-2 text-xs text-slate-900 dark:text-white focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+          <input type="text" id="viewing-name" placeholder="e.g. Caroline Achieng" required class="w-full border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:outline-none transition">
         </div>
 
-        <div class="grid grid-cols-2 gap-2.5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label for="viewing-phone" class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Mobile (Safaricom)</label>
-            <input type="tel" id="viewing-phone" placeholder="+2547XXXXXXXX" required class="w-full border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 rounded-md p-2 font-mono text-xs text-slate-900 dark:text-white focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+            <label for="viewing-phone" class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Mobile Phone (M-Pesa enabled)</label>
+            <input type="tel" id="viewing-phone" placeholder="+254 7XX XXX XXX" required class="w-full border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 font-mono text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:outline-none transition">
           </div>
           <div>
             <label for="viewing-date" class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Preferred Date</label>
-            <input type="date" id="viewing-date" required class="w-full border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 rounded-md p-2 text-xs text-slate-900 dark:text-white focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+            <input type="date" id="viewing-date" required class="w-full border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:outline-none transition">
           </div>
         </div>
 
         <div>
-          <label for="viewing-time" class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Preferred Time</label>
-          <select id="viewing-time" class="w-full border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 rounded-md p-2 text-xs text-slate-900 dark:text-white focus:ring-1 focus:ring-emerald-500 focus:outline-none">
-            <option value="10:00 AM">10:00 AM (Morning)</option>
-            <option value="02:00 PM">02:00 PM (Afternoon)</option>
-            <option value="04:30 PM">04:30 PM (Late Afternoon)</option>
+          <label for="viewing-time" class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Preferred Time Window</label>
+          <select id="viewing-time" class="w-full border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:outline-none transition cursor-pointer">
+            <option value="10:00 AM">Morning Session (10:00 AM - 12:00 PM)</option>
+            <option value="02:00 PM">Afternoon Session (02:00 PM - 04:00 PM)</option>
+            <option value="04:30 PM">Sunset / Evening Viewing (04:30 PM - 06:00 PM)</option>
           </select>
         </div>
 
-        <button type="submit" id="btn-submit-viewing" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700 rounded-md font-bold text-xs shadow-xs transition flex items-center justify-center space-x-2 cursor-pointer mt-2">
-          <span>Confirm Viewing Appointment</span>
-          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-        </button>
+        <div>
+          <label for="viewing-notes" class="block font-semibold text-slate-700 dark:text-zinc-300 mb-1">Special Requirements / Notes <span class="font-normal text-slate-400 dark:text-zinc-500">(Optional)</span></label>
+          <input type="text" id="viewing-notes" placeholder="e.g. Inquiring about allocated parking or move-in timeline" class="w-full border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg p-2 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:outline-none transition">
+        </div>
+
+        <div class="pt-1 space-y-2">
+          <button type="submit" id="btn-submit-viewing" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs shadow-md transition flex items-center justify-center space-x-2 cursor-pointer hover:shadow-lg">
+            <span>Confirm Viewing Appointment</span>
+            <i data-lucide="calendar-check" class="w-4 h-4"></i>
+          </button>
+
+          <a id="modal-viewing-whatsapp-direct" href="#" target="_blank" class="w-full py-2 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 rounded-lg font-semibold text-xs transition flex items-center justify-center space-x-2">
+            <i data-lucide="message-circle" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
+            <span>Ask Caretaker on WhatsApp</span>
+          </a>
+        </div>
       </form>
     </div>
   </div>
@@ -1033,6 +980,93 @@
       ];
     }
 
+    // Dynamically Populate Locations based on actual vacant properties in DB
+    function populateDynamicLocations(vacancies) {
+      const locSelect = document.getElementById('filter-location');
+      const quickPillsBox = document.getElementById('quick-region-filters');
+      if (!locSelect || !Array.isArray(vacancies)) return;
+
+      const currentVal = locSelect.value;
+      const cityGroups = {};
+
+      vacancies.forEach(v => {
+        const city = (v.city || 'Nairobi').trim();
+        const addr = (v.address || '').trim();
+        const propName = (v.property_name || '').trim();
+
+        // Extract area/neighborhood from address or property name
+        let area = '';
+        if (addr.includes(',')) {
+          const parts = addr.split(',').map(s => s.trim());
+          area = parts[parts.length - 1];
+        } else if (addr) {
+          area = addr;
+        }
+
+        if (!area || area.toLowerCase() === city.toLowerCase()) {
+          const words = propName.split(' ');
+          if (words.length > 0 && words[0].length > 3) area = words[0];
+          else area = city;
+        }
+
+        // Clean out redundant city suffix if present
+        area = area.replace(new RegExp(`\\b${city}\\b`, 'gi'), '').trim() || area;
+
+        const locKey = area.length > 1 ? area : city;
+        const locLabel = (area && area.toLowerCase() !== city.toLowerCase()) ? `${area}, ${city}` : city;
+
+        if (!cityGroups[city]) {
+          cityGroups[city] = {};
+        }
+        if (!cityGroups[city][locKey]) {
+          cityGroups[city][locKey] = { key: locKey, label: locLabel, count: 0, city };
+        }
+        cityGroups[city][locKey].count++;
+      });
+
+      const cityKeys = Object.keys(cityGroups);
+
+      // Build options for <select id="filter-location">
+      let optionsHtml = `<option value="all">All Locations (${vacancies.length} Available)</option>`;
+      const allLocKeys = new Set(['all']);
+
+      cityKeys.forEach(city => {
+        optionsHtml += `<optgroup label="${escapeHtml(city)}">`;
+        Object.values(cityGroups[city]).forEach(loc => {
+          allLocKeys.add(loc.key);
+          optionsHtml += `<option value="${escapeHtml(loc.key)}">${escapeHtml(loc.label)} (${loc.count} available)</option>`;
+        });
+        optionsHtml += `</optgroup>`;
+      });
+
+      locSelect.innerHTML = optionsHtml;
+      if (currentVal && allLocKeys.has(currentVal)) {
+        locSelect.value = currentVal;
+      } else {
+        locSelect.value = 'all';
+      }
+
+      // Build Quick Location Filter Pills
+      if (quickPillsBox) {
+        let pillsHtml = `
+          <span class="text-slate-400 dark:text-zinc-500 font-semibold text-[11px] uppercase tracking-wider shrink-0 mr-1">Locations:</span>
+          <button type="button" onclick="selectQuickLocation('all')" class="quick-loc-pill active px-3 py-1 rounded-full text-xs font-semibold border border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900 shrink-0 transition cursor-pointer">All Kenya (${vacancies.length})</button>
+        `;
+
+        cityKeys.forEach(city => {
+          Object.values(cityGroups[city]).forEach(loc => {
+            pillsHtml += `
+              <button type="button" onclick="selectQuickLocation('${escapeHtml(loc.key)}')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">
+                ${escapeHtml(loc.label)}
+              </button>
+            `;
+          });
+        });
+
+        quickPillsBox.innerHTML = pillsHtml;
+      }
+    }
+
     // Load Live Vacancies from REST API
     async function loadVacancies() {
       try {
@@ -1046,10 +1080,12 @@
         } else {
           allVacancies = getDemoFallbackVacancies();
         }
+        populateDynamicLocations(allVacancies);
         applyFilters();
       } catch (err) {
         console.warn('[BomaSphere Vacancies] Using local verified fallback:', err);
         allVacancies = getDemoFallbackVacancies();
+        populateDynamicLocations(allVacancies);
         applyFilters();
       }
     }
@@ -1369,51 +1405,13 @@
     }
 
     function toggleLightboxBookingDrawer() {
-      const drawer = document.getElementById('lightbox-booking-drawer');
-      if (drawer) {
-        drawer.classList.toggle('hidden');
-      }
+      openViewingModal(activeTourUnit ? activeTourUnit.id : null);
     }
 
-    // Direct booking inside Lightbox
+    // Direct booking compatibility alias
     async function submitLightboxBooking(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btn-lightbox-submit-booking');
-      btn.disabled = true;
-      btn.textContent = 'Scheduling...';
-
-      const name = document.getElementById('lightbox-book-name').value;
-      const phone = document.getElementById('lightbox-book-phone').value;
-      const date = document.getElementById('lightbox-book-date').value;
-
-      try {
-        const res = await fetch('/api/public/book-viewing', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            unit_id: activeTourUnit ? activeTourUnit.id : 4,
-            prospect_name: name,
-            phone,
-            email: '',
-            preferred_date: date,
-            time_slot: '02:00 PM',
-            notes: 'Booked directly via Fullscreen Lightbox'
-          })
-        });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error);
-
-        document.getElementById('lightbox-booking-success-msg').textContent = `Reference: ${data.reference}. Confirmation SMS dispatched to ${phone}.`;
-        document.getElementById('lightbox-booking-success').classList.remove('hidden');
-        document.getElementById('form-lightbox-booking').classList.add('hidden');
-        showToast(`Viewing Confirmed! Ref: ${data.reference}`, 'success');
-      } catch (err) {
-        showToast(err.message || 'Booking could not be confirmed', 'error');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i data-lucide="calendar-check" class="w-3.5 h-3.5"></i><span>Confirm Viewing</span>';
-        if (window.lucide) lucide.createIcons();
-      }
+      if (e) e.preventDefault();
+      openViewingModal(activeTourUnit ? activeTourUnit.id : null);
     }
 
     // Filter Logic
@@ -1487,7 +1485,17 @@
       });
     }
 
-    document.getElementById('filter-location')?.addEventListener('change', applyFilters);
+    document.getElementById('filter-location')?.addEventListener('change', () => {
+      const loc = document.getElementById('filter-location')?.value || 'all';
+      document.querySelectorAll('.quick-loc-pill').forEach(btn => {
+        if (btn.getAttribute('onclick')?.includes(`'${loc}'`)) {
+          btn.className = 'quick-loc-pill active px-3 py-1 rounded-full text-xs font-semibold border border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900 shrink-0 transition cursor-pointer';
+        } else {
+          btn.className = 'quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer';
+        }
+      });
+      applyFilters();
+    });
     document.getElementById('filter-type')?.addEventListener('change', applyFilters);
     document.getElementById('filter-budget')?.addEventListener('change', applyFilters);
     document.getElementById('filter-readiness')?.addEventListener('change', applyFilters);
@@ -1513,16 +1521,55 @@
       }, { passive: true });
     }
 
-    // Standalone Viewing Modal Handlers
+    // Schedule Viewing Modal Handlers (Unified across Cards & Virtual Tour)
     function openViewingModal(unitId, unitNum, propName, unitType) {
-      const v = (allVacancies || []).find(x => x.id === Number(unitId));
-      const uNum = unitNum || (v ? v.unit_number : '');
-      const pName = propName || (v ? v.property_name : '');
+      const v = (allVacancies || []).find(x => x.id === Number(unitId)) || (allVacancies && allVacancies[0]) || null;
+      const uId = v ? v.id : (unitId || 1);
+      const uNum = unitNum || (v ? v.unit_number : 'Vacant Unit');
+      const pName = propName || (v ? v.property_name : 'BomaSphere Residence');
       const uType = unitType || (v ? v.unit_type : 'Apartment');
 
-      document.getElementById('viewing-unit-id').value = unitId;
+      document.getElementById('viewing-unit-id').value = uId;
       document.getElementById('modal-viewing-title').textContent = `Schedule Viewing: Unit ${uNum}`;
       document.getElementById('modal-viewing-sub').textContent = `${uType} • ${pName}`;
+      
+      // Update rich preview snapshot card
+      const propNameEl = document.getElementById('modal-viewing-prop-name');
+      if (propNameEl) propNameEl.textContent = `${pName} • Unit ${uNum}`;
+      const addrEl = document.getElementById('modal-viewing-prop-addr');
+      if (addrEl) addrEl.textContent = v ? `${v.address || ''}, ${v.city || ''}` : pName;
+      const bedsEl = document.getElementById('modal-viewing-beds');
+      if (bedsEl) bedsEl.textContent = v ? `${v.bedrooms || 2} Beds` : '2 Beds';
+      const bathsEl = document.getElementById('modal-viewing-baths');
+      if (bathsEl) bathsEl.textContent = v ? `${v.bathrooms || 2} Baths` : '2 Baths';
+      const sqftEl = document.getElementById('modal-viewing-sqft');
+      if (sqftEl) sqftEl.textContent = v ? `${v.sqft || 1100} sqft` : '1,100 sqft';
+
+      const thumbEl = document.getElementById('modal-viewing-thumb');
+      if (thumbEl && v) {
+        const photos = extractPhotos(v);
+        thumbEl.src = photos[0];
+      }
+
+      const rentEl = document.getElementById('modal-viewing-rent');
+      if (rentEl && v) {
+        const rate = convertPrice(v.total_monthly || v.base_rent || 75000);
+        rentEl.textContent = `${rate} / mo`;
+      }
+      const depEl = document.getElementById('modal-viewing-deposit');
+      if (depEl && v) {
+        const dep = convertPrice(v.deposit || (v.base_rent * 2) || 150000);
+        depEl.textContent = `Deposit: ${dep}`;
+      }
+
+      // WhatsApp caretaker links
+      const msg = encodeURIComponent(`Jambo, I would like to schedule a private viewing for Unit ${uNum} (${uType}) at ${pName}.`);
+      const waUrl = `https://wa.me/254700112233?text=${msg}`;
+      const waDirect = document.getElementById('modal-viewing-whatsapp-direct');
+      if (waDirect) waDirect.href = waUrl;
+      const waSuccess = document.getElementById('viewing-success-whatsapp');
+      if (waSuccess) waSuccess.href = waUrl;
+
       document.getElementById('viewing-success-box').classList.add('hidden');
       document.getElementById('form-viewing').classList.remove('hidden');
 
@@ -1531,7 +1578,11 @@
       const yyyy = tomorrow.getFullYear();
       const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
       const dd = String(tomorrow.getDate()).padStart(2, '0');
-      document.getElementById('viewing-date').value = `${yyyy}-${mm}-${dd}`;
+      const dateEl = document.getElementById('viewing-date');
+      if (dateEl) {
+        dateEl.value = `${yyyy}-${mm}-${dd}`;
+        dateEl.min = new Date().toISOString().split('T')[0];
+      }
 
       document.getElementById('modal-viewing').classList.remove('hidden');
       if (window.lucide) lucide.createIcons();
@@ -1545,19 +1596,20 @@
       e.preventDefault();
       const btn = document.getElementById('btn-submit-viewing');
       btn.disabled = true;
-      btn.textContent = 'Scheduling...';
+      btn.innerHTML = '<span>Scheduling Appointment...</span>';
 
       const unitId = document.getElementById('viewing-unit-id').value;
       const name = document.getElementById('viewing-name').value;
       const phone = document.getElementById('viewing-phone').value;
       const date = document.getElementById('viewing-date').value;
       const time = document.getElementById('viewing-time').value;
+      const notes = document.getElementById('viewing-notes')?.value || '';
 
       try {
         const res = await fetch('/api/public/book-viewing', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ unit_id: unitId, prospect_name: name, phone, email: '', preferred_date: date, time_slot: time, notes: '' })
+          body: JSON.stringify({ unit_id: unitId, prospect_name: name, phone, email: '', preferred_date: date, time_slot: time, notes })
         });
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
@@ -1570,7 +1622,7 @@
         showToast(err.message || 'Viewing request could not be processed', 'error');
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<span>Confirm Viewing Appointment</span><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>';
+        btn.innerHTML = '<span>Confirm Viewing Appointment</span><i data-lucide="calendar-check" class="w-4 h-4"></i>';
         if (window.lucide) lucide.createIcons();
       }
     }
