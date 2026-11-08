@@ -467,6 +467,20 @@ async function runTests() {
     console.log(`      M-Pesa SMS parsed & auto-reconciled: Ref ${testCode}, Action: ${res.json.action}`);
   });
 
+  await test('WhatsApp Bot: Configuration API saves & retrieves Meta Cloud API credentials', async () => {
+    const saveRes = await invokeHandler('/api/whatsapp/config', 'POST', {
+      access_token: 'EAAXoZBc_TEST_TOKEN_VERIFICATION_SAMPLE_123',
+      phone_number_id: '1366496363222021'
+    });
+    if (saveRes.statusCode !== 200 || !saveRes.json.success) throw new Error(`Save status ${saveRes.statusCode}`);
+
+    const getRes = await invokeHandler('/api/whatsapp/config', 'GET');
+    if (getRes.statusCode !== 200 || !getRes.json.has_token || getRes.json.phone_number_id !== '1366496363222021') {
+      throw new Error(`Failed to retrieve WhatsApp config: ${JSON.stringify(getRes.json)}`);
+    }
+    console.log(`      WhatsApp Config Verified: Phone ID ${getRes.json.phone_number_id}, Token: ${getRes.json.token_preview}`);
+  });
+
   await test('Bank Statement Reconciler: POST /api/payments/reconcile-bank-statement matches bulk rows', async () => {
     const code1 = 'QG' + Math.random().toString(36).substring(2, 10).toUpperCase();
     const code2 = 'QG' + Math.random().toString(36).substring(2, 10).toUpperCase();

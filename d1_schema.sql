@@ -410,6 +410,12 @@ CREATE TABLE IF NOT EXISTS system_audit_logs (
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+CREATE TABLE IF NOT EXISTS system_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
 -- ====================================================================
 -- Initial System RBAC Users (Preserved Passwords & Session Tokens)
 -- ====================================================================

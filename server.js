@@ -2743,13 +2743,123 @@ async function handleRequest(req, res) {
         VALUES ('whatsapp', ?, ?, ?, 'delivered', ?)
       `).run(tenant.name, phone, replyText, action);
 
+      // Dispatch outgoing reply back to WhatsApp recipient via Meta Graph API
+      let metaToken = process.env.WHATSAPP_ACCESS_TOKEN || '';
+      let metaPhoneId = (b.entry && b.entry[0]?.changes?.[0]?.value?.metadata?.phone_number_id) || process.env.WHATSAPP_PHONE_NUMBER_ID || '1366496363222021';
+      try {
+        const storedToken = db.prepare("SELECT value FROM system_settings WHERE key = 'whatsapp_access_token'").get();
+        if (storedToken && storedToken.value) metaToken = storedToken.value;
+        const storedPhoneId = db.prepare("SELECT value FROM system_settings WHERE key = 'whatsapp_phone_number_id'").get();
+        if (storedPhoneId && storedPhoneId.value) metaPhoneId = storedPhoneId.value;
+      } catch (e) {}
+
+      let dispatched = false;
+      if (metaToken && phone) {
+        try {
+          const cleanPhone = String(phone).replace(/[^0-9]/g, '');
+          const metaRes = await fetch(`https://graph.facebook.com/v21.0/${metaPhoneId}/messages`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${metaToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              messaging_product: 'whatsapp',
+              recipient_type: 'individual',
+              to: cleanPhone,
+              type: 'text',
+              text: { preview_url: false, body: replyText }
+            })
+          });
+          dispatched = metaRes.ok;
+        } catch (dispatchErr) {
+          console.warn('[WhatsApp Outbound Dispatch Warning]', dispatchErr);
+        }
+      }
+
       return sendJSON(res, 200, {
         success: true,
         tenant_name: tenant.name,
         incoming: incomingText,
         reply: replyText,
-        action
+        action,
+        dispatched
       });
+    }
+
+    if (pathname === '/api/whatsapp/config' && method === 'GET') {
+      let token = process.env.WHATSAPP_ACCESS_TOKEN || '';
+      let phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID || '1366496363222021';
+      try {
+        const t = db.prepare("SELECT value FROM system_settings WHERE key = 'whatsapp_access_token'").get();
+        if (t?.value) token = t.value;
+        const p = db.prepare("SELECT value FROM system_settings WHERE key = 'whatsapp_phone_number_id'").get();
+        if (p?.value) phoneId = p.value;
+      } catch (e) {}
+      return sendJSON(res, 200, {
+        success: true,
+        phone_number_id: phoneId,
+        has_token: !!token,
+        token_preview: token ? `${token.slice(0, 8)}...${token.slice(-6)}` : ''
+      });
+    }
+
+    if (pathname === '/api/whatsapp/config' && method === 'POST') {
+      const b = await parseBody(req);
+      const token = (b.access_token || b.token || '').trim();
+      const phoneId = (b.phone_number_id || b.phoneId || '').trim();
+      try {
+        if (token) {
+          db.prepare("INSERT INTO system_settings (key, value) VALUES ('whatsapp_access_token', ?) ON CONFLICT(key) DO UPDATE SET value = ?").run(token, token);
+        }
+        if (phoneId) {
+          db.prepare("INSERT INTO system_settings (key, value) VALUES ('whatsapp_phone_number_id', ?) ON CONFLICT(key) DO UPDATE SET value = ?").run(phoneId, phoneId);
+        }
+      } catch (e) {}
+      return sendJSON(res, 200, { success: true, message: 'WhatsApp configuration updated successfully' });
+    }
+
+    if (pathname === '/api/whatsapp/test-outbound' && method === 'POST') {
+      const b = await parseBody(req);
+      const targetPhone = b.phone || '+254708877719';
+      let metaToken = b.access_token || process.env.WHATSAPP_ACCESS_TOKEN || '';
+      let metaPhoneId = b.phone_number_id || process.env.WHATSAPP_PHONE_NUMBER_ID || '1366496363222021';
+      try {
+        if (!metaToken) {
+          const t = db.prepare("SELECT value FROM system_settings WHERE key = 'whatsapp_access_token'").get();
+          if (t?.value) metaToken = t.value;
+        }
+        if (!metaPhoneId) {
+          const p = db.prepare("SELECT value FROM system_settings WHERE key = 'whatsapp_phone_number_id'").get();
+          if (p?.value) metaPhoneId = p.value;
+        }
+      } catch (e) {}
+
+      if (!metaToken) {
+        return sendJSON(res, 400, { success: false, error: 'Access token is required. Please paste your token first.' });
+      }
+
+      const cleanPhone = String(targetPhone).replace(/[^0-9]/g, '');
+      const testMsg = b.message || '🎉 Jambo from BomaSphere! Your WhatsApp Business Cloud API integration is officially connected and working!';
+      const metaRes = await fetch(`https://graph.facebook.com/v21.0/${metaPhoneId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${metaToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: cleanPhone,
+          type: 'text',
+          text: { preview_url: false, body: testMsg }
+        })
+      });
+      const data = await metaRes.json().catch(() => ({}));
+      if (!metaRes.ok) {
+        return sendJSON(res, metaRes.status, { success: false, error: data.error?.message || 'Meta API returned error', details: data });
+      }
+      return sendJSON(res, 200, { success: true, message: 'Test WhatsApp message dispatched successfully!', meta_response: data });
     }
 
     if (pathname === '/api/whatsapp/history' && method === 'GET') {
@@ -3488,7 +3598,7 @@ async function handleRequest(req, res) {
 
       const durationHours = Number(b.duration_hours || b.hours || 2);
       const totalFee = (amenity.hourly_fee || 0) * durationHours;
-      const ref = 'BK-' + Math.floor(1000 + Math.random() * 9000);
+      const ref = 'BK-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(100 + Math.random() * 900);
 
       const user = resolveRequestUser(req);
       let tenantId = Number(b.tenant_id || user?.tenant_id || 0);

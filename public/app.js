@@ -5282,8 +5282,75 @@ class BomaSphereApp {
   // ==========================================
 
   // FEATURE 1: 2-Way Interactive WhatsApp Business Bot
-  openWhatsappSetupGuide() {
+  async openWhatsappSetupGuide() {
     this.openModal('modal-whatsapp-setup-guide');
+    await this.loadWhatsappConfig();
+  }
+
+  async loadWhatsappConfig() {
+    try {
+      const res = await this.fetchAPI('/api/whatsapp/config', { silent: true });
+      if (res && res.success) {
+        const phoneEl = document.getElementById('wa-cfg-phone-id');
+        const tokenEl = document.getElementById('wa-cfg-token');
+        const statusEl = document.getElementById('wa-config-status');
+        if (phoneEl && res.phone_number_id) phoneEl.value = res.phone_number_id;
+        if (statusEl) {
+          if (res.has_token) {
+            statusEl.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200';
+            statusEl.textContent = 'Token Connected (' + (res.token_preview || 'Active') + ')';
+          } else {
+            statusEl.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200';
+            statusEl.textContent = 'Pending Token';
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
+  async saveWhatsappConfig() {
+    const phoneId = document.getElementById('wa-cfg-phone-id')?.value?.trim();
+    const token = document.getElementById('wa-cfg-token')?.value?.trim();
+    if (!token && !phoneId) {
+      return this.showToast('Please enter an Access Token or Phone Number ID', 'warning');
+    }
+    try {
+      const res = await this.fetchAPI('/api/whatsapp/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_token: token, phone_number_id: phoneId })
+      });
+      this.showToast(res.message || 'WhatsApp credentials saved successfully!', 'success');
+      await this.loadWhatsappConfig();
+    } catch (err) {
+      this.showToast('Failed to save WhatsApp config: ' + err.message, 'error');
+    }
+  }
+
+  async sendTestOutboundWhatsapp() {
+    const phoneId = document.getElementById('wa-cfg-phone-id')?.value?.trim();
+    const token = document.getElementById('wa-cfg-token')?.value?.trim();
+    const userPhone = '+254708877719';
+    try {
+      this.showToast('Dispatching test message to your phone...', 'info');
+      const res = await this.fetchAPI('/api/whatsapp/test-outbound', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: userPhone,
+          access_token: token,
+          phone_number_id: phoneId,
+          message: '🎉 Jambo from BomaSphere! Your WhatsApp Business Cloud API integration is officially connected and working!'
+        })
+      });
+      if (res.success) {
+        this.showToast('Test WhatsApp message sent to ' + userPhone + '!', 'success');
+      } else {
+        this.showToast(res.error || 'Meta dispatch error', 'error');
+      }
+    } catch (err) {
+      this.showToast('Failed to send test message: ' + err.message, 'error');
+    }
   }
 
   async sendTestMpesaSmsClaim() {

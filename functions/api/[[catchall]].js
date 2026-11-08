@@ -36,7 +36,8 @@ const DB = {
   amenityBookings: [],
   mpesaTransactions: [],
   ratibaStandingOrders: [],
-  unallocatedPayments: []
+  unallocatedPayments: [],
+  systemSettings: {}
 };
 
 function resolveRequestUser(request) {
@@ -428,6 +429,16 @@ async function ensureD1Schema(db) {
           payment_date DATETIME NOT NULL,
           notes TEXT,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
+    } catch (e) {}
+
+    try {
+      await db.prepare(`
+        CREATE TABLE IF NOT EXISTS system_settings (
+          key TEXT PRIMARY KEY,
+          value TEXT,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
       `).run();
     } catch (e) {}
@@ -1900,13 +1911,123 @@ async function handleD1(context, json, corsHeaders) {
         `).bind(tenant.name, phone, replyText, action).run();
       } catch (e) {}
 
+      // Dispatch outgoing reply back to WhatsApp recipient via Meta Graph API
+      let metaToken = env.WHATSAPP_ACCESS_TOKEN || env.WHATSAPP_TOKEN || '';
+      let metaPhoneId = (b.entry && b.entry[0]?.changes?.[0]?.value?.metadata?.phone_number_id) || env.WHATSAPP_PHONE_NUMBER_ID || '1366496363222021';
+      try {
+        const storedToken = await db.prepare("SELECT value FROM system_settings WHERE key = 'whatsapp_access_token'").first();
+        if (storedToken && storedToken.value) metaToken = storedToken.value;
+        const storedPhoneId = await db.prepare("SELECT value FROM system_settings WHERE key = 'whatsapp_phone_number_id'").first();
+        if (storedPhoneId && storedPhoneId.value) metaPhoneId = storedPhoneId.value;
+      } catch (e) {}
+
+      let dispatched = false;
+      if (metaToken && phone) {
+        try {
+          const cleanPhone = String(phone).replace(/[^0-9]/g, '');
+          const metaRes = await fetch(`https://graph.facebook.com/v21.0/${metaPhoneId}/messages`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${metaToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              messaging_product: 'whatsapp',
+              recipient_type: 'individual',
+              to: cleanPhone,
+              type: 'text',
+              text: { preview_url: false, body: replyText }
+            })
+          });
+          dispatched = metaRes.ok;
+        } catch (dispatchErr) {
+          console.warn('[WhatsApp Outbound Dispatch Warning]', dispatchErr);
+        }
+      }
+
       return json({
         success: true,
         tenant_name: tenant.name,
         incoming: incomingText,
         reply: replyText,
-        action
+        action,
+        dispatched
       }, 200);
+    }
+
+    if (pathname === '/api/whatsapp/config' && method === 'GET') {
+      let token = env.WHATSAPP_ACCESS_TOKEN || '';
+      let phoneId = env.WHATSAPP_PHONE_NUMBER_ID || '1366496363222021';
+      try {
+        const t = await db.prepare("SELECT value FROM system_settings WHERE key = 'whatsapp_access_token'").first();
+        if (t?.value) token = t.value;
+        const p = await db.prepare("SELECT value FROM system_settings WHERE key = 'whatsapp_phone_number_id'").first();
+        if (p?.value) phoneId = p.value;
+      } catch (e) {}
+      return json({
+        success: true,
+        phone_number_id: phoneId,
+        has_token: !!token,
+        token_preview: token ? `${token.slice(0, 8)}...${token.slice(-6)}` : ''
+      });
+    }
+
+    if (pathname === '/api/whatsapp/config' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const token = (b.access_token || b.token || '').trim();
+      const phoneId = (b.phone_number_id || b.phoneId || '').trim();
+      try {
+        if (token) {
+          await db.prepare("INSERT INTO system_settings (key, value) VALUES ('whatsapp_access_token', ?) ON CONFLICT(key) DO UPDATE SET value = ?").bind(token, token).run();
+        }
+        if (phoneId) {
+          await db.prepare("INSERT INTO system_settings (key, value) VALUES ('whatsapp_phone_number_id', ?) ON CONFLICT(key) DO UPDATE SET value = ?").bind(phoneId, phoneId).run();
+        }
+      } catch (e) {}
+      return json({ success: true, message: 'WhatsApp configuration updated successfully' });
+    }
+
+    if (pathname === '/api/whatsapp/test-outbound' && method === 'POST') {
+      const b = await request.json().catch(() => ({}));
+      const targetPhone = b.phone || '+254708877719';
+      let metaToken = b.access_token || env.WHATSAPP_ACCESS_TOKEN || '';
+      let metaPhoneId = b.phone_number_id || env.WHATSAPP_PHONE_NUMBER_ID || '1366496363222021';
+      try {
+        if (!metaToken) {
+          const t = await db.prepare("SELECT value FROM system_settings WHERE key = 'whatsapp_access_token'").first();
+          if (t?.value) metaToken = t.value;
+        }
+        if (!metaPhoneId) {
+          const p = await db.prepare("SELECT value FROM system_settings WHERE key = 'whatsapp_phone_number_id'").first();
+          if (p?.value) metaPhoneId = p.value;
+        }
+      } catch (e) {}
+
+      if (!metaToken) {
+        return json({ success: false, error: 'Access token is required. Please paste your token first.' }, 400);
+      }
+
+      const cleanPhone = String(targetPhone).replace(/[^0-9]/g, '');
+      const testMsg = b.message || '🎉 Jambo from BomaSphere! Your WhatsApp Business Cloud API integration is officially connected and working!';
+      const metaRes = await fetch(`https://graph.facebook.com/v21.0/${metaPhoneId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${metaToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: cleanPhone,
+          type: 'text',
+          text: { preview_url: false, body: testMsg }
+        })
+      });
+      const data = await metaRes.json().catch(() => ({}));
+      if (!metaRes.ok) {
+        return json({ success: false, error: data.error?.message || 'Meta API returned error', details: data }, metaRes.status);
+      }
+      return json({ success: true, message: 'Test WhatsApp message dispatched successfully!', meta_response: data });
     }
 
     if (pathname === '/api/whatsapp/history' && method === 'GET') {
@@ -2623,7 +2744,7 @@ async function handleD1(context, json, corsHeaders) {
       if (!amenity) return json({ error: 'Amenity not found.' }, 404);
       const hours = Number(b.duration_hours || 2);
       const totalFee = Number(amenity.hourly_fee || 0) * hours;
-      const ref = 'BK-' + Math.floor(1000 + Math.random() * 9000);
+      const ref = 'BK-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(100 + Math.random() * 900);
       const user = await getUser();
       let tenantId = Number(b.tenant_id || user?.tenant_id || 1);
       let unitId = Number(b.unit_id || 1);
@@ -3979,6 +4100,28 @@ export async function onRequest(context) {
     return json({ success: true, messages: DB.communications.filter(c => c.type === 'whatsapp') });
   }
 
+  if (pathname === '/api/whatsapp/config' && method === 'GET') {
+    return json({
+      success: true,
+      phone_number_id: DB.systemSettings?.whatsapp_phone_number_id || '1366496363222021',
+      has_token: !!DB.systemSettings?.whatsapp_access_token,
+      token_preview: DB.systemSettings?.whatsapp_access_token ? `${DB.systemSettings.whatsapp_access_token.slice(0, 8)}...` : ''
+    });
+  }
+
+  if (pathname === '/api/whatsapp/config' && method === 'POST') {
+    let b = {};
+    try { b = await request.json(); } catch (e) { }
+    if (!DB.systemSettings) DB.systemSettings = {};
+    if (b.access_token) DB.systemSettings.whatsapp_access_token = b.access_token.trim();
+    if (b.phone_number_id) DB.systemSettings.whatsapp_phone_number_id = b.phone_number_id.trim();
+    return json({ success: true, message: 'WhatsApp configuration updated successfully' });
+  }
+
+  if (pathname === '/api/whatsapp/test-outbound' && method === 'POST') {
+    return json({ success: true, message: 'Test message simulated in in-memory mode' });
+  }
+
   if (pathname === '/api/payments/reconcile-bank-statement' && method === 'POST') {
     let b = {};
     try { b = await request.json(); } catch (e) { }
@@ -4274,7 +4417,7 @@ export async function onRequest(context) {
   if (pathname === '/api/amenity-bookings' && method === 'POST') {
     let b = {};
     try { b = await request.json(); } catch (e) { }
-    const ref = 'BK-' + Math.floor(1000 + Math.random() * 9000);
+    const ref = 'BK-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(100 + Math.random() * 900);
     const amenity = DB.amenities.find(a => a.id === Number(b.amenity_id)) || DB.amenities[0];
     const durationHours = Number(b.duration_hours || b.hours || 2);
     const totalFee = (amenity.hourly_fee || 0) * durationHours;
