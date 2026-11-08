@@ -795,13 +795,17 @@
           <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
             <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
               <div class="flex items-center space-x-2">
-                <select aria-label="Filter invoices by status" id="filter-invoice-status" class="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5">
+                <select aria-label="Filter invoices by status" id="filter-invoice-status" class="text-xs bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-emerald-500 outline-none">
                   <option value="all">All Invoices</option>
                   <option value="unpaid">Unpaid</option>
                   <option value="partially_paid">Partially Paid</option>
                   <option value="paid">Fully Paid</option>
                   <option value="overdue">Overdue</option>
                 </select>
+                <div class="relative">
+                  <input type="text" id="search-invoices-input" placeholder="Search tenant, unit, month..." oninput="app.renderInvoices()" class="text-xs bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 rounded-lg pl-7 pr-2.5 py-1.5 focus:ring-1 focus:ring-emerald-500 outline-none w-48 sm:w-60">
+                  <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                </div>
               </div>
               <span class="text-xs text-slate-500" id="invoices-count-label">7 Total Invoices</span>
             </div>

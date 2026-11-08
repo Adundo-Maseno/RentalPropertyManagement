@@ -928,11 +928,21 @@ class BomaSphereApp {
   renderInvoices() {
     const tbody = document.getElementById('invoices-table-body');
     const filterStatus = document.getElementById('filter-invoice-status')?.value || 'all';
+    const searchQuery = document.getElementById('search-invoices-input')?.value?.toLowerCase().trim() || '';
     if (!tbody) return;
 
     let filtered = this.state.invoices;
     if (filterStatus !== 'all') {
       filtered = filtered.filter(i => i.status === filterStatus);
+    }
+    if (searchQuery) {
+      filtered = filtered.filter(i => 
+        (i.invoice_number && i.invoice_number.toLowerCase().includes(searchQuery)) ||
+        (i.tenant_name && i.tenant_name.toLowerCase().includes(searchQuery)) ||
+        (i.property_name && i.property_name.toLowerCase().includes(searchQuery)) ||
+        (i.unit_number && String(i.unit_number).toLowerCase().includes(searchQuery)) ||
+        (i.month && i.month.toLowerCase().includes(searchQuery))
+      );
     }
 
     // Update stats summary

@@ -4,14 +4,14 @@
  * Cache Version: bomasphere-v2.0.0
  */
 
-const CACHE_NAME = 'bomasphere-cache-v4.1';
+const CACHE_NAME = 'bomasphere-cache-v4.4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/rentals.html',
   '/tailwind.min.css?v=1.0',
   '/styles.css?v=2.2',
-  '/app.js?v=4.1',
+  '/app.js?v=4.4',
   '/manifest.json',
   '/favicon.ico',
   '/favicon.svg',
@@ -115,10 +115,14 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Handle SPA Navigation: Network First, fallback to /index.html
+  // Handle SPA / Catalog Navigation: Network First, fallback to matching cached HTML
   if (req.mode === 'navigate') {
     event.respondWith(
       fetch(req).catch(async () => {
+        if (url.pathname.includes('rentals')) {
+          const cachedRentals = await caches.match('/rentals.html');
+          if (cachedRentals) return cachedRentals;
+        }
         const cached = await caches.match('/index.html');
         return cached || caches.match('/');
       })
