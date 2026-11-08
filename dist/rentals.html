@@ -1556,12 +1556,12 @@
 
       const rentEl = document.getElementById('modal-viewing-rent');
       if (rentEl && v) {
-        const rate = convertPrice(v.total_monthly || v.base_rent || 75000);
+        const rate = formatMoney(v.total_monthly || v.base_rent || 75000);
         rentEl.textContent = `${rate} / mo`;
       }
       const depEl = document.getElementById('modal-viewing-deposit');
       if (depEl && v) {
-        const dep = convertPrice(v.deposit || (v.base_rent * 2) || 150000);
+        const dep = formatMoney(v.deposit || (v.base_rent * 2) || 150000);
         depEl.textContent = `Deposit: ${dep}`;
       }
 
