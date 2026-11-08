@@ -1310,15 +1310,24 @@
     // FULLSCREEN LIGHTBOX TOUR LOGIC (IMAGE DOMINANCE)
     // ====================================================================
     function updateTourModalContent(unit) {
-      document.getElementById('tour-unit-title').textContent = `Unit ${unit.unit_number} • ${unit.unit_type}`;
-      document.getElementById('tour-unit-sub').textContent = `${unit.property_name}, ${unit.city}`;
-      document.getElementById('tour-top-rate').textContent = `${formatMoney(unit.base_rent)} / mo`;
+      if (!unit) return;
+      const titleEl = document.getElementById('tour-unit-title');
+      if (titleEl) titleEl.textContent = `Unit ${unit.unit_number} • ${unit.unit_type}`;
+      const subEl = document.getElementById('tour-unit-sub');
+      if (subEl) subEl.textContent = `${unit.property_name}, ${unit.city}`;
+      const rateEl = document.getElementById('tour-top-rate');
+      if (rateEl) rateEl.textContent = `${formatMoney(unit.base_rent)} / mo`;
 
-      document.getElementById('tour-drawer-rent').textContent = formatMoney(unit.base_rent);
-      document.getElementById('tour-drawer-deposit').textContent = `Deposit: ${formatMoney(unit.deposit || (unit.base_rent * 2))}`;
-      document.getElementById('tour-drawer-beds').textContent = `${unit.bedrooms > 0 ? unit.bedrooms + ' Beds' : 'Office'}`;
-      document.getElementById('tour-drawer-baths').textContent = `${unit.bathrooms || 2} Baths`;
-      document.getElementById('tour-drawer-sqft').textContent = `${unit.sqft || 1200} sqft`;
+      const drawerRent = document.getElementById('tour-drawer-rent');
+      if (drawerRent) drawerRent.textContent = formatMoney(unit.base_rent);
+      const drawerDep = document.getElementById('tour-drawer-deposit');
+      if (drawerDep) drawerDep.textContent = `Deposit: ${formatMoney(unit.deposit || (unit.base_rent * 2))}`;
+      const drawerBeds = document.getElementById('tour-drawer-beds');
+      if (drawerBeds) drawerBeds.textContent = `${unit.bedrooms > 0 ? unit.bedrooms + ' Beds' : 'Office'}`;
+      const drawerBaths = document.getElementById('tour-drawer-baths');
+      if (drawerBaths) drawerBaths.textContent = `${unit.bathrooms || 2} Baths`;
+      const drawerSqft = document.getElementById('tour-drawer-sqft');
+      if (drawerSqft) drawerSqft.textContent = `${unit.sqft || 1200} sqft`;
     }
 
     function openArchitecturalTourModal(unitId) {
@@ -1343,22 +1352,15 @@
       }
 
       // WhatsApp link
-      document.getElementById('tour-whatsapp-link').href = `https://wa.me/254700112233?text=Hi%20BomaSphere%2C%20I%20am%20reviewing%20Unit%20${unit.unit_number}%20at%20${encodeURIComponent(unit.property_name)}%20and%20would%20like%20to%20schedule%20a%20viewing.`;
+      const waLink = document.getElementById('tour-whatsapp-link');
+      if (waLink) {
+        waLink.href = `https://wa.me/254700112233?text=Hi%20BomaSphere%2C%20I%20am%20reviewing%20Unit%20${unit.unit_number}%20at%20${encodeURIComponent(unit.property_name)}%20and%20would%20like%20to%20schedule%20a%20viewing.`;
+      }
 
       selectTourPhoto(0);
 
-      // Hide drawer initially so photo gets 100% space
-      document.getElementById('lightbox-booking-drawer').classList.add('hidden');
-      document.getElementById('lightbox-booking-success').classList.add('hidden');
-      document.getElementById('form-lightbox-booking').classList.remove('hidden');
-
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const yyyy = tomorrow.getFullYear();
-      const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
-      const dd = String(tomorrow.getDate()).padStart(2, '0');
-      const dateEl = document.getElementById('lightbox-book-date');
-      if (dateEl) dateEl.value = `${yyyy}-${mm}-${dd}`;
+      const drawer = document.getElementById('lightbox-booking-drawer');
+      if (drawer) drawer.classList.add('hidden');
 
       const modal = document.getElementById('modal-higgsfield-tour');
       modal.classList.remove('hidden');
@@ -1367,7 +1369,8 @@
 
     function closeArchitecturalTourModal() {
       document.getElementById('modal-higgsfield-tour').classList.add('hidden');
-      document.getElementById('lightbox-booking-drawer').classList.add('hidden');
+      const drawer = document.getElementById('lightbox-booking-drawer');
+      if (drawer) drawer.classList.add('hidden');
     }
 
     function selectTourPhoto(index) {
