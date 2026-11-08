@@ -96,7 +96,7 @@
             <span>BomaSphere Properties</span>
             <span class="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">Vacancies</span>
           </div>
-          <p class="text-[10px] text-slate-500 dark:text-zinc-400 -mt-0.5 truncate max-w-[140px] xs:max-w-none">Verified Direct Leases &bull; Nairobi &amp; Coast</p>
+          <p class="text-[10px] text-slate-500 dark:text-zinc-400 -mt-0.5 truncate max-w-[140px] xs:max-w-none">Verified Direct Leases &bull; Nationwide Across Kenya</p>
         </div>
       </a>
 
@@ -152,13 +152,13 @@
         <div class="space-y-2">
           <div class="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>Direct Landlord Portfolio &bull; Zero Brokerage Fees &bull; eTIMS Compliant</span>
+            <span>Direct Landlord Portfolio &bull; 47 Counties Nationwide &bull; Zero Brokerage Fees</span>
           </div>
           <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Find Your Next Home in Nairobi &amp; Mombasa
+            Find Your Next Home in Nairobi, Mombasa &amp; Across Kenya
           </h1>
           <p class="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 max-w-2xl font-normal leading-relaxed">
-            Verified direct landlord residences across Kilimani, Westlands, Riverside, and Nyali Beach. Each property features automated M-Pesa billing, borehole water, full backup power, and 24/7 security.
+            Verified direct landlord residences across Nairobi, the Coast, the Rift Valley, Central Kenya, Western, and nationwide. Every property features automated M-Pesa billing, borehole water, full backup power, and 24/7 security.
           </p>
         </div>
 
@@ -175,27 +175,51 @@
         </div>
       </div>
 
-      <!-- Quick Location Pill Filter -->
+      <!-- Quick Region Pill Filter for Kenya Nationwide -->
       <div class="flex items-center space-x-2 overflow-x-auto py-1 no-scrollbar text-xs">
-        <span class="text-slate-400 dark:text-zinc-500 font-semibold text-[11px] uppercase tracking-wider shrink-0 mr-1">Locations:</span>
-        <button type="button" onclick="selectQuickLocation('all')" class="quick-loc-pill active px-3 py-1 rounded-full text-xs font-semibold border border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900 shrink-0 transition cursor-pointer">All Locations</button>
-        <button type="button" onclick="selectQuickLocation('Kilimani')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Kilimani</button>
-        <button type="button" onclick="selectQuickLocation('Westlands')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Westlands</button>
-        <button type="button" onclick="selectQuickLocation('Riverside')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Riverside</button>
-        <button type="button" onclick="selectQuickLocation('Nyali')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Nyali Beach</button>
+        <span class="text-slate-400 dark:text-zinc-500 font-semibold text-[11px] uppercase tracking-wider shrink-0 mr-1">Regions:</span>
+        <button type="button" onclick="selectQuickLocation('all')" class="quick-loc-pill active px-3 py-1 rounded-full text-xs font-semibold border border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900 shrink-0 transition cursor-pointer">All Kenya</button>
+        <button type="button" onclick="selectQuickLocation('Nairobi')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Nairobi Metro</button>
+        <button type="button" onclick="selectQuickLocation('Mombasa')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Coast (Mombasa &amp; Diani)</button>
+        <button type="button" onclick="selectQuickLocation('Nakuru')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Rift Valley (Nakuru &amp; Eldoret)</button>
+        <button type="button" onclick="selectQuickLocation('Kiambu')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Central (Kiambu &amp; Mt. Kenya)</button>
+        <button type="button" onclick="selectQuickLocation('Kisumu')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Western (Kisumu &amp; Lake)</button>
       </div>
 
       <!-- Advanced Filter Form Controls -->
       <aside class="bg-slate-50 dark:bg-zinc-800/80 p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-zinc-700 shadow-xs" aria-label="Filter Properties">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <div>
-            <label for="filter-location" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Neighborhood</label>
+            <label for="filter-location" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">County / Region</label>
             <select id="filter-location" class="w-full text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md px-2.5 py-1.5 text-slate-800 dark:text-zinc-100 font-medium focus:ring-1 focus:ring-emerald-500 focus:outline-none transition cursor-pointer">
-              <option value="all">All Neighborhoods</option>
-              <option value="Kilimani">Kilimani, Nairobi</option>
-              <option value="Westlands">Westlands, Nairobi</option>
-              <option value="Riverside">Riverside Drive, Nairobi</option>
-              <option value="Nyali">Nyali Beach, Mombasa</option>
+              <option value="all">All Kenya (47 Counties)</option>
+              <optgroup label="Nairobi Metropolitan">
+                <option value="Kilimani">Kilimani, Nairobi</option>
+                <option value="Westlands">Westlands, Nairobi</option>
+                <option value="Riverside">Riverside Drive, Nairobi</option>
+                <option value="Karen">Karen &amp; Langata</option>
+                <option value="Runda">Runda &amp; Muthaiga</option>
+              </optgroup>
+              <optgroup label="Coast &amp; Marine">
+                <option value="Nyali">Nyali Beach, Mombasa</option>
+                <option value="Mombasa">Mombasa CBD &amp; Environs</option>
+                <option value="Diani">Diani Beach, Kwale</option>
+                <option value="Malindi">Malindi &amp; Watamu</option>
+              </optgroup>
+              <optgroup label="Rift Valley">
+                <option value="Nakuru">Milimani &amp; Nakuru City</option>
+                <option value="Eldoret">Eldoret &amp; Uasin Gishu</option>
+                <option value="Naivasha">Naivasha &amp; Lake Basin</option>
+              </optgroup>
+              <optgroup label="Central &amp; Mt. Kenya">
+                <option value="Kiambu">Kiambu Road &amp; Ruiru</option>
+                <option value="Thika">Thika Town &amp; Murang'a</option>
+                <option value="Nanyuki">Nanyuki &amp; Laikipia</option>
+              </optgroup>
+              <optgroup label="Western &amp; Lake Region">
+                <option value="Kisumu">Riat Hills &amp; Kisumu City</option>
+                <option value="Kakamega">Kakamega Town</option>
+              </optgroup>
             </select>
           </div>
 
@@ -276,30 +300,45 @@
           <!-- Rendered via JS -->
         </div>
 
-        <!-- Right Side: Sticky Interactive Neighborhood Map (5 cols) -->
+        <!-- Right Side: Sticky Interactive Kenya Nationwide Map (5 cols) -->
         <div class="lg:col-span-5 sticky top-20 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 p-4 shadow-sm space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-zinc-800 text-xs">
             <span class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
               <i data-lucide="map-pin" class="w-4 h-4 text-emerald-600"></i>
-              <span>Nairobi &amp; Coast Neighborhood Map</span>
+              <span>Kenya Nationwide Property Map</span>
             </span>
-            <span class="text-[10px] text-slate-500 font-mono">Interactive Pins</span>
+            <span class="text-[10px] text-slate-500 font-mono">47 Counties &bull; Live Pins</span>
           </div>
 
           <!-- Vector Map Canvas Preview -->
           <div class="relative w-full h-[480px] bg-slate-100 dark:bg-zinc-950 rounded-lg overflow-hidden border border-slate-200/60 dark:border-zinc-800 flex items-center justify-center select-none" id="vector-map-viewport">
-            <!-- Simulated Nairobi & Coast Vector Map with Geocoded Property Pins -->
+            <!-- Kenya Nationwide Vector Map with Regional Landmarks -->
             <svg class="w-full h-full text-slate-300 dark:text-zinc-800" viewBox="0 0 600 480" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <!-- Arterial Road Lines -->
-              <path d="M 50 240 Q 200 180 320 220 T 550 260" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
-              <path d="M 280 40 L 300 440" stroke="currentColor" stroke-width="3" stroke-dasharray="6 4" opacity="0.5"/>
-              <path d="M 120 80 Q 240 260 480 380" stroke="currentColor" stroke-width="2.5" opacity="0.4"/>
+              <!-- Stylized Kenya Territorial Boundary -->
+              <path d="M 110 190 L 170 70 L 320 30 L 430 80 L 510 190 L 500 320 L 440 430 L 320 440 L 250 330 L 160 290 L 90 230 Z" stroke="currentColor" stroke-width="2" fill="none" opacity="0.35" stroke-dasharray="6 3"/>
               
-              <!-- Regions -->
-              <text x="140" y="160" fill="currentColor" font-size="12" font-weight="700" letter-spacing="1">WESTLANDS</text>
-              <text x="110" y="270" fill="currentColor" font-size="12" font-weight="700" letter-spacing="1">KILIMANI</text>
-              <text x="230" y="130" fill="currentColor" font-size="12" font-weight="700" letter-spacing="1">RIVERSIDE</text>
-              <text x="440" y="360" fill="currentColor" font-size="12" font-weight="700" letter-spacing="1">NYALI BEACH (COAST)</text>
+              <!-- Great Rift Valley Fault System -->
+              <path d="M 210 50 Q 185 190 230 330" stroke="#059669" stroke-width="2.5" stroke-dasharray="6 4" opacity="0.45"/>
+              
+              <!-- Major Transit Corridors (A104 & Standard Gauge Railway) -->
+              <path d="M 110 230 Q 235 255 425 395" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
+              <path d="M 235 255 L 290 170 L 350 140" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.35"/>
+              
+              <!-- Lake Victoria (Western Kenya) -->
+              <ellipse cx="85" cy="235" rx="35" ry="50" fill="#38bdf8" fill-opacity="0.2" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4 2"/>
+              <text x="55" y="240" fill="#38bdf8" font-size="9" font-weight="700" letter-spacing="0.5">L. VICTORIA</text>
+              
+              <!-- Indian Ocean Coastline (Southeast) -->
+              <path d="M 390 360 Q 440 395 470 440" stroke="#0ea5e9" stroke-width="4" opacity="0.6"/>
+              <text x="430" y="445" fill="#0ea5e9" font-size="10" font-weight="700" letter-spacing="1">INDIAN OCEAN</text>
+              
+              <!-- Regional Labels Across Kenya -->
+              <text x="130" y="140" fill="currentColor" font-size="9" font-weight="700" letter-spacing="0.5">NORTH RIFT (ELDORET)</text>
+              <text x="75" y="210" fill="currentColor" font-size="9" font-weight="700" letter-spacing="0.5">WESTERN (KISUMU)</text>
+              <text x="160" y="210" fill="currentColor" font-size="9" font-weight="700" letter-spacing="0.5">RIFT VALLEY (NAKURU)</text>
+              <text x="270" y="185" fill="currentColor" font-size="9" font-weight="700" letter-spacing="0.5">MT. KENYA / CENTRAL</text>
+              <text x="210" y="290" fill="currentColor" font-size="11" font-weight="800" letter-spacing="1">NAIROBI METRO</text>
+              <text x="350" y="375" fill="currentColor" font-size="9" font-weight="700" letter-spacing="0.5">COAST (MOMBASA &amp; DIANI)</text>
             </svg>
 
             <!-- Dynamic Pin Markers rendered by JS on Map -->
@@ -309,7 +348,7 @@
           </div>
 
           <p class="text-[11px] text-slate-500 dark:text-zinc-400 text-center">
-            Click any price pin on the map to inspect property details and book viewings.
+            Click any price pin on the Kenya map to inspect property details and book viewings.
           </p>
         </div>
       </div>
@@ -597,12 +636,25 @@
     const FX_RATES = { KES: 1, USD: 0.0077, GBP: 0.0061, EUR: 0.0071 };
     const CURRENCY_SYMBOLS = { KES: 'KES ', USD: '$', GBP: '£', EUR: '€' };
 
-    // Geocoded Coordinates for Interactive Vector Map Pins
+    // Geocoded Coordinates for Interactive Kenya Nationwide Vector Map Pins
     const NEIGHBORHOOD_COORDS = {
-      'Kilimani': { x: 170, y: 260 },
-      'Westlands': { x: 190, y: 150 },
-      'Riverside': { x: 260, y: 180 },
-      'Nyali': { x: 470, y: 340 }
+      'Kilimani': { x: 250, y: 260 },
+      'Westlands': { x: 235, y: 245 },
+      'Riverside': { x: 245, y: 250 },
+      'Karen': { x: 230, y: 275 },
+      'Runda': { x: 260, y: 235 },
+      'Kiambu': { x: 275, y: 220 },
+      'Thika': { x: 305, y: 210 },
+      'Nanyuki': { x: 300, y: 175 },
+      'Nakuru': { x: 195, y: 205 },
+      'Naivasha': { x: 215, y: 230 },
+      'Eldoret': { x: 160, y: 145 },
+      'Kisumu': { x: 105, y: 215 },
+      'Kakamega': { x: 115, y: 185 },
+      'Nyali': { x: 420, y: 385 },
+      'Mombasa': { x: 415, y: 395 },
+      'Diani': { x: 405, y: 420 },
+      'Malindi': { x: 445, y: 350 }
     };
 
     // Native High-Contrast Toast Notification
@@ -888,6 +940,95 @@
             'https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?w=1600&auto=format&fit=crop&q=85'
           ],
           amenities: ['Private Garden', 'Direct Ocean Access', 'Perimeter Electric Fence', 'Fresh Water Desalination']
+        },
+        {
+          id: 104,
+          unit_number: 'Suite 3B',
+          floor: '3rd Floor',
+          unit_type: '3-Bedroom Executive Master Ensuite',
+          property_name: 'Milimani Executive Heights',
+          property_type: 'Modern Residential Apartments',
+          address: 'Milimani Road, Nakuru',
+          city: 'Nakuru',
+          bedrooms: 3,
+          bathrooms: 2,
+          sqft: 1450,
+          base_rent: 65000,
+          deposit: 130000,
+          photo: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=1600&auto=format&fit=crop&q=85',
+          photos: [
+            'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=1600&auto=format&fit=crop&q=85',
+            'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=1600&auto=format&fit=crop&q=85',
+            'https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?w=1600&auto=format&fit=crop&q=85',
+            'https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=1600&auto=format&fit=crop&q=85'
+          ],
+          amenities: ['Panoramic Crater Views', 'Borehole Water', 'Electric Perimeter Fence', 'High-Speed Fiber Ready']
+        },
+        {
+          id: 105,
+          unit_number: 'Villa Serene',
+          floor: 'Private Beach Compound',
+          unit_type: '3-Bedroom Coastal Villa with Plunge Pool',
+          property_name: 'Sunset Bay Luxury Suites',
+          property_type: 'Coastal Holiday Residences',
+          address: 'Diani Beach Road, Kwale',
+          city: 'Diani',
+          bedrooms: 3,
+          bathrooms: 3,
+          sqft: 2200,
+          base_rent: 140000,
+          deposit: 280000,
+          photo: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=1600&auto=format&fit=crop&q=85',
+          photos: [
+            'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=1600&auto=format&fit=crop&q=85',
+            'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1600&auto=format&fit=crop&q=85',
+            'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1600&auto=format&fit=crop&q=85'
+          ],
+          amenities: ['Private Plunge Pool', 'Direct White Sands Access', 'Full Solar & Inverter Backup', 'CCTV Security']
+        },
+        {
+          id: 106,
+          unit_number: 'Townhouse 2',
+          floor: 'Gated Hillside Community',
+          unit_type: '4-Bedroom Family Villa with Lake View',
+          property_name: 'Lakeview Garden Enclave',
+          property_type: 'Executive Townhouses',
+          address: 'Riat Hills, Kisumu',
+          city: 'Kisumu',
+          bedrooms: 4,
+          bathrooms: 3.5,
+          sqft: 2600,
+          base_rent: 85000,
+          deposit: 170000,
+          photo: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&auto=format&fit=crop&q=85',
+          photos: [
+            'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&auto=format&fit=crop&q=85',
+            'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&auto=format&fit=crop&q=85',
+            'https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?w=1600&auto=format&fit=crop&q=85'
+          ],
+          amenities: ['Lake Victoria Views', 'Private Garden Lawn', 'Solar Hot Water', '24/7 Manned Gatehouse']
+        },
+        {
+          id: 107,
+          unit_number: 'Residence 104',
+          floor: 'Ground Floor with Private Lawn',
+          unit_type: '3-Bedroom Master Ensuite Garden Apartment',
+          property_name: 'Fourways Ridge Estate',
+          property_type: 'Gated Master-Planned Community',
+          address: 'Kiambu Road, Kiambu',
+          city: 'Kiambu',
+          bedrooms: 3,
+          bathrooms: 2,
+          sqft: 1550,
+          base_rent: 95000,
+          deposit: 190000,
+          photo: 'https://images.unsplash.com/photo-1598228723793-52759bba239c?w=1600&auto=format&fit=crop&q=85',
+          photos: [
+            'https://images.unsplash.com/photo-1598228723793-52759bba239c?w=1600&auto=format&fit=crop&q=85',
+            'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=1600&auto=format&fit=crop&q=85',
+            'https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?w=1600&auto=format&fit=crop&q=85'
+          ],
+          amenities: ['Private Garden Lawn', 'Estate Jogging Track', 'Borehole & Backup Generator', 'Fiber Ready']
         }
       ];
     }
@@ -1103,9 +1244,14 @@
 
       container.innerHTML = list.map(v => {
         let coord = NEIGHBORHOOD_COORDS['Kilimani'];
-        if (v.property_name.includes('Westlands') || (v.address && v.address.includes('Westlands'))) coord = NEIGHBORHOOD_COORDS['Westlands'];
-        else if (v.property_name.includes('Riverside') || (v.address && v.address.includes('Riverside'))) coord = NEIGHBORHOOD_COORDS['Riverside'];
-        else if (v.property_name.includes('Nyali') || (v.address && v.address.includes('Nyali')) || v.city === 'Mombasa') coord = NEIGHBORHOOD_COORDS['Nyali'];
+        const textToMatch = `${v.property_name || ''} ${v.address || ''} ${v.city || ''}`.toLowerCase();
+
+        for (const [key, c] of Object.entries(NEIGHBORHOOD_COORDS)) {
+          if (textToMatch.includes(key.toLowerCase())) {
+            coord = c;
+            break;
+          }
+        }
 
         return `
           <button onclick="highlightResidence(${v.id})" class="absolute map-pin-pulse px-2.5 py-1 rounded-full bg-slate-900 text-white dark:bg-emerald-600 font-mono font-bold text-[11px] shadow-lg border-2 border-white flex items-center space-x-1 hover:scale-110 active:scale-95 transition cursor-pointer" style="left: ${coord.x}px; top: ${coord.y}px;" title="${v.unit_number} • ${v.property_name}">
@@ -1280,10 +1426,31 @@
 
       let filtered = allVacancies.filter(v => {
         const locLower = loc.toLowerCase();
-        const matchesLoc = loc === 'all' || 
-          (v.city && v.city.toLowerCase().includes(locLower)) || 
-          (v.property_name && v.property_name.toLowerCase().includes(locLower)) ||
-          (v.address && v.address.toLowerCase().includes(locLower));
+        let matchesLoc = false;
+
+        if (loc === 'all') {
+          matchesLoc = true;
+        } else if (locLower === 'nairobi') {
+          const t = `${v.city || ''} ${v.property_name || ''} ${v.address || ''}`.toLowerCase();
+          matchesLoc = t.includes('nairobi') || t.includes('kilimani') || t.includes('westlands') || t.includes('riverside') || t.includes('karen') || t.includes('runda');
+        } else if (locLower === 'mombasa') {
+          const t = `${v.city || ''} ${v.property_name || ''} ${v.address || ''}`.toLowerCase();
+          matchesLoc = t.includes('mombasa') || t.includes('nyali') || t.includes('diani') || t.includes('kwale') || t.includes('malindi');
+        } else if (locLower === 'nakuru') {
+          const t = `${v.city || ''} ${v.property_name || ''} ${v.address || ''}`.toLowerCase();
+          matchesLoc = t.includes('nakuru') || t.includes('eldoret') || t.includes('naivasha') || t.includes('milimani');
+        } else if (locLower === 'kiambu') {
+          const t = `${v.city || ''} ${v.property_name || ''} ${v.address || ''}`.toLowerCase();
+          matchesLoc = t.includes('kiambu') || t.includes('fourways') || t.includes('thika') || t.includes('nanyuki') || t.includes('nyeri') || t.includes('ruiru');
+        } else if (locLower === 'kisumu') {
+          const t = `${v.city || ''} ${v.property_name || ''} ${v.address || ''}`.toLowerCase();
+          matchesLoc = t.includes('kisumu') || t.includes('lakeview') || t.includes('riat') || t.includes('kakamega');
+        } else {
+          matchesLoc = (v.city && v.city.toLowerCase().includes(locLower)) || 
+            (v.property_name && v.property_name.toLowerCase().includes(locLower)) ||
+            (v.address && v.address.toLowerCase().includes(locLower));
+        }
+
         const matchesType = type === 'all' || (v.unit_type && v.unit_type.toLowerCase().includes(type.toLowerCase()));
         const matchesBudget = Number(v.base_rent) <= budget;
         const matchesReadiness = readiness === 'all' || (v.status && v.status.toLowerCase() === 'vacant');
