@@ -434,6 +434,24 @@ function initSchema() {
       invoiced INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS unallocated_payments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      reference_code TEXT UNIQUE NOT NULL,
+      amount REAL NOT NULL,
+      payer_phone TEXT,
+      payer_name TEXT,
+      paybill_number TEXT DEFAULT '174379',
+      account_reference TEXT,
+      source TEXT DEFAULT 'bank_statement',
+      status TEXT DEFAULT 'pending',
+      claimed_tenant_id INTEGER REFERENCES tenants(id),
+      claimed_invoice_id INTEGER REFERENCES invoices(id),
+      reconciled_at DATETIME,
+      payment_date DATETIME NOT NULL,
+      notes TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   // Ensure columns exist if table was created previously

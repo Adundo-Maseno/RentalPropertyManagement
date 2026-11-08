@@ -435,6 +435,14 @@ async function runTests() {
   });
 
   // 34. Feature 1: WhatsApp Business Interactive Bot
+  await test('WhatsApp Bot: GET /api/whatsapp/webhook verifies Meta Cloud API challenge', async () => {
+    const res = await invokeHandler('/api/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=bomasphere_webhook_secret_2026&hub.challenge=challenge_882910', 'GET');
+    if (res.statusCode !== 200 || !res.body.includes('challenge_882910')) {
+      throw new Error(`Expected Meta challenge verification 200, got ${res.statusCode}: ${res.body}`);
+    }
+    console.log(`      Meta Cloud API Webhook successfully verified with challenge response`);
+  });
+
   await test('WhatsApp Bot: POST /api/whatsapp/webhook handles 2-way BALANCE command', async () => {
     const res = await invokeHandler('/api/whatsapp/webhook', 'POST', {
       phone: '+254722889900',
@@ -443,6 +451,38 @@ async function runTests() {
     if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
     if (!res.json.reply || !res.json.reply.includes('KES')) throw new Error('Invalid WhatsApp balance reply');
     console.log(`      WhatsApp Bot response: "${res.json.reply.substring(0, 75)}..."`);
+  });
+
+  await test('WhatsApp Bot: Auto-parses M-Pesa Bank Paybill SMS & reconciles unit rent', async () => {
+    const testCode = 'QG' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    const sms = `${testCode} Confirmed. Ksh15,000.00 sent to EQUITY BANK for account 0120199999999 on 08/11/26 at 09:30 AM.`;
+    const res = await invokeHandler('/api/whatsapp/webhook', 'POST', {
+      phone: '+254722889900',
+      message: sms
+    });
+    if (res.statusCode !== 200) throw new Error(`Expected 200, got ${res.statusCode}`);
+    if (res.json.action !== 'claim_reconciled' || !res.json.reply.includes('VERIFIED & RECONCILED')) {
+      throw new Error(`Expected claim_reconciled, got: ${JSON.stringify(res.json)}`);
+    }
+    console.log(`      M-Pesa SMS parsed & auto-reconciled: Ref ${testCode}, Action: ${res.json.action}`);
+  });
+
+  await test('Bank Statement Reconciler: POST /api/payments/reconcile-bank-statement matches bulk rows', async () => {
+    const code1 = 'QG' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    const code2 = 'QG' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    const csv = `Date,Narration,Deposit\n08/11/2026,MPESA C2B 247247 ${code1} KARIUKI JAMES,12000.00\n08/11/2026,MPESA C2B 247247 ${code2} BRIAN OTIENO,18000.00`;
+    const res = await invokeHandler('/api/payments/reconcile-bank-statement', 'POST', {
+      statement_text: csv
+    });
+    if (res.statusCode !== 200 || !res.json.success) throw new Error(`Status ${res.statusCode}`);
+    if (res.json.matched_count < 1) throw new Error(`Expected matches, got: ${JSON.stringify(res.json)}`);
+    console.log(`      Bank Statement processed: ${res.json.total_processed} lines, ${res.json.matched_count} matched, KES ${res.json.total_reconciled_amount} reconciled`);
+  });
+
+  await test('Bank Suspense Queue: GET /api/payments/unallocated returns queue', async () => {
+    const res = await invokeHandler('/api/payments/unallocated', 'GET');
+    if (res.statusCode !== 200 || !res.json.success) throw new Error(`Status ${res.statusCode}`);
+    console.log(`      Unallocated suspense payments queue active: ${res.json.count || 0} records`);
   });
 
   // 35. Feature 2: AI Tenant Vetting & CRB Scoring

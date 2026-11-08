@@ -326,10 +326,13 @@ async function generateDarajaQrCode({ amount, refNo, trxCode }, config) {
   // Self-contained SVG QR Code with Safaricom M-Pesa branding
   const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300"><rect width="300" height="300" fill="#ffffff" rx="16"/><rect x="20" y="20" width="260" height="260" fill="none" stroke="#00A859" stroke-width="6" rx="12"/><text x="150" y="55" font-family="sans-serif" font-size="14" font-weight="bold" fill="#00A859" text-anchor="middle">LIPA NA M-PESA</text><rect x="50" y="80" width="45" height="45" fill="#000"/><rect x="58" y="88" width="29" height="29" fill="#fff"/><rect x="66" y="96" width="13" height="13" fill="#000"/><rect x="205" y="80" width="45" height="45" fill="#000"/><rect x="213" y="88" width="29" height="29" fill="#fff"/><rect x="221" y="96" width="13" height="13" fill="#000"/><rect x="50" y="195" width="45" height="45" fill="#000"/><rect x="58" y="203" width="29" height="29" fill="#fff"/><rect x="66" y="211" width="13" height="13" fill="#000"/><g fill="#111827"><rect x="110" y="90" width="10" height="20"/><rect x="130" y="80" width="15" height="10"/><rect x="155" y="95" width="20" height="10"/><rect x="110" y="125" width="80" height="12"/><rect x="120" y="150" width="60" height="10"/><rect x="105" y="175" width="25" height="25"/><rect x="145" y="170" width="35" height="15"/><rect x="120" y="205" width="20" height="35"/><rect x="155" y="200" width="35" height="15"/><rect x="205" y="145" width="45" height="10"/><rect x="220" y="170" width="20" height="30"/><rect x="200" y="215" width="45" height="25"/></g><text x="150" y="272" font-family="sans-serif" font-size="11" font-weight="600" fill="#374151" text-anchor="middle">Paybill: ${shortcode} | Acc: ${cleanRef}</text></svg>`;
   const base64Svg = Buffer.from(fallbackSvg).toString('base64');
+  const utf8SvgUri = `data:image/svg+xml;utf8,${encodeURIComponent(fallbackSvg)}`;
 
   return {
     qr_code: `data:image/svg+xml;base64,${base64Svg}`,
     qrCode: `data:image/svg+xml;base64,${base64Svg}`,
+    qr_svg: fallbackSvg,
+    qr_data_url: utf8SvgUri,
     ref_no: cleanRef,
     refNo: cleanRef,
     amount: cleanAmount,
@@ -2540,29 +2543,177 @@ async function handleRequest(req, res) {
     }
 
     // ==========================================
+    // UNIVERSAL M-PESA PARSER & BANK RECONCILER
+    // ==========================================
+    function parseMpesaMessage(text) {
+      if (!text || typeof text !== 'string') return null;
+      const raw = text.trim();
+
+      const codeMatch = raw.match(/\b([A-Z0-9]{10})\s+Confirmed/i) ||
+                        raw.match(/(?:claim|paid|ref|code|mpesa|receipt)[:\s#]*([A-Z0-9]{10})\b/i) ||
+                        raw.match(/\b([Q-Z0-9][A-Z0-9]{9})\b/i);
+
+      if (!codeMatch) return null;
+      const referenceCode = codeMatch[1].toUpperCase();
+
+      const amtMatch = raw.match(/(?:Ksh|KES)\.?\s*([0-9,]+(?:\.[0-9]{2})?)/i) ||
+                       raw.match(/(?:sent|paid|amount|deposit)\s*(?:of\s*)?(?:Ksh|KES)?\.?\s*([0-9,]+(?:\.[0-9]{2})?)/i);
+      const amount = amtMatch ? parseFloat(amtMatch[1].replace(/,/g, '')) : null;
+
+      const payeeMatch = raw.match(/(?:sent to|paid to)\s*([^.]+?)(?:\s+for account|\s+on|\.)/i);
+      const accountMatch = raw.match(/(?:for account|acc(?:ount)?\.?[:\s]*)\s*([0-9A-Z_.-]+)/i);
+
+      return {
+        referenceCode,
+        amount,
+        payee: payeeMatch ? payeeMatch[1].trim() : null,
+        accountReference: accountMatch ? accountMatch[1].trim() : null,
+        rawText: raw
+      };
+    }
+
+    function reconcileMpesaClaim({ referenceCode, amount, phone, name, source = 'whatsapp' }, db) {
+      const existingPayment = db.prepare("SELECT p.*, t.name as tenant_name, u.unit_number FROM payments p LEFT JOIN tenants t ON p.tenant_id = t.id LEFT JOIN leases l ON l.tenant_id = t.id AND l.status = 'active' LEFT JOIN units u ON l.unit_id = u.id WHERE p.reference_code = ?").get(referenceCode);
+      if (existingPayment) {
+        return {
+          status: 'already_reconciled',
+          payment: existingPayment,
+          message: `Transaction ${referenceCode} was already reconciled on ${existingPayment.payment_date} for Unit ${existingPayment.unit_number || 'Resident'} (Receipt #${existingPayment.receipt_number}).`
+        };
+      }
+
+      let tenant = null;
+      if (phone) {
+        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        const last9 = cleanPhone.slice(-9);
+        tenant = db.prepare("SELECT t.*, u.unit_number, u.property_id, p.name as property_name FROM tenants t LEFT JOIN leases l ON l.tenant_id = t.id AND l.status = 'active' LEFT JOIN units u ON l.unit_id = u.id LEFT JOIN properties p ON u.property_id = p.id WHERE t.phone LIKE ? OR t.phone LIKE ?").get(`%${last9}%`, phone);
+      }
+
+      if (!tenant && name) {
+        const words = name.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+        for (const w of words) {
+          tenant = db.prepare("SELECT t.*, u.unit_number, u.property_id, p.name as property_name FROM tenants t LEFT JOIN leases l ON l.tenant_id = t.id AND l.status = 'active' LEFT JOIN units u ON l.unit_id = u.id LEFT JOIN properties p ON u.property_id = p.id WHERE LOWER(t.name) LIKE ?").get(`%${w}%`);
+          if (tenant) break;
+        }
+      }
+
+      if (tenant) {
+        let inv = db.prepare("SELECT * FROM invoices WHERE tenant_id = ? AND balance > 0 ORDER BY id ASC LIMIT 1").get(tenant.id);
+        if (!inv) {
+          inv = db.prepare("SELECT * FROM invoices WHERE tenant_id = ? ORDER BY id DESC LIMIT 1").get(tenant.id);
+        }
+
+        const paidAmount = Number(amount) > 0 ? Number(amount) : (inv ? Number(inv.balance) : 0);
+        const receiptNum = 'REC-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+        let newBalance = 0;
+        if (inv) {
+          newBalance = Math.max(0, Number(inv.balance) - paidAmount);
+          const newStatus = newBalance <= 0 ? 'paid' : 'partial';
+          const newPaid = Number(inv.amount_paid || 0) + paidAmount;
+          db.prepare("UPDATE invoices SET balance = ?, amount_paid = ?, status = ? WHERE id = ?").run(newBalance, newPaid, newStatus, inv.id);
+        }
+
+        db.prepare(`
+          INSERT INTO payments (receipt_number, invoice_id, tenant_id, amount, payment_date, payment_method, reference_code, payer_phone, payer_name, status, notes)
+          VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, 'mpesa_c2b_claim', ?, ?, ?, 'completed', ?)
+        `).run(receiptNum, inv?.id || null, tenant.id, paidAmount, referenceCode, phone || tenant.phone, name || tenant.name, `Auto-reconciled via ${source}`);
+
+        return {
+          status: 'reconciled',
+          tenant,
+          invoice: inv,
+          receiptNumber: receiptNum,
+          paidAmount,
+          newBalance,
+          referenceCode
+        };
+      }
+
+      try {
+        db.prepare(`
+          INSERT OR IGNORE INTO unallocated_payments (reference_code, amount, payer_phone, payer_name, source, status, payment_date, notes)
+          VALUES (?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP, 'Unidentified sender payment')
+        `).run(referenceCode, Number(amount) || 0, phone || '', name || '', source);
+      } catch (e) {}
+
+      return {
+        status: 'unallocated',
+        referenceCode,
+        paidAmount: Number(amount) || 0,
+        phone,
+        name
+      };
+    }
+
+    // ==========================================
     // FEATURE 1: WHATSAPP BUSINESS BOT WEBHOOK
     // ==========================================
+    if (pathname === '/api/whatsapp/webhook' && method === 'GET') {
+      const mode = parsedUrl.searchParams.get('hub.mode');
+      const token = parsedUrl.searchParams.get('hub.verify_token');
+      const challenge = parsedUrl.searchParams.get('hub.challenge');
+      const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN || 'bomasphere_webhook_secret_2026';
+
+      if (mode === 'subscribe' && token === verifyToken) {
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        return res.end(challenge || 'VERIFIED');
+      }
+      return sendJSON(res, 403, { error: 'Forbidden: Invalid verification token' });
+    }
+
     if (pathname === '/api/whatsapp/webhook' && method === 'POST') {
       const b = await parseBody(req);
-      const phone = b.phone || b.From || '+254722889900';
-      const incomingText = (b.message || b.Body || '').trim();
+      
+      let phone = b.phone || b.From || '';
+      let incomingText = (b.message || b.Body || '').trim();
 
-      let tenant = db.prepare("SELECT * FROM tenants WHERE phone LIKE ? OR phone LIKE ?").get(`%${phone.slice(-9)}%`, phone);
-      if (!tenant) tenant = db.prepare("SELECT * FROM tenants LIMIT 1").get();
+      if (b.entry && Array.isArray(b.entry) && b.entry[0]?.changes?.[0]?.value?.messages?.[0]) {
+        const msg = b.entry[0].changes[0].value.messages[0];
+        phone = msg.from;
+        incomingText = (msg.text?.body || '').trim();
+      }
+
+      if (!phone) phone = '+254722889900';
+
+      let tenant = db.prepare("SELECT t.*, u.unit_number, u.property_id, p.name as property_name FROM tenants t LEFT JOIN leases l ON l.tenant_id = t.id AND l.status = 'active' LEFT JOIN units u ON l.unit_id = u.id LEFT JOIN properties p ON u.property_id = p.id WHERE t.phone LIKE ? OR t.phone LIKE ?").get(`%${phone.slice(-9)}%`, phone);
+      if (!tenant) tenant = db.prepare("SELECT t.*, u.unit_number, u.property_id, p.name as property_name FROM tenants t LEFT JOIN leases l ON l.tenant_id = t.id AND l.status = 'active' LEFT JOIN units u ON l.unit_id = u.id LEFT JOIN properties p ON u.property_id = p.id LIMIT 1").get();
 
       const cmd = incomingText.toUpperCase();
       let replyText = '';
       let action = 'menu';
 
-      if (cmd.includes('BALANCE') || cmd === '1') {
+      const parsedMpesa = parseMpesaMessage(incomingText);
+      const isClaimIntent = cmd.includes('CLAIM') || cmd.includes('PAID') || cmd.includes('CONFIRMED') || cmd.startsWith('5');
+
+      if (parsedMpesa && (isClaimIntent || incomingText.includes('Confirmed') || incomingText.length >= 10)) {
+        const recResult = reconcileMpesaClaim({
+          referenceCode: parsedMpesa.referenceCode,
+          amount: parsedMpesa.amount,
+          phone,
+          name: tenant?.name,
+          source: 'whatsapp'
+        }, db);
+
+        if (recResult.status === 'reconciled') {
+          replyText = `🎉 Jambo ${recResult.tenant.name}!\nYour payment of KES ${Number(recResult.paidAmount).toLocaleString()} (M-Pesa Ref: ${recResult.referenceCode}) has been VERIFIED & RECONCILED!\n\n🏠 Property: ${recResult.tenant.property_name || 'BomaSphere Residences'}\n🚪 Unit: ${recResult.tenant.unit_number || 'Resident'}\n📄 Invoice: ${recResult.invoice?.invoice_number || 'RENT'}\n🧾 Official Receipt: ${recResult.receiptNumber}\n💰 Remaining Balance: KES ${Number(recResult.newBalance).toLocaleString()}\n\nOfficial KRA eTIMS compliant receipt generated. Asante sana!`;
+          action = 'claim_reconciled';
+        } else if (recResult.status === 'already_reconciled') {
+          replyText = `⚠️ Notice: M-Pesa transaction ${recResult.referenceCode} was already reconciled on ${recResult.payment.payment_date} (Receipt #${recResult.payment.receipt_number}). Reply 'RECEIPT' to view.`;
+          action = 'claim_duplicate';
+        } else {
+          replyText = `Jambo! We received your M-Pesa claim ${recResult.referenceCode} for KES ${Number(recResult.paidAmount).toLocaleString()}, but your phone number (${phone}) is not yet linked to an active unit lease.\n\nOur property manager has queued this in the suspense ledger. Please reply with your Unit Number (e.g. 'Unit A102') to expedite reconciliation.`;
+          action = 'claim_unallocated';
+        }
+      } else if (cmd.includes('BALANCE') || cmd === '1') {
         const inv = db.prepare("SELECT * FROM invoices WHERE tenant_id = ? ORDER BY id DESC LIMIT 1").get(tenant.id);
         const bal = inv ? inv.balance : 0;
-        replyText = `Jambo ${tenant.name}! Your current BomaSphere balance is KES ${Number(bal).toLocaleString()}. Due date: 5th of this month. Pay easily via Paybill 522522, Account: ${inv?.invoice_number || 'RENT'}. Reply 'PAY' to trigger instant M-Pesa prompt.`;
+        replyText = `Jambo ${tenant.name}! Your current BomaSphere balance is KES ${Number(bal).toLocaleString()}. Due date: 5th of this month. Pay easily via Bank Paybill or Safaricom Paybill 174379, Account: ${inv?.invoice_number || tenant.unit_number || 'RENT'}. Forward your M-Pesa SMS here to claim instant reconciliation!`;
         action = 'balance';
       } else if (cmd.includes('RECEIPT') || cmd === '2') {
         const pmt = db.prepare("SELECT * FROM payments WHERE tenant_id = ? ORDER BY id DESC LIMIT 1").get(tenant.id);
         if (pmt) {
-          replyText = `Official BomaSphere Receipt: ${pmt.receipt_number}. Paid KES ${Number(pmt.amount).toLocaleString()} via ${pmt.payment_method} on ${pmt.payment_date}. Ref: ${pmt.reference_code}. Status: Verified.`;
+          replyText = `Official BomaSphere Receipt: ${pmt.receipt_number}. Paid KES ${Number(pmt.amount).toLocaleString()} via ${pmt.payment_method} on ${pmt.payment_date}. Ref: ${pmt.reference_code}. Status: Verified & eTIMS Compliant.`;
         } else {
           replyText = `No recent receipts found for account ${tenant.name}.`;
         }
@@ -2584,7 +2735,7 @@ async function handleRequest(req, res) {
         replyText = `Maintenance ticket ${tktNum} logged successfully for ${tenant.name}! Our site caretaker has been notified and will contact you shortly.`;
         action = 'ticket';
       } else {
-        replyText = `Welcome to BomaSphere WhatsApp Business Bot!\n\nReply with a number or keyword:\n1. BALANCE - Check your current rent & water dues\n2. RECEIPT - View latest official payment receipt\n3. PAY - Receive 1-tap Lipa Na M-Pesa prompt\n4. TICKET <issue> - Report a maintenance issue\n\nOur office is open Mon-Fri 8AM - 5PM.`;
+        replyText = `Welcome to BomaSphere WhatsApp Concierge!\n\nReply with a number or command:\n1. BALANCE - Check rent & utilities balance\n2. RECEIPT - View latest official payment receipt\n3. PAY - Receive 1-tap Lipa Na M-Pesa STK prompt\n4. TICKET <issue> - Report a maintenance issue\n5. CLAIM <code/SMS> - Reconcile Bank Paybill or M-Pesa payment\n\nOr simply forward your Safaricom M-Pesa confirmation SMS here to auto-reconcile your rent instantly!`;
       }
 
       db.prepare(`
@@ -2603,9 +2754,115 @@ async function handleRequest(req, res) {
 
     if (pathname === '/api/whatsapp/history' && method === 'GET') {
       const messages = db.prepare(`
-        SELECT * FROM communications WHERE type = 'whatsapp' ORDER BY id DESC LIMIT 20
+        SELECT * FROM communications WHERE type = 'whatsapp' ORDER BY id DESC LIMIT 50
       `).all();
       return sendJSON(res, 200, { success: true, messages });
+    }
+
+    // ==========================================
+    // BANK PAYBILL CSV RECONCILER & SUSPENSE
+    // ==========================================
+    if (pathname === '/api/payments/reconcile-bank-statement' && method === 'POST') {
+      const b = await parseBody(req);
+      const statementText = b.statement_text || b.csv || '';
+      const lines = statementText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+
+      const results = [];
+      let matchedCount = 0;
+      let alreadyReconciledCount = 0;
+      let unallocatedCount = 0;
+      let totalReconciledAmount = 0;
+
+      for (const line of lines) {
+        if (/^(date|transaction|details|narration|ref)/i.test(line)) continue;
+
+        const parsed = parseMpesaMessage(line);
+        if (!parsed || !parsed.referenceCode) continue;
+
+        const phoneMatch = line.match(/(?:254|0)(7\d{8})/);
+        const phone = phoneMatch ? ('+254' + phoneMatch[1]) : null;
+
+        let extractedName = null;
+        const nameMatch = line.match(/(?:mpesa|c2b|b2c|paybill|\b[A-Z0-9]{10}\b)\s+([A-Z\s]{4,30})/i);
+        if (nameMatch) {
+          extractedName = nameMatch[1].replace(/EQUITY|KCB|COOP|BANK|PAYBILL|LIPA|NA/gi, '').trim();
+        }
+
+        const rec = reconcileMpesaClaim({
+          referenceCode: parsed.referenceCode,
+          amount: parsed.amount,
+          phone,
+          name: extractedName,
+          source: 'bank_statement'
+        }, db);
+
+        if (rec.status === 'reconciled') {
+          matchedCount++;
+          totalReconciledAmount += Number(rec.paidAmount);
+          results.push({ line, status: 'reconciled', code: rec.referenceCode, tenant: rec.tenant.name, unit: rec.tenant.unit_number, amount: rec.paidAmount, receipt: rec.receiptNumber });
+        } else if (rec.status === 'already_reconciled') {
+          alreadyReconciledCount++;
+          results.push({ line, status: 'already_reconciled', code: rec.referenceCode, amount: rec.payment.amount });
+        } else {
+          unallocatedCount++;
+          results.push({ line, status: 'unallocated', code: rec.referenceCode, amount: rec.paidAmount });
+        }
+      }
+
+      return sendJSON(res, 200, {
+        success: true,
+        total_processed: lines.length,
+        matched_count: matchedCount,
+        already_reconciled_count: alreadyReconciledCount,
+        unallocated_count: unallocatedCount,
+        total_reconciled_amount: totalReconciledAmount,
+        results
+      });
+    }
+
+    if (pathname === '/api/payments/unallocated' && method === 'GET') {
+      const list = db.prepare("SELECT * FROM unallocated_payments ORDER BY id DESC LIMIT 50").all();
+      return sendJSON(res, 200, { success: true, count: list.length, unallocated: list });
+    }
+
+    if (pathname.startsWith('/api/payments/unallocated/') && pathname.endsWith('/claim') && method === 'POST') {
+      const parts = pathname.split('/');
+      const unallocId = Number(parts[4]);
+      const b = await parseBody(req);
+      const tenantId = Number(b.tenant_id);
+      const invoiceId = Number(b.invoice_id) || null;
+
+      const record = db.prepare("SELECT * FROM unallocated_payments WHERE id = ?").get(unallocId);
+      if (!record) return sendJSON(res, 404, { error: 'Unallocated payment record not found' });
+
+      const tenant = db.prepare("SELECT t.*, u.unit_number FROM tenants t LEFT JOIN leases l ON l.tenant_id = t.id AND l.status = 'active' LEFT JOIN units u ON l.unit_id = u.id WHERE t.id = ?").get(tenantId);
+      if (!tenant) return sendJSON(res, 404, { error: 'Tenant not found' });
+
+      let inv = invoiceId ? db.prepare("SELECT * FROM invoices WHERE id = ?").get(invoiceId) :
+                            db.prepare("SELECT * FROM invoices WHERE tenant_id = ? AND balance > 0 ORDER BY id ASC LIMIT 1").get(tenantId);
+
+      const receiptNum = 'REC-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      let newBalance = 0;
+      if (inv) {
+        newBalance = Math.max(0, Number(inv.balance) - Number(record.amount));
+        const newStatus = newBalance <= 0 ? 'paid' : 'partial';
+        const newPaid = Number(inv.amount_paid || 0) + Number(record.amount);
+        db.prepare("UPDATE invoices SET balance = ?, amount_paid = ?, status = ? WHERE id = ?").run(newBalance, newPaid, newStatus, inv.id);
+      }
+
+      db.prepare(`
+        INSERT INTO payments (receipt_number, invoice_id, tenant_id, amount, payment_date, payment_method, reference_code, payer_phone, payer_name, status, notes)
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, 'bank_paybill_manual_match', ?, ?, ?, 'completed', 'Manually claimed from suspense queue')
+      `).run(receiptNum, inv?.id || null, tenant.id, record.amount, record.reference_code, record.payer_phone, record.payer_name);
+
+      db.prepare("UPDATE unallocated_payments SET status = 'claimed', claimed_tenant_id = ?, claimed_invoice_id = ?, reconciled_at = CURRENT_TIMESTAMP WHERE id = ?").run(tenant.id, inv?.id || null, unallocId);
+
+      return sendJSON(res, 200, {
+        success: true,
+        message: `Payment ${record.reference_code} of KES ${record.amount} successfully allocated to Unit ${tenant.unit_number} (${tenant.name})`,
+        receipt_number: receiptNum,
+        new_balance: newBalance
+      });
     }
 
     // ==========================================

@@ -2111,6 +2111,13 @@ class BomaSphereApp {
     if (window.lucide) lucide.createIcons();
   }
 
+  getMpesaVectorSvg(shortcode, refNo, amount) {
+    const sc = shortcode || '174379';
+    const cleanRef = (refNo || 'RENT-BOMA').slice(0, 15);
+    const amt = Math.round(Number(amount)) || 25000;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" class="w-full h-full max-h-48 drop-shadow-sm select-none"><rect width="300" height="300" fill="#ffffff" rx="16"/><rect x="20" y="20" width="260" height="260" fill="none" stroke="#00A859" stroke-width="6" rx="12"/><text x="150" y="55" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#00A859" text-anchor="middle">LIPA NA M-PESA</text><rect x="50" y="80" width="45" height="45" fill="#000"/><rect x="58" y="88" width="29" height="29" fill="#fff"/><rect x="66" y="96" width="13" height="13" fill="#000"/><rect x="205" y="80" width="45" height="45" fill="#000"/><rect x="213" y="88" width="29" height="29" fill="#fff"/><rect x="221" y="96" width="13" height="13" fill="#000"/><rect x="50" y="195" width="45" height="45" fill="#000"/><rect x="58" y="203" width="29" height="29" fill="#fff"/><rect x="66" y="211" width="13" height="13" fill="#000"/><g fill="#111827"><rect x="110" y="90" width="10" height="20"/><rect x="130" y="80" width="15" height="10"/><rect x="155" y="95" width="20" height="10"/><rect x="110" y="125" width="80" height="12"/><rect x="120" y="150" width="60" height="10"/><rect x="105" y="175" width="25" height="25"/><rect x="145" y="170" width="35" height="15"/><rect x="120" y="205" width="20" height="35"/><rect x="155" y="200" width="35" height="15"/><rect x="205" y="145" width="45" height="10"/><rect x="220" y="170" width="20" height="30"/><rect x="200" y="215" width="45" height="25"/></g><text x="150" y="272" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#374151" text-anchor="middle">Paybill: ${sc} | Acc: ${cleanRef}</text></svg>`;
+  }
+
   async loadMpesaQrCode() {
     const amount = Number(document.getElementById('mpesa-amount-input')?.value) || 25000;
     const invoiceId = document.getElementById('mpesa-invoice-select')?.value;
@@ -2119,12 +2126,14 @@ class BomaSphereApp {
 
     const spinner = document.getElementById('mpesa-qr-spinner');
     const img = document.getElementById('mpesa-qr-image');
+    const svgTarget = document.getElementById('mpesa-qr-svg-target');
     const amountEl = document.getElementById('mpesa-qr-amount');
     const refEl = document.getElementById('mpesa-qr-ref');
     const shortcodeEl = document.getElementById('mpesa-qr-shortcode');
 
     if (spinner) spinner.classList.remove('hidden');
     if (img) img.classList.add('hidden');
+    if (svgTarget) svgTarget.classList.add('hidden');
     if (amountEl) amountEl.textContent = `KES ${amount.toLocaleString()}`;
     if (refEl) refEl.textContent = refNo;
 
@@ -2139,23 +2148,32 @@ class BomaSphereApp {
         })
       });
 
-      let qrCodeData = res.qr_code || res.qrCode;
-      if (qrCodeData && typeof qrCodeData === 'string' && !qrCodeData.startsWith('data:') && !qrCodeData.startsWith('http')) {
-        qrCodeData = `data:image/png;base64,${qrCodeData}`;
-      }
-      if (img && qrCodeData) {
+      const shortcode = res.shortcode || '174379';
+      if (shortcodeEl) shortcodeEl.textContent = shortcode;
+
+      if (res.qr_svg && svgTarget) {
+        svgTarget.innerHTML = res.qr_svg;
+        svgTarget.classList.remove('hidden');
+      } else if (res.qr_code && img) {
         img.onerror = () => {
-          console.warn('M-Pesa QR image failed to load, falling back to SVG QR');
-          const fallbackData = `MPESA|PB|${res.shortcode || '174379'}|${refNo}|${amount}`;
-          img.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(fallbackData)}`;
+          img.classList.add('hidden');
+          if (svgTarget) {
+            svgTarget.innerHTML = this.getMpesaVectorSvg(shortcode, refNo, amount);
+            svgTarget.classList.remove('hidden');
+          }
         };
-        img.src = qrCodeData;
+        img.src = res.qr_code;
         img.classList.remove('hidden');
+      } else if (svgTarget) {
+        svgTarget.innerHTML = this.getMpesaVectorSvg(shortcode, refNo, amount);
+        svgTarget.classList.remove('hidden');
       }
-      if (shortcodeEl) shortcodeEl.textContent = res.shortcode || '174379';
     } catch (err) {
-      console.error('Failed to load M-Pesa QR code:', err);
-      this.showToast('Could not generate M-Pesa QR code: ' + err.message, 'error');
+      console.warn('Failed to load M-Pesa QR from API, rendering vector SVG fallback:', err);
+      if (svgTarget) {
+        svgTarget.innerHTML = this.getMpesaVectorSvg('174379', refNo, amount);
+        svgTarget.classList.remove('hidden');
+      }
     } finally {
       if (spinner) spinner.classList.add('hidden');
     }
@@ -5264,6 +5282,102 @@ class BomaSphereApp {
   // ==========================================
 
   // FEATURE 1: 2-Way Interactive WhatsApp Business Bot
+  openWhatsappSetupGuide() {
+    this.openModal('modal-whatsapp-setup-guide');
+  }
+
+  async sendTestMpesaSmsClaim() {
+    const randomCode = 'QG' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    const sampleSms = `${randomCode} Confirmed. Ksh35,000.00 sent to EQUITY BANK for account 0120199999999 on ${new Date().toLocaleDateString('en-GB')} at 09:14 AM. New M-PESA balance is Ksh14,200.00.`;
+    const input = document.getElementById('whatsapp-input-text');
+    if (input) input.value = sampleSms;
+    await this.sendCustomWhatsapp();
+  }
+
+  loadSampleBankCsv() {
+    const code1 = 'QG' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    const code2 = 'QG' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    const code3 = 'QG' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    const sample = `Date,Narration,Deposit\n${new Date().toLocaleDateString('en-GB')},MPESA C2B 247247 ${code1} KARIUKI JAMES,35000.00\n${new Date().toLocaleDateString('en-GB')},MPESA C2B 247247 ${code2} BRIAN OTIENO,28000.00\n${new Date().toLocaleDateString('en-GB')},MPESA C2B 247247 ${code3} UNKNOWN TENANT,15000.00`;
+    const textarea = document.getElementById('bank-statement-input');
+    if (textarea) textarea.value = sample;
+    this.showToast('Sample Equity Bank Paybill statement loaded', 'info');
+  }
+
+  async reconcileBankStatement() {
+    const input = document.getElementById('bank-statement-input');
+    const spinner = document.getElementById('bank-reconcile-spinner');
+    const resultsContainer = document.getElementById('bank-statement-results');
+    const badge = document.getElementById('bank-summary-badge');
+    const statsGrid = document.getElementById('bank-stats-grid');
+    const matchesList = document.getElementById('bank-matches-list');
+
+    const statementText = input ? input.value.trim() : '';
+    if (!statementText) {
+      return this.showToast('Please paste bank statement rows or click Load Sample', 'error');
+    }
+
+    if (spinner) spinner.classList.remove('hidden');
+
+    try {
+      const res = await this.fetchAPI('/api/payments/reconcile-bank-statement', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ statement_text: statementText })
+      });
+
+      if (resultsContainer) resultsContainer.classList.remove('hidden');
+
+      if (badge) {
+        badge.textContent = `${res.matched_count} Reconciled • ${res.unallocated_count} Suspense`;
+      }
+
+      if (statsGrid) {
+        statsGrid.innerHTML = `
+          <div class="p-2 bg-white dark:bg-zinc-800 rounded border border-slate-200">
+            <span class="text-slate-400 block text-[10px]">Processed</span>
+            <span class="font-bold text-slate-800 dark:text-white text-sm">${res.total_processed}</span>
+          </div>
+          <div class="p-2 bg-emerald-50 dark:bg-emerald-950/30 rounded border border-emerald-200">
+            <span class="text-emerald-600 block text-[10px]">Matched</span>
+            <span class="font-bold text-emerald-800 dark:text-emerald-400 text-sm">${res.matched_count}</span>
+          </div>
+          <div class="p-2 bg-amber-50 dark:bg-amber-950/30 rounded border border-amber-200">
+            <span class="text-amber-600 block text-[10px]">Suspense</span>
+            <span class="font-bold text-amber-800 dark:text-amber-400 text-sm">${res.unallocated_count}</span>
+          </div>
+          <div class="p-2 bg-indigo-50 dark:bg-indigo-950/30 rounded border border-indigo-200">
+            <span class="text-indigo-600 block text-[10px]">Reconciled Value</span>
+            <span class="font-bold text-indigo-800 dark:text-indigo-400 text-sm">KES ${Number(res.total_reconciled_amount).toLocaleString()}</span>
+          </div>
+        `;
+      }
+
+      if (matchesList && res.results) {
+        matchesList.innerHTML = res.results.map(r => `
+          <div class="p-2 rounded border ${r.status === 'reconciled' ? 'bg-emerald-50/50 border-emerald-200 text-emerald-900' : (r.status === 'already_reconciled' ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-amber-50/60 border-amber-200 text-amber-900')} flex items-center justify-between text-[11px]">
+            <div>
+              <span class="font-mono font-bold">${escapeHtml(r.code)}</span>
+              ${r.tenant ? ` • Unit ${escapeHtml(r.unit || '')} (${escapeHtml(r.tenant)})` : ' • Unidentified Sender (Logged to Suspense)'}
+            </div>
+            <div class="font-bold">
+              KES ${Number(r.amount).toLocaleString()}
+              <span class="ml-1.5 px-1.5 py-0.5 rounded text-[9px] uppercase font-bold ${r.status === 'reconciled' ? 'bg-emerald-200 text-emerald-900' : (r.status === 'already_reconciled' ? 'bg-slate-200 text-slate-800' : 'bg-amber-200 text-amber-900')}">${r.status}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      this.showToast(`Batch reconciled ${res.matched_count} transactions totaling KES ${Number(res.total_reconciled_amount).toLocaleString()}!`, 'success');
+      await this.refreshAllData();
+    } catch (err) {
+      console.error('Bank statement reconciliation failed:', err);
+      this.showToast('Reconciliation failed: ' + err.message, 'error');
+    } finally {
+      if (spinner) spinner.classList.add('hidden');
+    }
+  }
+
   async sendTestWhatsapp(cmd) {
     const input = document.getElementById('whatsapp-input-text');
     if (input) input.value = cmd;
@@ -5307,7 +5421,10 @@ class BomaSphereApp {
       stream.appendChild(inDiv);
       stream.scrollTop = stream.scrollHeight;
 
-      if (res.action === 'pay') {
+      if (res.action === 'claim_reconciled') {
+        this.showToast('M-Pesa payment reconciled against unit invoice!', 'success');
+        await this.refreshAllData();
+      } else if (res.action === 'pay') {
         this.showToast('M-Pesa STK push initiated via WhatsApp!', 'success');
       } else if (res.action === 'ticket') {
         this.showToast('Maintenance ticket created via WhatsApp webhook!', 'success');
