@@ -1366,51 +1366,113 @@
             </div>
 
             <!-- Right Preview & Playback Canvas (7 Cols) -->
-            <div class="lg:col-span-7 bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl flex flex-col justify-between text-white relative overflow-hidden min-h-[380px]">
+            <div class="lg:col-span-7 bg-slate-900 rounded-2xl border border-slate-800 p-5 sm:p-6 shadow-xl flex flex-col justify-between text-white relative overflow-hidden min-h-[460px]">
               
-              <!-- Video Screen Simulation -->
-              <div id="hg-video-viewport" class="relative flex-1 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden flex flex-col items-center justify-center text-center p-6 group">
-                
-                <!-- HUD Overlay -->
-                <div class="absolute top-3 left-3 right-3 flex items-center justify-between text-[10px] font-mono text-emerald-400 select-none pointer-events-none z-20">
-                  <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse mr-1.5"></span>REC &bull; 4K 60FPS</span>
-                  <span id="hg-hud-coords">CAM: [X: 14.2, Y: 8.4, Z: 2.1] &bull; 35mm f/1.8</span>
-                  <span class="text-violet-300">HIGGSFIELD ENGINE v3</span>
-                </div>
+              <!-- Aspect Ratio Sizing Wrapper -->
+              <div id="hg-viewport-wrapper" class="w-full flex items-center justify-center transition-all duration-300">
+                <!-- Video Screen Simulation Viewport -->
+                <div id="hg-video-viewport" class="relative w-full aspect-video rounded-xl bg-slate-950 border border-slate-800 overflow-hidden flex flex-col items-center justify-center text-center group select-none shadow-2xl transition-all duration-300">
+                  
+                  <!-- Real Active Cinematic Frame -->
+                  <img id="hg-active-frame" src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1600&auto=format&fit=crop&q=85" alt="Active Walkthrough Frame" class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 ease-out select-none hg-motion-dolly">
 
-                <!-- Scene Graphic / Video Placeholder -->
-                <div id="hg-viewport-graphic" class="space-y-3 z-10 transition-all duration-500">
-                  <div class="w-16 h-16 rounded-2xl bg-violet-600/20 border border-violet-500/40 text-violet-400 flex items-center justify-center mx-auto shadow-lg shadow-violet-500/10">
-                    <i data-lucide="play" class="w-8 h-8 ml-1"></i>
-                  </div>
-                  <div>
-                    <h4 class="font-bold text-sm text-white" id="hg-preview-title">Kilimani Royal Heights &bull; Unit A202 Walkthrough</h4>
-                    <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto" id="hg-preview-desc">Click "Render 4K Cinematic Walkthrough" to generate physics-aware drone and interior tour footage.</p>
-                  </div>
-                </div>
+                  <!-- Cinematic Vignette & Ambient Gradient -->
+                  <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/60 pointer-events-none z-10"></div>
 
-                <!-- Live Render Progress Bar -->
-                <div id="hg-render-bar-container" class="absolute inset-x-8 bottom-6 hidden z-30 space-y-1 text-xs">
-                  <div class="flex justify-between text-[11px] font-mono text-violet-300">
-                    <span id="hg-render-step">Generating frames with Cinema Studio...</span>
-                    <span id="hg-render-pct">0%</span>
+                  <!-- HUD Overlay (Top) -->
+                  <div class="absolute top-3 inset-x-3 flex items-center justify-between text-[10px] font-mono select-none pointer-events-none z-20">
+                    <span class="flex items-center text-emerald-400 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded border border-white/10">
+                      <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse mr-1.5"></span>
+                      <span id="hg-hud-status">REC &bull; 4K 60FPS</span>
+                    </span>
+                    <span id="hg-hud-coords" class="hidden sm:inline-block text-zinc-300 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded border border-white/10">
+                      CAM: [X: 14.2, Y: 8.4, Z: 2.1] &bull; 35mm f/1.8
+                    </span>
+                    <span class="text-violet-300 font-bold bg-violet-950/80 backdrop-blur-md px-2 py-0.5 rounded border border-violet-800/40">
+                      HIGGSFIELD CINEMA v3
+                    </span>
                   </div>
-                  <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                    <div id="hg-render-bar" class="bg-gradient-to-r from-violet-500 to-emerald-400 h-full w-0 transition-all duration-100"></div>
-                  </div>
-                </div>
 
-                <!-- Gridlines Background -->
-                <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:32px_32px] opacity-25"></div>
+                  <!-- Condition Inspection Mode Badge -->
+                  <div id="hg-inspection-badge" class="hidden absolute top-10 left-3 px-2.5 py-1 rounded-md bg-emerald-950/90 border border-emerald-500/50 text-[10px] font-mono text-emerald-300 flex items-center space-x-1.5 shadow-lg z-20">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    <span>DIGITAL TWIN INSPECTION &bull; SHA-256 VERIFIED</span>
+                  </div>
+
+                  <!-- Center Play/Pause Trigger & Info Overlay (Clickable) -->
+                  <div id="hg-viewport-graphic" onclick="app.toggleHiggsfieldPlayback()" class="space-y-2 z-20 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 p-4 rounded-2xl bg-black/40 backdrop-blur-xs border border-white/10 max-w-md mx-4">
+                    <div id="hg-center-play-btn" class="w-14 h-14 rounded-2xl bg-violet-600/90 hover:bg-violet-600 border border-violet-400/50 text-white flex items-center justify-center mx-auto shadow-xl shadow-violet-600/30 transition">
+                      <i data-lucide="play" class="w-6 h-6 ml-0.5" id="hg-center-play-icon"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-bold text-sm text-white" id="hg-preview-title">Kilimani Royal Heights &bull; Unit Penthouse 1</h4>
+                      <p class="text-[11px] text-zinc-300 mt-0.5" id="hg-preview-desc">Click play to preview 60fps cinematic camera path or click Render for high-res pass.</p>
+                    </div>
+                  </div>
+
+                  <!-- Live Render Progress Bar -->
+                  <div id="hg-render-bar-container" class="absolute inset-x-8 bottom-12 hidden z-30 space-y-1 text-xs">
+                    <div class="flex justify-between text-[11px] font-mono text-violet-300">
+                      <span id="hg-render-step">Generating frames with Cinema Studio...</span>
+                      <span id="hg-render-pct">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden border border-white/10">
+                      <div id="hg-render-bar" class="bg-gradient-to-r from-violet-500 via-indigo-400 to-emerald-400 h-full w-0 transition-all duration-100"></div>
+                    </div>
+                  </div>
+
+                  <!-- Bottom Scrub & Controls Bar -->
+                  <div class="absolute inset-x-0 bottom-0 px-4 py-2.5 bg-gradient-to-t from-black/95 via-black/80 to-transparent z-25 flex flex-col space-y-1.5">
+                    <!-- Progress Timeline Scrub Track -->
+                    <div class="w-full h-1.5 bg-white/20 rounded-full overflow-hidden cursor-pointer" onclick="app.scrubHiggsfield(event)">
+                      <div id="hg-playback-progress" class="h-full bg-violet-500 transition-all duration-100" style="width: 25%;"></div>
+                    </div>
+                    <!-- Controls row -->
+                    <div class="flex items-center justify-between text-xs text-white">
+                      <div class="flex items-center space-x-2.5">
+                        <button onclick="app.toggleHiggsfieldPlayback()" class="p-1 rounded hover:bg-white/10 transition cursor-pointer" title="Play/Pause" aria-label="Play or pause walkthrough">
+                          <i data-lucide="play" class="w-3.5 h-3.5" id="hg-bar-play-icon"></i>
+                        </button>
+                        <button onclick="app.restartHiggsfieldPlayback()" class="p-1 rounded hover:bg-white/10 transition cursor-pointer" title="Restart" aria-label="Restart walkthrough">
+                          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                        </button>
+                        <span id="hg-timecode" class="font-mono text-[11px] text-zinc-300">00:03 / 00:15</span>
+                      </div>
+                      <div class="flex items-center space-x-2">
+                        <span id="hg-active-rig-badge" class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-white/10 border border-white/15 text-zinc-300">
+                          DOLLY GLIDE
+                        </span>
+                        <button onclick="app.openHiggsfieldFullscreen()" class="p-1 rounded hover:bg-white/10 transition cursor-pointer" title="Fullscreen" aria-label="Fullscreen view">
+                          <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Gridlines Background Pattern -->
+                  <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:32px_32px] opacity-15 pointer-events-none"></div>
+                </div>
               </div>
 
-              <!-- Gallery Bar -->
-              <div class="mt-4 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
-                <span class="font-mono text-[11px]">Recent Renders:</span>
-                <div class="flex space-x-2">
-                  <button onclick="app.loadSampleTour('kilimani')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition">Kilimani Balcony</button>
-                  <button onclick="app.loadSampleTour('nyali')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition">Nyali Ocean Breeze</button>
-                  <button onclick="app.loadSampleTour('westlands')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition">Westlands Executive</button>
+              <!-- Post-Render Action Dock: Syndicate & WhatsApp Broadcast -->
+              <div class="mt-4 pt-3.5 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center space-x-2">
+                  <button id="btn-hg-syndicate" onclick="app.syndicateHiggsfieldTour()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-semibold text-xs shadow-md transition flex items-center space-x-1.5 cursor-pointer">
+                    <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+                    <span id="hg-syndicate-text">Syndicate to Public Rentals</span>
+                  </button>
+                  <button onclick="app.shareHiggsfieldWhatsApp()" class="px-3 py-1.5 rounded-lg bg-emerald-800/80 hover:bg-emerald-700 active:scale-95 text-white font-semibold text-xs shadow-sm transition flex items-center space-x-1.5 cursor-pointer">
+                    <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                    <span>Share on WhatsApp</span>
+                  </button>
+                </div>
+                
+                <!-- Recent Renders Shortcuts -->
+                <div class="flex items-center space-x-1.5 text-xs text-slate-400">
+                  <span class="font-mono text-[10px] uppercase">Renders:</span>
+                  <button onclick="app.loadSampleTour('kilimani')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-medium transition cursor-pointer">Kilimani</button>
+                  <button onclick="app.loadSampleTour('nyali')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-medium transition cursor-pointer">Nyali</button>
+                  <button onclick="app.loadSampleTour('westlands')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-medium transition cursor-pointer">Westlands</button>
                 </div>
               </div>
 
@@ -4103,7 +4165,7 @@
   <div id="toast-container"></div>
 
   <!-- Core Frontend Application Logic -->
-  <script defer src="app.js?v=4.3"></script>
+  <script defer src="app.js?v=4.4"></script>
 </body>
 </html>
 

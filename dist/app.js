@@ -3774,8 +3774,61 @@ class BomaSphereApp {
   }
 
   // ==========================================
-  // HIGGSFIELD.AI VIRTUAL TOUR & STAGING STUDIO
+  // HIGGSFIELD.AI VIRTUAL TOUR & STAGING STUDIO (TWK 60fps Motion Engine)
   // ==========================================
+  getHiggsfieldPreset(unitId) {
+    const presets = {
+      1: {
+        title: 'Kilimani Royal Heights • Unit A101 (2-Bed Master Ensuite)',
+        photo: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1600&auto=format&fit=crop&q=85',
+        motion: 'dolly_interior',
+        rigBadge: 'DOLLY GLIDE'
+      },
+      2: {
+        title: 'Kilimani Royal Heights • Unit A102 (2-Bed Garden View)',
+        photo: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1600&auto=format&fit=crop&q=85',
+        motion: 'dolly_interior',
+        rigBadge: 'DOLLY GLIDE'
+      },
+      4: {
+        title: 'Kilimani Royal Heights • Unit A202 (3-Bedroom with DSQ)',
+        photo: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=1600&auto=format&fit=crop&q=85',
+        motion: 'pedestal_balcony',
+        rigBadge: 'BALCONY REVEAL'
+      },
+      5: {
+        title: 'Kilimani Royal Heights • Unit Penthouse 1 (4-Bed Luxury)',
+        photo: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&auto=format&fit=crop&q=85',
+        motion: 'drone_aerial',
+        rigBadge: 'DRONE ELEVATION'
+      },
+      8: {
+        title: 'Westlands Executive Suites • Unit Res B3 (Executive Serviced)',
+        photo: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1600&auto=format&fit=crop&q=85',
+        motion: 'dolly_interior',
+        rigBadge: 'DOLLY GLIDE'
+      },
+      9: {
+        title: 'Westlands Executive Suites • Unit Res B4 (Studio Loft)',
+        photo: 'https://images.unsplash.com/photo-1536376072261-38c75010e6c9?w=1600&auto=format&fit=crop&q=85',
+        motion: 'dolly_interior',
+        rigBadge: 'DOLLY GLIDE'
+      },
+      11: {
+        title: 'Nyali Ocean Breeze Villas • Unit Villa 7 (Beachfront Townhouse)',
+        photo: 'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1600&auto=format&fit=crop&q=85',
+        motion: 'orbit_360',
+        rigBadge: '360° ORBIT'
+      }
+    };
+    return presets[unitId] || {
+      title: 'Kilimani Royal Heights • Unit Penthouse 1 (4-Bed Luxury)',
+      photo: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&auto=format&fit=crop&q=85',
+      motion: 'dolly_interior',
+      rigBadge: 'DOLLY GLIDE'
+    };
+  }
+
   renderHiggsfield() {
     const select = document.getElementById('hg-unit-select');
     if (select && select.children.length === 0) {
@@ -3787,31 +3840,91 @@ class BomaSphereApp {
         </option>
       `).join('');
     }
+
+    // Initialize viewport image and state to match the first selected unit
+    const initialUnitId = select ? select.value : 5;
+    this.onHiggsfieldUnitChange(initialUnitId);
     this.updateHiggsfieldPrompt();
+    this.startHiggsfieldPlaybackTicker();
   }
 
   onHiggsfieldUnitChange(unitId) {
+    const id = Number(unitId);
+    const preset = this.getHiggsfieldPreset(id);
+    const unitSelect = document.getElementById('hg-unit-select');
+    const opt = unitSelect?.selectedOptions?.[0];
+    const unitTitle = opt ? opt.text : preset.title;
+
+    const frameImg = document.getElementById('hg-active-frame');
+    if (frameImg) {
+      frameImg.src = preset.photo;
+      this.applyHiggsfieldMotion(document.getElementById('hg-camera-motion')?.value || preset.motion);
+    }
+
+    const titleEl = document.getElementById('hg-preview-title');
+    const descEl = document.getElementById('hg-preview-desc');
+    if (titleEl) titleEl.textContent = unitTitle;
+    if (descEl) descEl.textContent = '60fps camera path active. Click play or click Render for 4K pass.';
+
+    // Reset Syndicate button to un-syndicated state for new unit
+    const syndicateText = document.getElementById('hg-syndicate-text');
+    const syndicateBtn = document.getElementById('btn-hg-syndicate');
+    if (syndicateBtn && syndicateText) {
+      syndicateText.textContent = 'Syndicate to Public Rentals';
+      syndicateBtn.className = 'px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-semibold text-xs shadow-md transition flex items-center space-x-1.5 cursor-pointer';
+    }
+
     this.updateHiggsfieldPrompt();
+  }
+
+  applyHiggsfieldMotion(motionKey) {
+    const frame = document.getElementById('hg-active-frame');
+    const rigBadge = document.getElementById('hg-active-rig-badge');
+    if (!frame) return;
+
+    // Clean old motion classes
+    frame.classList.remove('hg-motion-dolly', 'hg-motion-drone', 'hg-motion-orbit', 'hg-motion-pedestal');
+
+    const rigMap = {
+      dolly_interior: { cls: 'hg-motion-dolly', label: 'DOLLY GLIDE' },
+      drone_aerial: { cls: 'hg-motion-drone', label: 'DRONE ELEVATION' },
+      orbit_360: { cls: 'hg-motion-orbit', label: '360° ORBIT' },
+      pedestal_balcony: { cls: 'hg-motion-pedestal', label: 'BALCONY REVEAL' }
+    };
+
+    const rig = rigMap[motionKey] || rigMap.dolly_interior;
+    frame.classList.add(rig.cls);
+    if (rigBadge) rigBadge.textContent = rig.label;
   }
 
   setHiggsfieldMode(mode) {
     this.state.hgMode = mode;
     const btnVacant = document.getElementById('hg-mode-vacant');
     const btnInspection = document.getElementById('hg-mode-inspection');
+    const badge = document.getElementById('hg-inspection-badge');
+    const hudStatus = document.getElementById('hg-hud-status');
+    const genBtn = document.getElementById('btn-hg-generate');
+
     if (!btnVacant || !btnInspection) return;
 
     if (mode === 'inspection') {
       btnInspection.className = 'px-3 py-1.5 rounded-md font-semibold bg-white text-slate-900 shadow-xs transition';
       btnVacant.className = 'px-3 py-1.5 rounded-md font-semibold text-slate-600 hover:text-slate-900 transition';
-      document.getElementById('btn-hg-generate').innerHTML = `<i data-lucide="shield-check" class="w-4 h-4 inline mr-1"></i><span>Render Inspection Proof (Digital Twin)</span>`;
+      if (badge) badge.classList.remove('hidden');
+      if (hudStatus) hudStatus.textContent = 'INSPECTION AUDIT • SHA-256';
+      if (genBtn) genBtn.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4 inline mr-1"></i><span>Render Inspection Proof (Digital Twin)</span>`;
       document.getElementById('hg-preview-title').textContent = 'Pre-Move-In Verified Digital Inspection Record';
       document.getElementById('hg-preview-desc').textContent = 'Timestamped 4K camera scan recording exact flooring, paint, sanitary fittings, and fixture condition prior to key handover.';
     } else {
       btnVacant.className = 'px-3 py-1.5 rounded-md font-semibold bg-white text-slate-900 shadow-xs transition';
       btnInspection.className = 'px-3 py-1.5 rounded-md font-semibold text-slate-600 hover:text-slate-900 transition';
-      document.getElementById('btn-hg-generate').innerHTML = `<i data-lucide="video" class="w-4 h-4 inline mr-1"></i><span>Render 4K Cinematic Walkthrough</span>`;
-      document.getElementById('hg-preview-title').textContent = 'Kilimani Royal Heights · Unit A202 Walkthrough';
-      document.getElementById('hg-preview-desc').textContent = 'Click "Render 4K Cinematic Walkthrough" to generate physics-aware drone and interior tour footage.';
+      if (badge) badge.classList.add('hidden');
+      if (hudStatus) hudStatus.textContent = 'REC • 4K 60FPS';
+      if (genBtn) genBtn.innerHTML = `<i data-lucide="video" class="w-4 h-4 inline mr-1"></i><span>Render 4K Cinematic Walkthrough</span>`;
+      const select = document.getElementById('hg-unit-select');
+      const opt = select?.selectedOptions?.[0];
+      document.getElementById('hg-preview-title').textContent = opt ? opt.text : 'Kilimani Royal Heights · Unit Penthouse 1';
+      document.getElementById('hg-preview-desc').textContent = '60fps camera path active. Click play or click Render for 4K pass.';
     }
     if (window.lucide) lucide.createIcons();
     this.updateHiggsfieldPrompt();
@@ -3824,9 +3937,11 @@ class BomaSphereApp {
     const promptEl = document.getElementById('hg-prompt-text');
     if (!promptEl) return;
 
+    this.applyHiggsfieldMotion(motion);
+
     const opt = unitSelect?.selectedOptions?.[0];
-    const unitName = opt ? opt.dataset.name : 'Kilimani Heights - Unit A202';
-    const unitType = opt ? opt.dataset.type : '2-Bedroom Master Ensuite';
+    const unitName = opt ? opt.dataset.name : 'Kilimani Heights - Unit Penthouse 1';
+    const unitType = opt ? opt.dataset.type : '4-Bedroom Luxury Penthouse';
 
     const motions = {
       dolly_interior: 'Smooth eye-level tracking dolly shot gliding forward through open sunlit living room to master bedroom suite, 35mm lens, 4k 60fps, subtle depth of field',
@@ -3853,6 +3968,101 @@ class BomaSphereApp {
     btn.classList.add('active', 'bg-violet-600', 'text-white', 'border-violet-600');
     btn.classList.remove('bg-white', 'text-slate-700', 'border-slate-300');
     this.state.hgRatio = ratio;
+
+    const viewport = document.getElementById('hg-video-viewport');
+    if (!viewport) return;
+
+    // Dynamically adjust viewport shape
+    viewport.classList.remove('aspect-video', 'aspect-[9/16]', 'aspect-square', 'max-w-[270px]', 'max-w-[380px]', 'w-full');
+    if (ratio === '9:16') {
+      viewport.classList.add('aspect-[9/16]', 'max-w-[270px]');
+    } else if (ratio === '1:1') {
+      viewport.classList.add('aspect-square', 'max-w-[380px]');
+    } else {
+      viewport.classList.add('aspect-video', 'w-full');
+    }
+
+    this.showToast(`Canvas formatted for ${ratio === '9:16' ? 'TikTok / Instagram Reels (9:16)' : ratio === '1:1' ? 'Listing Square (1:1)' : 'Widescreen Web (16:9)'}`, 'info');
+  }
+
+  // Playback Engine & Timecode Ticker
+  toggleHiggsfieldPlayback() {
+    this.hgIsPlaying = !this.hgIsPlaying;
+    const frame = document.getElementById('hg-active-frame');
+    const centerBtn = document.getElementById('hg-viewport-graphic');
+    const barIcon = document.getElementById('hg-bar-play-icon');
+
+    if (frame) {
+      frame.style.animationPlayState = this.hgIsPlaying ? 'running' : 'paused';
+    }
+
+    if (this.hgIsPlaying) {
+      if (centerBtn) centerBtn.classList.add('opacity-0', 'pointer-events-none');
+      if (barIcon) barIcon.setAttribute('data-lucide', 'pause');
+    } else {
+      if (centerBtn) centerBtn.classList.remove('opacity-0', 'pointer-events-none');
+      if (barIcon) barIcon.setAttribute('data-lucide', 'play');
+    }
+    if (window.lucide) lucide.createIcons();
+  }
+
+  restartHiggsfieldPlayback() {
+    this.hgPlaybackSec = 0;
+    const progress = document.getElementById('hg-playback-progress');
+    const timecode = document.getElementById('hg-timecode');
+    if (progress) progress.style.width = '0%';
+    if (timecode) timecode.textContent = '00:00 / 00:15';
+
+    const frame = document.getElementById('hg-active-frame');
+    if (frame) {
+      frame.style.animation = 'none';
+      void frame.offsetHeight; // force reflow
+      frame.style.animation = '';
+    }
+    if (!this.hgIsPlaying) this.toggleHiggsfieldPlayback();
+  }
+
+  scrubHiggsfield(e) {
+    const track = e.currentTarget;
+    const rect = track.getBoundingClientRect();
+    const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    this.hgPlaybackSec = Math.round(pos * 15);
+    const progress = document.getElementById('hg-playback-progress');
+    const timecode = document.getElementById('hg-timecode');
+    if (progress) progress.style.width = `${pos * 100}%`;
+    if (timecode) {
+      const secStr = String(this.hgPlaybackSec).padStart(2, '0');
+      timecode.textContent = `00:${secStr} / 00:15`;
+    }
+  }
+
+  startHiggsfieldPlaybackTicker() {
+    if (this.hgTickerInterval) clearInterval(this.hgTickerInterval);
+    this.hgPlaybackSec = 4;
+    this.hgIsPlaying = true;
+
+    this.hgTickerInterval = setInterval(() => {
+      if (!this.hgIsPlaying) return;
+      this.hgPlaybackSec = (this.hgPlaybackSec + 1) % 16;
+      const progress = document.getElementById('hg-playback-progress');
+      const timecode = document.getElementById('hg-timecode');
+      if (progress) progress.style.width = `${(this.hgPlaybackSec / 15) * 100}%`;
+      if (timecode) {
+        const secStr = String(this.hgPlaybackSec).padStart(2, '0');
+        timecode.textContent = `00:${secStr} / 00:15`;
+      }
+    }, 1000);
+  }
+
+  openHiggsfieldFullscreen() {
+    const viewport = document.getElementById('hg-video-viewport');
+    if (viewport && viewport.requestFullscreen) {
+      viewport.requestFullscreen().catch(() => {
+        window.open('rentals.html', '_blank');
+      });
+    } else {
+      window.open('rentals.html', '_blank');
+    }
   }
 
   generateHiggsfieldVideo() {
@@ -3861,11 +4071,12 @@ class BomaSphereApp {
     const bar = document.getElementById('hg-render-bar');
     const stepLabel = document.getElementById('hg-render-step');
     const pctLabel = document.getElementById('hg-render-pct');
-    const graphic = document.getElementById('hg-viewport-graphic');
+    const centerOverlay = document.getElementById('hg-viewport-graphic');
     const hudCoords = document.getElementById('hg-hud-coords');
 
     btn.disabled = true;
     barContainer.classList.remove('hidden');
+    if (centerOverlay) centerOverlay.classList.add('opacity-0', 'pointer-events-none');
 
     const steps = [
       { pct: 15, msg: 'Choreographing camera splines in Cinema Studio...' },
@@ -3882,7 +4093,7 @@ class BomaSphereApp {
         bar.style.width = `${s.pct}%`;
         pctLabel.textContent = `${s.pct}%`;
         stepLabel.textContent = s.msg;
-        hudCoords.textContent = `CAM: [X: ${(Math.random()*20).toFixed(1)}, Y: ${(Math.random()*15).toFixed(1)}, Z: ${(Math.random()*5).toFixed(1)}] · 35mm f/1.8`;
+        if (hudCoords) hudCoords.textContent = `CAM: [X: ${(Math.random()*20).toFixed(1)}, Y: ${(Math.random()*15).toFixed(1)}, Z: ${(Math.random()*5).toFixed(1)}] · 35mm f/1.8`;
         currentStep++;
       } else {
         clearInterval(interval);
@@ -3890,15 +4101,18 @@ class BomaSphereApp {
           barContainer.classList.add('hidden');
           btn.disabled = false;
           
-          if (window.gsap) {
-            gsap.fromTo(graphic, 
-              { scale: 0.92, opacity: 0 }, 
-              { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(1.7)' }
-            );
+          if (centerOverlay) {
+            centerOverlay.classList.remove('opacity-0', 'pointer-events-none');
+            if (window.gsap) {
+              gsap.fromTo(centerOverlay, 
+                { scale: 0.92, opacity: 0 }, 
+                { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(1.7)' }
+              );
+            }
           }
 
           document.getElementById('hg-preview-title').innerHTML = `
-            <span class="text-emerald-400 flex items-center justify-center space-x-1">
+            <span class="text-emerald-400 font-bold flex items-center justify-center space-x-1">
               <i data-lucide="check-circle" class="w-4 h-4 inline mr-1"></i>
               <span>4K Ultra-HD Tour Ready</span>
             </span>
@@ -3906,21 +4120,61 @@ class BomaSphereApp {
           document.getElementById('hg-preview-desc').textContent = 'Render completed via Higgsfield Soul ID. Ready to broadcast to prospective tenants via WhatsApp or syndicate to property portals.';
           if (window.lucide) lucide.createIcons();
 
+          this.hgIsPlaying = true;
+          this.applyHiggsfieldMotion(document.getElementById('hg-camera-motion')?.value || 'dolly_interior');
           this.showToast('Higgsfield 4K Virtual Walkthrough rendered successfully!', 'success');
         }, 400);
       }
     }, 450);
   }
 
+  syndicateHiggsfieldTour() {
+    const unitSelect = document.getElementById('hg-unit-select');
+    const unitId = unitSelect ? unitSelect.value : null;
+    const opt = unitSelect?.selectedOptions?.[0];
+    const unitName = opt ? opt.text : 'Selected Residence';
+
+    // Mark unit in local state
+    if (unitId) {
+      const u = this.state.units.find(item => item.id === Number(unitId));
+      if (u) u.has_virtual_tour = true;
+    }
+
+    const syndicateText = document.getElementById('hg-syndicate-text');
+    const syndicateBtn = document.getElementById('btn-hg-syndicate');
+    if (syndicateBtn && syndicateText) {
+      syndicateText.textContent = '✓ Live on rentals.html';
+      syndicateBtn.className = 'px-3 py-1.5 rounded-lg bg-emerald-700 text-white font-bold text-xs shadow-md transition flex items-center space-x-1.5 cursor-default';
+    }
+
+    this.showToast(`⚡ Virtual tour for ${unitName} is now published on the public listings portal!`, 'success');
+  }
+
+  shareHiggsfieldWhatsApp() {
+    const unitSelect = document.getElementById('hg-unit-select');
+    const opt = unitSelect?.selectedOptions?.[0];
+    const unitName = opt ? opt.text : 'Luxury Residence';
+    const msg = `Jambo! Here is your exclusive 4K Virtual Walkthrough of ${unitName} at BomaSphere Properties: https://rentalpropertymanagement.pages.dev/rentals.html. Reply here to book an on-site viewing with our estate caretaker!`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    window.open(whatsappUrl, '_blank');
+    this.showToast('Opening WhatsApp with prospective tenant viewing link...', 'info');
+  }
+
   loadSampleTour(key) {
-    const titles = {
-      kilimani: 'Kilimani Royal Heights · Balcony Skyline Drone Reveal (4K)',
-      nyali: 'Nyali Ocean Breeze Villas · 360 Beachfront Facade Flyaround (4K)',
-      westlands: 'Westlands Executive Suites · Dolly Interior Walkthrough (4K)'
+    const samples = {
+      kilimani: { unitId: 5, motion: 'drone_aerial' },
+      nyali: { unitId: 11, motion: 'orbit_360' },
+      westlands: { unitId: 9, motion: 'dolly_interior' }
     };
-    document.getElementById('hg-preview-title').textContent = titles[key] || 'Property Tour';
-    document.getElementById('hg-preview-desc').textContent = 'Loaded verified footage from Higgsfield Cinema Studio library.';
-    this.showToast(`Loaded ${titles[key]} preview`, 'info');
+    const s = samples[key] || samples.kilimani;
+    const select = document.getElementById('hg-unit-select');
+    if (select) {
+      select.value = s.unitId;
+      document.getElementById('hg-camera-motion').value = s.motion;
+      this.onHiggsfieldUnitChange(s.unitId);
+    }
+    this.restartHiggsfieldPlayback();
+    this.showToast(`Loaded ${key.toUpperCase()} sample walkthrough in Cinema Studio`, 'info');
   }
 
   // ==========================================

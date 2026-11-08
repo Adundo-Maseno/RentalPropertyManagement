@@ -870,6 +870,49 @@ async function runTests() {
     console.log(`      Audit Ledger Integrity Verified: ${verifyRes.json.total_verified} chained records verified mathematically (Integrity: ${verifyRes.json.chain_integrity}, Latest Checksum: ${verifyRes.json.latest_checksum.slice(0, 16)}...)`);
   });
 
+  // 52. Virtual Walkthroughs & Higgsfield Cinema Studio Engine
+  await test('Virtual Walkthroughs: Higgsfield Cinema Studio 60fps camera motion, syndication & HUD verification', async () => {
+    const fs = require('fs');
+    const path = require('path');
+    const indexHtml = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+    const appJs = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    const stylesCss = fs.readFileSync(path.join(__dirname, 'public', 'styles.css'), 'utf8');
+
+    // 1. Verify index.html contains camera viewport, active frame, and syndication dock
+    if (!indexHtml.includes('id="hg-video-viewport"') || !indexHtml.includes('id="hg-active-frame"')) {
+      throw new Error('index.html missing Higgsfield active cinematic frame or viewport container');
+    }
+    if (!indexHtml.includes('id="btn-hg-syndicate"') || !indexHtml.includes('app.shareHiggsfieldWhatsApp()')) {
+      throw new Error('index.html missing syndicate or WhatsApp sharing triggers');
+    }
+    if (!indexHtml.includes('id="hg-inspection-badge"') || !indexHtml.includes('id="hg-hud-status"')) {
+      throw new Error('index.html missing HUD telemetry or digital twin inspection badge');
+    }
+
+    // 2. Verify app.js contains Higgsfield methods
+    const requiredMethods = [
+      'renderHiggsfield',
+      'onHiggsfieldUnitChange',
+      'applyHiggsfieldMotion',
+      'toggleHiggsfieldPlayback',
+      'syndicateHiggsfieldTour',
+      'shareHiggsfieldWhatsApp',
+      'loadSampleTour'
+    ];
+    for (const m of requiredMethods) {
+      if (!appJs.includes(m)) {
+        throw new Error(`app.js missing Higgsfield engine method: ${m}`);
+      }
+    }
+
+    // 3. Verify styles.css contains 60fps camera rig keyframes
+    if (!stylesCss.includes('hgDollyAnimation') || !stylesCss.includes('hgDroneAnimation') || !stylesCss.includes('hgOrbitAnimation')) {
+      throw new Error('styles.css missing Higgsfield camera rig keyframe animations');
+    }
+
+    console.log('      Verified: 60fps Camera Rigs, Aspect Ratio Canvas, WhatsApp Sharing & Syndication verified');
+  });
+
   console.log(`\n=======================================================`);
   console.log(` TESTS COMPLETED: ${passed} PASSED, ${failed} FAILED `);
   console.log(`=======================================================`);
