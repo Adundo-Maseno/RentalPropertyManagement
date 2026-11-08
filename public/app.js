@@ -1549,6 +1549,9 @@ class BomaSphereApp {
         }
       });
     }
+
+    // Immediately populate live data from DB state
+    this.updateCharts();
   }
 
   setRevenueTimeframe(tf) {
