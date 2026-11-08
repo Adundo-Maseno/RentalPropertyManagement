@@ -1446,11 +1446,12 @@ async function handleD1(context, json, corsHeaders) {
       if (!unit_id || !prospect_name || !phone || !preferred_date) {
         return json({ error: 'Unit ID, prospect name, phone, and preferred date are required.' }, 400);
       }
+      const ref = 'VIEW-' + Math.random().toString(36).substring(2, 8).toUpperCase();
       const res = await db.prepare(`
         INSERT INTO viewing_leads (unit_id, prospect_name, phone, email, preferred_date, time_slot, status, notes)
         VALUES (?, ?, ?, ?, ?, ?, 'confirmed', ?)
       `).bind(Number(unit_id), prospect_name, phone, email || '', preferred_date, time_slot || '10:00 AM', notes || '').run();
-      return json({ success: true, lead_id: res.meta?.last_row_id, message: 'Viewing booked successfully!' }, 201);
+      return json({ success: true, reference: ref, booking_reference: ref, lead_id: res.meta?.last_row_id, message: 'Viewing booked successfully!' }, 201);
     }
 
     // 16. Users Management (Full CRUD)

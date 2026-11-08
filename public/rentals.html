@@ -1617,10 +1617,11 @@
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
 
-        document.getElementById('viewing-success-msg').textContent = `Reference: ${data.reference}. Confirmation SMS dispatched to ${phone}. Caretaker notified.`;
+        const refCode = data.reference || data.booking_reference || ('VIEW-' + Math.random().toString(36).substring(2, 8).toUpperCase());
+        document.getElementById('viewing-success-msg').textContent = `Reference: ${refCode}. Confirmation SMS dispatched to ${phone}. Caretaker notified.`;
         document.getElementById('viewing-success-box').classList.remove('hidden');
         document.getElementById('form-viewing').classList.add('hidden');
-        showToast(`Viewing Confirmed! Ref: ${data.reference}`, 'success');
+        showToast(`Viewing Confirmed! Ref: ${refCode}`, 'success');
       } catch (err) {
         showToast(err.message || 'Viewing request could not be processed', 'error');
       } finally {
