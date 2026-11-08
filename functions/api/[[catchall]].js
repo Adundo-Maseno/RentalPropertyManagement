@@ -199,7 +199,10 @@ async function generateDarajaQrCode({ amount, refNo, trxCode }, config) {
       });
       const data = await res.json();
       if (res.ok && (data.ResponseCode === "00" || data.QRCode)) {
-        const code = data.QRCode;
+        let code = data.QRCode;
+        if (code && typeof code === 'string' && !code.startsWith('data:') && !code.startsWith('http')) {
+          code = `data:image/png;base64,${code}`;
+        }
         return {
           qr_code: code,
           qrCode: code,

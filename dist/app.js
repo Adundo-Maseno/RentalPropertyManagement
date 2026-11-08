@@ -2139,8 +2139,16 @@ class BomaSphereApp {
         })
       });
 
-      const qrCodeData = res.qr_code || res.qrCode;
+      let qrCodeData = res.qr_code || res.qrCode;
+      if (qrCodeData && typeof qrCodeData === 'string' && !qrCodeData.startsWith('data:') && !qrCodeData.startsWith('http')) {
+        qrCodeData = `data:image/png;base64,${qrCodeData}`;
+      }
       if (img && qrCodeData) {
+        img.onerror = () => {
+          console.warn('M-Pesa QR image failed to load, falling back to SVG QR');
+          const fallbackData = `MPESA|PB|${res.shortcode || '174379'}|${refNo}|${amount}`;
+          img.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(fallbackData)}`;
+        };
         img.src = qrCodeData;
         img.classList.remove('hidden');
       }

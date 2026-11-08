@@ -749,6 +749,9 @@ async function runTests() {
     if (res.statusCode !== 200 || !res.json.success || !res.json.qr_code) {
       throw new Error(`Failed to generate dynamic M-Pesa QR code: ${res.body}`);
     }
+    if (!res.json.qr_code.startsWith('data:image/') && !res.json.qr_code.startsWith('http')) {
+      throw new Error(`M-Pesa QR code format invalid, expected data:image/ or http: ${res.json.qr_code.substring(0, 30)}`);
+    }
     if (res.json.amount !== 25000 || res.json.ref_no !== 'INV-202611-002') {
       throw new Error(`M-Pesa QR code payload mismatch: ${res.body}`);
     }
