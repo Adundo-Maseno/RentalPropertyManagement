@@ -1871,7 +1871,7 @@ async function handleD1(context, json, corsHeaders) {
           replyText = `Jambo! We received your M-Pesa claim ${recResult.referenceCode} for KES ${Number(recResult.paidAmount).toLocaleString()}, but your phone number (${phone}) is not yet linked to an active unit lease.\n\nOur property manager has queued this in the suspense ledger. Please reply with your Unit Number (e.g. 'Unit A102') to expedite reconciliation.`;
           action = 'claim_unallocated';
         }
-      } else if (cmd.includes('BALANCE') || cmd === '1') {
+      } else if (cmd.includes('BALANCE') || cmd.includes('BAL') || cmd === '1') {
         const inv = await db.prepare("SELECT * FROM invoices WHERE tenant_id = ? ORDER BY id DESC LIMIT 1").bind(tenant.id).first();
         const bal = inv ? inv.balance : 0;
         replyText = `Jambo ${tenant.name}! Your current BomaSphere balance is KES ${Number(bal).toLocaleString()}. Due date: 5th of this month. Pay easily via Bank Paybill or Safaricom Paybill 174379, Account: ${inv?.invoice_number || tenant.unit_number || 'RENT'}. Forward your M-Pesa SMS here to claim instant reconciliation!`;
