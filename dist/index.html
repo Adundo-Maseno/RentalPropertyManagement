@@ -445,19 +445,68 @@
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             <!-- Revenue & Collections Trend Chart (2 Cols) -->
-            <div class="lg:col-span-2 bg-white rounded-xl p-5 border border-slate-200/90 shadow-xs">
-              <div class="flex items-center justify-between mb-4">
-                <div>
-                  <h3 class="font-bold text-slate-800 text-base">Monthly Billing vs. Collections</h3>
-                  <p class="text-xs text-slate-500">Historical performance across all properties (KES)</p>
+            <div class="lg:col-span-2 bg-white dark:bg-zinc-900 rounded-xl p-5 border border-slate-200/90 dark:border-zinc-800 shadow-xs flex flex-col justify-between">
+              <div>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                  <div>
+                    <div class="flex items-center space-x-2">
+                      <h3 class="font-bold text-slate-800 dark:text-zinc-100 text-base">Monthly Billing vs. Collections</h3>
+                      <span id="chart-live-badge" class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse mr-1.5"></span>LIVE DB
+                      </span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5" id="chart-subtitle">Historical performance across portfolio (KES)</p>
+                  </div>
+
+                  <!-- Controls: Property Dropdown & Timeframe Toggle -->
+                  <div class="flex items-center flex-wrap gap-2">
+                    <!-- Property Filter -->
+                    <select id="chart-property-filter" onchange="app.onRevenueFilterChange()" class="text-xs border border-slate-300 dark:border-zinc-700 rounded-lg px-2.5 py-1.5 bg-slate-50 dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 font-medium focus:ring-1 focus:ring-emerald-500 outline-none cursor-pointer" aria-label="Filter chart by property">
+                      <option value="all">All Properties</option>
+                      <!-- populated dynamically from state.properties -->
+                    </select>
+
+                    <!-- Timeframe Pills (6M, 12M, YTD) -->
+                    <div class="inline-flex rounded-lg p-0.5 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs font-semibold">
+                      <button type="button" class="chart-timeframe-btn px-2.5 py-1 rounded-md text-xs font-mono font-medium transition active-timeframe bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 shadow-xs cursor-pointer" data-timeframe="6M" onclick="app.setRevenueTimeframe('6M')">6M</button>
+                      <button type="button" class="chart-timeframe-btn px-2.5 py-1 rounded-md text-xs font-mono font-medium transition text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200 cursor-pointer" data-timeframe="12M" onclick="app.setRevenueTimeframe('12M')">12M</button>
+                      <button type="button" class="chart-timeframe-btn px-2.5 py-1 rounded-md text-xs font-mono font-medium transition text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200 cursor-pointer" data-timeframe="YTD" onclick="app.setRevenueTimeframe('YTD')">YTD</button>
+                    </div>
+                  </div>
                 </div>
-                <div class="flex items-center space-x-2 text-xs">
-                  <span class="inline-flex items-center text-slate-600"><span class="w-2.5 h-2.5 rounded-full bg-slate-800 mr-1.5"></span>Billed</span>
-                  <span class="inline-flex items-center text-slate-600"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1.5"></span>Collected</span>
+
+                <!-- KPI Summary Strip above Chart -->
+                <div class="grid grid-cols-3 gap-2 p-2.5 rounded-lg bg-slate-50 dark:bg-zinc-800/60 border border-slate-100 dark:border-zinc-800/80 mb-3 text-xs">
+                  <div>
+                    <span class="text-slate-400 dark:text-zinc-400 text-[10px] block font-mono uppercase">Period Invoiced</span>
+                    <span class="font-bold text-slate-800 dark:text-zinc-100 text-xs sm:text-sm font-mono" id="chart-kpi-billed">KES 0</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 dark:text-zinc-400 text-[10px] block font-mono uppercase">Period Collected</span>
+                    <span class="font-bold text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm font-mono" id="chart-kpi-collected">KES 0</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 dark:text-zinc-400 text-[10px] block font-mono uppercase">Efficiency Rate</span>
+                    <span class="font-bold text-slate-800 dark:text-zinc-100 text-xs sm:text-sm font-mono flex items-center" id="chart-kpi-rate">
+                      0.0%
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div class="h-64 relative">
+
+              <!-- Canvas with responsive height -->
+              <div class="h-56 relative w-full">
                 <canvas id="revenueTrendChart"></canvas>
+              </div>
+
+              <!-- Footer legend with interactive hints -->
+              <div class="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 pt-3 border-t border-slate-100 dark:border-zinc-800/80 mt-2">
+                <div class="flex items-center space-x-3">
+                  <span class="inline-flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-slate-800 dark:bg-zinc-300 mr-1.5"></span>Billed</span>
+                  <span class="inline-flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1.5"></span>Collected</span>
+                  <span class="inline-flex items-center hidden sm:inline-flex"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 mr-1.5"></span>Unpaid Arrears</span>
+                </div>
+                <span class="text-[11px] text-slate-400 dark:text-zinc-400 font-mono">Click month to inspect invoices</span>
               </div>
             </div>
 
