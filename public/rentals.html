@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Available Residences &amp; Estates | BomaSphere Properties</title>
-  <meta name="description" content="Explore verified residential apartments, penthouses, oceanfront villas, and commercial suites across Nairobi and Mombasa. Managed directly by BomaSphere Properties.">
+  <meta name="description" content="Explore verified architectural residences, luxury penthouses, oceanfront villas, and executive suites across Nairobi and Mombasa. Managed directly by BomaSphere Properties.">
   
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="alternate icon" type="image/x-icon" href="/favicon.ico">
@@ -16,10 +16,10 @@
   <!-- Core Theme Engine & WCAG AAA Contrast Tokens -->
   <link rel="stylesheet" href="/styles.css?v=2.2">
 
-  <!-- Typography: Plus Jakarta Sans & JetBrains Mono (Identical to Portal) -->
+  <!-- Typography: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <script defer src="https://unpkg.com/lucide@latest"></script>
 
@@ -31,12 +31,22 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Subtle Card Photo Hover */
-    .property-card-img {
-      transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+    /* In-Card Photo Carousel Smooth Transition */
+    .card-carousel-img {
+      transition: opacity 250ms ease, transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .property-card:hover .property-card-img {
-      transform: scale(1.03);
+    .property-card:hover .card-carousel-img {
+      transform: scale(1.02);
+    }
+
+    /* Interactive Map Marker Pulse */
+    @keyframes pin-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+      70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .map-pin-pulse {
+      animation: pin-pulse 2s infinite;
     }
 
     /* Fullscreen Lightbox Image Showcase */
@@ -53,8 +63,17 @@
       transition: opacity 300ms ease;
     }
 
+    /* Hide scrollbar for clean chip strips */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
     @media (prefers-reduced-motion: reduce) {
-      .property-card-img,
+      .card-carousel-img,
       .lightbox-hero-img {
         transition: none !important;
         transform: none !important;
@@ -65,7 +84,7 @@
 <body class="bg-slate-50 text-slate-800 dark:bg-zinc-950 dark:text-zinc-100 min-h-screen flex flex-col justify-between antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-200">
 
   <!-- ==================================================================== -->
-  <!-- 1. HEADER NAVIGATION (Exact Parity with BomaSphere PMS Portal)      -->
+  <!-- 1. HEADER NAVIGATION (SaaS Parity with BomaSphere PMS Portal)       -->
   <!-- ==================================================================== -->
   <header class="w-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-zinc-800 px-4 sm:px-8 py-2.5 sticky top-0 z-40 select-none transition-colors">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
@@ -74,22 +93,29 @@
         <img src="/icons/icon.svg" alt="BomaSphere" width="28" height="28" class="w-7 h-7 rounded shadow-xs shrink-0 transition-transform group-hover:scale-105">
         <div>
           <div class="font-bold text-slate-900 dark:text-white text-sm tracking-tight flex items-center gap-1.5">
-            <span>BomaSphere</span>
+            <span>BomaSphere Properties</span>
             <span class="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">Vacancies</span>
           </div>
-          <p class="text-[10px] text-slate-500 dark:text-zinc-400 -mt-0.5 truncate max-w-[130px] sm:max-w-none">Direct Leases &bull; Nairobi &amp; Coast</p>
+          <p class="text-[10px] text-slate-500 dark:text-zinc-400 -mt-0.5 truncate max-w-[140px] xs:max-w-none">Verified Direct Leases &bull; Nairobi &amp; Coast</p>
         </div>
       </a>
 
-      <!-- Header Utilities (Currency, Theme, Mode, Portal Link) -->
+      <!-- Header Utilities (Currency, Shortlist, Theme, Mode, Portal Link) -->
       <div class="flex items-center space-x-2 sm:space-x-3">
         <!-- Currency Selector -->
-        <select aria-label="Currency Selector" id="currency-selector" onchange="changeCurrency(this.value)" class="text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-md px-2 py-1 text-slate-800 dark:text-zinc-100 font-bold cursor-pointer transition">
+        <select aria-label="Currency Selector" id="currency-selector" onchange="changeCurrency(this.value)" class="text-xs bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-md px-2 py-1 text-slate-800 dark:text-zinc-100 font-bold cursor-pointer transition" title="Switch Currency">
           <option value="KES" selected>KES (KSh)</option>
           <option value="USD">USD ($)</option>
           <option value="GBP">GBP (£)</option>
           <option value="EUR">EUR (€)</option>
         </select>
+
+        <!-- Shortlist / Saved Properties Drawer Trigger -->
+        <button onclick="toggleShortlistDrawer()" class="relative flex items-center space-x-1.5 py-1 px-2.5 rounded-md border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-700 text-xs font-semibold transition cursor-pointer" title="View Saved Shortlist">
+          <i data-lucide="heart" class="w-3.5 h-3.5 text-rose-500 fill-rose-500/20"></i>
+          <span class="hidden sm:inline">Saved</span>
+          <span id="shortlist-count-badge" class="px-1.5 py-0.2 rounded-full bg-rose-500 text-white font-mono text-[10px] font-bold">0</span>
+        </button>
 
         <!-- Theme Selector (No Emojis) -->
         <div class="hidden sm:flex items-center">
@@ -118,24 +144,38 @@
   </header>
 
   <!-- ==================================================================== -->
-  <!-- 2. HERO & GROUNDED PROPERTY FILTERS                                 -->
+  <!-- 2. HERO & COMPREHENSIVE FILTER CONTROLS (StreetEasy + Modern House)  -->
   <!-- ==================================================================== -->
-  <section class="w-full border-b border-slate-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 py-10 px-4 sm:px-8 transition-colors">
-    <div class="max-w-5xl mx-auto space-y-6">
-      <div class="space-y-2 text-center sm:text-left">
-        <div class="inline-flex items-center space-x-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800">
-          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>Verified Direct Landlord Portfolio &bull; Zero Broker Fees</span>
+  <section class="w-full border-b border-slate-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 py-8 px-4 sm:px-8 transition-colors">
+    <div class="max-w-7xl mx-auto space-y-5">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div class="space-y-2">
+          <div class="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Direct Landlord Portfolio &bull; Zero Brokerage Fees &bull; eTIMS Compliant</span>
+          </div>
+          <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Find Your Next Home in Nairobi &amp; Mombasa
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 max-w-2xl font-normal leading-relaxed">
+            Verified direct landlord residences across Kilimani, Westlands, Riverside, and Nyali Beach. Each property features automated M-Pesa billing, borehole water, full backup power, and 24/7 security.
+          </p>
         </div>
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          Find Your Next Home in Nairobi &amp; Mombasa
-        </h1>
-        <p class="text-sm text-slate-600 dark:text-zinc-400 max-w-2xl font-normal leading-relaxed">
-          Explore vacant residential apartments, executive townhouses, and private coastal villas. Each residence is managed directly with automated M-Pesa billing, borehole water, and 24/7 security.
-        </p>
+
+        <!-- View Switcher (Grid View vs Split Map View) -->
+        <div class="flex items-center space-x-1 p-1 bg-slate-100 dark:bg-zinc-800 rounded-lg border border-slate-200 dark:border-zinc-700 self-start md:self-auto">
+          <button type="button" id="btn-view-grid" onclick="setViewMode('grid')" class="px-3 py-1.5 rounded-md text-xs font-semibold bg-white dark:bg-zinc-900 text-slate-900 dark:text-white shadow-xs flex items-center space-x-1.5 transition cursor-pointer">
+            <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+            <span>Grid Catalog</span>
+          </button>
+          <button type="button" id="btn-view-split" onclick="setViewMode('split')" class="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white flex items-center space-x-1.5 transition cursor-pointer">
+            <i data-lucide="map" class="w-3.5 h-3.5"></i>
+            <span>Interactive Map</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Quick Location Pill Filter for Mobile & Desktop -->
+      <!-- Quick Location Pill Filter -->
       <div class="flex items-center space-x-2 overflow-x-auto py-1 no-scrollbar text-xs">
         <span class="text-slate-400 dark:text-zinc-500 font-semibold text-[11px] uppercase tracking-wider shrink-0 mr-1">Locations:</span>
         <button type="button" onclick="selectQuickLocation('all')" class="quick-loc-pill active px-3 py-1 rounded-full text-xs font-semibold border border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900 shrink-0 transition cursor-pointer">All Locations</button>
@@ -145,13 +185,13 @@
         <button type="button" onclick="selectQuickLocation('Nyali')" class="quick-loc-pill px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 hover:bg-slate-100 dark:hover:bg-zinc-700 transition cursor-pointer">Nyali Beach</button>
       </div>
 
-      <!-- Clean Filter Form Controls -->
-      <aside class="bg-slate-50 dark:bg-zinc-800/80 p-4 rounded-xl border border-slate-200 dark:border-zinc-700 shadow-xs" aria-label="Filter Properties">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <!-- Advanced Filter Form Controls -->
+      <aside class="bg-slate-50 dark:bg-zinc-800/80 p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-zinc-700 shadow-xs" aria-label="Filter Properties">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <div>
-            <label for="filter-location" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Location</label>
-            <select id="filter-location" class="w-full text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md px-3 py-2 text-slate-800 dark:text-zinc-100 font-medium focus:ring-1 focus:ring-emerald-500 focus:outline-none transition cursor-pointer">
-              <option value="all">All Locations (Nairobi &amp; Coast)</option>
+            <label for="filter-location" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Neighborhood</label>
+            <select id="filter-location" class="w-full text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md px-2.5 py-1.5 text-slate-800 dark:text-zinc-100 font-medium focus:ring-1 focus:ring-emerald-500 focus:outline-none transition cursor-pointer">
+              <option value="all">All Neighborhoods</option>
               <option value="Kilimani">Kilimani, Nairobi</option>
               <option value="Westlands">Westlands, Nairobi</option>
               <option value="Riverside">Riverside Drive, Nairobi</option>
@@ -161,7 +201,7 @@
 
           <div>
             <label for="filter-type" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Configuration</label>
-            <select id="filter-type" class="w-full text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md px-3 py-2 text-slate-800 dark:text-zinc-100 font-medium focus:ring-1 focus:ring-emerald-500 focus:outline-none transition cursor-pointer">
+            <select id="filter-type" class="w-full text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md px-2.5 py-1.5 text-slate-800 dark:text-zinc-100 font-medium focus:ring-1 focus:ring-emerald-500 focus:outline-none transition cursor-pointer">
               <option value="all">All Configurations</option>
               <option value="2-Bedroom">2-Bedroom Master Ensuite</option>
               <option value="3-Bedroom">3-Bedroom Executive</option>
@@ -172,7 +212,7 @@
 
           <div>
             <label for="filter-budget" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Max Budget</label>
-            <select id="filter-budget" class="w-full text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md px-3 py-2 text-slate-800 dark:text-zinc-100 font-medium focus:ring-1 focus:ring-emerald-500 focus:outline-none transition cursor-pointer">
+            <select id="filter-budget" class="w-full text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md px-2.5 py-1.5 text-slate-800 dark:text-zinc-100 font-medium focus:ring-1 focus:ring-emerald-500 focus:outline-none transition cursor-pointer">
               <option value="99999999">Any Budget</option>
               <option value="80000">Up to KES 80,000 / mo</option>
               <option value="120000">Up to KES 120,000 / mo</option>
@@ -182,8 +222,18 @@
           </div>
 
           <div>
-            <label for="filter-readiness" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Move-In Status</label>
-            <select id="filter-readiness" class="w-full text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md px-3 py-2 text-slate-800 dark:text-zinc-100 font-medium focus:ring-1 focus:ring-emerald-500 focus:outline-none transition cursor-pointer">
+            <label for="filter-sort" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Sort By</label>
+            <select id="filter-sort" onchange="applyFilters()" class="w-full text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md px-2.5 py-1.5 text-slate-800 dark:text-zinc-100 font-medium focus:ring-1 focus:ring-emerald-500 focus:outline-none transition cursor-pointer">
+              <option value="default">Featured &bull; Newest First</option>
+              <option value="price-asc">Rent: Low to High</option>
+              <option value="price-desc">Rent: High to Low</option>
+              <option value="size-desc">Size: Largest Sqft</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="filter-readiness" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1">Availability</label>
+            <select id="filter-readiness" class="w-full text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md px-2.5 py-1.5 text-slate-800 dark:text-zinc-100 font-medium focus:ring-1 focus:ring-emerald-500 focus:outline-none transition cursor-pointer">
               <option value="all">All Available</option>
               <option value="immediate">Immediate Move-In</option>
               <option value="vacant">Verified Vacant</option>
@@ -195,33 +245,120 @@
   </section>
 
   <!-- ==================================================================== -->
-  <!-- 3. MAIN VACANCIES GRID (Matching Portal Card Styling)               -->
+  <!-- 3. MAIN CATALOG & SPLIT MAP CONTAINER                               -->
   <!-- ==================================================================== -->
   <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-8 py-8 flex-1 w-full" aria-label="Available Residence Catalog">
-    <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200 dark:border-zinc-800">
+    <div class="flex items-center justify-between pb-3.5 mb-6 border-b border-slate-200 dark:border-zinc-800">
       <div>
-        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Available Residences</h2>
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <span>Available Residences</span>
+        </h2>
         <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5" id="vacancies-count-label">
-          Loading available units...
+          Loading available residences...
         </p>
       </div>
 
       <div class="hidden sm:flex items-center space-x-3 text-xs text-slate-500 dark:text-zinc-400 font-mono">
         <span class="inline-flex items-center"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600 mr-1"></i> Direct Leases</span>
         <span>&bull;</span>
-        <span>eTIMS Compliant</span>
+        <span>No Agency Fee</span>
       </div>
     </div>
 
-    <!-- Vacancies Grid Container -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="vacancies-grid">
-      <!-- Dynamic units rendered via JS -->
+    <!-- Dual Layout Container (Grid or Split Map) -->
+    <div id="catalog-layout-container" class="space-y-6">
+      
+      <!-- Split View Mode Wrapper -->
+      <div id="split-layout-wrapper" class="hidden grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left Side: Cards Scroll Column (7 cols) -->
+        <div class="lg:col-span-7 space-y-5" id="split-cards-container">
+          <!-- Rendered via JS -->
+        </div>
+
+        <!-- Right Side: Sticky Interactive Neighborhood Map (5 cols) -->
+        <div class="lg:col-span-5 sticky top-20 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 p-4 shadow-sm space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-zinc-800 text-xs">
+            <span class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+              <i data-lucide="map-pin" class="w-4 h-4 text-emerald-600"></i>
+              <span>Nairobi &amp; Coast Neighborhood Map</span>
+            </span>
+            <span class="text-[10px] text-slate-500 font-mono">Interactive Pins</span>
+          </div>
+
+          <!-- Vector Map Canvas Preview -->
+          <div class="relative w-full h-[480px] bg-slate-100 dark:bg-zinc-950 rounded-lg overflow-hidden border border-slate-200/60 dark:border-zinc-800 flex items-center justify-center select-none" id="vector-map-viewport">
+            <!-- Simulated Nairobi & Coast Vector Map with Geocoded Property Pins -->
+            <svg class="w-full h-full text-slate-300 dark:text-zinc-800" viewBox="0 0 600 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Arterial Road Lines -->
+              <path d="M 50 240 Q 200 180 320 220 T 550 260" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+              <path d="M 280 40 L 300 440" stroke="currentColor" stroke-width="3" stroke-dasharray="6 4" opacity="0.5"/>
+              <path d="M 120 80 Q 240 260 480 380" stroke="currentColor" stroke-width="2.5" opacity="0.4"/>
+              
+              <!-- Regions -->
+              <text x="140" y="160" fill="currentColor" font-size="12" font-weight="700" letter-spacing="1">WESTLANDS</text>
+              <text x="110" y="270" fill="currentColor" font-size="12" font-weight="700" letter-spacing="1">KILIMANI</text>
+              <text x="230" y="130" fill="currentColor" font-size="12" font-weight="700" letter-spacing="1">RIVERSIDE</text>
+              <text x="440" y="360" fill="currentColor" font-size="12" font-weight="700" letter-spacing="1">NYALI BEACH (COAST)</text>
+            </svg>
+
+            <!-- Dynamic Pin Markers rendered by JS on Map -->
+            <div id="map-markers-overlay" class="absolute inset-0 pointer-events-auto">
+              <!-- Pin elements injected by JS -->
+            </div>
+          </div>
+
+          <p class="text-[11px] text-slate-500 dark:text-zinc-400 text-center">
+            Click any price pin on the map to inspect property details and book viewings.
+          </p>
+        </div>
+      </div>
+
+      <!-- Default 3-Column Grid Catalog -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="vacancies-grid">
+        <!-- Dynamic units rendered via JS -->
+      </div>
     </div>
   </main>
 
   <!-- ==================================================================== -->
-  <!-- 4. FULLSCREEN IMMERSIVE LIGHTBOX (MAXIMUM IMAGE REAL ESTATE)         -->
-  <!-- Image takes 85-100% of viewport space; booking panel slides over    -->
+  <!-- 4. SHORTLIST & COMPARISON SLIDE-OVER DRAWER                         -->
+  <!-- ==================================================================== -->
+  <aside id="drawer-shortlist" class="fixed right-0 top-0 bottom-0 w-full sm:w-96 bg-white dark:bg-zinc-900 border-l border-slate-200 dark:border-zinc-800 shadow-2xl p-6 hidden z-50 flex flex-col justify-between transition-transform" role="dialog" aria-modal="true" aria-labelledby="shortlist-drawer-title">
+    <div class="space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-zinc-800">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2" id="shortlist-drawer-title">
+          <i data-lucide="heart" class="w-4 h-4 text-rose-500 fill-rose-500"></i>
+          <span>Saved Residences</span>
+        </h3>
+        <button onclick="toggleShortlistDrawer()" class="p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-zinc-100 rounded-md transition cursor-pointer" aria-label="Close shortlist">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-500 dark:text-zinc-400">
+        Review your saved properties side-by-side or schedule group viewings.
+      </p>
+
+      <!-- Shortlist Items Container -->
+      <div id="shortlist-items-list" class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <div class="pt-4 border-t border-slate-200 dark:border-zinc-800 space-y-2">
+      <button onclick="scheduleShortlistViewing()" id="btn-shortlist-book-all" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-xs transition flex items-center justify-center space-x-2 cursor-pointer">
+        <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+        <span>Schedule Tour for Shortlist</span>
+      </button>
+      <button onclick="clearShortlist()" class="w-full py-1.5 text-slate-500 hover:text-rose-600 text-[11px] font-semibold transition cursor-pointer">
+        Clear All Saved Properties
+      </button>
+    </div>
+  </aside>
+
+  <!-- ==================================================================== -->
+  <!-- 5. FULLSCREEN IMMERSIVE LIGHTBOX (MAXIMUM IMAGE DOMINANCE)           -->
   <!-- ==================================================================== -->
   <div id="modal-higgsfield-tour" data-tour-lightbox="fullscreen" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between hidden" role="dialog" aria-modal="true" aria-labelledby="tour-unit-title">
     
@@ -245,7 +382,7 @@
           KES 75,000 / mo
         </div>
 
-        <!-- Schedule Visit Trigger (Opens slide-over booking panel) -->
+        <!-- Schedule Visit Trigger -->
         <button onclick="toggleLightboxBookingDrawer()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-md transition flex items-center space-x-1.5 cursor-pointer">
           <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
           <span>Book Visit</span>
@@ -255,7 +392,7 @@
 
     <!-- Center Viewport: MAXIMUM PHOTO SHOWCASE (Dominates the screen) -->
     <div class="relative flex-1 w-full h-full flex items-center justify-center p-2 sm:p-4 overflow-hidden select-none">
-      <img id="tour-stage-img" src="" alt="Property Room View" class="lightbox-hero-img max-h-[82vh] max-w-[96vw] object-contain rounded-lg shadow-2xl transition-all duration-300">
+      <img id="tour-stage-img" src="" alt="Property Room View" class="lightbox-hero-img max-h-[84vh] max-w-[96vw] object-contain rounded-lg shadow-2xl transition-all duration-300">
 
       <!-- Navigation Arrows -->
       <button onclick="stepTourPhoto(-1)" class="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 transition cursor-pointer" aria-label="Previous photo">
@@ -282,7 +419,7 @@
       </div>
     </div>
 
-    <!-- Slide-Over / Bottom Sheet Booking Panel (Adapts seamlessly on Mobile) -->
+    <!-- Slide-Over / Bottom Sheet Booking Panel -->
     <aside id="lightbox-booking-drawer" class="fixed inset-x-0 bottom-0 sm:inset-x-auto sm:right-0 sm:top-0 sm:bottom-0 w-full sm:w-96 max-h-[85vh] sm:max-h-none overflow-y-auto bg-zinc-900 border-t sm:border-t-0 sm:border-l border-zinc-800 p-5 sm:p-6 rounded-t-2xl sm:rounded-none shadow-2xl flex flex-col justify-between hidden z-40 transition-transform">
       <div class="sm:hidden w-12 h-1 rounded-full bg-zinc-700 mx-auto -mt-1 mb-3 shrink-0"></div>
       <div class="space-y-4">
@@ -298,7 +435,7 @@
 
         <!-- Rent Info Box -->
         <div class="p-3.5 rounded-lg bg-zinc-800/80 border border-zinc-700/80 space-y-1">
-          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Monthly Rate</span>
+          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Direct Monthly Rate</span>
           <p class="text-xl font-extrabold text-white font-mono" id="tour-drawer-rent">KES 75,000</p>
           <p class="text-xs text-zinc-400 font-mono" id="tour-drawer-deposit">Deposit: KES 150,000</p>
         </div>
@@ -332,7 +469,7 @@
           </div>
 
           <div>
-            <label class="block text-zinc-300 text-[11px] font-semibold mb-1">Mobile (M-Pesa enabled)</label>
+            <label class="block text-zinc-300 text-[11px] font-semibold mb-1">Mobile Phone (M-Pesa enabled)</label>
             <input type="tel" id="lightbox-book-phone" placeholder="+2547XXXXXXXX" required class="w-full bg-zinc-800 border border-zinc-700 rounded-md p-2 font-mono text-white text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none">
           </div>
 
@@ -359,7 +496,7 @@
   </div>
 
   <!-- ==================================================================== -->
-  <!-- 5. STANDALONE SCHEDULE VIEWING MODAL (Direct Card Access)            -->
+  <!-- 6. STANDALONE SCHEDULE VIEWING MODAL (Direct Card Access)            -->
   <!-- ==================================================================== -->
   <div id="modal-viewing" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden flex sm:items-center items-end justify-center sm:p-4 p-0" role="dialog" aria-modal="true" aria-labelledby="modal-viewing-title">
     <div class="bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 relative transition-transform max-h-[90vh] overflow-y-auto">
@@ -426,7 +563,7 @@
   <div id="toast-container"></div>
 
   <!-- ==================================================================== -->
-  <!-- 6. FOOTER (Parity with BomaSphere PMS)                              -->
+  <!-- 7. FOOTER                                                           -->
   <!-- ==================================================================== -->
   <footer class="w-full border-t border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 py-6 px-4 sm:px-8 text-xs text-slate-500 dark:text-zinc-400 transition-colors">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -444,7 +581,7 @@
   </footer>
 
   <!-- ==================================================================== -->
-  <!-- 7. APPLICATION LOGIC & FULLSCREEN LIGHTBOX ENGINE                  -->
+  <!-- 8. APPLICATION LOGIC, CAROUSEL, MAP & LIGHTBOX ENGINE               -->
   <!-- ==================================================================== -->
   <script>
     let allVacancies = [];
@@ -453,8 +590,20 @@
     let activePhotosList = [];
     let activeRoomNames = ['Living Room', 'Master Bedroom', 'Kitchen & Dining', 'Private Balcony', 'Ensuite Bathroom'];
     let currentCurrency = 'KES';
+    let currentViewMode = 'grid'; // 'grid' or 'split'
+    let savedShortlist = [];
+    const cardCarouselIndices = {}; // map of unitId -> current photo index
+
     const FX_RATES = { KES: 1, USD: 0.0077, GBP: 0.0061, EUR: 0.0071 };
     const CURRENCY_SYMBOLS = { KES: 'KES ', USD: '$', GBP: '£', EUR: '€' };
+
+    // Geocoded Coordinates for Interactive Vector Map Pins
+    const NEIGHBORHOOD_COORDS = {
+      'Kilimani': { x: 170, y: 260 },
+      'Westlands': { x: 190, y: 150 },
+      'Riverside': { x: 260, y: 180 },
+      'Nyali': { x: 470, y: 340 }
+    };
 
     // Native High-Contrast Toast Notification
     function showToast(message, type = 'info') {
@@ -506,11 +655,13 @@
       localStorage.setItem('bomasphere_currency', curr);
       const sel = document.getElementById('currency-selector');
       if (sel) sel.value = curr;
-      renderVacancies(allVacancies);
+      renderVacancies(getCurrentFilteredList());
+      renderMapMarkers(getCurrentFilteredList());
+      renderShortlistItems();
       if (activeTourUnit) updateTourModalContent(activeTourUnit);
     }
 
-    // Theme Engine (Exact match to BomaSphere PMS)
+    // Theme Engine
     function initTheme() {
       const savedTheme = localStorage.getItem('bomasphere_theme') || 'swiss';
       changeTheme(savedTheme, false);
@@ -528,6 +679,11 @@
       currentCurrency = savedCurr;
       const currSel = document.getElementById('currency-selector');
       if (currSel) currSel.value = savedCurr;
+
+      try {
+        savedShortlist = JSON.parse(localStorage.getItem('bomasphere_shortlist') || '[]');
+      } catch(e) { savedShortlist = []; }
+      updateShortlistBadge();
     }
 
     function changeTheme(themeName, persist = true) {
@@ -540,6 +696,121 @@
     function toggleDarkMode() {
       const isDark = document.documentElement.classList.toggle('dark');
       localStorage.setItem('bomasphere_theme_mode', isDark ? 'dark' : 'light');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Shortlist / Favorites Engine
+    function toggleShortlist(unitId, event) {
+      if (event) event.stopPropagation();
+      const id = Number(unitId);
+      const index = savedShortlist.indexOf(id);
+      if (index === -1) {
+        savedShortlist.push(id);
+        showToast('Residence added to your Saved Shortlist', 'success');
+      } else {
+        savedShortlist.splice(index, 1);
+        showToast('Removed from Saved Shortlist', 'info');
+      }
+      localStorage.setItem('bomasphere_shortlist', JSON.stringify(savedShortlist));
+      updateShortlistBadge();
+      renderVacancies(getCurrentFilteredList());
+      renderShortlistItems();
+    }
+
+    function updateShortlistBadge() {
+      const badge = document.getElementById('shortlist-count-badge');
+      if (badge) badge.textContent = savedShortlist.length;
+    }
+
+    function toggleShortlistDrawer() {
+      const drawer = document.getElementById('drawer-shortlist');
+      if (drawer) {
+        drawer.classList.toggle('hidden');
+        renderShortlistItems();
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function renderShortlistItems() {
+      const container = document.getElementById('shortlist-items-list');
+      if (!container) return;
+
+      const items = allVacancies.filter(v => savedShortlist.includes(Number(v.id)));
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="py-12 text-center text-slate-400 space-y-2">
+            <i data-lucide="heart" class="w-8 h-8 mx-auto opacity-40"></i>
+            <p class="text-xs font-semibold text-slate-700 dark:text-zinc-300">Your Shortlist is Empty</p>
+            <p class="text-[11px]">Click the heart icon on any card to save and compare residences.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map(v => `
+        <div class="p-3 rounded-lg border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800 flex items-center justify-between gap-3 text-xs">
+          <div class="flex items-center space-x-2.5 overflow-hidden">
+            <img src="${(Array.isArray(v.photos) && v.photos[0]) || v.photo || 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=200'}" class="w-12 h-12 rounded object-cover shrink-0">
+            <div class="truncate">
+              <p class="font-bold text-slate-900 dark:text-white truncate">Unit ${v.unit_number} &bull; ${v.property_name}</p>
+              <p class="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-semibold">${formatMoney(v.base_rent)} / mo</p>
+              <p class="text-[10px] text-slate-500">${v.bedrooms > 0 ? v.bedrooms + ' Beds' : 'Office'} &bull; ${v.sqft || 1200} sqft</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-1 shrink-0">
+            <button onclick="openViewingModal(${v.id})" class="p-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-700 transition" title="Schedule Visit">
+              <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="toggleShortlist(${v.id})" class="p-1.5 rounded text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition" title="Remove">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function clearShortlist() {
+      savedShortlist = [];
+      localStorage.setItem('bomasphere_shortlist', JSON.stringify([]));
+      updateShortlistBadge();
+      renderVacancies(getCurrentFilteredList());
+      renderShortlistItems();
+      showToast('Shortlist cleared', 'info');
+    }
+
+    function scheduleShortlistViewing() {
+      if (savedShortlist.length === 0) {
+        showToast('Please add at least one residence to your shortlist first', 'info');
+        return;
+      }
+      toggleShortlistDrawer();
+      openViewingModal(savedShortlist[0]);
+    }
+
+    // View Mode Switcher (Grid vs Split Map)
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      const btnGrid = document.getElementById('btn-view-grid');
+      const btnSplit = document.getElementById('btn-view-split');
+      const gridView = document.getElementById('vacancies-grid');
+      const splitView = document.getElementById('split-layout-wrapper');
+
+      if (mode === 'grid') {
+        btnGrid.className = 'px-3 py-1.5 rounded-md text-xs font-semibold bg-white dark:bg-zinc-900 text-slate-900 dark:text-white shadow-xs flex items-center space-x-1.5 transition cursor-pointer';
+        btnSplit.className = 'px-3 py-1.5 rounded-md text-xs font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white flex items-center space-x-1.5 transition cursor-pointer';
+        gridView.classList.remove('hidden');
+        splitView.classList.add('hidden');
+        splitView.classList.remove('grid');
+      } else {
+        btnSplit.className = 'px-3 py-1.5 rounded-md text-xs font-semibold bg-white dark:bg-zinc-900 text-slate-900 dark:text-white shadow-xs flex items-center space-x-1.5 transition cursor-pointer';
+        btnGrid.className = 'px-3 py-1.5 rounded-md text-xs font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white flex items-center space-x-1.5 transition cursor-pointer';
+        gridView.classList.add('hidden');
+        splitView.classList.remove('hidden');
+        splitView.classList.add('grid');
+      }
+
+      renderVacancies(getCurrentFilteredList());
+      renderMapMarkers(getCurrentFilteredList());
       if (window.lucide) lucide.createIcons();
     }
 
@@ -568,7 +839,7 @@
             'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1600&auto=format&fit=crop&q=85',
             'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1600&auto=format&fit=crop&q=85'
           ],
-          amenities: ['Borehole Water', 'Full Backup Generator', '24/7 Security CCTV', 'High-Speed Fiber Ready']
+          amenities: ['Borehole Water', 'Full Backup Generator', '24/7 Security CCTV', 'Fiber Ready']
         },
         {
           id: 102,
@@ -634,65 +905,102 @@
         } else {
           allVacancies = getDemoFallbackVacancies();
         }
-        renderVacancies(allVacancies);
+        applyFilters();
       } catch (err) {
         console.warn('[BomaSphere Vacancies] Using local verified fallback:', err);
         allVacancies = getDemoFallbackVacancies();
-        renderVacancies(allVacancies);
+        applyFilters();
       }
     }
 
-    // Render Vacancies Grid
+    function extractPhotos(v) {
+      if (Array.isArray(v.photos) && v.photos.length > 0) return v.photos;
+      if (v.photo) {
+        try {
+          const parsed = JSON.parse(v.photo);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        } catch(e) {}
+        return [v.photo];
+      }
+      return ['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&auto=format&fit=crop&q=85'];
+    }
+
+    // In-Card Photo Carousel Step
+    function stepCardCarousel(unitId, step, event) {
+      if (event) event.stopPropagation();
+      const v = allVacancies.find(x => x.id === Number(unitId));
+      if (!v) return;
+      const photos = extractPhotos(v);
+      const cur = cardCarouselIndices[unitId] || 0;
+      const next = (cur + step + photos.length) % photos.length;
+      cardCarouselIndices[unitId] = next;
+
+      const img = document.getElementById(`card-img-${unitId}`);
+      if (img) img.src = photos[next];
+
+      // Update dots
+      const dotsContainer = document.getElementById(`card-dots-${unitId}`);
+      if (dotsContainer) {
+        dotsContainer.querySelectorAll('span').forEach((dot, i) => {
+          dot.className = i === next ? 'w-2 h-2 rounded-full bg-white shadow-xs' : 'w-1.5 h-1.5 rounded-full bg-white/50';
+        });
+      }
+    }
+
+    // Render Vacancies Grid & Split View
     function renderVacancies(list) {
-      const container = document.getElementById('vacancies-grid');
+      const gridContainer = document.getElementById('vacancies-grid');
+      const splitCardsContainer = document.getElementById('split-cards-container');
       const countEl = document.getElementById('vacancies-count-label');
+
       if (countEl) {
-        countEl.textContent = `Showing ${list.length} verified available unit${list.length === 1 ? '' : 's'} ready for immediate occupancy`;
+        countEl.textContent = `Showing ${list.length} verified available residence${list.length === 1 ? '' : 's'} ready for immediate occupancy`;
       }
 
-      if (!container) return;
+      const emptyHtml = `
+        <div class="col-span-full py-16 text-center text-slate-500 dark:text-zinc-500 space-y-2">
+          <i data-lucide="home" class="w-10 h-10 mx-auto text-slate-300 dark:text-zinc-600"></i>
+          <p class="text-base font-semibold text-slate-800 dark:text-zinc-200">No Residences Match Selected Filters</p>
+          <p class="text-xs">Try selecting 'All Locations' or widening your budget parameters.</p>
+        </div>
+      `;
 
       if (list.length === 0) {
-        container.innerHTML = `
-          <div class="col-span-full py-16 text-center text-slate-500 dark:text-zinc-500 space-y-2">
-            <i data-lucide="home" class="w-10 h-10 mx-auto text-slate-300 dark:text-zinc-600"></i>
-            <p class="text-base font-semibold text-slate-800 dark:text-zinc-200">No Residences Match Selected Filters</p>
-            <p class="text-xs">Try selecting 'All Locations' or widening your budget parameters.</p>
-          </div>
-        `;
+        if (gridContainer) gridContainer.innerHTML = emptyHtml;
+        if (splitCardsContainer) splitCardsContainer.innerHTML = emptyHtml;
         if (window.lucide) lucide.createIcons();
         return;
       }
 
-      container.innerHTML = list.map(v => {
-        let photosList = [];
-        if (Array.isArray(v.photos) && v.photos.length > 0) {
-          photosList = v.photos;
-        } else if (v.photo) {
-          try {
-            const parsed = JSON.parse(v.photo);
-            if (Array.isArray(parsed) && parsed.length > 0) photosList = parsed;
-            else photosList = [v.photo];
-          } catch(e) {
-            photosList = [v.photo];
-          }
-        } else {
-          photosList = ['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&auto=format&fit=crop&q=85'];
-        }
-        const activePhoto = photosList[0];
+      const cardsHtml = list.map(v => {
+        const photosList = extractPhotos(v);
+        const curIdx = cardCarouselIndices[v.id] || 0;
+        const activePhoto = photosList[curIdx] || photosList[0];
+        const isSaved = savedShortlist.includes(Number(v.id));
 
         const amenitiesList = (Array.isArray(v.amenities) && v.amenities.length > 0) ? v.amenities : [
           'Borehole Water', 'Full Generator', '24/7 Security', 'Fiber Ready'
         ];
 
+        const sqft = v.sqft || 1200;
+        const pricePerSqft = Math.round(v.base_rent / sqft);
+
         return `
-        <article class="property-card bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/90 dark:border-zinc-800 shadow-xs overflow-hidden flex flex-col justify-between hover:shadow-md transition duration-200 group">
+        <article id="residence-card-${v.id}" class="property-card bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/90 dark:border-zinc-800 shadow-xs overflow-hidden flex flex-col justify-between hover:shadow-md transition duration-200 group">
           <div>
-            <!-- Hero Photo Viewport -->
+            <!-- In-Card Interactive Photo Carousel Viewport (StreetEasy Standard) -->
             <div class="relative h-60 sm:h-64 w-full overflow-hidden bg-slate-900 cursor-pointer" onclick="openArchitecturalTourModal(${v.id})" id="viewport-${v.id}">
-              <img src="${activePhoto}" alt="${v.unit_type}" class="property-card-img w-full h-full object-cover" id="img-unit-${v.id}">
+              <img src="${activePhoto}" alt="${v.unit_type}" class="card-carousel-img w-full h-full object-cover" id="card-img-${v.id}">
               
-              <!-- Top Left Tag -->
+              <!-- Carousel Left/Right Controls -->
+              <button onclick="stepCardCarousel(${v.id}, -1, event)" class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition z-10 cursor-pointer" aria-label="Previous image">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+              </button>
+              <button onclick="stepCardCarousel(${v.id}, 1, event)" class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition z-10 cursor-pointer" aria-label="Next image">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+
+              <!-- Top Left Location Tag -->
               <div class="absolute top-3 left-3 flex items-center space-x-1.5 bg-slate-950/80 backdrop-blur-xs text-white text-[10px] font-mono font-medium px-2.5 py-1 rounded-md border border-white/10 shadow-xs">
                 <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
                 <span>${v.floor || 'Ground'}</span>
@@ -700,21 +1008,21 @@
                 <span>${v.city}</span>
               </div>
 
-              <!-- Top Right Status Badge -->
-              <div class="absolute top-3 right-3">
-                <span class="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase font-mono tracking-wider shadow-xs">
-                  Available
-                </span>
-              </div>
+              <!-- Top Right: Shortlist / Heart Button -->
+              <button onclick="toggleShortlist(${v.id}, event)" class="absolute top-3 right-3 p-2 rounded-full bg-black/60 hover:bg-black/85 text-white transition z-10 cursor-pointer shadow-xs" title="${isSaved ? 'Remove from Shortlist' : 'Save to Shortlist'}">
+                <i data-lucide="heart" class="w-4 h-4 ${isSaved ? 'text-rose-500 fill-rose-500' : 'text-white'}"></i>
+              </button>
 
-              <!-- Bottom Overlay: Tour Pill -->
-              <div class="absolute bottom-3 inset-x-3 flex items-center justify-between pointer-events-none">
-                <span class="bg-slate-950/80 backdrop-blur-xs text-[10px] text-zinc-300 px-2 py-1 rounded font-mono border border-white/10">
-                  ${photosList.length} Photos
-                </span>
+              <!-- Bottom Overlay: Carousel Dots & Expand Tour Pill -->
+              <div class="absolute bottom-3 inset-x-3 flex items-center justify-between pointer-events-none z-10">
+                <!-- Dot Indicators -->
+                <div class="flex items-center space-x-1 bg-black/60 backdrop-blur-xs px-2 py-1 rounded-full" id="card-dots-${v.id}">
+                  ${photosList.slice(0, 5).map((_, i) => `<span class="${i === curIdx ? 'w-2 h-2 rounded-full bg-white shadow-xs' : 'w-1.5 h-1.5 rounded-full bg-white/50'}"></span>`).join('')}
+                </div>
+
                 <button class="pointer-events-auto px-2.5 py-1 rounded-md bg-white/95 hover:bg-white text-slate-900 font-bold text-xs shadow-xs flex items-center space-x-1 transition cursor-pointer">
                   <i data-lucide="maximize" class="w-3.5 h-3.5 text-emerald-700"></i>
-                  <span>View Tour</span>
+                  <span>Private Tour</span>
                 </button>
               </div>
             </div>
@@ -730,23 +1038,27 @@
                 </p>
               </div>
 
-              <!-- Specs Row -->
-              <div class="grid grid-cols-3 gap-2 py-2.5 border-y border-slate-100 dark:border-zinc-800 text-center text-xs">
+              <!-- Specs Matrix (StreetEasy High Density) -->
+              <div class="grid grid-cols-4 gap-1.5 py-2.5 border-y border-slate-100 dark:border-zinc-800 text-center text-xs">
                 <div>
                   <span class="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-semibold">Rooms</span>
                   <p class="font-bold text-slate-800 dark:text-zinc-200 mt-0.5">${v.bedrooms > 0 ? v.bedrooms + ' Beds' : 'Office'}</p>
                 </div>
                 <div>
                   <span class="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-semibold">Baths</span>
-                  <p class="font-bold text-slate-800 dark:text-zinc-200 mt-0.5">${v.bathrooms || 2} Baths</p>
+                  <p class="font-bold text-slate-800 dark:text-zinc-200 mt-0.5">${v.bathrooms || 2} Ba</p>
                 </div>
                 <div>
                   <span class="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-semibold">Area</span>
-                  <p class="font-bold text-slate-800 dark:text-zinc-200 mt-0.5">${v.sqft || 1200} sqft</p>
+                  <p class="font-bold text-slate-800 dark:text-zinc-200 mt-0.5">${sqft} sqft</p>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-semibold">Rate</span>
+                  <p class="font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 font-mono">${formatMoney(pricePerSqft)}/sf</p>
                 </div>
               </div>
 
-              <!-- Amenities -->
+              <!-- Amenities Pills -->
               <div class="flex flex-wrap gap-1.5 pt-0.5">
                 ${amenitiesList.slice(0, 3).map(a => `<span class="text-[10px] bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 px-2 py-0.5 rounded font-medium">${a}</span>`).join('')}
               </div>
@@ -778,7 +1090,38 @@
         `;
       }).join('');
 
+      if (gridContainer) gridContainer.innerHTML = cardsHtml;
+      if (splitCardsContainer) splitCardsContainer.innerHTML = cardsHtml;
+
       if (window.lucide) lucide.createIcons();
+    }
+
+    // Render Interactive Pins on Vector Map
+    function renderMapMarkers(list) {
+      const container = document.getElementById('map-markers-overlay');
+      if (!container) return;
+
+      container.innerHTML = list.map(v => {
+        let coord = NEIGHBORHOOD_COORDS['Kilimani'];
+        if (v.property_name.includes('Westlands') || (v.address && v.address.includes('Westlands'))) coord = NEIGHBORHOOD_COORDS['Westlands'];
+        else if (v.property_name.includes('Riverside') || (v.address && v.address.includes('Riverside'))) coord = NEIGHBORHOOD_COORDS['Riverside'];
+        else if (v.property_name.includes('Nyali') || (v.address && v.address.includes('Nyali')) || v.city === 'Mombasa') coord = NEIGHBORHOOD_COORDS['Nyali'];
+
+        return `
+          <button onclick="highlightResidence(${v.id})" class="absolute map-pin-pulse px-2.5 py-1 rounded-full bg-slate-900 text-white dark:bg-emerald-600 font-mono font-bold text-[11px] shadow-lg border-2 border-white flex items-center space-x-1 hover:scale-110 active:scale-95 transition cursor-pointer" style="left: ${coord.x}px; top: ${coord.y}px;" title="${v.unit_number} • ${v.property_name}">
+            <span>${formatMoney(v.base_rent)}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function highlightResidence(id) {
+      const card = document.getElementById(`residence-card-${id}`);
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.add('ring-2', 'ring-emerald-500');
+        setTimeout(() => card.classList.remove('ring-2', 'ring-emerald-500'), 2500);
+      }
     }
 
     // ====================================================================
@@ -803,21 +1146,7 @@
 
       updateTourModalContent(unit);
 
-      let photos = [];
-      if (Array.isArray(unit.photos) && unit.photos.length > 0) {
-        photos = unit.photos;
-      } else if (unit.photo) {
-        try {
-          const parsed = JSON.parse(unit.photo);
-          if (Array.isArray(parsed) && parsed.length > 0) photos = parsed;
-          else photos = [unit.photo];
-        } catch(e) {
-          photos = [unit.photo];
-        }
-      } else {
-        photos = ['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1600&auto=format&fit=crop&q=85'];
-      }
-
+      const photos = extractPhotos(unit);
       activePhotosList = photos;
       currentPhotoIndex = 0;
 
@@ -942,13 +1271,14 @@
     }
 
     // Filter Logic
-    function applyFilters() {
-      const loc = document.getElementById('filter-location').value;
-      const type = document.getElementById('filter-type').value;
-      const budget = Number(document.getElementById('filter-budget').value);
-      const readiness = document.getElementById('filter-readiness').value;
+    function getCurrentFilteredList() {
+      const loc = document.getElementById('filter-location')?.value || 'all';
+      const type = document.getElementById('filter-type')?.value || 'all';
+      const budget = Number(document.getElementById('filter-budget')?.value || 99999999);
+      const readiness = document.getElementById('filter-readiness')?.value || 'all';
+      const sort = document.getElementById('filter-sort')?.value || 'default';
 
-      const filtered = allVacancies.filter(v => {
+      let filtered = allVacancies.filter(v => {
         const locLower = loc.toLowerCase();
         const matchesLoc = loc === 'all' || 
           (v.city && v.city.toLowerCase().includes(locLower)) || 
@@ -960,7 +1290,18 @@
         return matchesLoc && matchesType && matchesBudget && matchesReadiness;
       });
 
+      // Sorting
+      if (sort === 'price-asc') filtered.sort((a, b) => Number(a.base_rent) - Number(b.base_rent));
+      else if (sort === 'price-desc') filtered.sort((a, b) => Number(b.base_rent) - Number(a.base_rent));
+      else if (sort === 'size-desc') filtered.sort((a, b) => Number(b.sqft || 0) - Number(a.sqft || 0));
+
+      return filtered;
+    }
+
+    function applyFilters() {
+      const filtered = getCurrentFilteredList();
       renderVacancies(filtered);
+      renderMapMarkers(filtered);
     }
 
     // Quick Location Selection
@@ -978,6 +1319,11 @@
         }
       });
     }
+
+    document.getElementById('filter-location')?.addEventListener('change', applyFilters);
+    document.getElementById('filter-type')?.addEventListener('change', applyFilters);
+    document.getElementById('filter-budget')?.addEventListener('change', applyFilters);
+    document.getElementById('filter-readiness')?.addEventListener('change', applyFilters);
 
     // Mobile Touch Swipe Gesture Support for Fullscreen Lightbox
     let touchStartX = 0;
@@ -999,11 +1345,6 @@
         }
       }, { passive: true });
     }
-
-    document.getElementById('filter-location')?.addEventListener('change', applyFilters);
-    document.getElementById('filter-type')?.addEventListener('change', applyFilters);
-    document.getElementById('filter-budget')?.addEventListener('change', applyFilters);
-    document.getElementById('filter-readiness')?.addEventListener('change', applyFilters);
 
     // Standalone Viewing Modal Handlers
     function openViewingModal(unitId, unitNum, propName, unitType) {
@@ -1071,10 +1412,12 @@
     window.addEventListener('keydown', (e) => {
       const tourModal = document.getElementById('modal-higgsfield-tour');
       const viewingModal = document.getElementById('modal-viewing');
+      const shortlistDrawer = document.getElementById('drawer-shortlist');
 
       if (e.key === 'Escape' || e.keyCode === 27) {
         if (viewingModal && !viewingModal.classList.contains('hidden')) closeViewingModal();
         if (tourModal && !tourModal.classList.contains('hidden')) closeArchitecturalTourModal();
+        if (shortlistDrawer && !shortlistDrawer.classList.contains('hidden')) toggleShortlistDrawer();
       }
 
       if (tourModal && !tourModal.classList.contains('hidden')) {
